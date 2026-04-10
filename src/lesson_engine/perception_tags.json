@@ -1,0 +1,258 @@
+{
+  "$schema": "https://motesart.com/schemas/perception-tags/v2.0.0",
+  "version": "2.0.0",
+  "status": "LOCKED",
+  "governed_by": "sensing_perception_stack_spec.md, Sections V and XVI",
+  "description": "Machine-readable interpretation tags with triggers, severities, and teacher-safe translations. Internal tags appear in Concept_State and debug view. Teacher phrases appear in evidence_summary and dashboards.",
+  "tags": {
+    "pitch_tags": [
+      {
+        "tag": "flat_landing",
+        "trigger": "cents_offset < -15 consistently",
+        "severity": "warning",
+        "teacher_phrase": "Pitch landed below target",
+        "source": "pitch_engine"
+      },
+      {
+        "tag": "sharp_landing",
+        "trigger": "cents_offset > +15 consistently",
+        "severity": "warning",
+        "teacher_phrase": "Pitch landed above target",
+        "source": "pitch_engine"
+      },
+      {
+        "tag": "unstable_hold",
+        "trigger": "pitch_stability < 0.6",
+        "severity": "warning",
+        "teacher_phrase": "Pitch wavered during the note",
+        "source": "pitch_engine"
+      },
+      {
+        "tag": "pitch_drift",
+        "trigger": "pitch_contour = rising or falling across phrase",
+        "severity": "info",
+        "teacher_phrase": "Pitch shifted during the phrase",
+        "source": "pitch_engine"
+      },
+      {
+        "tag": "pitch_confident",
+        "trigger": "time_in_tune > 0.9 AND pitch_stability > 0.85",
+        "severity": "info",
+        "positive": true,
+        "teacher_phrase": "Strong pitch accuracy",
+        "source": "pitch_engine",
+        "confidence_adjustment": 0.02,
+        "confidence_condition": "3+ consecutive pitch_confident events in one phrase"
+      }
+    ],
+    "timing_tags": [
+      {
+        "tag": "rushed_entry",
+        "trigger": "onset_offset_ms < -50",
+        "severity": "warning",
+        "teacher_phrase": "Entered early",
+        "source": "timing_engine"
+      },
+      {
+        "tag": "late_entry",
+        "trigger": "onset_offset_ms > +50",
+        "severity": "warning",
+        "teacher_phrase": "Entered late",
+        "source": "timing_engine"
+      },
+      {
+        "tag": "timing_drag",
+        "trigger": "tempo_drift = dragging over 4+ beats",
+        "severity": "warning",
+        "teacher_phrase": "Tempo slowed down",
+        "source": "timing_engine"
+      },
+      {
+        "tag": "timing_rush",
+        "trigger": "tempo_drift = rushing over 4+ beats",
+        "severity": "warning",
+        "teacher_phrase": "Tempo sped up",
+        "source": "timing_engine"
+      },
+      {
+        "tag": "pulse_unstable",
+        "trigger": "pulse_stability < 0.6",
+        "severity": "critical",
+        "teacher_phrase": "Unsteady beat",
+        "source": "timing_engine"
+      },
+      {
+        "tag": "timing_locked",
+        "trigger": "pulse_stability > 0.9 AND duration_accuracy > 0.9",
+        "severity": "info",
+        "positive": true,
+        "teacher_phrase": "Solid, steady timing",
+        "source": "timing_engine",
+        "confidence_adjustment": 0.02,
+        "confidence_condition": "full phrase meets Pass threshold"
+      }
+    ],
+    "silence_tags": [
+      {
+        "tag": "silence_missed",
+        "trigger": "rest_obeyed = false",
+        "severity": "critical",
+        "teacher_phrase": "Played through the rest",
+        "source": "silence_engine"
+      },
+      {
+        "tag": "rest_clipped",
+        "trigger": "rest_duration_accuracy < 0.7",
+        "severity": "warning",
+        "teacher_phrase": "Rest was too short",
+        "source": "silence_engine"
+      },
+      {
+        "tag": "early_reentry",
+        "trigger": "entry_after_rest_ms < -40",
+        "severity": "warning",
+        "teacher_phrase": "Came back in too early after rest",
+        "source": "silence_engine"
+      },
+      {
+        "tag": "phrase_cramped",
+        "trigger": "phrase_spacing < 0.5",
+        "severity": "warning",
+        "teacher_phrase": "Needs more space between phrases",
+        "source": "silence_engine"
+      },
+      {
+        "tag": "dirty_release",
+        "trigger": "release_cleanliness < 0.6",
+        "severity": "warning",
+        "teacher_phrase": "Note ending was unclear",
+        "source": "silence_engine"
+      },
+      {
+        "tag": "silence_respected",
+        "trigger": "rest_obeyed = true AND rest_duration_accuracy > 0.85",
+        "severity": "info",
+        "positive": true,
+        "teacher_phrase": "Rests were clean and accurate",
+        "source": "silence_engine",
+        "confidence_adjustment": 0.01,
+        "confidence_condition": "every correctly obeyed rest"
+      }
+    ],
+    "engagement_tags": [
+      {
+        "tag": "engagement_drop",
+        "trigger": "engagement_level drops below threshold for 10+ seconds",
+        "severity": "warning",
+        "teacher_phrase": "Attention dipped",
+        "source": "engagement_module"
+      },
+      {
+        "tag": "confusion_detected",
+        "trigger": "confusion signals sustained 5+ seconds",
+        "severity": "warning",
+        "teacher_phrase": "May have been confused",
+        "source": "engagement_module"
+      },
+      {
+        "tag": "engaged",
+        "trigger": "stable engagement above threshold",
+        "severity": "info",
+        "positive": true,
+        "teacher_phrase": "Focused and attentive",
+        "source": "engagement_module",
+        "confidence_adjustment": 0,
+        "confidence_condition": "logged only — supportive path"
+      }
+    ],
+    "mechanics_tags": [
+      {
+        "tag": "collapsed_wrist",
+        "trigger": "wrist_angle below safe range",
+        "severity": "critical",
+        "teacher_phrase": "Wrist position needs support",
+        "source": "mechanics_module"
+      },
+      {
+        "tag": "shoulder_tension",
+        "trigger": "shoulder elevation above threshold",
+        "severity": "warning",
+        "teacher_phrase": "Shoulders looked tense",
+        "source": "mechanics_module"
+      },
+      {
+        "tag": "flat_fingers",
+        "trigger": "finger_curvature below minimum",
+        "severity": "warning",
+        "teacher_phrase": "Finger curvature needs work",
+        "source": "mechanics_module"
+      },
+      {
+        "tag": "posture_good",
+        "trigger": "all mechanics within acceptable range",
+        "severity": "info",
+        "positive": true,
+        "teacher_phrase": "Good posture and hand position",
+        "source": "mechanics_module",
+        "confidence_adjustment": 0,
+        "confidence_condition": "logged only — supportive path"
+      }
+    ]
+  },
+  "enums": {
+    "severity": [
+      "info",
+      "warning",
+      "critical"
+    ],
+    "source": [
+      "pitch_engine",
+      "timing_engine",
+      "silence_engine",
+      "note_event_engine",
+      "engagement_module",
+      "mechanics_module",
+      "midi_module"
+    ],
+    "tempo_drift": [
+      "stable",
+      "rushing",
+      "dragging"
+    ],
+    "pitch_contour": [
+      "steady",
+      "rising",
+      "falling",
+      "wobble"
+    ],
+    "articulation": [
+      "legato",
+      "staccato",
+      "normal",
+      "accented"
+    ],
+    "note_source": [
+      "audio_derived",
+      "midi_direct"
+    ],
+    "calibration_status": [
+      "passed",
+      "failed",
+      "skipped"
+    ],
+    "session_mode": [
+      "solo",
+      "classroom"
+    ],
+    "signal_path": [
+      "core",
+      "supportive",
+      "optional"
+    ],
+    "perception_status": [
+      "active",
+      "degraded",
+      "off"
+    ]
+  }
+}

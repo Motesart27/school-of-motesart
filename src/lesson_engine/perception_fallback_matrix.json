@@ -1,0 +1,108 @@
+{
+  "$schema": "https://motesart.com/schemas/perception-fallback/v2.0.0",
+  "version": "2.0.0",
+  "status": "LOCKED",
+  "governed_by": "sensing_perception_stack_spec.md, Section XIV",
+  "description": "Machine-readable fallback rules for device and browser conditions. Perception never blocks practice. Graceful degradation only.",
+  "fallback_rules": [
+    {
+      "condition": "no_mic_permission",
+      "detection": "navigator.mediaDevices.getUserMedia rejected or not available",
+      "audio_core": "off",
+      "face_module": "unchanged",
+      "body_module": "unchanged",
+      "midi_module": "unchanged",
+      "perception_status": "off",
+      "user_message": "Turn on your microphone to get feedback on your playing.",
+      "teacher_note": "Perception unavailable — no microphone access"
+    },
+    {
+      "condition": "noisy_room",
+      "detection": "calibration noise_floor above threshold",
+      "audio_core": "active_degraded",
+      "confidence_gate_override": 0.65,
+      "face_module": "unchanged",
+      "body_module": "unchanged",
+      "midi_module": "unchanged",
+      "perception_status": "degraded",
+      "user_message": "It’s a little noisy — I might miss some notes. Find a quieter spot if you can.",
+      "teacher_note": "Perception active in degraded mode — noisy environment"
+    },
+    {
+      "condition": "no_camera_permission",
+      "detection": "navigator.mediaDevices.getUserMedia video rejected or not requested",
+      "audio_core": "unchanged",
+      "face_module": "off",
+      "body_module": "off",
+      "midi_module": "unchanged",
+      "perception_status": "active",
+      "user_message": null,
+      "teacher_note": null
+    },
+    {
+      "condition": "safari_no_midi",
+      "detection": "navigator.requestMIDIAccess not available",
+      "audio_core": "unchanged",
+      "face_module": "unchanged",
+      "body_module": "unchanged",
+      "midi_module": "off",
+      "perception_status": "active",
+      "user_message": null,
+      "teacher_note": null
+    },
+    {
+      "condition": "firefox_no_midi",
+      "detection": "navigator.requestMIDIAccess not available",
+      "audio_core": "unchanged",
+      "face_module": "unchanged",
+      "body_module": "unchanged",
+      "midi_module": "off",
+      "perception_status": "active",
+      "user_message": null,
+      "teacher_note": null
+    },
+    {
+      "condition": "low_end_device",
+      "detection": "navigator.deviceMemory < 4 OR mobile user agent",
+      "audio_core": "active",
+      "face_module": "off",
+      "body_module": "off",
+      "midi_module": "unchanged",
+      "perception_status": "active",
+      "user_message": null,
+      "teacher_note": "Audio-only perception — device resources limited"
+    },
+    {
+      "condition": "no_audio_detected",
+      "detection": "calibration input_gain check fails — no signal above noise floor",
+      "audio_core": "off",
+      "face_module": "unchanged",
+      "body_module": "unchanged",
+      "midi_module": "unchanged",
+      "perception_status": "off",
+      "user_message": "I couldn’t hear anything — check your microphone and try again.",
+      "teacher_note": "Perception unavailable — no audio input detected"
+    },
+    {
+      "condition": "midi_connected_no_events",
+      "detection": "MIDI device enumerated but 0 note-on events during calibration",
+      "audio_core": "unchanged",
+      "face_module": "unchanged",
+      "body_module": "unchanged",
+      "midi_module": "off",
+      "perception_status": "active",
+      "user_message": "I see your keyboard but it’s not sending notes. Check the connection.",
+      "teacher_note": "MIDI device detected but unresponsive — using audio only"
+    }
+  ],
+  "classroom_mode": {
+    "trigger": "calibration ambient_noise > threshold OR teacher_manual_selection",
+    "confidence_gate_override": 0.65,
+    "silence_scoring_weight_reduction": 0.5,
+    "critical_tag_repeat_threshold": 3,
+    "engagement_module": "off",
+    "timing_threshold_relaxation": 0.2,
+    "teacher_summary_note": "Session scored in classroom mode"
+  },
+  "principle": "Perception never blocks practice. If a signal source is unavailable, the system degrades gracefully. The student always gets to play."
+}

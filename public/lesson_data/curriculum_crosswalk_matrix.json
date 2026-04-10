@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Curriculum Crosswalk Matrix — maps concepts across Traditional (input), Parallel (output), and Motesart Fast (student) curricula",
+    "last_updated": "2026-03-23"
+  },
+  "curricula": {
+    "traditional": {
+      "name": "Traditional Registry",
+      "purpose": "School-facing input curriculum, concept definitions and standards alignment",
+      "source_file": "traditional_registry_v1_1.json"
+    },
+    "parallel": {
+      "name": "Parallel Output Curriculum",
+      "purpose": "Assessment and output mapping, what students demonstrate",
+      "source_file": null
+    },
+    "motesart_fast": {
+      "name": "Motesart Fast Curriculum",
+      "purpose": "Student experience sequence, 6 phases, feel-mode progression",
+      "source_file": "motesart_fast_curriculum_v2_0.json"
+    }
+  },
+  "crosswalk": [
+    {
+      "concept_id": "T_HALF_STEP",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "parallel_outcome": "Student identifies half steps by ear and on keyboard",
+      "is_pilot": true
+    },
+    {
+      "concept_id": "T_WHOLE_STEP",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "parallel_outcome": "Student identifies whole steps by ear and on keyboard",
+      "is_pilot": true
+    },
+    {
+      "concept_id": "T_MAJOR_SCALE_PATTERN",
+      "traditional_grade": "1-3",
+      "fast_phase": "PHASE_2_PATTERNS",
+      "parallel_outcome": "Student constructs WWHWWWH pattern from any starting note",
+      "is_pilot": true
+    },
+    {
+      "concept_id": "T_SCALE_DEGREES_MAJOR",
+      "traditional_grade": "1-3",
+      "fast_phase": "PHASE_2_PATTERNS",
+      "parallel_outcome": "Student names and locates scale degrees 1-7",
+      "is_pilot": true
+    },
+    {
+      "concept_id": "T_MAJOR_3RD",
+      "traditional_grade": "2-4",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "parallel_outcome": "Student recognizes major 3rd by ear and constructs on keyboard",
+      "is_pilot": true
+    },
+    {
+      "concept_id": "T_KEYBOARD_LAYOUT",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "parallel_outcome": "Student navigates keyboard geography",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_FINGER_NUMBERING",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "parallel_outcome": "Student uses correct finger numbers",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_OCTAVE_RECOGNITION",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "parallel_outcome": "Student identifies octave equivalence",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_C_MAJOR_SCALE",
+      "traditional_grade": "1-3",
+      "fast_phase": "PHASE_2_PATTERNS",
+      "parallel_outcome": "Student plays C major scale with correct fingering",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_INTERVAL_RECOGNITION",
+      "traditional_grade": "2-4",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "parallel_outcome": "Student identifies common intervals",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_MELODIC_INTERVALS_CONTEXT",
+      "traditional_grade": "2-4",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "parallel_outcome": "Student hears intervals within melodic context",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_SAME_DIFFERENT",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "parallel_outcome": "Student distinguishes same vs different musical phrases",
+      "is_pilot": false
+    },
+    {
+      "concept_id": "T_STEP_SKIP",
+      "traditional_grade": "K-2",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "parallel_outcome": "Student identifies stepwise vs skip motion",
+      "is_pilot": false
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://motesart.com/schemas/feel-mode-perception/v2.0.0",
+  "version": "2.0.0",
+  "status": "LOCKED",
+  "governed_by": "sensing_perception_stack_spec.md, Section XVIII",
+  "description": "Machine-readable Feel Mode × Perception weight tables. Defines what perception watches and how heavily it weights each signal at each Feel Mode stage.",
+  "stages": {
+    "A_see_it": {
+      "name": "See It",
+      "visual_support": true,
+      "description": "Student learns the shape. Perception establishes baselines.",
+      "max_severity_allowed": "warning",
+      "weights": {
+        "pitch_accuracy": {
+          "weight": "high",
+          "value": 1
+        },
+        "timing_accuracy": {
+          "weight": "medium",
+          "value": 0.7
+        },
+        "silence_accuracy": {
+          "weight": "low",
+          "value": 0.3
+        },
+        "hesitation_count": {
+          "weight": "logged_only",
+          "value": 0
+        },
+        "engagement_level": {
+          "weight": "logged_only",
+          "value": 0
+        },
+        "mechanics": {
+          "weight": "logged_only",
+          "value": 0
+        }
+      },
+      "advancement_criteria": {
+        "session_pitch_score_min": 0.85,
+        "session_timing_score_min": 0.85,
+        "description": "When both thresholds are met, flag student as ready for Feel Mode B evaluation"
+      }
+    },
+    "B_feel_it": {
+      "name": "Feel It",
+      "visual_support": false,
+      "description": "Visual support reduced. Perception flags hesitation and accuracy drops.",
+      "max_severity_allowed": "critical",
+      "weights": {
+        "pitch_accuracy": {
+          "weight": "high",
+          "value": 1
+        },
+        "timing_stability": {
+          "weight": "high",
+          "value": 1
+        },
+        "silence_accuracy": {
+          "weight": "medium",
+          "value": 0.7
+        },
+        "hesitation_count": {
+          "weight": "high",
+          "value": 1
+        },
+        "engagement_level": {
+          "weight": "medium",
+          "value": 0.5
+        },
+        "mechanics": {
+          "weight": "medium",
+          "value": 0.5
+        }
+      },
+      "scaffold_restore_rule": {
+        "trigger": "accuracy_drop > 0.15 from Stage A baseline",
+        "action": "temporarily_restore_visual_scaffolding",
+        "description": "If accuracy drops more than 15% from See It baseline, T.A.M.i may temporarily restore scaffolding"
+      },
+      "advancement_criteria": {
+        "session_stability_score_min": 0.8,
+        "session_silence_score_min": 0.8,
+        "description": "When both thresholds are met, flag student as ready for Feel Mode C evaluation"
+      }
+    },
+    "C_own_it": {
+      "name": "Own It",
+      "visual_support": false,
+      "description": "No-look performance. Perception provides the ownership evidence.",
+      "max_severity_allowed": "critical",
+      "weights": {
+        "pitch_accuracy_in_new_key": {
+          "weight": "critical",
+          "value": 1.5
+        },
+        "timing_consistency": {
+          "weight": "critical",
+          "value": 1.5
+        },
+        "silence_control": {
+          "weight": "high",
+          "value": 1
+        },
+        "recovery_after_error": {
+          "weight": "high",
+          "value": 1
+        },
+        "stability_score": {
+          "weight": "critical",
+          "value": 1.5
+        },
+        "engagement_level": {
+          "weight": "medium",
+          "value": 0.5
+        },
+        "mechanics": {
+          "weight": "high",
+          "value": 1
+        }
+      },
+      "ownership_criteria": {
+        "session_stability_score_min": 0.8,
+        "session_pitch_score_min": 0.85,
+        "session_silence_score_min": 0.75,
+        "perception_confidence_min": 0.7,
+        "transfer_required": true,
+        "critical_tags_max": 0,
+        "description": "All criteria met = ownership confirmed. ownership_status → owned."
+      }
+    }
+  },
+  "intervention_escalation": {
+    "max_consecutive_corrections": 2,
+    "repeated_failure_threshold": 3,
+    "repeated_failure_action": "slow_tempo_10bpm_or_simplify",
+    "recovery_encouragement_after": 2,
+    "low_confidence_suppression_after": 3,
+    "session_fatigue_guard_minutes": 15,
+    "critical_tag_teacher_flag_after_sessions": 3
+  },
+  "performance_budgets": {
+    "audio_processing_latency_target_ms": 20,
+    "audio_processing_latency_hard_limit_ms": 50,
+    "pitch_detection_hz_target": 30,
+    "pitch_detection_hz_minimum": 15,
+    "timing_grid_resolution_ms_target": 10,
+    "timing_grid_resolution_ms_limit": 20,
+    "face_mesh_fps_target": 15,
+    "face_mesh_fps_minimum": 10,
+    "body_tracking_fps_target": 10,
+    "body_tracking_fps_minimum": 5,
+    "cpu_audio_only_target_percent": 15,
+    "cpu_audio_only_limit_percent": 25,
+    "cpu_full_stack_target_percent": 35,
+    "cpu_full_stack_limit_percent": 50,
+    "memory_target_mb": 100,
+    "memory_limit_mb": 200,
+    "time_to_first_feedback_target_ms": 100,
+    "time_to_first_feedback_limit_ms": 200,
+    "calibration_duration_target_s": 10,
+    "calibration_duration_limit_s": 20,
+    "reference_device": "Mid-range Chromebook (4GB RAM, Intel Celeron)"
+  }
+}

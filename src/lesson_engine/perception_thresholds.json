@@ -1,0 +1,203 @@
+{
+  "$schema": "https://motesart.com/schemas/perception-thresholds/v2.0.0",
+  "version": "2.0.0",
+  "status": "LOCKED",
+  "governed_by": "sensing_perception_stack_spec.md, Section XII",
+  "description": "Machine-readable pass/warn/fail thresholds for all perception modules. The markdown spec is the contract. This JSON is the executable source.",
+  "pitch": {
+    "cents_offset": {
+      "pass": {
+        "min": -10,
+        "max": 10
+      },
+      "warn": {
+        "min": -25,
+        "max": 25
+      },
+      "fail_outside": 25,
+      "unit": "cents"
+    },
+    "pitch_stability": {
+      "pass": {
+        "min": 0.8
+      },
+      "warn": {
+        "min": 0.6
+      },
+      "fail_below": 0.6
+    },
+    "time_in_tune": {
+      "pass": {
+        "min": 0.85
+      },
+      "warn": {
+        "min": 0.65
+      },
+      "fail_below": 0.65
+    }
+  },
+  "timing": {
+    "onset_offset_ms": {
+      "pass": {
+        "min": -30,
+        "max": 30
+      },
+      "warn": {
+        "min": -80,
+        "max": 80
+      },
+      "fail_outside": 80,
+      "unit": "ms"
+    },
+    "duration_accuracy": {
+      "pass": {
+        "min": 0.85
+      },
+      "warn": {
+        "min": 0.65
+      },
+      "fail_below": 0.65
+    },
+    "pulse_stability": {
+      "pass": {
+        "min": 0.8
+      },
+      "warn": {
+        "min": 0.6
+      },
+      "fail_below": 0.6
+    },
+    "subdivision_accuracy": {
+      "pass": {
+        "min": 0.75
+      },
+      "warn": {
+        "min": 0.55
+      },
+      "fail_below": 0.55
+    }
+  },
+  "silence": {
+    "rest_obeyed": {
+      "pass": true,
+      "fail": false,
+      "type": "boolean"
+    },
+    "rest_duration_accuracy": {
+      "pass": {
+        "min": 0.8
+      },
+      "warn": {
+        "min": 0.6
+      },
+      "fail_below": 0.6
+    },
+    "entry_after_rest_ms": {
+      "pass": {
+        "min": -40,
+        "max": 40
+      },
+      "warn": {
+        "min": -100,
+        "max": 100
+      },
+      "fail_outside": 100,
+      "unit": "ms"
+    },
+    "release_cleanliness": {
+      "pass": {
+        "min": 0.75
+      },
+      "warn": {
+        "min": 0.55
+      },
+      "fail_below": 0.55
+    }
+  },
+  "note_event": {
+    "correct_note": {
+      "pass": true,
+      "fail": false,
+      "type": "boolean"
+    },
+    "velocity_variance": {
+      "pass": {
+        "max": 15
+      },
+      "warn": {
+        "max": 30
+      },
+      "fail_above": 30,
+      "unit": "midi_units"
+    }
+  },
+  "engagement": {
+    "engagement_sustained": {
+      "pass": {
+        "min_seconds_above_threshold": 10
+      },
+      "warn": {
+        "drop_seconds": {
+          "min": 5,
+          "max": 10
+        }
+      },
+      "fail": {
+        "drop_seconds_above": 10
+      }
+    },
+    "confusion_signal": {
+      "pass": {
+        "not_detected": true
+      },
+      "warn": {
+        "sustained_seconds_max": 3
+      },
+      "fail": {
+        "sustained_seconds_above": 5
+      }
+    }
+  },
+  "mechanics": {
+    "wrist_angle": {
+      "pass": "within_safe_range",
+      "warn": "5_degrees_outside",
+      "fail": "10_degrees_outside"
+    },
+    "finger_curvature": {
+      "pass": "curved",
+      "warn": "partially_flat",
+      "fail": "fully_flat"
+    },
+    "shoulder_elevation": {
+      "pass": "relaxed",
+      "warn": "slightly_raised",
+      "fail": "visibly_elevated"
+    }
+  },
+  "confidence_gate": {
+    "default": 0.5,
+    "classroom_mode": 0.65
+  },
+  "session_aggregation": {
+    "ema_weight_new": 0.3,
+    "ema_weight_existing": 0.7,
+    "trend_improving_delta": 0.08,
+    "trend_declining_delta": -0.08,
+    "pattern_age_out_sessions": 5
+  },
+  "ownership_evidence_pack": {
+    "session_pitch_score_min": 0.85,
+    "session_timing_score_min": 0.85,
+    "session_silence_score_min": 0.75,
+    "session_stability_score_min": 0.8,
+    "critical_tags_max": 0,
+    "perception_confidence_min": 0.7,
+    "transfer_attempt_required": true,
+    "feel_mode_A_required": true,
+    "feel_mode_B_required": true,
+    "feel_mode_C_required": true,
+    "min_attempts": 10
+  },
+  "_note": "These are starting values for pilot validation. Changes require change control per Section XXX."
+}
