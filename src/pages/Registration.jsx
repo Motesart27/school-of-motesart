@@ -2,61 +2,22 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../services/api.js'
+import { COLORS, FONTS, GRADIENTS, ANIMATIONS, SHARED, logoStyles } from '../styles/theme.js'
+
+const LOGO = logoStyles(64, 90)
 
 const css = `
-.reg-page{min-height:100vh;background:#0d1117;color:#e2e8f0;font-family:'DM Sans',sans-serif;padding:30px 20px}
-.reg-title{font-size:11px;letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:30px;color:#718096}
-.reg-steps{display:flex;gap:8px;justify-content:center;margin-bottom:30px;flex-wrap:wrap}
-.reg-step-btn{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:8px 16px;border-radius:20px;cursor:pointer;border:1.5px solid rgba(99,179,237,.15);background:#1c2333;color:#718096;transition:all .2s}
-.reg-step-btn.active{background:rgba(78,205,196,.12);border-color:#4ecdc4;color:#4ecdc4}
-.reg-phone{width:340px;background:#161b26;border-radius:28px;border:1px solid rgba(99,179,237,.15);padding:28px 22px;box-shadow:0 30px 80px rgba(0,0,0,.4);margin:0 auto}
-.reg-screen-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#4ecdc4;margin-bottom:14px}
-.reg-som{text-align:center;font-size:15px;font-weight:700;margin-bottom:18px}
-.reg-som span{color:#9f7aea}
-.reg-progress{display:flex;gap:5px;margin-bottom:22px;justify-content:center}
-.reg-dot{height:5px;border-radius:3px}
-.reg-dot.done{background:#38b2ac;opacity:.5;width:16px}
-.reg-dot.active{background:#4ecdc4;width:28px}
-.reg-dot.inactive{background:#2d3748;width:16px}
-.reg-step-title{font-size:20px;font-weight:800;margin-bottom:4px}
-.reg-step-sub{font-size:12px;color:#718096;margin-bottom:20px}
-.reg-field{margin-bottom:12px}
-.reg-field label{font-size:10px;color:#718096;display:block;margin-bottom:4px}
-.reg-field input,.reg-field select{width:100%;background:#1c2333;border:1px solid rgba(99,179,237,.15);border-radius:10px;padding:10px 12px;color:#e2e8f0;font-size:12px;outline:none;box-sizing:border-box}
-.reg-field-row{display:flex;gap:8px}
-.reg-field-row .reg-field{flex:1}
-.reg-role-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
-.reg-role-card{background:#1c2333;border:1.5px solid rgba(99,179,237,.15);border-radius:12px;padding:12px 10px;cursor:pointer}
-.reg-role-card.sel{border-color:#4ecdc4;background:rgba(78,205,196,.07)}
-.reg-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.reg-chip{background:#1c2333;border:1.5px solid rgba(99,179,237,.15);border-radius:8px;padding:5px 10px;font-size:10px;cursor:pointer;color:#e2e8f0}
-.reg-chip.sel{border-color:#4ecdc4;background:rgba(78,205,196,.1);color:#4ecdc4}
-.reg-avatar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.reg-avatar-card{background:#1c2333;border:2px solid rgba(99,179,237,.15);border-radius:16px;padding:16px 8px 12px;text-align:center;cursor:pointer;position:relative}
-.reg-avatar-card.sel{border-color:#4ecdc4;background:rgba(78,205,196,.07);box-shadow:0 0 18px rgba(78,205,196,.18)}
-.reg-avatar-card.sel::after{content:'✓';position:absolute;top:7px;right:9px;font-size:9px;color:#4ecdc4;font-weight:700}
-.reg-av-emoji{font-size:36px;margin-bottom:7px;display:block}
-.reg-av-name{font-size:12px;font-weight:700}
-.reg-av-role{font-size:9px;color:#718096;margin-top:2px}
-.reg-upload{border:2px dashed rgba(99,179,237,.2);border-radius:14px;padding:18px;text-align:center;color:#718096;font-size:11px;margin-bottom:16px;cursor:pointer}
-.reg-confirm-card{background:#1c2333;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:center}
-.reg-detail-card{background:#1c2333;border-radius:10px;padding:12px;margin-bottom:8px;font-size:10px;color:#718096;line-height:1.9}
-.reg-detail-card strong{color:#e2e8f0;font-size:11px;display:block;margin-bottom:3px}
-.reg-btn-row{display:flex;gap:10px;margin-top:6px}
-.reg-btn{flex:1;padding:12px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;border:none}
-.reg-btn-p{background:linear-gradient(135deg,#38b2ac,#4ecdc4);color:#0d1117}
-.reg-btn-s{background:#1c2333;color:#718096;border:1px solid rgba(99,179,237,.15)}
-.reg-wyl-scroll{max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;padding-right:2px}
-.reg-wyl-q{background:#1c2333;border-radius:10px;padding:12px;border:1px solid rgba(99,179,237,.15)}
-.reg-wyl-q.answered{border-color:rgba(78,205,196,.35)}
-.reg-wyl-opt{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:7px;font-size:10px;color:#718096;margin-bottom:3px;cursor:pointer;transition:background .15s}
-.reg-wyl-opt:hover{background:rgba(78,205,196,.05)}
-.reg-wyl-opt.sel{background:rgba(78,205,196,.1);color:#4ecdc4}
-.reg-radio{width:12px;height:12px;border-radius:50%;border:2px solid rgba(99,179,237,.15);flex-shrink:0;transition:all .15s}
-.reg-wyl-opt.sel .reg-radio{border-color:#4ecdc4;background:#4ecdc4}
-.reg-wyl-progress{display:flex;gap:3px;margin-bottom:10px;flex-wrap:wrap}
-.reg-wyl-tick{width:18px;height:5px;border-radius:3px;background:#2d3748;transition:background .2s}
-.reg-wyl-tick.done{background:#4ecdc4}
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+  ${ANIMATIONS}
+  *{box-sizing:border-box;}
+  .reg-wyl-opt:hover{background:rgba(217,70,239,0.07);}
+  .reg-wyl-opt.sel{background:rgba(217,70,239,0.12);color:#d946ef;}
+  .reg-wyl-opt.sel .reg-radio{border-color:#d946ef;background:#d946ef;}
+  .reg-role-card:hover{border-color:rgba(217,70,239,0.4);background:rgba(217,70,239,0.05);}
+  .reg-chip:hover{border-color:rgba(217,70,239,0.4);color:#d946ef;}
+  .reg-avatar-card:hover{border-color:rgba(217,70,239,0.4);}
+  input::placeholder{color:rgba(255,255,255,0.25);}
+  select option{background:#1c2333;color:#fff;}
 `
 
 const ROLES = [
@@ -67,12 +28,12 @@ const ROLES = [
 ]
 
 const AVATARS = [
-  { emoji: '👩🏿‍🎤', name: 'Lyric', role: 'The Storyteller' },
-  { emoji: '🦸🏽',  name: 'Jazz',  role: 'The Performer' },
-  { emoji: '🧒🏻',  name: 'Coda',  role: 'The Dreamer' },
-  { emoji: '🧒🏾',  name: 'Forte', role: 'The Rockstar' },
-  { emoji: '🧒🏾',  name: 'Sol',   role: 'The Composer' },
-  { emoji: '🦸🏻',  name: 'Riff',  role: 'The Freestyler' },
+  { emoji: '👩🏿‍🎤', name: 'Lyric',  role: 'The Storyteller' },
+  { emoji: '🦸🏽',  name: 'Jazz',   role: 'The Performer' },
+  { emoji: '🧒🏻',  name: 'Coda',   role: 'The Dreamer' },
+  { emoji: '🧒🏾',  name: 'Forte',  role: 'The Rockstar' },
+  { emoji: '🧒🏾',  name: 'Sol',    role: 'The Composer' },
+  { emoji: '🦸🏻',  name: 'Riff',   role: 'The Freestyler' },
 ]
 
 const WYL_QUESTIONS = [
@@ -149,6 +110,10 @@ function scoreWYL(answers) {
 }
 
 const WYL_LABEL = { visual: 'Visual', auditory: 'Auditory', readwrite: 'Read/Write', kinesthetic: 'Kinesthetic' }
+const DURATIONS = ['Less than 6 months', '6 months–2 years', '2+ years']
+const READINGS  = ['Not at all', 'With some difficulty', 'Comfortably']
+const GOALS     = ['Just for fun', 'Play for friends/family', 'Perform or take exams']
+const STEPS     = ['Profile', 'Role', 'Music', 'WYL', 'Assessment', 'Avatar', 'Confirm']
 
 export default function RegistrationPage() {
   const navigate = useNavigate()
@@ -171,253 +136,520 @@ export default function RegistrationPage() {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const dots = Array.from({ length: 7 }).map((_, i) => i < step ? 'done' : i === step ? 'active' : 'inactive')
+  const wyl = scoreWYL(wylAnswers)
   const go = (dir) => { setError(''); setStep(s => Math.max(0, Math.min(6, s + dir))) }
-
   const setWylAnswer = (qIdx, type) => {
     setWylAnswers(prev => { const next = [...prev]; next[qIdx] = type; return next })
   }
 
-  const wyl = scoreWYL(wylAnswers)
-
-  const DURATIONS = ['Less than 6 months', '6 months–2 years', '2+ years']
-  const READINGS  = ['Not at all', 'With some difficulty', 'Comfortably']
-  const GOALS     = ['Just for fun', 'Play for friends/family', 'Perform or take exams']
-
   const finish = async () => {
     const fullName = `${firstName} ${lastName}`.trim()
-    if (!fullName || !email || !password) {
-      setError('Please fill in all required fields (name, email, password)')
-      return
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
-      return
-    }
-    setError('')
-    setIsSubmitting(true)
+    if (!fullName || !email || !password) { setError('Please fill in name, email and password'); return }
+    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
+    setError(''); setIsSubmitting(true)
     try {
       const user = await api.register({
-        name: fullName,
-        email,
-        password,
-        role,
-        avatar: AVATARS[avatar]?.emoji || '',
-        instrument,
-        genre,
-        song,
-        experience: exp,
+        name: fullName, email, password, role,
+        avatar: AVATARS[avatar]?.name || '',
+        instrument, genre, song, experience: exp,
         assessment: {
           duration: DURATIONS[assessmentDuration],
           reading: READINGS[assessmentReading],
           goal: GOALS[assessmentGoal],
         },
         wyl: {
-          visual: wyl.visual,
-          auditory: wyl.auditory,
-          readwrite: wyl.readwrite,
-          kinesthetic: wyl.kinesthetic,
+          visual: wyl.visual, auditory: wyl.auditory,
+          readwrite: wyl.readwrite, kinesthetic: wyl.kinesthetic,
           dominant: wyl.dominant,
         },
       })
       const userData = user.user || user
       const token = user.token || userData?.token || null
-
       login(userData, token)
-      if (user?.user?.id || user?.id) {
-        const userId = user.user?.id || user.id
-
-        if (wyl && userId) {
-          api.updateWYL(userId, wyl).catch(() => {})
-        }
-      }
+      const userId = user.user?.id || user.id
+      if (wyl && userId) api.updateWYL(userId, wyl).catch(() => {})
       navigate('/dashboard')
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.')
+      const msg = typeof err?.message === 'string' ? err.message : 'Registration failed. Please try again.'
+      setError(msg)
       setIsSubmitting(false)
     }
   }
 
-  return (
-    <div className="reg-page"><style>{css}</style>
-      <div className="reg-title">School of Motesart — Registration Flow</div>
-      <div className="reg-steps">{['Profile','Role','Music','WYL','Assessment','Avatar','Confirm'].map((s, i) => (
-        <div key={s} className={`reg-step-btn ${step === i ? 'active' : ''}`} onClick={() => setStep(i)}>{i + 1} · {s}</div>
-      ))}</div>
+  const pillState = (i) => i < step ? 'done' : i === step ? 'active' : 'upcoming'
+  const dotState  = (i) => i < step ? 'done' : i === step ? 'active' : 'inactive'
 
-      <div className="reg-phone">
-        <div className="reg-screen-label">Step {step + 1} of 7</div>
-        <div className="reg-som">School of <span>Motesart</span></div>
-        <div className="reg-progress">{dots.map((d, i) => <div key={i} className={`reg-dot ${d}`} />)}</div>
+  return (
+    <div style={S.page}>
+      <style>{css}</style>
+
+      <div style={S.topLabel}>School of Motesart — Registration</div>
+
+      <div style={S.stepNav}>
+        {STEPS.map((s, i) => (
+          <div
+            key={s}
+            onClick={() => setStep(i)}
+            style={{
+              ...S.stepPill,
+              ...(pillState(i) === 'active' ? S.stepPillActive : {}),
+              ...(pillState(i) === 'done'   ? S.stepPillDone  : {}),
+            }}
+          >
+            {i + 1} · {s}
+          </div>
+        ))}
+      </div>
+
+      <div style={S.card}>
+        {/* Logo */}
+        <div style={S.logoWrapper}>
+          <div style={LOGO.logoGlow} />
+          <div style={LOGO.laserRing1} />
+          <div style={LOGO.laserRing2} />
+          <div style={LOGO.logoCircle}>
+            <img src="/SOM_logo.png" alt="School of Motesart" style={LOGO.logoImg} />
+          </div>
+        </div>
+
+        <div style={S.cardTitle}>School of <span style={S.cardAccent}>Motesart</span></div>
+
+        <div style={S.stepIndicator}>Step {step + 1} of 7</div>
+
+        <div style={S.progressDots}>
+          {Array.from({length: 7}).map((_, i) => (
+            <div key={i} style={{
+              ...S.dot,
+              ...(dotState(i) === 'active' ? S.dotActive  : {}),
+              ...(dotState(i) === 'done'   ? S.dotDone    : {}),
+              ...(dotState(i) === 'inactive' ? S.dotInactive : {}),
+            }} />
+          ))}
+        </div>
 
         {/* STEP 0 — Profile */}
-        {step === 0 && <>
-          <div className="reg-step-title">Set up your profile</div>
-          <div className="reg-step-sub">Tell us a bit about yourself</div>
-          <div className="reg-field-row">
-            <div className="reg-field"><label>First Name *</label><input placeholder="John" value={firstName} onChange={e => setFirstName(e.target.value)} /></div>
-            <div className="reg-field"><label>Last Name *</label><input placeholder="Doe" value={lastName} onChange={e => setLastName(e.target.value)} /></div>
+        {step === 0 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Set up your profile</div>
+            <div style={S.stepSub}>Tell us a bit about yourself</div>
+            <div style={S.confidenceAnchor}>Takes less than 2 minutes — we'll personalize your learning style.</div>
+            <div style={S.fieldRow}>
+              <div style={S.field}>
+                <label style={S.label}>First Name *</label>
+                <input style={S.input} placeholder="John" value={firstName} onChange={e => setFirstName(e.target.value)} />
+              </div>
+              <div style={S.field}>
+                <label style={S.label}>Last Name *</label>
+                <input style={S.input} placeholder="Doe" value={lastName} onChange={e => setLastName(e.target.value)} />
+              </div>
+            </div>
+            <div style={S.field}>
+              <label style={S.label}>Email *</label>
+              <input style={S.input} type="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} />
+            </div>
+            <div style={S.field}>
+              <label style={S.label}>Password *</label>
+              <input style={S.input} type="password" placeholder="Create a password (min 6 chars)" value={password} onChange={e => setPassword(e.target.value)} />
+            </div>
+            {error && <p style={S.error}>{error}</p>}
+            <button style={S.btnPrimary} onClick={() => go(1)}>Continue →</button>
           </div>
-          <div className="reg-field"><label>Email *</label><input placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} /></div>
-          <div className="reg-field"><label>Password *</label><input type="password" placeholder="Create a password (min 6 chars)" value={password} onChange={e => setPassword(e.target.value)} /></div>
-          <button className="reg-btn reg-btn-p" style={{ width: '100%', marginTop: 6 }} onClick={() => go(1)}>Continue →</button>
-        </>}
+        )}
 
         {/* STEP 1 — Role */}
-        {step === 1 && <>
-          <div className="reg-step-title">Choose your role</div>
-          <div className="reg-step-sub">How will you use School of Motesart?</div>
-          <div className="reg-role-grid">{ROLES.map(r => (
-            <div key={r.name} className={`reg-role-card ${role === r.name ? 'sel' : ''}`} onClick={() => setRole(r.name)}>
-              <div style={{ fontSize: 20, marginBottom: 5 }}>{r.icon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700 }}>{r.name}</div>
-              <div style={{ fontSize: 9, color: '#718096', marginTop: 2 }}>{r.desc}</div>
+        {step === 1 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Choose your role</div>
+            <div style={S.stepSub}>How will you use School of Motesart?</div>
+            <div style={S.roleGrid}>
+              {ROLES.map(r => (
+                <div
+                  key={r.name}
+                  className="reg-role-card"
+                  onClick={() => setRole(r.name)}
+                  style={{
+                    ...S.roleCard,
+                    ...(role === r.name ? S.roleCardSel : {}),
+                  }}
+                >
+                  <div style={{ fontSize: 22, marginBottom: 6 }}>{r.icon}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.name}</div>
+                  <div style={{ fontSize: 10, color: COLORS.textSecondary, marginTop: 2 }}>{r.desc}</div>
+                </div>
+              ))}
             </div>
-          ))}</div>
-          {error && <div style={{ color: '#ef4444', fontSize: 11, padding: '7px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: 8, marginBottom: 8, textAlign: 'center' }}>{error}</div>}
-          <div className="reg-btn-row">
-            <button className="reg-btn reg-btn-s" onClick={() => go(-1)}>← Back</button>
-            <button className="reg-btn reg-btn-p" onClick={() => go(1)}>Continue →</button>
+            <div style={S.btnRow}>
+              <button style={S.btnSecondary} onClick={() => go(-1)}>← Back</button>
+              <button style={{...S.btnPrimary, flex: 1}} onClick={() => go(1)}>Continue →</button>
+            </div>
           </div>
-        </>}
+        )}
 
         {/* STEP 2 — Music */}
-        {step === 2 && <>
-          <div className="reg-step-title">Your music journey</div>
-          <div className="reg-step-sub">Help TAMi personalize your experience</div>
-          <div className="reg-field"><label>Favorite Genre</label><input placeholder="e.g. R&B, Classical, Pop" value={genre} onChange={e => setGenre(e.target.value)} /></div>
-          <div className="reg-field"><label>Favorite Song</label><input placeholder="e.g. Moonlight Sonata" value={song} onChange={e => setSong(e.target.value)} /></div>
-          <div className="reg-field"><label>Primary Instrument</label>
-            <select value={instrument} onChange={e => setInstrument(e.target.value)}>
-              {['Piano','Guitar','Violin','Voice','Drums','Bass','Cello','Flute','Trumpet','Saxophone'].map(i => <option key={i}>{i}</option>)}
-            </select>
-          </div>
-          <div className="reg-field"><label>Experience Level</label>
-            <div className="reg-chips">{['Beginner', 'Intermediate', 'Advanced'].map(e => (
-              <div key={e} className={`reg-chip ${exp === e ? 'sel' : ''}`} onClick={() => setExp(e)}>{e}</div>
-            ))}</div>
-          </div>
-          <div className="reg-btn-row">
-            <button className="reg-btn reg-btn-s" onClick={() => go(-1)}>← Back</button>
-            <button className="reg-btn reg-btn-p" onClick={() => go(1)}>Continue →</button>
-          </div>
-        </>}
-
-        {/* STEP 3 — WYL */}
-        {step === 3 && <>
-          <div className="reg-step-title">Way You Learn</div>
-          <div className="reg-step-sub">Helps TAMi teach the way that works best for you</div>
-          <div className="reg-wyl-progress">
-            {WYL_QUESTIONS.map((_, i) => <div key={i} className={`reg-wyl-tick ${wylAnswers[i] ? 'done' : ''}`} />)}
-          </div>
-          <div style={{ fontSize: 10, color: '#4ecdc4', marginBottom: 10 }}>{wyl.answered} / 10 answered</div>
-          <div className="reg-wyl-scroll">
-            {WYL_QUESTIONS.map((q, qi) => (
-              <div key={qi} className={`reg-wyl-q ${wylAnswers[qi] ? 'answered' : ''}`}>
-                <div style={{ fontSize: 11, fontWeight: 600, marginBottom: 8, lineHeight: 1.5, color: '#e2e8f0' }}>
-                  {qi + 1}. {q.q}
-                </div>
-                {q.opts.map((o, oi) => (
-                  <div key={oi} className={`reg-wyl-opt ${wylAnswers[qi] === o.type ? 'sel' : ''}`} onClick={() => setWylAnswer(qi, o.type)}>
-                    <div className="reg-radio" />
-                    {o.label}
+        {step === 2 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Your music journey</div>
+            <div style={S.stepSub}>Help T.A.M.i personalize your experience</div>
+            <div style={S.field}>
+              <label style={S.label}>Favorite Genre</label>
+              <input style={S.input} placeholder="e.g. R&B, Classical, Pop" value={genre} onChange={e => setGenre(e.target.value)} />
+            </div>
+            <div style={S.field}>
+              <label style={S.label}>Favorite Song</label>
+              <input style={S.input} placeholder="e.g. Moonlight Sonata" value={song} onChange={e => setSong(e.target.value)} />
+            </div>
+            <div style={S.field}>
+              <label style={S.label}>Primary Instrument</label>
+              <select style={S.input} value={instrument} onChange={e => setInstrument(e.target.value)}>
+                {['Piano','Guitar','Violin','Voice','Drums','Bass','Cello','Flute','Trumpet','Saxophone'].map(i => <option key={i}>{i}</option>)}
+              </select>
+            </div>
+            <div style={S.field}>
+              <label style={S.label}>Experience Level</label>
+              <div style={S.chips}>
+                {['Beginner','Intermediate','Advanced'].map(e => (
+                  <div key={e} className="reg-chip" onClick={() => setExp(e)} style={{...S.chip, ...(exp === e ? S.chipSel : {})}}>
+                    {e}
                   </div>
                 ))}
               </div>
-            ))}
+            </div>
+            <div style={S.btnRow}>
+              <button style={S.btnSecondary} onClick={() => go(-1)}>← Back</button>
+              <button style={{...S.btnPrimary, flex: 1}} onClick={() => go(1)}>Continue →</button>
+            </div>
           </div>
-          <div className="reg-btn-row">
-            <button className="reg-btn reg-btn-s" onClick={() => go(-1)}>← Back</button>
-            <button className="reg-btn reg-btn-p" onClick={() => go(1)}>Continue →</button>
+        )}
+
+        {/* STEP 3 — WYL */}
+        {step === 3 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Way You Learn</div>
+            <div style={S.stepSub}>Helps T.A.M.i teach the way that works best for you</div>
+            <div style={S.wylProgressBar}>
+              {WYL_QUESTIONS.map((_, i) => (
+                <div key={i} style={{...S.wylTick, ...(wylAnswers[i] ? S.wylTickDone : {})}} />
+              ))}
+            </div>
+            <div style={{ fontSize: 11, color: COLORS.accent, marginBottom: 12, fontWeight: 600 }}>
+              {wyl.answered} / 10 answered
+              {wyl.answered > 0 && wyl.dominant && ` · ${WYL_LABEL[wyl.dominant]} leaning`}
+            </div>
+            <div style={S.wylScroll}>
+              {WYL_QUESTIONS.map((q, qi) => (
+                <div key={qi} style={{...S.wylQ, ...(wylAnswers[qi] ? S.wylQAnswered : {})}}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#fff', marginBottom: 8, lineHeight: 1.5 }}>
+                    {qi + 1}. {q.q}
+                  </div>
+                  {q.opts.map((o, oi) => (
+                    <div
+                      key={oi}
+                      className={`reg-wyl-opt ${wylAnswers[qi] === o.type ? 'sel' : ''}`}
+                      onClick={() => setWylAnswer(qi, o.type)}
+                      style={S.wylOpt}
+                    >
+                      <div className="reg-radio" style={{
+                        ...S.radio,
+                        ...(wylAnswers[qi] === o.type ? S.radioSel : {}),
+                      }} />
+                      {o.label}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div style={S.btnRow}>
+              <button style={S.btnSecondary} onClick={() => go(-1)}>← Back</button>
+              <button style={{...S.btnPrimary, flex: 1}} onClick={() => go(1)}>Continue →</button>
+            </div>
           </div>
-        </>}
+        )}
 
         {/* STEP 4 — Assessment */}
-        {step === 4 && <>
-          <div className="reg-step-title">Music Assessment</div>
-          <div className="reg-step-sub">Helps TAMi set your starting point</div>
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 500, marginBottom: 6 }}>How long have you been learning {instrument}?</div>
-            <div className="reg-chips">{DURATIONS.map((d, i) => (
-              <div key={d} className={`reg-chip ${assessmentDuration === i ? 'sel' : ''}`} onClick={() => setAssessmentDuration(i)}>{d}</div>
-            ))}</div>
+        {step === 4 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Music Assessment</div>
+            <div style={S.stepSub}>Helps T.A.M.i set your starting point</div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={S.assessLabel}>How long have you been learning {instrument}?</div>
+              <div style={S.chips}>
+                {DURATIONS.map((d, i) => (
+                  <div key={d} className="reg-chip" onClick={() => setAssessmentDuration(i)} style={{...S.chip, ...(assessmentDuration === i ? S.chipSel : {})}}>{d}</div>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={S.assessLabel}>Can you read sheet music?</div>
+              <div style={S.chips}>
+                {READINGS.map((r, i) => (
+                  <div key={r} className="reg-chip" onClick={() => setAssessmentReading(i)} style={{...S.chip, ...(assessmentReading === i ? S.chipSel : {})}}>{r}</div>
+                ))}
+              </div>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={S.assessLabel}>What is your goal?</div>
+              <div style={S.chips}>
+                {GOALS.map((g, i) => (
+                  <div key={g} className="reg-chip" onClick={() => setAssessmentGoal(i)} style={{...S.chip, ...(assessmentGoal === i ? S.chipSel : {})}}>{g}</div>
+                ))}
+              </div>
+            </div>
+            <div style={S.btnRow}>
+              <button style={S.btnSecondary} onClick={() => go(-1)}>← Back</button>
+              <button style={{...S.btnPrimary, flex: 1}} onClick={() => go(1)}>Continue →</button>
+            </div>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 500, marginBottom: 6 }}>Can you read sheet music?</div>
-            <div className="reg-chips">{READINGS.map((r, i) => (
-              <div key={r} className={`reg-chip ${assessmentReading === i ? 'sel' : ''}`} onClick={() => setAssessmentReading(i)}>{r}</div>
-            ))}</div>
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 11, fontWeight: 500, marginBottom: 6 }}>What is your goal?</div>
-            <div className="reg-chips">{GOALS.map((g, i) => (
-              <div key={g} className={`reg-chip ${assessmentGoal === i ? 'sel' : ''}`} onClick={() => setAssessmentGoal(i)}>{g}</div>
-            ))}</div>
-          </div>
-          <div className="reg-btn-row">
-            <button className="reg-btn reg-btn-s" onClick={() => go(-1)}>← Back</button>
-            <button className="reg-btn reg-btn-p" onClick={() => go(1)}>Continue →</button>
-          </div>
-        </>}
+        )}
 
         {/* STEP 5 — Avatar */}
-        {step === 5 && <>
-          <div className="reg-step-title">Choose your avatar</div>
-          <div className="reg-step-sub">Pick a character or upload your own</div>
-          <div className="reg-avatar-grid">{AVATARS.map((a, i) => (
-            <div key={a.name} className={`reg-avatar-card ${avatar === i ? 'sel' : ''}`} onClick={() => setAvatar(i)}>
-              <span className="reg-av-emoji">{a.emoji}</span>
-              <div className="reg-av-name">{a.name}</div>
-              <div className="reg-av-role">{a.role}</div>
+        {step === 5 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Choose your avatar</div>
+            <div style={S.stepSub}>Pick a character that represents you</div>
+            <div style={S.avatarGrid}>
+              {AVATARS.map((a, i) => (
+                <div
+                  key={a.name}
+                  className="reg-avatar-card"
+                  onClick={() => setAvatar(i)}
+                  style={{...S.avatarCard, ...(avatar === i ? S.avatarCardSel : {})}}
+                >
+                  {avatar === i && <div style={S.avatarCheck}>✓</div>}
+                  <div style={{ fontSize: 32, marginBottom: 6 }}>{a.emoji}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{a.name}</div>
+                  <div style={{ fontSize: 9, color: COLORS.textSecondary, marginTop: 2 }}>{a.role}</div>
+                </div>
+              ))}
             </div>
-          ))}</div>
-          <div className="reg-upload">
-            <div style={{ fontSize: 22, marginBottom: 5 }}>📷</div>
-            <div style={{ fontSize: 12, color: '#4ecdc4', fontWeight: 600 }}>Upload your own photo</div>
-            <div style={{ fontSize: 9, color: '#718096' }}>JPG, PNG or GIF · Max 5MB</div>
+            <div style={S.btnRow}>
+              <button style={S.btnSecondary} onClick={() => go(-1)}>← Back</button>
+              <button style={{...S.btnPrimary, flex: 1}} onClick={() => go(1)}>Continue →</button>
+            </div>
           </div>
-          <div className="reg-btn-row">
-            <button className="reg-btn reg-btn-s" onClick={() => go(-1)}>← Back</button>
-            <button className="reg-btn reg-btn-p" onClick={() => go(1)}>Continue →</button>
-          </div>
-        </>}
+        )}
 
         {/* STEP 6 — Confirm */}
-        {step === 6 && <>
-          <div className="reg-step-title">Confirm your profile</div>
-          <div className="reg-step-sub">Make sure everything looks right</div>
-          <div className="reg-confirm-card">
-            <div style={{ fontSize: 36 }}>{AVATARS[avatar].emoji}</div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700 }}>{`${firstName} ${lastName}`.trim() || 'Your Name'}</div>
-              <div style={{ fontSize: 10, color: '#718096', marginTop: 2 }}>{email || 'your@email.com'}</div>
-              <div style={{ display: 'inline-block', background: 'rgba(78,205,196,.15)', color: '#4ecdc4', fontSize: 9, padding: '2px 8px', borderRadius: 20, marginTop: 4 }}>{role}</div>
+        {step === 6 && (
+          <div style={S.stepBody}>
+            <div style={S.stepTitle}>Confirm your profile</div>
+            <div style={S.stepSub}>Make sure everything looks right</div>
+            <div style={S.confirmCard}>
+              <div style={{ fontSize: 32 }}>{AVATARS[avatar].emoji}</div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>{`${firstName} ${lastName}`.trim() || 'Your Name'}</div>
+                <div style={{ fontSize: 11, color: COLORS.textSecondary, marginTop: 2 }}>{email || 'your@email.com'}</div>
+                <div style={S.roleBadge}>{role}</div>
+              </div>
+            </div>
+            <div style={S.detailCard}>
+              <div style={S.detailCardTitle}>🎵 Music Profile</div>
+              <div style={{ color: COLORS.textSecondary, fontSize: 12 }}>{instrument} · {exp}{genre ? ` · ${genre}` : ''}</div>
+            </div>
+            <div style={S.detailCard}>
+              <div style={S.detailCardTitle}>🧠 Way You Learn</div>
+              {wyl.answered > 0
+                ? <div style={{ fontSize: 12 }}><span style={{ color: COLORS.accent }}>{WYL_LABEL[wyl.dominant]}</span> <span style={{ color: COLORS.textSecondary }}>learner · {wyl.answered}/10 answered</span></div>
+                : <div style={{ fontSize: 12, color: COLORS.textSecondary }}>Not completed (optional)</div>
+              }
+            </div>
+            <div style={S.detailCard}>
+              <div style={S.detailCardTitle}>🎯 Assessment</div>
+              <div style={{ color: COLORS.textSecondary, fontSize: 12 }}>{DURATIONS[assessmentDuration]} · {GOALS[assessmentGoal]}</div>
+            </div>
+            {error && <p style={S.error}>{error}</p>}
+            <div style={S.btnRow}>
+              <button style={S.btnSecondary} onClick={() => go(-1)}>← Back</button>
+              <button
+                style={{...S.btnPrimary, flex: 1, opacity: isSubmitting ? 0.6 : 1}}
+                onClick={finish}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating Account...' : 'Finish Setup →'}
+              </button>
             </div>
           </div>
-          <div className="reg-detail-card">
-            <strong>🎵 Music Profile</strong>
-            {instrument} · {exp}{genre ? ` · ${genre}` : ''}
-          </div>
-          <div className="reg-detail-card">
-            <strong>🧠 Way You Learn</strong>
-            {wyl.answered > 0
-              ? <><span style={{ color: '#4ecdc4' }}>{WYL_LABEL[wyl.dominant]}</span> learner · {wyl.answered}/10 answered</>
-              : <span style={{ color: '#718096' }}>Not completed (optional)</span>
-            }
-          </div>
-          <div className="reg-detail-card">
-            <strong>🎯 Assessment</strong>
-            {DURATIONS[assessmentDuration]} · Goal: {GOALS[assessmentGoal]}
-          </div>
-          {error && <div style={{ color: '#ef4444', fontSize: 11, padding: '7px 10px', background: 'rgba(239,68,68,0.1)', borderRadius: 8, marginBottom: 8, textAlign: 'center' }}>{error}</div>}
-          <div className="reg-btn-row">
-            <button className="reg-btn reg-btn-s" onClick={() => go(-1)}>← Back</button>
-            <button className="reg-btn reg-btn-p" onClick={finish} disabled={isSubmitting} style={isSubmitting ? { opacity: 0.6, pointerEvents: 'none' } : {}}>
-              {isSubmitting ? 'Creating Account...' : 'Finish Setup'} →
-            </button>
-          </div>
-        </>}
+        )}
       </div>
     </div>
   )
+}
+
+const S = {
+  page: {
+    minHeight: '100vh',
+    background: GRADIENTS.page,
+    fontFamily: FONTS.body,
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+    padding: '28px 16px 60px',
+    position: 'relative', overflow: 'hidden',
+  },
+  topLabel: {
+    fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
+    color: COLORS.textMuted, marginBottom: 16, fontFamily: FONTS.body,
+  },
+  stepNav: {
+    display: 'flex', gap: 6, marginBottom: 24,
+    flexWrap: 'wrap', justifyContent: 'center',
+  },
+  stepPill: {
+    fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
+    padding: '6px 14px', borderRadius: 20,
+    border: `1px solid ${COLORS.cardBorder}`,
+    background: 'rgba(255,255,255,0.04)',
+    color: COLORS.textMuted,
+    fontFamily: FONTS.body, fontWeight: 500,
+    cursor: 'pointer', transition: 'all .2s',
+  },
+  stepPillActive: {
+    borderColor: 'rgba(217,70,239,0.5)',
+    background: 'rgba(217,70,239,0.1)',
+    color: COLORS.accent,
+  },
+  stepPillDone: {
+    borderColor: 'rgba(217,70,239,0.25)',
+    background: 'rgba(217,70,239,0.05)',
+    color: 'rgba(217,70,239,0.6)',
+  },
+  card: {
+    background: COLORS.cardBg,
+    border: `1px solid ${COLORS.cardBorder}`,
+    borderRadius: 20,
+    padding: '24px 24px 20px',
+    width: '100%', maxWidth: 420,
+    backdropFilter: 'blur(20px)',
+    boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+    display: 'flex', flexDirection: 'column', alignItems: 'center',
+  },
+  logoWrapper: { ...LOGO.logoWrapper, marginBottom: 10 },
+  cardTitle: {
+    fontFamily: FONTS.display, fontSize: 20, fontWeight: 700,
+    color: '#fff', margin: '0 0 2px', textAlign: 'center',
+  },
+  cardAccent: { color: COLORS.accent },
+  stepIndicator: {
+    fontSize: 10, letterSpacing: '0.12em', color: COLORS.accent,
+    textTransform: 'uppercase', marginBottom: 10, marginTop: 4,
+  },
+  progressDots: { display: 'flex', gap: 5, marginBottom: 18, justifyContent: 'center' },
+  dot:         { height: 4, borderRadius: 3, background: 'rgba(255,255,255,0.1)', width: 14 },
+  dotActive:   { width: 24, background: COLORS.accent },
+  dotDone:     { width: 14, background: COLORS.accent, opacity: 0.4 },
+  dotInactive: { width: 14, background: 'rgba(255,255,255,0.1)' },
+  stepBody:    { width: '100%' },
+  stepTitle:   { fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 3, fontFamily: FONTS.display },
+  stepSub:     { fontSize: 12, color: COLORS.textSecondary, marginBottom: 10 },
+  confidenceAnchor: {
+    fontSize: 11, color: COLORS.textMuted,
+    background: 'rgba(217,70,239,0.07)',
+    border: '1px solid rgba(217,70,239,0.15)',
+    borderRadius: 8, padding: '8px 12px',
+    marginBottom: 16, lineHeight: 1.5,
+  },
+  field:    { marginBottom: 12, width: '100%' },
+  fieldRow: { display: 'flex', gap: 8, width: '100%' },
+  label:    { display: 'block', fontSize: 10, color: COLORS.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 5 },
+  input: {
+    width: '100%', background: 'rgba(255,255,255,0.07)',
+    border: `1px solid ${COLORS.cardBorder}`,
+    borderRadius: 10, padding: '11px 13px',
+    color: '#fff', fontSize: 13, fontFamily: FONTS.body,
+    outline: 'none', boxSizing: 'border-box',
+  },
+  btnPrimary: {
+    background: GRADIENTS.primary,
+    color: '#fff', border: 'none', borderRadius: 12,
+    padding: '12px 0', fontSize: 14, fontWeight: 700,
+    fontFamily: FONTS.body, cursor: 'pointer', width: '100%',
+  },
+  btnSecondary: {
+    background: 'rgba(255,255,255,0.06)',
+    color: COLORS.textSecondary,
+    border: `1px solid ${COLORS.cardBorder}`,
+    borderRadius: 12, padding: '12px 0',
+    fontSize: 13, fontWeight: 600,
+    fontFamily: FONTS.body, cursor: 'pointer', flex: 1,
+  },
+  btnRow:  { display: 'flex', gap: 8, marginTop: 14, width: '100%' },
+  error:   { color: COLORS.error, fontSize: 12, margin: '8px 0 0', textAlign: 'center' },
+  chips:   { display: 'flex', flexWrap: 'wrap', gap: 6 },
+  chip: {
+    background: 'rgba(255,255,255,0.06)',
+    border: `1px solid ${COLORS.cardBorder}`,
+    borderRadius: 8, padding: '6px 12px',
+    fontSize: 11, cursor: 'pointer', color: COLORS.textSecondary,
+    transition: 'all .15s',
+  },
+  chipSel: {
+    borderColor: COLORS.accent,
+    background: 'rgba(217,70,239,0.12)',
+    color: COLORS.accent,
+  },
+  roleGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14, width: '100%' },
+  roleCard: {
+    background: 'rgba(255,255,255,0.05)',
+    border: `1.5px solid ${COLORS.cardBorder}`,
+    borderRadius: 12, padding: '12px 10px',
+    cursor: 'pointer', textAlign: 'center', transition: 'all .2s',
+  },
+  roleCardSel: {
+    borderColor: COLORS.accent,
+    background: 'rgba(217,70,239,0.1)',
+  },
+  wylProgressBar: { display: 'flex', gap: 3, marginBottom: 8, flexWrap: 'wrap' },
+  wylTick:     { width: 18, height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.1)', transition: 'background .2s' },
+  wylTickDone: { background: COLORS.accent },
+  wylScroll:   { maxHeight: 300, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 },
+  wylQ: {
+    background: 'rgba(255,255,255,0.04)',
+    borderRadius: 10, padding: '10px 12px',
+    border: `1px solid ${COLORS.cardBorder}`,
+  },
+  wylQAnswered: { borderColor: 'rgba(217,70,239,0.3)' },
+  wylOpt: {
+    display: 'flex', alignItems: 'center', gap: 8,
+    padding: '7px 8px', borderRadius: 7,
+    fontSize: 11, color: COLORS.textSecondary,
+    marginBottom: 2, cursor: 'pointer', transition: 'all .15s',
+  },
+  radio: {
+    width: 12, height: 12, borderRadius: '50%',
+    border: `2px solid ${COLORS.cardBorder}`,
+    flexShrink: 0, transition: 'all .15s',
+  },
+  radioSel: { borderColor: COLORS.accent, background: COLORS.accent },
+  assessLabel: { fontSize: 12, fontWeight: 500, color: '#fff', marginBottom: 8 },
+  avatarGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 14, width: '100%' },
+  avatarCard: {
+    background: 'rgba(255,255,255,0.05)',
+    border: `2px solid ${COLORS.cardBorder}`,
+    borderRadius: 14, padding: '14px 8px 10px',
+    textAlign: 'center', cursor: 'pointer',
+    position: 'relative', transition: 'all .2s',
+  },
+  avatarCardSel: {
+    borderColor: COLORS.accent,
+    background: 'rgba(217,70,239,0.08)',
+    boxShadow: `0 0 16px rgba(217,70,239,0.2)`,
+  },
+  avatarCheck: {
+    position: 'absolute', top: 6, right: 8,
+    fontSize: 9, color: COLORS.accent, fontWeight: 700,
+  },
+  confirmCard: {
+    background: 'rgba(255,255,255,0.06)',
+    borderRadius: 12, padding: '14px',
+    marginBottom: 10, display: 'flex', gap: 12, alignItems: 'center', width: '100%',
+  },
+  detailCard: {
+    background: 'rgba(255,255,255,0.04)',
+    borderRadius: 10, padding: '10px 12px',
+    marginBottom: 8, width: '100%',
+  },
+  detailCardTitle: { fontSize: 11, fontWeight: 700, color: '#fff', marginBottom: 4 },
+  roleBadge: {
+    display: 'inline-block',
+    background: 'rgba(217,70,239,0.15)',
+    color: COLORS.accent, fontSize: 9,
+    padding: '2px 8px', borderRadius: 20, marginTop: 4,
+  },
 }
