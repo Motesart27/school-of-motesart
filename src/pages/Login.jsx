@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from './context/AuthContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
-import api from './services/api.js'
+import api from '../services/api.js'
 
 const loginStyles = `
   @keyframes laserSpin {
@@ -84,12 +84,9 @@ export default function Login() {
             <button style={{ ...S.tabBtn, ...S.tabActive }}>
               Sign In
             </button>
-            <button
-              style={S.tabBtn}
-              onClick={() => { window.location.href = '/register' }}
-            >
+            <a href="/register" style={{ ...S.tabBtn, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               Register
-            </button>
+            </a>
           </div>
 
           <form onSubmit={handleLogin} style={S.form}>
@@ -119,9 +116,7 @@ export default function Login() {
 
           <p style={S.helperText}>
             Don't have an account?{' '}
-            <span style={S.helperLink} onClick={() => { window.location.href = '/register' }}>
-              Register here
-            </span>
+            <a href="/register" style={S.helperLink}>Register here</a>
           </p>
 
           <div style={S.divider}><span>or continue with</span></div>
@@ -154,8 +149,8 @@ const S = {
   card: { background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', borderRadius: 20, padding: '40px 36px', width: '100%', maxWidth: 420, boxShadow: '0 8px 40px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', alignItems: 'center' },
   logoWrapper: { position: 'relative', width: 180, height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   logoGlow: { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.32) 0%, rgba(139,92,246,0.1) 40%, transparent 70%)', filter: 'blur(14px)', pointerEvents: 'none', animation: 'glowPulse 4s ease-in-out infinite', zIndex: 1 },
-  laserRing1: { position: 'absolute', top: '50%', left: '50%', width: 158, height: 158, borderRadius: '50%', border: '2px solid transparent', borderTop: '2px solid #d946ef', borderRight: '2px solid #a855f7', animation: 'laserSpin 3s linear infinite', filter: 'drop-shadow(0 0 8px rgba(217,70,239,0.65))', zIndex: 5 },
-  laserRing2: { position: 'absolute', top: '50%', left: '50%', width: 170, height: 170, borderRadius: '50%', border: '1.5px solid transparent', borderBottom: '1.5px solid #06b6d4', borderLeft: '1.5px solid #7c3aed', animation: 'laserSpin 5s linear infinite reverse', filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.45))', opacity: 0.8, zIndex: 5 },
+  laserRing1: { position: 'absolute', top: '50%', left: '50%', width: 158, height: 158, borderRadius: '50%', border: '2px solid transparent', borderTop: '2px solid #d946ef', borderRight: '2px solid #a855f7', animation: 'laserSpin 3s linear infinite', filter: 'drop-shadow(0 0 8px rgba(217,70,239,0.65))', zIndex: 5, pointerEvents: 'none' },
+  laserRing2: { position: 'absolute', top: '50%', left: '50%', width: 170, height: 170, borderRadius: '50%', border: '1.5px solid transparent', borderBottom: '1.5px solid #06b6d4', borderLeft: '1.5px solid #7c3aed', animation: 'laserSpin 5s linear infinite reverse', filter: 'drop-shadow(0 0 6px rgba(6,182,212,0.45))', opacity: 0.8, zIndex: 5, pointerEvents: 'none' },
   logoCircle: { width: 140, height: 140, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative', zIndex: 10, boxShadow: '0 0 30px rgba(168,85,247,0.25)' },
   logoImg: { width: 130, height: 130, objectFit: 'contain' },
   logoTitle: { textAlign: 'center', fontSize: 26, fontWeight: 700, color: '#fff', margin: '0 0 4px', fontFamily: "'Outfit',sans-serif" },
@@ -169,7 +164,7 @@ const S = {
   btn: { padding: '13px 0', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#d946ef,#a855f7)', color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', marginTop: 4, fontFamily: "'DM Sans',sans-serif" },
   error: { color: '#f87171', fontSize: 13, margin: 0, textAlign: 'center' },
   helperText: { textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: '12px 0 0' },
-  helperLink: { color: '#d946ef', cursor: 'pointer', textDecoration: 'underline' },
+  helperLink: { color: '#d946ef', textDecoration: 'underline' },
   divider: { display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0', color: 'rgba(255,255,255,0.3)', fontSize: 13, width: '100%' },
   socialRow: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20, width: '100%' },
   googleBtn: { padding: '12px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.07)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" },
