@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext"
-import { useNavigate, Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import api from "../services/api"
 
 const loginStyles = `
@@ -105,12 +105,10 @@ export default function Login() {
             </button>
           </form>
 
-          <p style={S.registerRow}>
-            New here?{" "}
-            <Link to="/register" style={S.registerLink}>
-              Create your account →
-            </Link>
-          </p>
+          <div style={S.registerBlock}>
+            <a href="/register" style={S.registerBtn}>Go to Registration</a>
+            <a href="/register" style={S.registerSmall}>Open full registration flow</a>
+          </div>
 
           <div style={S.divider}><span>or</span></div>
 
@@ -153,8 +151,9 @@ const S = {
   input: { padding: "12px 14px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: 15, outline: "none", fontFamily: "DM Sans,sans-serif" },
   btn: { padding: "13px 0", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#d946ef,#a855f7)", color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", marginTop: 4, fontFamily: "DM Sans,sans-serif" },
   error: { color: "#f87171", fontSize: 13, margin: 0, textAlign: "center" },
-  registerRow: { margin: "16px 0 0", fontSize: 13, color: "rgba(255,255,255,0.4)", textAlign: "center" },
-  registerLink: { color: "#d946ef", fontWeight: 600, textDecoration: "none", cursor: "pointer", position: "relative", zIndex: 20 },
+  registerBlock: { display: "flex", flexDirection: "column", alignItems: "center", gap: 6, margin: "18px 0 0", width: "100%" },
+  registerBtn: { display: "block", width: "100%", padding: "12px 0", borderRadius: 10, border: "2px solid rgba(217,70,239,0.6)", background: "transparent", color: "#d946ef", fontSize: 15, fontWeight: 700, textAlign: "center", textDecoration: "none", fontFamily: "DM Sans,sans-serif", boxSizing: "border-box" },
+  registerSmall: { fontSize: 12, color: "rgba(255,255,255,0.4)", textDecoration: "underline", textAlign: "center" },
   divider: { display: "flex", alignItems: "center", gap: 10, margin: "20px 0", color: "rgba(255,255,255,0.3)", fontSize: 13, width: "100%" },
   socialRow: { display: "flex", flexDirection: "column", gap: 10, marginBottom: 20, width: "100%" },
   googleBtn: { padding: "12px 0", borderRadius: 10, border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.07)", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "DM Sans,sans-serif" },
