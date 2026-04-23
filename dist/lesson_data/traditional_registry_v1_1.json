@@ -1,0 +1,478 @@
+{
+  "_meta": {
+    "version": "1.1",
+    "description": "SOM Traditional Registry — 31 concepts, 5 pilot + 26 non-pilot",
+    "last_updated": "2026-03-23",
+    "pilot_concepts": [
+      "T_HALF_STEP",
+      "T_WHOLE_STEP",
+      "T_MAJOR_SCALE_PATTERN",
+      "T_SCALE_DEGREES_MAJOR",
+      "T_MAJOR_3RD"
+    ]
+  },
+  "concepts": [
+    {
+      "concept_id": "T_HALF_STEP",
+      "display_name": "The Half Step",
+      "motesart_language": "The Half Step - Next-Door Neighbors",
+      "motesart_id": "SOM-HS-001",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "primary_tool": "half_step_demo",
+      "is_pilot": true,
+      "intelligence_level": "full",
+      "feel_mode_gate": {
+        "entry_condition": "none",
+        "exit_mastery": 0.85,
+        "requires_audio": true,
+        "feel_first": true
+      },
+      "mastery_threshold": {
+        "accuracy": 0.85,
+        "mastery_ready": 0.75,
+        "consecutive_correct": 5,
+        "min_attempts": 10
+      },
+      "mistake_tags_expected": [
+        "wrong_direction",
+        "skipped_key",
+        "whole_instead_of_half"
+      ],
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_HALFWHOLE"
+    },
+    {
+      "concept_id": "T_WHOLE_STEP",
+      "display_name": "The Whole Step",
+      "motesart_language": "The Whole Step - Skip One Neighbor",
+      "motesart_id": "SOM-WS-002",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "primary_tool": "whole_step_demo",
+      "is_pilot": true,
+      "intelligence_level": "full",
+      "feel_mode_gate": {
+        "entry_condition": "T_HALF_STEP.mastery >= 0.85",
+        "exit_mastery": 0.85,
+        "requires_audio": true,
+        "feel_first": true
+      },
+      "mastery_threshold": {
+        "accuracy": 0.85,
+        "mastery_ready": 0.75,
+        "consecutive_correct": 5,
+        "min_attempts": 10
+      },
+      "mistake_tags_expected": [
+        "half_instead_of_whole",
+        "wrong_direction",
+        "counted_wrong"
+      ],
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_WHOLE_STEP"
+    },
+    {
+      "concept_id": "T_MAJOR_SCALE_PATTERN",
+      "display_name": "Major Scale Pattern",
+      "motesart_language": "The Major Scale Pattern - WWHWWWH",
+      "motesart_id": "SOM-MSP-003",
+      "grade_band": "1-3",
+      "fast_phase": "PHASE_2_PATTERNS",
+      "primary_tool": "scale_pattern_builder",
+      "is_pilot": true,
+      "intelligence_level": "full",
+      "feel_mode_gate": {
+        "entry_condition": "T_WHOLE_STEP.mastery >= 0.85",
+        "exit_mastery": 0.85,
+        "requires_audio": true,
+        "feel_first": true
+      },
+      "mastery_threshold": {
+        "accuracy": 0.85,
+        "mastery_ready": 0.75,
+        "consecutive_correct": 5,
+        "min_attempts": 12
+      },
+      "mistake_tags_expected": [
+        "pattern_break_at_3_4",
+        "pattern_break_at_7_1",
+        "wrong_interval_type"
+      ],
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_MAJSCALE"
+    },
+    {
+      "concept_id": "T_SCALE_DEGREES_MAJOR",
+      "display_name": "Scale Degrees",
+      "motesart_language": "Scale Degrees - The Number Names",
+      "motesart_id": "SOM-SD-004",
+      "grade_band": "1-3",
+      "fast_phase": "PHASE_2_PATTERNS",
+      "primary_tool": "scale_degree_overlay",
+      "is_pilot": true,
+      "intelligence_level": "full",
+      "feel_mode_gate": {
+        "entry_condition": "T_MAJOR_SCALE_PATTERN.mastery >= 0.85",
+        "exit_mastery": 0.85,
+        "requires_audio": false,
+        "feel_first": false
+      },
+      "mastery_threshold": {
+        "accuracy": 0.85,
+        "mastery_ready": 0.75,
+        "consecutive_correct": 5,
+        "min_attempts": 12
+      },
+      "mistake_tags_expected": [
+        "wrong_degree_number",
+        "confused_tonic_dominant",
+        "off_by_one"
+      ],
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_SCALE_DEGREES"
+    },
+    {
+      "concept_id": "T_MAJOR_3RD",
+      "display_name": "Major 3rd",
+      "motesart_language": "The Major Third - The Happy Sound",
+      "motesart_id": "SOM-M3-005",
+      "grade_band": "2-4",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "primary_tool": "interval_ear_trainer",
+      "is_pilot": true,
+      "intelligence_level": "full",
+      "feel_mode_gate": {
+        "entry_condition": "T_SCALE_DEGREES_MAJOR.mastery >= 0.85",
+        "exit_mastery": 0.85,
+        "requires_audio": true,
+        "feel_first": true
+      },
+      "mastery_threshold": {
+        "accuracy": 0.85,
+        "mastery_ready": 0.75,
+        "consecutive_correct": 5,
+        "min_attempts": 12
+      },
+      "mistake_tags_expected": [
+        "minor_instead_of_major",
+        "perfect_instead_of_major",
+        "interval_size_wrong"
+      ],
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_MAJOR_3RD"
+    },
+    {
+      "concept_id": "T_KEYBOARD_LAYOUT",
+      "display_name": "Keyboard Layout",
+      "motesart_language": "The Piano Keyboard - Black & White Geography",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_KEYBOARD"
+    },
+    {
+      "concept_id": "T_FINGER_NUMBERING",
+      "display_name": "Finger Numbering",
+      "motesart_language": "Finger Numbers - Your Hand's Address Book",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_FINGERS"
+    },
+    {
+      "concept_id": "T_OCTAVE_RECOGNITION",
+      "display_name": "Octave Recognition",
+      "motesart_language": "The Octave - Same Name, Higher Home",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_1_FOUNDATIONS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_OCTAVE"
+    },
+    {
+      "concept_id": "T_C_MAJOR_SCALE",
+      "display_name": "C Major Scale",
+      "motesart_language": "C Major - The White Key Scale",
+      "grade_band": "1-3",
+      "fast_phase": "PHASE_2_PATTERNS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_CMAJOR"
+    },
+    {
+      "concept_id": "T_INTERVAL_RECOGNITION",
+      "display_name": "Interval Recognition",
+      "motesart_language": "Intervals - Measuring Musical Distance",
+      "grade_band": "2-4",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_INTERVAL"
+    },
+    {
+      "concept_id": "T_MELODIC_INTERVALS_CONTEXT",
+      "display_name": "Melodic Intervals in Context",
+      "motesart_language": "Melodic Intervals - Hearing the Distance in Melodies",
+      "grade_band": "2-4",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_SAME_DIFFERENT",
+      "display_name": "Same vs Different",
+      "motesart_language": "Same or Different - Musical Matching",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_STEP_SKIP",
+      "display_name": "Step vs Skip",
+      "motesart_language": "Step or Skip - Close or Far",
+      "grade_band": "K-2",
+      "fast_phase": "PHASE_3_INTERVALS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_G_MAJOR_SCALE",
+      "display_name": "G Major Scale",
+      "motesart_language": "G Major - One Sharp Adventure",
+      "grade_band": "2-5",
+      "fast_phase": "PHASE_4_KEYS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_GMAJOR"
+    },
+    {
+      "concept_id": "T_F_MAJOR_SCALE",
+      "display_name": "F Major Scale",
+      "motesart_language": "F Major - One Flat Discovery",
+      "grade_band": "2-5",
+      "fast_phase": "PHASE_4_KEYS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_FMAJOR"
+    },
+    {
+      "concept_id": "T_D_MAJOR_SCALE",
+      "display_name": "D Major Scale",
+      "motesart_language": "D Major - Two Sharps Journey",
+      "grade_band": "2-5",
+      "fast_phase": "PHASE_4_KEYS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_DMAJOR"
+    },
+    {
+      "concept_id": "T_A_MINOR_SCALE",
+      "display_name": "A Minor Scale",
+      "motesart_language": "A Minor - The Sad Relative",
+      "grade_band": "2-5",
+      "fast_phase": "PHASE_4_KEYS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_AMINOR"
+    },
+    {
+      "concept_id": "T_KEY_SIGNATURE_READING",
+      "display_name": "Key Signature Reading",
+      "motesart_language": "Key Signatures - The Map at the Start",
+      "grade_band": "2-5",
+      "fast_phase": "PHASE_4_KEYS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_KEY_SIGNATURE"
+    },
+    {
+      "concept_id": "T_SHARP_FLAT_NAMES",
+      "display_name": "Sharps & Flats",
+      "motesart_language": "Sharps and Flats - Up a Half, Down a Half",
+      "grade_band": "2-5",
+      "fast_phase": "PHASE_4_KEYS",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_SHARP_FLAT"
+    },
+    {
+      "concept_id": "T_CHORD_TRIAD_STRUCTURE",
+      "display_name": "Chord Triad Structure",
+      "motesart_language": "Triads - Three Note Towers",
+      "grade_band": "3-8",
+      "fast_phase": "PHASE_5_HARMONY",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_CHORD_TRIAD"
+    },
+    {
+      "concept_id": "T_CHORD_QUALITY",
+      "display_name": "Chord Quality",
+      "motesart_language": "Major vs Minor Chords - Happy vs Sad",
+      "grade_band": "3-8",
+      "fast_phase": "PHASE_5_HARMONY",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_CHORD_QUALITY"
+    },
+    {
+      "concept_id": "T_HARMONY_BASIC",
+      "display_name": "Basic Harmony",
+      "motesart_language": "Harmony - Notes Together",
+      "grade_band": "3-8",
+      "fast_phase": "PHASE_5_HARMONY",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_STAFF_LINE_SPACE_READING",
+      "display_name": "Staff Reading",
+      "motesart_language": "Lines and Spaces - The Musical Grid",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_TREBLE_CLEF_NOTES",
+      "display_name": "Treble Clef Notes",
+      "motesart_language": "Treble Clef - The Right Hand Territory",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_BASS_CLEF_NOTES",
+      "display_name": "Bass Clef Notes",
+      "motesart_language": "Bass Clef - The Left Hand Territory",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": null
+    },
+    {
+      "concept_id": "T_TIME_SIGNATURE_BASICS",
+      "display_name": "Time Signatures",
+      "motesart_language": "Time Signatures - The Rhythm Recipe",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_TIME_SIG"
+    },
+    {
+      "concept_id": "T_NOTE_VALUE_DURATION",
+      "display_name": "Note Values",
+      "motesart_language": "Note Values - Long and Short Sounds",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_NOTE_VALUE"
+    },
+    {
+      "concept_id": "T_REST_VALUE_DURATION",
+      "display_name": "Rest Values",
+      "motesart_language": "Rest Values - The Sound of Silence",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_REST_VALUE"
+    },
+    {
+      "concept_id": "T_DYNAMIC_MARKINGS",
+      "display_name": "Dynamic Markings",
+      "motesart_language": "Dynamics - Loud and Soft",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_DYNAMICS"
+    },
+    {
+      "concept_id": "T_TEMPO_MARKINGS",
+      "display_name": "Tempo Markings",
+      "motesart_language": "Tempo - Fast and Slow",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_TEMPO"
+    },
+    {
+      "concept_id": "T_REPEAT_NAVIGATION",
+      "display_name": "Repeat Signs",
+      "motesart_language": "Repeats - Go Back and Play Again",
+      "grade_band": "2-8",
+      "fast_phase": "PHASE_6_NOTATION",
+      "is_pilot": false,
+      "intelligence_level": "stub",
+      "mistake_tags_expected": "not_modeled_yet",
+      "evidence_summary": null,
+      "resolver_legacy_id": "C_REPEAT"
+    }
+  ]
+}

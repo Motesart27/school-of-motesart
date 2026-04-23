@@ -95,7 +95,7 @@ export default function StudentDashboard() {
           <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(55,65,81,0.3)' }}>
             <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff' }}>{userName}</div>
             <div style={{ fontSize: 12, fontWeight: 500, color: '#14b8a6', marginTop: 2 }}>Student</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 4 }}>6th Grade · Piano · Westside Music</div>
+            
           </div>
         )}
 
