@@ -29,6 +29,7 @@ import PlayItChapter from './pages/PlayItChapter.jsx'
 import MoveItChapter from './pages/MoveItChapter.jsx'
 import OwnItChapter from './pages/OwnItChapter.jsx'
 import PracticeChapterWrapper from './pages/PracticeChapterWrapper.jsx'
+import DPMPlayground from './pages/DPMPlayground.jsx'
 
 function TamiGate() {
   const { pathname } = useLocation()
@@ -118,6 +119,7 @@ export default function App() {
       <Route path="/move-it" element={<ProtectedRoute><MoveItChapter /></ProtectedRoute>} />
       <Route path="/own-it" element={<ProtectedRoute><OwnItChapter /></ProtectedRoute>} />
       <Route path="/concept-health" element={<TeacherRoute><ConceptHealth /></TeacherRoute>} />
+      <Route path="/dpm-playground" element={<ProtectedRoute><DPMPlayground /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

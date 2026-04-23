@@ -11,6 +11,8 @@
  * Field names are FROZEN per PRACTICE_LOG_SCHEMA.md.
  */
 
+import { updateWYLFromBehavior } from "./wylEvolution.js"
+
 const API_URL = import.meta.env.VITE_API_URL || "https://deployable-python-codebase-som-production.up.railway.app";
 
 /**
@@ -137,10 +139,26 @@ export async function fetchSessions(studentId, opts = {}) {
  * @param {object} data — { student_id, duration_min, activity_type, piece_name, self_rating, source }
  */
 export async function createSession(data) {
-  return apiFetch("/practice-log/sessions", {
+  const result = await apiFetch("/practice-log/sessions", {
     method: "POST",
     body: JSON.stringify(data),
-  });
+  })
+  try {
+    const eventMap = {
+      "games": "ear_training_session",
+      "live_practice": "live_practice",
+      "sheet_music": "sheet_music",
+      "homework": "homework",
+    }
+
+    const mappedEvent = eventMap[data?.activity_type] || "live_practice"
+
+    updateWYLFromBehavior(mappedEvent, {
+      accuracy: data?.accuracy || data?.accuracy_pct || 70,
+      duration: data?.duration || 0,
+    })
+  } catch {}
+  return result
 }
 
 // ─── Transform helpers (backend shape → component shape) ───────

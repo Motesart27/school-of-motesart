@@ -1,11 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
-/**
- * Shared fetch wrapper.
- * - Injects Authorization Bearer token from localStorage on every request.
- * - On 401: clears stored session and dispatches 'som:force-logout' event.
- * - Throws on non-2xx responses with the backend's detail message.
- */
 async function request(path, options = {}) {
   const token = localStorage.getItem('som_token')
   const controller = new AbortController()
@@ -34,7 +28,6 @@ async function request(path, options = {}) {
   clearTimeout(timeout)
 
   if (res.status === 401) {
-    // Ghost session or expired token — force logout
     localStorage.removeItem('som_token')
     localStorage.removeItem('som_user')
     window.dispatchEvent(new CustomEvent('som:force-logout'))
@@ -59,12 +52,33 @@ export const api = {
   login: (email, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
 
-  register: (name, email, password) =>
-    request('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
+  // Accepts a single data object: { name, email, password, role, avatar, wyl, instrument, genre, song, experience }
+  register: (data) =>
+    request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Verify persisted token against Airtable — used by AuthContext boot validation.
-  // Returns { valid: true, user: {...} } if valid. Throws 401 if user no longer exists.
   verifySession: () => request('/auth/verify'),
+
+  // ─── WYL ─────────────────────────────────────────────────────
+  submitWYL: (userId, wylData) =>
+    request('/students/wyl', {
+      method: 'POST',
+      body: JSON.stringify({ user_id: userId, ...wylData }),
+    }),
+
+  updateWYL: (userId, wylData) =>
+    request(`/students/${encodeURIComponent(userId)}/wyl`, {
+      method: 'PUT',
+      body: JSON.stringify(wylData),
+    }),
+  updateWYLFromBehavior: (userId, eventType, data) =>
+    request(`/students/${userId}/wyl/update-from-behavior`, {
+      method: "POST",
+      body: JSON.stringify({
+        event_type: eventType,
+        ...data,
+      }),
+    }),
+
 
   // ─── Students ───────────────────────────────────────────────
   getStudents: () => request('/students'),
@@ -85,11 +99,12 @@ export const api = {
     request(`/sessions?student_id=${encodeURIComponent(studentId)}`),
 
   // ─── T.A.M.i Chat ───────────────────────────────────────────
-  chatWithTami: (studentName, message, conversationHistory = [], currentPage = '', userRole = '') =>
+  chatWithTami: (studentName, message, conversationHistory = [], currentPage = '', userRole = '', userId = '') =>
     request('/api/tami/chat', {
       method: 'POST',
       body: JSON.stringify({
         student_id: studentName,
+        user_id: userId,
         message,
         conversation_history: conversationHistory,
         current_page: currentPage,
@@ -97,11 +112,12 @@ export const api = {
       }),
     }),
 
-  chatWithTamiVoice: (studentName, message, conversationHistory = [], currentPage = '', userRole = '') =>
+  chatWithTamiVoice: (studentName, message, conversationHistory = [], currentPage = '', userRole = '', userId = '') =>
     request('/api/tami/chat/voice', {
       method: 'POST',
       body: JSON.stringify({
         student_id: studentName,
+        user_id: userId,
         message,
         conversation_history: conversationHistory,
         current_page: currentPage,
@@ -112,8 +128,7 @@ export const api = {
   tamiWeeklyReview: (studentName) =>
     request('/tami/weekly-review', { method: 'POST', body: JSON.stringify({ student_name: studentName }) }),
 
-  // ─── Health ─────────────────────────────────────────────────
-  // ─── T.A.M.i History ──────────────────────────────────────────
+  // ─── T.A.M.i History ─────────────────────────────────────────
   loadTamiHistory: async (userId) => {
     try {
       const data = await request(`/tami/history/${encodeURIComponent(userId)}`)
@@ -140,9 +155,7 @@ export const api = {
   },
 
   clearTamiHistory: (userId) => {
-    request(`/tami/history/${encodeURIComponent(userId)}`, {
-      method: 'DELETE',
-    }).catch(() => {})
+    request(`/tami/history/${encodeURIComponent(userId)}`, { method: 'DELETE' }).catch(() => {})
   },
 
   wake: () => fetch(`${API_URL}/`).then(r => r.json()),

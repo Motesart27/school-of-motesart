@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate } from 'react-router-dom'
+import { updateWYLFromBehavior } from "../services/wylEvolution.js"
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
@@ -423,6 +424,7 @@ export default function GamePage() {
  })
  })
  setSessionLogged(true)
+ updateWYLFromBehavior("ear_training_session", { accuracy, level })
  } catch (e) {
  console.warn('Session/leaderboard log failed:', e)
  }

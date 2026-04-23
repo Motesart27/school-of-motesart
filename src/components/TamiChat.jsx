@@ -344,6 +344,29 @@ const TAMI_PROMPTS = {
   ].join(' '),
 
 }
+function buildWYLContext(user) {
+  const wyl = user?.wyl
+  if (!wyl || typeof wyl.visual === 'undefined') {
+    return 'Student Learning Style Profile: No WYL profile yet — default balanced teaching style.'
+  }
+  const dominantRaw = wyl.dominant || 'balanced'
+  const dominantLabel = dominantRaw === 'readwrite' ? 'Reading/Writing'
+    : dominantRaw.charAt(0).toUpperCase() + dominantRaw.slice(1)
+  return [
+    'Student Learning Style Profile:',
+    '- Visual: ' + (wyl.visual || 0) + '%',
+    '- Auditory: ' + (wyl.auditory || 0) + '%',
+    '- Kinesthetic: ' + (wyl.kinesthetic || 0) + '%',
+    '- Reading/Writing: ' + (wyl.readwrite || wyl.reading_writing || 0) + '%',
+    '- Dominant Style: ' + dominantLabel,
+    'Adapt teaching:',
+    '- Visual → use imagery, patterns, diagrams',
+    '- Auditory → explain through sound, rhythm, phrasing',
+    '- Kinesthetic → emphasize doing, repetition, physical action',
+    '- Reading/Writing → structured explanation, steps, labels',
+  ].join(' ')
+}
+
 function getPageContext(pathname) {
   const dash = _getDashboard(pathname)
   return TAMI_DASHBOARD_CONTEXT[dash] || 'This is an active platform page.'
@@ -359,7 +382,7 @@ const GREETING_PLAY_DELAY_MS = 200   // buffer before first greeting plays
 
 
 export default function TamiChat() {
-  const { user } = useAuth()
+  const { user, updateUser } = useAuth()
   const location = useLocation()
 
   // Hide TamiChat on HalfStep practice pages (they have their own coach)
@@ -628,7 +651,9 @@ useEffect(() => {
         const dash = dashboard
         const pageContext = getPageContext(location.pathname)
         const firstName = studentName.split(' ')[0]
-        const greetingPrompt = TAMI_PROMPTS.greeting(firstName, role, dash)
+        const wylCtxGreeting = buildWYLContext(user)
+        const greetingPrompt = TAMI_PROMPTS.greeting(firstName, role, dash) + ' ' + wylCtxGreeting
+        const greetingUserId = _tamiUserId()
 
         // Race the API call against an 8-second timeout (Railway cold start guard)
         console.log('[TAMi] greeting request: /api/tami/chat', 'token:', !!localStorage.getItem('som_token'))
@@ -636,7 +661,7 @@ useEffect(() => {
           setTimeout(() => reject(new Error('Greeting timeout')), 8000)
         )
         const res = await Promise.race([
-          api.chatWithTami(studentName, greetingPrompt, [], pageContext, role),
+          api.chatWithTami(studentName, greetingPrompt, [], pageContext, role, greetingUserId),
           timeout
         ])
         const reply = res.reply || res.response || res.message; console.log('[TAMi:debug] backend reply received:', reply ? reply.substring(0,80) : 'null')
@@ -851,9 +876,11 @@ useEffect(() => {
     try {
       const role = (user?.role || 'student').toLowerCase()
       const dash = dashboard
-      const instructionPrompt = TAMI_PROMPTS.instruction(role, dash, baseHistory.length > 1)
+      const wylCtxInstruction = buildWYLContext(user)
+      const instructionPrompt = TAMI_PROMPTS.instruction(role, dash, baseHistory.length > 1) + ' ' + wylCtxInstruction
+      const instructionUserId = _tamiUserId()
       console.log('[TAMi] chat request: /api/tami/chat', 'token:', !!localStorage.getItem('som_token'))
-      const res = await api.chatWithTami(studentName, instructionPrompt + ' ' + userMsg, baseHistory, getPageContext(location.pathname), role)
+      const res = await api.chatWithTami(studentName, instructionPrompt + ' ' + userMsg, baseHistory, getPageContext(location.pathname), role, instructionUserId)
       const reply = res.reply || res.response || res.message
       if (reply) {
         const assistantMessage = { role: 'assistant', content: reply }
@@ -974,6 +1001,12 @@ useEffect(() => {
     }
     prevSpeaking.current = isSpeaking
   }, [isSpeaking, isOpen, loading, hasGreeted, startListening])
+
+  useEffect(() => {
+    const handler = (e) => updateUser({ wyl: e.detail })
+    window.addEventListener("wyl:update", handler)
+    return () => window.removeEventListener("wyl:update", handler)
+  }, [])
 
   // Quick actions â role + dashboard aware
   const quickActions = getQuickActions((user?.role || 'student').toLowerCase(), dashboard)
