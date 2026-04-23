@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
+function parseDetail(detail, fallbackMsg, defaultMsg) {
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) return detail.map(e => e.msg || JSON.stringify(e)).join('; ')
+  if (detail && typeof detail === 'object') return JSON.stringify(detail)
+  return fallbackMsg || defaultMsg || 'Request failed'
+}
+
 async function request(path, options = {}) {
   const token = localStorage.getItem('som_token')
   const controller = new AbortController()
@@ -32,14 +39,14 @@ async function request(path, options = {}) {
     localStorage.removeItem('som_user')
     window.dispatchEvent(new CustomEvent('som:force-logout'))
     const err = await res.json().catch(() => ({ detail: 'Session expired' }))
-    const error = new Error(err.detail || 'Session expired')
+    const error = new Error(parseDetail(err.detail, err.message, 'Session expired'))
     error.status = 401
     throw error
   }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Request failed' }))
-    const error = new Error(err.detail || 'Request failed')
+    const error = new Error(parseDetail(err.detail, err.message, 'Request failed'))
     error.status = res.status
     throw error
   }
@@ -72,7 +79,7 @@ export const api = {
     }),
   updateWYLFromBehavior: (userId, eventType, data) =>
     request(`/students/${userId}/wyl/update-from-behavior`, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({
         event_type: eventType,
         ...data,
