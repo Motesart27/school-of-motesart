@@ -114,7 +114,7 @@ export default function Login() {
             <div style={S.laserRing1} />
             <div style={S.laserRing2} />
             <div style={S.logoCircle}>
-              <img src="/logo.png" alt="School of Motesart" style={S.logoImg} />
+              <img src="/SOM_logo.png" alt="School of Motesart" style={S.logoImg} />
             </div>
           </div>
           <h1 style={S.logoTitle}>School of <span style={S.logoAccent}>Motesart</span></h1>
