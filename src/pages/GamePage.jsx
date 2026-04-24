@@ -219,7 +219,7 @@ function playTone(freq, dur = 0.5) {
 
 // CSS 
 const css = `
-.gp{min-height:100vh;background:linear-gradient(180deg,#0f172a,#1e293b);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column}
+.gp{min-height:100vh;background:linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%);color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;flex-direction:column}
 .gp-top{padding:8px 12px;background:rgba(15,23,42,.98);border-bottom:2px solid rgba(59,130,246,.3);backdrop-filter:blur(8px);position:sticky;top:0;z-index:10}
 .gp-top-inner{max-width: mob ? '100%' : 1024px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
 .gp-pill-pts{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;border:1px solid rgba(234,179,8,.3);background:linear-gradient(135deg,rgba(234,179,8,.2),rgba(234,179,8,.1));color:#fbbf24}
@@ -795,11 +795,11 @@ export default function GamePage() {
  <div className="gp-action-row">
  <button className={`gp-abtn gp-abtn-scale ${scaleReplays<=0?'depleted':''}`}
  onClick={playScale} disabled={isPlaying || scaleReplays<=0}>
- µ Play Scale {!isHomeworkSession && <span>({scaleReplays})</span>}
+ ▶ Play Scale {!isHomeworkSession && <span>({scaleReplays})</span>}
  </button>
  <button className={`gp-abtn gp-abtn-find ${findReplays<=0?'depleted':''}`}
  onClick={findNote} disabled={isPlaying || findReplays<=0}>
- ¶ Find Note {!isHomeworkSession && <span>({findReplays})</span>}
+ ♪ Find Note {!isHomeworkSession && <span>({findReplays})</span>}
  </button>
  </div>
 
