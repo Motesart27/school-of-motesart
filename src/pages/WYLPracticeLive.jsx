@@ -4,6 +4,7 @@ import api from '../services/api'
 import { VisualOverlay, VISUAL_COMPONENT_MAP, VISUAL_LABELS, C_MAJOR_NOTES, KeyboardDiagram } from '../components/TeachingVisuals'
 import useTamiQuestions from '../hooks/useTamiQuestions'
 import TelemetryPanel from '../components/TelemetryPanel'
+import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
 
 // ============================================
 // PHASE 1A: Real-Time Adaptive Teaching Layer
@@ -595,6 +596,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const videoRef = useRef(null)
 
   // ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Core state ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
+  const [practiceView, setPracticeView] = useState('cockpit')
   const [timer, setTimer] = useState(0)
   const [paused, setPaused] = useState(false)
   const [chatOpen, setChatOpen] = useState(true)
@@ -1166,6 +1168,10 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         </div>
       </>
     )
+  }
+
+  if (practiceView === 'cockpit') {
+    return <PracticeSessionCockpit onBegin={() => setPracticeView('lesson')} />
   }
 
   return (
