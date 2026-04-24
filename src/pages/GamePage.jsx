@@ -315,9 +315,9 @@ function Confetti() {
  id: i,
  left: Math.random() * 100,
  delay: Math.random() * 0.8,
- duration: 1.5 + Math.random() * 1.5,
+ duration: 2.5 + Math.random() * 1.5,
  color: ['#fbbf24','#a855f7','#14b8a6','#ef4444','#3b82f6','#22c55e','#f97316'][Math.floor(Math.random() * 7)],
- size: 6 + Math.random() * 8,
+ size: 10 + Math.random() * 4,
  }))
  return (
  <>
@@ -385,6 +385,8 @@ export default function GamePage() {
  // Progress toward level-up (resets each level)
  const [levelProgress, setLevelProgress] = useState(0)
  const CORRECT_TO_LEVELUP = 4
+ const SING_IT_REQUIRED_FROM_LEVEL = 3
+ const singItRequired = isHomeworkSession && level >= SING_IT_REQUIRED_FROM_LEVEL
 
  // Level up celebration
  const [showLevelUp, setShowLevelUp] = useState(false)
@@ -398,6 +400,7 @@ export default function GamePage() {
  const [targetNoteNumber, setTargetNoteNumber] = useState(null)
  const [singItPhase, setSingItPhase] = useState(false)
  const [sungPitchAccuracy, setSungPitchAccuracy] = useState(null)
+ const [singItSkipped, setSingItSkipped] = useState(false)
 
  const playingRef = useRef(false)
  const sessionRef = useRef({
@@ -520,9 +523,6 @@ export default function GamePage() {
  step()
  }, [])
 
- // Only show Sing It + Name It on the level-up qualifying round
- const isCheckpointRound = isHomeworkSession && (levelProgress + 1 >= CORRECT_TO_LEVELUP)
-
  const playScale = () => {
  if (scaleReplays <= 0 || isPlaying) return
  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
@@ -532,13 +532,6 @@ export default function GamePage() {
  playSequence([0,1,2,3,4,5,6,7], () => {
  setLitNote(null)
  setTimeout(() => playSequenceHidden(mystery, () => {
-  if (isCheckpointRound) {
-   setSingItPhase(true)
-   setNameItPhase(false)
-   setNameItAnswer(null)
-   setNameItCorrect(null)
-   setSungPitchAccuracy(null)
-  }
  }), 600)
  })
  }
@@ -550,13 +543,6 @@ export default function GamePage() {
  sessionRef.current.replaysUsed++
  // Hidden no lighting
  playSequenceHidden(mystery, () => {
-  if (isCheckpointRound) {
-   setSingItPhase(true)
-   setNameItPhase(false)
-   setNameItAnswer(null)
-   setNameItCorrect(null)
-   setSungPitchAccuracy(null)
-  }
  })
  }
 
@@ -627,6 +613,14 @@ export default function GamePage() {
  setNoteStates(newStates)
 
  if (allCorrect) {
+ const isLevelUpCheckpoint = isHomeworkSession && ((sessionRef.current.correct + 1) % CORRECT_TO_LEVELUP === 0)
+ if (isLevelUpCheckpoint) {
+  setSingItPhase(true)
+  setNameItPhase(false)
+  setNameItAnswer(null)
+  setNameItCorrect(null)
+  setSingItSkipped(false)
+ }
  sessionRef.current.correct++
  const newStreak = sessionRef.current.currentStreak + 1
  sessionRef.current.currentStreak = newStreak
@@ -677,7 +671,7 @@ export default function GamePage() {
  setTargetNoteNumber(seq[0] + 1)
  setScaleReplays(getMaxScaleReplays(level))
  setFindReplays(getMaxFindReplays())
- }, 1600)
+ }, isHomeworkSession && allCorrect ? 4000 : 1600)
  }
  }, [answers, isPlaying, isEvaluating, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp, nameItPhase, singItPhase])
 
@@ -916,26 +910,56 @@ export default function GamePage() {
     color:'rgba(255,255,255,.38)',
     marginBottom:18
    }}>Match the pitch with your voice before naming it.</div>
-   <button
-    onClick={() => {
-     setSungPitchAccuracy(null)
-     setSingItPhase(false)
-     setNameItPhase(true)
-     setNameItAnswer(null)
-     setNameItCorrect(null)
-    }}
-    style={{
-     background:'rgba(255,255,255,.07)',
-     border:'1px solid rgba(255,255,255,.14)',
-     borderRadius:10,
-     padding:'10px 24px',
-     color:'rgba(255,255,255,.55)',
-     fontSize:13,
-     fontWeight:600,
-     cursor:'pointer',
-     fontFamily:'DM Sans,sans-serif'
-    }}
-   >Skip for now →</button>
+   {!singItRequired ? (
+    <button
+     onClick={() => {
+      setSungPitchAccuracy(null)
+      setSingItSkipped(true)
+      setSingItPhase(false)
+      setNameItPhase(true)
+      setNameItAnswer(null)
+      setNameItCorrect(null)
+     }}
+     style={{
+      background:'rgba(255,255,255,.07)',
+      border:'1px solid rgba(255,255,255,.14)',
+      borderRadius:10,
+      padding:'10px 24px',
+      color:'rgba(255,255,255,.55)',
+      fontSize:13,
+      fontWeight:600,
+      cursor:'pointer',
+      fontFamily:'DM Sans,sans-serif'
+     }}
+    >Skip for now (available until Level {SING_IT_REQUIRED_FROM_LEVEL}) →</button>
+   ) : (
+    <div>
+     <div style={{fontSize:11,color:'rgba(217,70,239,.6)',marginBottom:8}}>
+      Microphone required from Level {SING_IT_REQUIRED_FROM_LEVEL}
+     </div>
+     <button
+      onClick={() => {
+       setSungPitchAccuracy(null)
+       setSingItSkipped(true)
+       setSingItPhase(false)
+       setNameItPhase(true)
+       setNameItAnswer(null)
+       setNameItCorrect(null)
+      }}
+      style={{
+       background:'rgba(217,70,239,.15)',
+       border:'1px solid rgba(217,70,239,.4)',
+       borderRadius:10,
+       padding:'10px 24px',
+       color:'#d946ef',
+       fontSize:13,
+       fontWeight:600,
+       cursor:'pointer',
+       fontFamily:'DM Sans,sans-serif'
+      }}
+     >Continue for testing →</button>
+    </div>
+   )}
   </div>
  )}
 
