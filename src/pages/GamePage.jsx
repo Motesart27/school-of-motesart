@@ -389,6 +389,10 @@ export default function GamePage() {
 
  const [sessionLogged, setSessionLogged] = useState(false)
  const [sessionPoints, setSessionPoints] = useState(0)
+ const [nameItPhase, setNameItPhase] = useState(false)
+ const [nameItAnswer, setNameItAnswer] = useState(null)
+ const [nameItCorrect, setNameItCorrect] = useState(null)
+ const [targetNoteNumber, setTargetNoteNumber] = useState(null)
 
  const playingRef = useRef(false)
  const sessionRef = useRef({
@@ -460,6 +464,7 @@ export default function GamePage() {
  useEffect(() => {
  const seq = generateMystery(noteCount, mystery)
  setMystery(seq)
+ setTargetNoteNumber(seq[0] + 1)
  setScaleReplays(getMaxScaleReplays(level))
  setFindReplays(getMaxFindReplays())
  }, [level, noteCount])
@@ -518,7 +523,13 @@ export default function GamePage() {
  sessionRef.current.replaysUsed++
  playSequence([0,1,2,3,4,5,6,7], () => {
  setLitNote(null)
- setTimeout(() => playSequenceHidden(mystery), 600)
+ setTimeout(() => playSequenceHidden(mystery, () => {
+  if (isHomeworkSession) {
+   setNameItPhase(true)
+   setNameItAnswer(null)
+   setNameItCorrect(null)
+  }
+ }), 600)
  })
  }
 
@@ -528,7 +539,13 @@ export default function GamePage() {
  setFindReplays(r => r - 1)
  sessionRef.current.replaysUsed++
  // Hidden no lighting
- playSequenceHidden(mystery)
+ playSequenceHidden(mystery, () => {
+  if (isHomeworkSession) {
+   setNameItPhase(true)
+   setNameItAnswer(null)
+   setNameItCorrect(null)
+  }
+ })
  }
 
  const showToastMsg = (msg, color, bg, border) => {
@@ -562,6 +579,7 @@ export default function GamePage() {
  const pressKey = useCallback((noteIdx, keyPos, scaleNote) => {
  if (isPlaying) return
  if (isEvaluating) return
+ if (isHomeworkSession && nameItPhase) return
  if (mode === 'game' && lives <= 0) return
  if (!audioCtx || audioCtx.state === 'suspended') {
  audioCtx = new (window.AudioContext || window.webkitAudioContext)()
@@ -644,11 +662,12 @@ export default function GamePage() {
  setIsEvaluating(false)
  const seq = generateMystery(noteCount, mystery)
  setMystery(seq)
+ setTargetNoteNumber(seq[0] + 1)
  setScaleReplays(getMaxScaleReplays(level))
  setFindReplays(getMaxFindReplays())
  }, 1600)
  }
- }, [answers, isPlaying, isEvaluating, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp])
+ }, [answers, isPlaying, isEvaluating, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp, nameItPhase])
 
  const resetGame = () => {
  setLevel(1)
@@ -664,6 +683,43 @@ export default function GamePage() {
  setIsEvaluating(false)
  const seq = generateMystery(1, mystery)
  setMystery(seq)
+ setTargetNoteNumber(seq[0] + 1)
+ }
+
+ const handleNameItAnswer = (num) => {
+  if (nameItAnswer !== null) return
+  const correct = num === targetNoteNumber
+  setNameItAnswer(num)
+  setNameItCorrect(correct)
+
+  if (urlConcept) {
+   const prev = getState(urlConcept) || {}
+   const newState = {
+    ...prev,
+    attempts: (prev.attempts || 0) + 1,
+    confidence: correct
+     ? Math.min(1, (prev.confidence || 0) + 0.05)
+     : Math.max(0, (prev.confidence || 0) - 0.02),
+    mistake_history: correct ? prev.mistake_history : {
+     ...(prev.mistake_history || {}),
+     number_mapping: ((prev.mistake_history || {}).number_mapping || 0) + 1
+    }
+   }
+   setState(urlConcept, newState)
+  }
+
+  const sessionLog = JSON.parse(
+   localStorage.getItem('som_name_it_log') || '[]'
+  )
+  sessionLog.push({
+   concept_id: urlConcept,
+   assignment_id: urlAssignmentId,
+   target_note_number: targetNoteNumber,
+   number_response: num,
+   number_correct: correct,
+   timestamp: new Date().toISOString()
+  })
+  localStorage.setItem('som_name_it_log', JSON.stringify(sessionLog))
  }
 
  const streakStyle = getStreakStyle(streak)
@@ -802,6 +858,86 @@ export default function GamePage() {
  ♪ Find Note {!isHomeworkSession && <span>({findReplays})</span>}
  </button>
  </div>
+
+ {isHomeworkSession && nameItPhase && (
+  <div style={{
+   background:'rgba(255,255,255,.05)',
+   border:'1px solid rgba(255,255,255,.1)',
+   borderRadius:16,
+   padding:'20px 16px',
+   margin:'12px 0',
+   textAlign:'center'
+  }}>
+   <div style={{
+    fontSize:12,
+    color:'rgba(255,255,255,.4)',
+    letterSpacing:'.1em',
+    textTransform:'uppercase',
+    marginBottom:8
+   }}>Name It</div>
+   <div style={{
+    fontSize:16,
+    fontWeight:600,
+    color:'#fff',
+    marginBottom:16,
+    fontFamily:'DM Sans,sans-serif'
+   }}>Name the sound before you play it.</div>
+   <div style={{
+    display:'grid',
+    gridTemplateColumns:'repeat(4,1fr)',
+    gap:8,
+    maxWidth:320,
+    margin:'0 auto 12px'
+   }}>
+    {[1,2,3,4,5,6,7,8].map(num => (
+     <button
+      key={num}
+      onClick={() => handleNameItAnswer(num)}
+      style={{
+       padding:'14px 8px',
+       borderRadius:12,
+       border: nameItAnswer === num
+        ? (nameItCorrect ? '2px solid #10b981' : '2px solid #ef4444')
+        : '1px solid rgba(255,255,255,.15)',
+       background: nameItAnswer === num
+        ? (nameItCorrect ? 'rgba(16,185,129,.15)' : 'rgba(239,68,68,.1)')
+        : 'rgba(255,255,255,.07)',
+       color: nameItAnswer === num
+        ? (nameItCorrect ? '#10b981' : '#ef4444')
+        : '#fff',
+       fontSize:18,
+       fontWeight:800,
+       cursor:'pointer',
+       fontFamily:'Outfit,sans-serif'
+      }}
+     >{num}</button>
+    ))}
+   </div>
+   {nameItAnswer && !nameItCorrect && (
+    <div style={{fontSize:12,color:'rgba(239,68,68,.8)',marginBottom:8}}>
+     Your ear is close. The number was {targetNoteNumber}. Now play it.
+    </div>
+   )}
+   {nameItAnswer && (
+    <button
+     onClick={() => setNameItPhase(false)}
+     style={{
+      background:'linear-gradient(135deg,#d946ef,#a855f7)',
+      border:'none',
+      borderRadius:10,
+      padding:'10px 24px',
+      color:'#fff',
+      fontSize:13,
+      fontWeight:700,
+      cursor:'pointer',
+      fontFamily:'DM Sans,sans-serif'
+     }}
+    >
+     {nameItCorrect ? 'Now play it →' : 'Got it — play it →'}
+    </button>
+   )}
+  </div>
+ )}
 
  {/* Mode toggle */}
  <div className="gp-mode-row">
