@@ -412,19 +412,63 @@ Body:            DM Sans, regular
 
 > Update this section at the end of every productive session.
 
-### 2026-04-24 — Practice Live Views 1 & 2 (Cockpit + Concept)
-**Changes:**
-- Created `src/components/PracticeSessionCockpit.jsx` — View 1 of Practice Live. Full-screen session intro with animated energy rings, concept mastery progress bar (Find It / Play It / Own It stages), last session recap, assignments card, Motesart suggestion bubble, and Begin Session button.
-- Created `src/components/PracticeConceptView.jsx` — View 2 of Practice Live. Concept teaching screen with 8-key piano, animated SVG arrow overlay between highlighted keys, phase flow dots (Teach → Guide → Confirm → Release), Motesart speech card (72px avatar, speaking bars, Replay button), answer option grid, BPM control, home key toggle, and stats footer.
-- Wired both views into `src/pages/WYLPracticeLive.jsx` — surgical edits only: added two imports, one `practiceView` state variable, and two conditional returns (`'cockpit'` → `'concept'`) before the existing lesson engine. Lesson engine, TTS, and speech recognition untouched.
-- Layout polish: PracticeConceptView widened to 640px max-width, speech card restructured with avatar left + text right + speak bars/Replay in border-top row, responsive breakpoint at 520px.
+### 2026-04-24 — Practice Live Full Deploy + Academic Homework Mode End-to-End
 
-**Files Modified:**
-- `src/components/PracticeSessionCockpit.jsx` (new)
-- `src/components/PracticeConceptView.jsx` (new)
-- `src/pages/WYLPracticeLive.jsx` (surgical wire-in)
+**Session scope:** Two back-to-back work blocks. Block 1 deployed the Practice Live view layer (Cockpit + Concept + config). Block 2 wired homework → game → practice-live and built Academic Mode top to bottom.
 
-**Result:** Both views live at `/practice-live`. Flow: Cockpit → Concept → existing lesson engine. No regressions — lesson engine, TAMi, TTS, and all locked features untouched.
+---
+
+#### Commit 1 — `2023f8d` feat: add Practice Live Session Cockpit view
+**What it did:** Created `src/components/PracticeSessionCockpit.jsx` (View 1 of Practice Live). Full-screen session intro: animated energy rings, concept mastery progress bar with Find It / Play It / Own It stage labels, last session recap card, assignments due card, Motesart suggestion bubble, and Begin Session button that transitions to View 2.
+
+---
+
+#### Commit 2 — `295a135` feat: add Practice Live Concept View (View 2)
+**What it did:** Created `src/components/PracticeConceptView.jsx`. 8-key piano with animated SVG arrow overlay between highlighted keys, phase flow dots (Teach → Guide → Confirm → Release), Motesart speech card (72px avatar, speaking bars, Replay button wired to TTS), answer option grid, BPM control, home key toggle, and session stats footer. Wired into `WYLPracticeLive.jsx` via `practiceView` state variable — lesson engine, TTS, and speech recognition left untouched.
+
+---
+
+#### Commit 3 — `15fb5c5` feat: wire concept view config — T_HALF_STEP dynamic props
+**What it did:** Created `src/config/conceptViewConfig.js` — centralized config object for concept-driven props (piano keys, arrow overlays, answer options, BPM range, label text) keyed by concept ID. Wired into `PracticeConceptView.jsx` and `WYLPracticeLive.jsx` so all concept-specific behavior is data-driven, not hardcoded. Added `speakText` helper to `src/services/api.js` for TTS proxy calls from the Replay button.
+
+---
+
+#### Commit 4 — `a77754e` feat: game reads URL params, homework routes by type, unify start practice
+**What it did:**
+- `GamePage.jsx`: Added `useSearchParams` to read `?mode=`, `?concept=`, `?assignment_id=` on mount. Initialized `mode` state from URL (`academic` vs `game`). Added `isHomeworkSession` flag (`!!(urlAssignmentId && urlMode === 'academic')`). Mode toggle button disabled when `isHomeworkSession` is true with "Academic Mode — assigned by teacher" subtext. Added `completeAssignment` placeholder and `conceptDisplayName` formatter.
+- `HomeworkDashboard.jsx`: Added `useNavigate`. Added Launch button to each assignment card — routes to `/game?mode=academic&concept=T_HALF_STEP&assignment_id={id}` for Quiz type, `/practice-live?concept=T_HALF_STEP&assignment_id={id}` for Homework type.
+- `StudentDashboard.jsx`: Unified Start Practice — Sidebar Quick Links `navigate('/practice')` changed to `navigate('/practice-live')`.
+
+---
+
+#### Commit 5 — `cdf823a` feat: academic mode UI and assignment completion signal
+**What it did:**
+- `GamePage.jsx`: Added purple academic banner above action buttons (`rgba(217,70,239,.1)` background, `#d946ef` text, "Academic Session — {conceptDisplayName}" header + "Assigned by your teacher" subtext).
+- Leaderboard submit guarded: `if (!isHomeworkSession) { await fetch(…/leaderboard/submit) }` — free-play still submits, homework never does.
+- On academic session end: calls `completeAssignment(urlAssignmentId)` and updates `concept_state_store.js` with `getState`/`setState` — increments `attempts`, blends `confidence` score, sets `last_session_date` and `ownership_state`.
+- Game Over modal: title changes to "Assignment Complete!" for homework sessions, subtitle shows concept name, leaderboard points block hidden.
+
+---
+
+#### Commit 6 — `43a67b5` design: remove DPM card, green ABC toggle, hide replay counts in academic mode
+**What it did:**
+- `GamePage.jsx`: Removed DPM tracking card entirely (`{mode==='academic' && <div className="gp-dpm-bar">…</div>}` block deleted).
+- ABC/# notation toggle restyled to pill buttons: active state = `#10b981` green solid fill + white text + no border; inactive state = `rgba(255,255,255,.06)` fill + `rgba(255,255,255,.4)` dimmed text + faint border. Replaces the previous flat unstyled toggle.
+- Replay counts (scale replays, find-note replays) wrapped in `{!isHomeworkSession && <span>({count})</span>}` — counts visible in game mode, hidden in academic mode.
+
+---
+
+**All files modified this session:**
+- `src/components/PracticeSessionCockpit.jsx` (created)
+- `src/components/PracticeConceptView.jsx` (created)
+- `src/config/conceptViewConfig.js` (created)
+- `src/pages/WYLPracticeLive.jsx` (surgical wire-in: imports + practiceView state + two conditional returns)
+- `src/pages/GamePage.jsx` (URL params + isHomeworkSession flag + academic mode UI + leaderboard guard + concept state update + modal + DPM removal + toggle restyle + replay count gates)
+- `src/pages/HomeworkDashboard.jsx` (useNavigate + Launch button with type-based routing)
+- `src/pages/StudentDashboard.jsx` (Start Practice route unified to /practice-live)
+- `src/services/api.js` (speakText TTS helper added)
+
+**Result:** Practice Live fully deployed (Cockpit → Concept → lesson engine). Game is context-aware via URL params. Homework routing connected end-to-end. Academic Mode locked top to bottom — leaderboard blocked, DPM removed, mode toggle disabled, completion signal fires, concept state updated on finish.
 
 ---
 
