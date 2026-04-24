@@ -490,6 +490,7 @@ const S = {
   stepNav: {
     display: 'flex', gap: 6, marginBottom: 24,
     flexWrap: 'wrap', justifyContent: 'center',
+    width: '100%', maxWidth: 680,
   },
   stepPill: {
     fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -514,8 +515,8 @@ const S = {
     background: COLORS.cardBg,
     border: `1px solid ${COLORS.cardBorder}`,
     borderRadius: 20,
-    padding: '24px 24px 20px',
-    width: '100%', maxWidth: 420,
+    padding: '40px 48px',
+    width: '100%', maxWidth: 680,
     backdropFilter: 'blur(20px)',
     boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
     display: 'flex', flexDirection: 'column', alignItems: 'center',
