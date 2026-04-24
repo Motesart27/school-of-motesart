@@ -23,7 +23,7 @@ const css = `
 const ROLES = [
   { icon: '🎹', name: 'Student',    desc: 'Learn & practice music' },
   { icon: '👨‍👩‍👧', name: 'Parent',     desc: 'Monitor your child' },
-  { icon: '👩‍🏫', name: 'Teacher',    desc: 'Manage students' },
+  { icon: null, name: 'Teacher', desc: 'Manage students', img: '/Motesart Avatar 1.PNG' },
   { icon: '⭐',  name: 'Ambassador', desc: 'Grow the community' },
 ]
 
@@ -278,7 +278,10 @@ export default function RegistrationPage() {
                     ...(role === r.name ? S.roleCardSel : {}),
                   }}
                 >
-                  <div style={{ fontSize: 26, marginBottom: 6 }}>{r.icon}</div>
+                  {r.img
+                    ? <img src={r.img} alt={r.name} style={{ width: 40, height: 40, objectFit: 'contain', marginBottom: 6, borderRadius: 8 }} />
+                    : <div style={{ fontSize: 26, marginBottom: 6 }}>{r.icon}</div>
+                  }
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.name}</div>
                   <div style={{ fontSize: 10, color: COLORS.textSecondary, marginTop: 2 }}>{r.desc}</div>
                 </div>
