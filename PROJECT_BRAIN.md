@@ -412,6 +412,22 @@ Body:            DM Sans, regular
 
 > Update this section at the end of every productive session.
 
+### 2026-04-24 — Practice Live Views 1 & 2 (Cockpit + Concept)
+**Changes:**
+- Created `src/components/PracticeSessionCockpit.jsx` — View 1 of Practice Live. Full-screen session intro with animated energy rings, concept mastery progress bar (Find It / Play It / Own It stages), last session recap, assignments card, Motesart suggestion bubble, and Begin Session button.
+- Created `src/components/PracticeConceptView.jsx` — View 2 of Practice Live. Concept teaching screen with 8-key piano, animated SVG arrow overlay between highlighted keys, phase flow dots (Teach → Guide → Confirm → Release), Motesart speech card (72px avatar, speaking bars, Replay button), answer option grid, BPM control, home key toggle, and stats footer.
+- Wired both views into `src/pages/WYLPracticeLive.jsx` — surgical edits only: added two imports, one `practiceView` state variable, and two conditional returns (`'cockpit'` → `'concept'`) before the existing lesson engine. Lesson engine, TTS, and speech recognition untouched.
+- Layout polish: PracticeConceptView widened to 640px max-width, speech card restructured with avatar left + text right + speak bars/Replay in border-top row, responsive breakpoint at 520px.
+
+**Files Modified:**
+- `src/components/PracticeSessionCockpit.jsx` (new)
+- `src/components/PracticeConceptView.jsx` (new)
+- `src/pages/WYLPracticeLive.jsx` (surgical wire-in)
+
+**Result:** Both views live at `/practice-live`. Flow: Cockpit → Concept → existing lesson engine. No regressions — lesson engine, TAMi, TTS, and all locked features untouched.
+
+---
+
 ### 2026-03-11 — TAMi Page Awareness + Pronunciation Fix
 **Changes:**
 - Added `currentPage` and `userRole` params to `api.js` (chatWithTami, chatWithTamiVoice)
