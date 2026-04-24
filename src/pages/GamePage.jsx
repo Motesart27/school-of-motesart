@@ -251,7 +251,7 @@ const css = `
 .gp-note-lbl-lit{color:#60a5fa}
 .gp-staff-hint{font-size:10px;color:#475569;text-align:center;padding-top:4px}
 .gp-title h1{font-size:24px;font-weight:700;font-family:Georgia,serif;background:linear-gradient(135deg,#e2e8f0,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.gp-info{width:28px;height:28px;border-radius:50%;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:#60a5fa;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:700}
+.gp-info{width:28px;height:28px;border-radius:50%;background:rgba(59,130,246,.2);border:1px solid rgba(59,130,246,.4);color:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:700;font-style:italic}
 .gp-action-row{display:flex;gap:8px;width:100%;max-width:384px}
 .gp-abtn{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:.2s}
 .gp-abtn:hover{transform:scale(.98)}
@@ -304,6 +304,9 @@ const css = `
 .gp-levelup-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(251,191,36,.05),rgba(168,85,247,.05));pointer-events:none}
 .gp-confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;pointer-events:none;z-index:300}
 @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.gp-academic-tag{background:rgba(217,70,239,.12);border:1px solid rgba(217,70,239,.3);border-radius:8px;padding:3px 8px;display:flex;flex-direction:column}
+.gp-at-title{font-size:10px;font-weight:700;color:#d946ef}
+.gp-at-concept{font-size:9px;color:rgba(217,70,239,.5)}
 `
 
 // CONFETTI COMPONENT 
@@ -787,7 +790,13 @@ export default function GamePage() {
   <div style={{width:32,height:32,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#a855f7)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:900,color:'#fff',flexShrink:0}}>
    {(storedUser.name||'S')[0].toUpperCase()}
   </div>
-  <div className="gp-pill-pts">{sessionPoints + (s.correct * 100)} pts</div>
+  {isHomeworkSession
+   ? <div className="gp-academic-tag">
+      <span className="gp-at-title">Academic</span>
+      <span className="gp-at-concept">{conceptDisplayName}</span>
+     </div>
+   : <div className="gp-pill-pts">{sessionPoints + (s.correct * 100)} pts</div>
+  }
  </div>
  {mode === 'game'
  ? <div className="gp-lives">{Array.from({length:3}, (_,i) => i < lives ? '¤¸' : '¤')}</div>
@@ -851,19 +860,13 @@ export default function GamePage() {
  <div className="gp-title" style={{textAlign:'center'}}>
  <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
  <h1>Find the Note</h1>
- <button className="gp-info" onClick={()=>setShowHtp(true)}></button>
+ <button className="gp-info" onClick={()=>setShowHtp(true)}>i</button>
  </div>
  <div style={{fontSize:13,color:'#64748b',marginTop:4}}>
  Level {level} · {octaveLabel} · {noteCount} {noteCount===1?'note':'notes'}
  </div>
  </div>
 
- {isHomeworkSession && (
- <div style={{background:'rgba(217,70,239,.1)',border:'1px solid rgba(217,70,239,.25)',borderRadius:10,padding:'8px 16px',fontSize:12,color:'#d946ef',textAlign:'center',marginBottom:12}}>
- <div style={{fontWeight:700}}>Academic Session — {conceptDisplayName}</div>
- <div style={{marginTop:2,opacity:.8}}>Assigned by your teacher</div>
- </div>
- )}
  {/* Action buttons */}
  <div className="gp-action-row">
  <button className={`gp-abtn gp-abtn-scale ${scaleReplays<=0?'depleted':''}`}
