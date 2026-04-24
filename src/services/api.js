@@ -59,7 +59,6 @@ export const api = {
   login: (email, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
 
-  // Accepts a single data object: { name, email, password, role, avatar, wyl, instrument, genre, song, experience }
   register: (data) =>
     request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
 
@@ -77,15 +76,12 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify(wylData),
     }),
+
   updateWYLFromBehavior: (userId, eventType, data) =>
     request(`/students/${userId}/wyl/update-from-behavior`, {
       method: 'POST',
-      body: JSON.stringify({
-        event_type: eventType,
-        ...data,
-      }),
+      body: JSON.stringify({ event_type: eventType, ...data }),
     }),
-
 
   // ─── Students ───────────────────────────────────────────────
   getStudents: () => request('/students'),
@@ -165,22 +161,44 @@ export const api = {
     request(`/tami/history/${encodeURIComponent(userId)}`, { method: 'DELETE' }).catch(() => {})
   },
 
+  // ─── TTS ─────────────────────────────────────────────────────
   speakText: async (text, voiceType = 'coach') => {
-    const ttsUrl = import.meta.env.VITE_RAILWAY_URL
-      ? `${import.meta.env.VITE_RAILWAY_URL}/api/tts/speak`
+    const railwayUrl = import.meta.env.VITE_RAILWAY_URL
+    const ttsUrl = railwayUrl
+      ? `${railwayUrl}/api/tts/speak`
       : '/api/tts/speak'
-    const res = await fetch(ttsUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice: voiceType }),
-    })
-    if (!res.ok) throw new Error('TTS failed')
+
+    console.log('[TTS] Calling:', ttsUrl, '| text:', text.substring(0, 60))
+
+    let res
+    try {
+      res = await fetch(ttsUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voice: voiceType }),
+      })
+    } catch (networkErr) {
+      console.warn('[TTS] Network error — Railway may be sleeping:', networkErr.message)
+      throw networkErr
+    }
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      console.warn(`[TTS] Failed — status ${res.status} | url: ${ttsUrl} | body: ${body.substring(0, 200)}`)
+      throw new Error(`TTS failed: ${res.status}`)
+    }
+
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
     const audio = new Audio(url)
     audio.play()
     return new Promise(resolve => {
       audio.onended = () => {
+        URL.revokeObjectURL(url)
+        resolve()
+      }
+      audio.onerror = (e) => {
+        console.warn('[TTS] Audio playback error:', e)
         URL.revokeObjectURL(url)
         resolve()
       }
