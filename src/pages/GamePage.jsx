@@ -474,6 +474,7 @@ export default function GamePage() {
  useEffect(() => {
  const seq = generateMystery(noteCount, mystery)
  setMystery(seq)
+ currentMysteryRef.current = seq
  setTargetNoteNumber(seq[0] + 1)
  setScaleReplays(getMaxScaleReplays(level))
  setFindReplays(getMaxFindReplays())
@@ -738,6 +739,8 @@ export default function GamePage() {
    setTimeout(() => doLevelUp(level), 400)
   } else if (!correct) {
    pendingLevelUpRef.current = false
+   setLevelProgress(0)
+   setAnswers([])
    setTimeout(() => setNameItPhase(false), 1200)
   }
  }
@@ -1033,7 +1036,7 @@ export default function GamePage() {
    </div>
    {nameItAnswer && !nameItCorrect && (
     <div style={{fontSize:12,color:'rgba(239,68,68,.8)',marginBottom:8}}>
-     Your ear is close. The number was {targetNoteNumber}. Now play it.
+     Your ear is close. The number was {currentMysteryRef.current[0] + 1}. Now play it.
     </div>
    )}
    {nameItAnswer && (
