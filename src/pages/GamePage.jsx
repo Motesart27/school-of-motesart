@@ -1,6 +1,7 @@
+// GAME / DIAGNOSTIC LAYER — /game
 import { useState, useCallback, useRef, useEffect } from 'react'
 import useIsMobile from '../hooks/useIsMobile.js'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { updateWYLFromBehavior } from "../services/wylEvolution.js"
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
@@ -335,6 +336,11 @@ function Confetti() {
 export default function GamePage() {
  const mob = useIsMobile()
  const navigate = useNavigate()
+ const [searchParams] = useSearchParams()
+ const urlMode = searchParams.get('mode')
+ const urlConcept = searchParams.get('concept')
+ const urlAssignmentId = searchParams.get('assignment_id')
+ const isHomeworkSession = !!(urlAssignmentId && urlMode === 'academic')
  const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 
  // Level lives in state so UI updates when it changes
@@ -356,7 +362,8 @@ export default function GamePage() {
  const [scaleReplays, setScaleReplays] = useState(2)
  const [findReplays, setFindReplays] = useState(2)
  const [mystery, setMystery] = useState([])
- const [mode, setMode] = useState('game')
+ const [mode, setMode] = useState(urlMode === 'academic' ? 'academic' : 'game')
+ const [assignmentId] = useState(urlAssignmentId || null)
  const [labelMode, setLabelMode] = useState('abc')
  const [isPlaying, setIsPlaying] = useState(false)
  const [isEvaluating, setIsEvaluating] = useState(false)
@@ -774,8 +781,13 @@ export default function GamePage() {
  {/* Mode toggle */}
  <div className="gp-mode-row">
  <button className={`gp-mbtn ${mode==='academic'?'gp-mbtn-academic':'gp-mbtn-off'}`} onClick={()=>setMode('academic')}> Academic</button>
- <button className={`gp-mbtn ${mode==='game'?'gp-mbtn-game':'gp-mbtn-off'}`} onClick={()=>setMode('game')}>® Game</button>
+ <button className={`gp-mbtn ${mode==='game'?'gp-mbtn-game':'gp-mbtn-off'}`} onClick={()=>!isHomeworkSession&&setMode('game')} disabled={isHomeworkSession}>® Game</button>
  </div>
+ {isHomeworkSession && (
+ <div style={{fontSize:11,color:'rgba(255,255,255,.4)',textAlign:'center',marginTop:4}}>
+   Academic Mode — assigned by teacher
+ </div>
+ )}
  {/* Label toggle: ABC / # */}
  <div style={{display:'flex',justifyContent:'center',width:'100%'}}>
  <div style={{display:'flex',gap:0,background:'rgba(30,41,59,.9)',border:'2px solid rgba(100,116,139,.4)',borderRadius:10,padding:3}}>

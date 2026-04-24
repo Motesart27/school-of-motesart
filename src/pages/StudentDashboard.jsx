@@ -65,14 +65,19 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(135deg,#111827,#111827,#1f2937)', color: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%)', color: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
 
       {/* ===== LEFT SIDEBAR ===== */}
-      <div style={{ width: isCollapsed ? 50 : 220, minWidth: isCollapsed ? 50 : 220, background: 'rgba(17,24,39,0.95)', borderRight: '1px solid rgba(55,65,81,0.5)', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', transition: 'width 0.25s ease, min-width 0.25s ease' }}>
+      <div style={{ width: isCollapsed ? 50 : 220, minWidth: isCollapsed ? 50 : 220, background: 'rgba(15,12,41,0.95)', borderRight: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', transition: 'width 0.25s ease, min-width 0.25s ease' }}>
 
         {/* Sidebar Header + Toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', padding: isCollapsed ? '12px 0' : '12px 16px', borderBottom: '1px solid rgba(55,65,81,0.3)' }}>
-          <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700, color: '#14b8a6', opacity: isCollapsed ? 0 : 1, width: isCollapsed ? 0 : 'auto', overflow: 'hidden', whiteSpace: 'nowrap', transition: 'opacity 0.2s ease, width 0.2s ease' }}>School of Motesart</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', padding: isCollapsed ? '12px 0' : '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', opacity: isCollapsed ? 0 : 1, width: isCollapsed ? 0 : 'auto', transition: 'opacity 0.2s ease, width 0.2s ease' }}>
+            <div style={{ width: 22, height: 22, borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.15)', flexShrink: 0 }}>
+              <img src="/Motesart Avatar 1.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+            </div>
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700, color: '#14b8a6', whiteSpace: 'nowrap' }}>School of Motesart</span>
+          </div>
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             style={{
@@ -88,11 +93,11 @@ export default function StudentDashboard() {
 
         {/* Identity Strip */}
         {isCollapsed ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0 10px', borderBottom: '1px solid rgba(55,65,81,0.3)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '14px 0 10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', border: '1.5px solid #14b8a6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#14b8a6', background: 'rgba(20,184,166,0.08)' }}>{initials}</div>
           </div>
         ) : (
-          <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(55,65,81,0.3)' }}>
+          <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 16, fontWeight: 600, color: '#fff' }}>{userName}</div>
             <div style={{ fontSize: 12, fontWeight: 500, color: '#14b8a6', marginTop: 2 }}>Student</div>
             
@@ -134,13 +139,13 @@ export default function StudentDashboard() {
           </nav>
 
           {/* Divider */}
-          <div style={{ margin: '8px 16px', borderTop: '1px solid rgba(55,65,81,0.4)' }} />
+          <div style={{ margin: '8px 16px', borderTop: '1px solid rgba(255,255,255,0.06)' }} />
 
           {/* Quick Links */}
           <div style={{ padding: '8px 16px' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>QUICK LINKS</div>
             <button
-              onClick={() => navigate('/practice')}
+              onClick={() => navigate('/practice-live')}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
                 background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.25)',
@@ -199,32 +204,34 @@ export default function StudentDashboard() {
         {/* Top Bar */}
         <div style={{
           padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(55,65,81,0.5)', position: 'sticky', top: 0,
-          background: 'rgba(17,24,39,0.95)', backdropFilter: 'blur(12px)', zIndex: 10,
+          borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0,
+          background: 'rgba(15,12,41,0.92)', backdropFilter: 'blur(12px)', zIndex: 10,
         }}>
           <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 15, fontWeight: 600 }}>
             {greeting}, {userName}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {/* Academic/Game Toggle */}
-            <div style={{ display: 'flex', background: '#1f2937', borderRadius: 8, padding: 2 }}>
+            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.07)', borderRadius: 8, padding: 2, border: '1px solid rgba(255,255,255,0.1)' }}>
               <button onClick={() => setMode('academic')} style={{
                 padding: '6px 14px', fontSize: 11, fontWeight: 600, border: 'none', borderRadius: 6,
                 cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-                color: mode === 'academic' ? '#fff' : '#9ca3af',
+                color: mode === 'academic' ? '#fff' : 'rgba(255,255,255,0.45)',
                 background: mode === 'academic' ? '#14b8a6' : 'transparent',
               }}>Academic</button>
               <button onClick={() => setMode('game')} style={{
                 padding: '6px 14px', fontSize: 11, fontWeight: 600, border: 'none', borderRadius: 6,
                 cursor: 'pointer', fontFamily: "'DM Sans', sans-serif",
-                color: mode === 'game' ? '#fff' : '#9ca3af',
+                color: mode === 'game' ? '#fff' : 'rgba(255,255,255,0.45)',
                 background: mode === 'game' ? '#14b8a6' : 'transparent',
               }}>Game</button>
             </div>
             {/* Notification Bell */}
-            <div style={{ position: 'relative', cursor: 'pointer', fontSize: 18, padding: 4 }}>
-              🔔
-              <div style={{ position: 'absolute', top: 2, right: 2, width: 7, height: 7, borderRadius: '50%', background: '#ef4444', border: '1.5px solid #111827' }} />
+            <div style={{ position: 'relative', cursor: 'pointer', padding: 4, color: 'rgba(255,255,255,0.6)' }}>
+              <svg width={20} height={20} fill='none' stroke='currentColor' strokeWidth={1.5} strokeLinecap='round' strokeLinejoin='round' viewBox='0 0 24 24'>
+                <path d='M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' />
+              </svg>
+              <div style={{ position: 'absolute', top: 2, right: 2, width: 7, height: 7, borderRadius: '50%', background: '#ef4444', border: '1.5px solid rgba(15,12,41,1)' }} />
             </div>
           </div>
         </div>
@@ -244,8 +251,8 @@ export default function StudentDashboard() {
           {/* Chat Panel */}
           {showTamiChat && (
             <div style={{
-              width: 320, height: 420, background: 'rgba(17,24,39,0.98)',
-              border: '1px solid rgba(55,65,81,0.6)', borderRadius: 16, marginBottom: 10,
+              width: 320, height: 420, background: 'rgba(15,12,41,0.98)',
+              border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, marginBottom: 10,
               display: 'flex', flexDirection: 'column', overflow: 'hidden',
               boxShadow: '0 8px 32px rgba(0,0,0,0.5)', backdropFilter: 'blur(16px)',
             }}>
@@ -268,19 +275,19 @@ export default function StudentDashboard() {
               <div style={{ flex: 1, padding: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 9, fontWeight: 600, color: '#e84b8a', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>T.A.M.i</div>
-                  <div style={{ background: 'rgba(55,65,81,0.5)', borderRadius: '12px 12px 12px 4px', padding: '10px 14px', maxWidth: '85%', fontSize: 12, lineHeight: 1.5, color: 'rgba(255,255,255,0.85)' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '12px 12px 12px 4px', padding: '10px 14px', maxWidth: '85%', fontSize: 12, lineHeight: 1.5, color: 'rgba(255,255,255,0.85)' }}>
                     Hey {userName}! 👋 Welcome back to Motes-Art! Ready to make some music magic today?
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
-                  <button style={{ padding: '6px 12px', borderRadius: 16, fontSize: 11, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(55,65,81,0.6)', background: 'rgba(31,41,55,0.6)', color: '#9ca3af', fontFamily: "'DM Sans', sans-serif" }}>How am I doing?</button>
-                  <button style={{ padding: '6px 12px', borderRadius: 16, fontSize: 11, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(55,65,81,0.6)', background: 'rgba(31,41,55,0.6)', color: '#9ca3af', fontFamily: "'DM Sans', sans-serif" }}>Help me understand my dashboard</button>
+                  <button style={{ padding: '6px 12px', borderRadius: 16, fontSize: 11, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Sans', sans-serif" }}>How am I doing?</button>
+                  <button style={{ padding: '6px 12px', borderRadius: 16, fontSize: 11, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.45)', fontFamily: "'DM Sans', sans-serif" }}>Help me understand my dashboard</button>
                 </div>
               </div>
 
               {/* Input */}
-              <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(55,65,81,0.5)', display: 'flex', gap: 8, alignItems: 'center' }}>
-                <input type="text" placeholder="Ask T.A.M.i anything..." style={{ flex: 1, padding: '8px 14px', borderRadius: 20, fontSize: 12, background: 'rgba(31,41,55,0.8)', border: '1px solid rgba(55,65,81,0.5)', color: '#fff', fontFamily: "'DM Sans', sans-serif", outline: 'none' }} />
+              <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: 8, alignItems: 'center' }}>
+                <input type="text" placeholder="Ask T.A.M.i anything..." style={{ flex: 1, padding: '8px 14px', borderRadius: 20, fontSize: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontFamily: "'DM Sans', sans-serif", outline: 'none' }} />
                 <button onClick={() => navigate('/tami')} style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg,#e84b8a,#f97316)', border: 'none', color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>↑</button>
               </div>
             </div>
@@ -299,7 +306,7 @@ export default function StudentDashboard() {
             >
               <img src="/tami-avatar.png" alt="T.A.M.i" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
             </div>
-            <div style={{ position: 'absolute', bottom: 2, right: 2, width: 10, height: 10, borderRadius: '50%', background: '#22c55e', border: '2px solid #111827', boxShadow: '0 0 6px rgba(34,197,94,0.4)' }} />
+            <div style={{ position: 'absolute', bottom: 2, right: 2, width: 10, height: 10, borderRadius: '50%', background: '#22c55e', border: '2px solid rgba(15,12,41,1)', boxShadow: '0 0 6px rgba(34,197,94,0.4)' }} />
           </div>
         </div>
 
@@ -370,7 +377,7 @@ function HomeDashboard({ navigate, userName }) {
           onClick={() => navigate('/practice-live')}
           style={{
             display: 'inline-block', marginTop: 12, padding: '8px 20px',
-            background: 'linear-gradient(135deg,#0d9488,#14b8a6)', color: '#fff', border: 'none',
+            background: 'linear-gradient(135deg,#d946ef,#a855f7)', color: '#fff', border: 'none',
             borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
             fontFamily: "'DM Sans', sans-serif", boxShadow: '0 2px 8px rgba(20,184,166,0.3)',
           }}
@@ -385,12 +392,12 @@ function HomeDashboard({ navigate, userName }) {
           { label: 'Day Streak', value: '5', sub: 'personal best: 12', color: '#14b8a6' },
         ].map(stat => (
           <div key={stat.label} style={{
-            background: 'rgba(31,41,55,0.7)', border: '1px solid rgba(55,65,81,0.5)',
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 12, padding: 14, textAlign: 'center',
           }}>
-            <div style={{ fontSize: 10, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: 0.5 }}>{stat.label}</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{stat.label}</div>
             <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 700, color: stat.color || '#fff', marginTop: 4 }}>{stat.value}</div>
-            <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{stat.sub}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{stat.sub}</div>
           </div>
         ))}
       </div>
@@ -415,7 +422,7 @@ function HomeDashboard({ navigate, userName }) {
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px rgba(34,197,94,.4)', display: 'inline-block' }} />
             <span style={{ color: '#4ade80', fontSize: 10, fontWeight: 600 }}>Active</span>
           </div>
-          <div style={{ color: '#9ca3af', fontSize: 11, marginTop: 2 }}>Piano | Voice | Ear Training</div>
+          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: 11, marginTop: 2 }}>Piano | Voice | Ear Training</div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
           <button
@@ -438,17 +445,17 @@ function HomeDashboard({ navigate, userName }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14, alignItems: 'stretch' }}>
 
         {/* Left: Today's Practice Goal */}
-        <div style={{ background: 'rgba(31,41,55,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(55,65,81,0.5)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(55,65,81,0.5)' }}>
+        <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Today's Practice Goal</span>
             <span style={{ fontSize: 11, color: '#14b8a6', cursor: 'pointer', fontWeight: 500 }}>Edit</span>
           </div>
           <div style={{ padding: 16, flex: 1 }}>
             <div style={{ marginBottom: 12 }}>
               <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 700, color: '#fff' }}>12</span>
-              <span style={{ fontSize: 13, color: '#9ca3af', marginLeft: 4 }}>of 30 min</span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginLeft: 4 }}>of 30 min</span>
             </div>
-            <div style={{ width: '100%', height: 10, background: 'rgba(55,65,81,0.5)', borderRadius: 6, overflow: 'hidden' }}>
+            <div style={{ width: '100%', height: 10, background: 'rgba(255,255,255,0.12)', borderRadius: 6, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: '40%', background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 6 }} />
             </div>
             <div style={{ marginTop: 8, fontSize: 12, color: '#5DCAA5' }}>Just 18 more minutes!</div>
@@ -462,7 +469,7 @@ function HomeDashboard({ navigate, userName }) {
                     background: dayOpacity[i] > 0 ? '#14b8a6' : 'rgba(255,255,255,0.07)',
                     opacity: dayOpacity[i] || (i >= dayIndex ? 1 : 0.3),
                   }} />
-                  <span style={{ fontSize: 10, color: i === dayIndex ? '#14b8a6' : '#6b7280', fontWeight: i === dayIndex ? 600 : 400 }}>{d}</span>
+                  <span style={{ fontSize: 10, color: i === dayIndex ? '#14b8a6' : 'rgba(255,255,255,0.3)', fontWeight: i === dayIndex ? 600 : 400 }}>{d}</span>
                 </div>
               ))}
             </div>
@@ -470,8 +477,8 @@ function HomeDashboard({ navigate, userName }) {
         </div>
 
         {/* Right: DPM Score */}
-        <div ref={dpmRef} onMouseEnter={triggerDpm} style={{ background: 'rgba(31,41,55,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(55,65,81,0.5)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(55,65,81,0.5)' }}>
+        <div ref={dpmRef} onMouseEnter={triggerDpm} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>DPM Score</span>
             <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 500 }}>Building</span>
           </div>
@@ -480,8 +487,8 @@ function HomeDashboard({ navigate, userName }) {
               {/* SVG Donut */}
               <div style={{ position: 'relative' }}>
                 <svg width="100" height="100" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(55,65,81,0.5)" strokeWidth="8" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#6366f1" strokeWidth="8"
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="#378ADD" strokeWidth="8"
                     strokeDasharray={dpmVisible ? `${dA} ${C - dA}` : `0 ${C}`} transform="rotate(-90 50 50)" strokeLinecap="round" style={{ transition: 'stroke-dasharray 1.2s ease-out' }} />
                   <circle cx="50" cy="50" r="42" fill="none" stroke="#f59e0b" strokeWidth="8"
                     strokeDasharray={dpmVisible ? `${pA} ${C - pA}` : `0 ${C}`} strokeDashoffset={`${-(dA + 4)}`} style={{ transition: 'stroke-dasharray 1.2s ease-out 0.25s' }}
@@ -495,19 +502,19 @@ function HomeDashboard({ navigate, userName }) {
                 </svg>
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
                   <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 800 }}>{overall}%</div>
-                  <div style={{ fontSize: 10, color: '#9ca3af' }}>DPM</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>DPM</div>
                 </div>
               </div>
               {/* Legend */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
-                  { color: '#6366f1', label: 'Drive', value: `${drive}%` },
+                  { color: '#378ADD', label: 'Drive', value: `${drive}%` },
                   { color: '#f59e0b', label: 'Passion', value: `${passion}%` },
                   { color: '#22c55e', label: 'Motivation', value: `${motivation}%` },
                 ].map(d => (
                   <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
-                    <span style={{ color: '#9ca3af' }}>{d.label}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.45)' }}>{d.label}</span>
                     <span style={{ color: '#fff', fontWeight: 700 }}>{d.value}</span>
                   </div>
                 ))}
@@ -518,8 +525,8 @@ function HomeDashboard({ navigate, userName }) {
       </div>
 
       {/* 6. Community Card */}
-      <div style={{ background: 'rgba(31,41,55,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(55,65,81,0.5)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(55,65,81,0.5)' }}>
+      <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Community</span>
           <span style={{ fontSize: 11, color: '#14b8a6', cursor: 'pointer', fontWeight: 500 }}>See All →</span>
         </div>
@@ -533,28 +540,28 @@ function HomeDashboard({ navigate, userName }) {
                 </div>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Great job on your scales this week!</div>
-                  <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>Motesart · 2h ago</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Motesart · 2h ago</div>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(55,65,81,0.5)' }}>
+                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(255,255,255,0.15)' }}>
                   <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 13, color: '#fff' }}>A</div>
                 </div>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Who wants to practice duets this weekend?</div>
-                  <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>Aiden · 5h ago</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Aiden · 5h ago</div>
                 </div>
               </div>
             </div>
             {/* Right: Class Goal */}
             <div>
-              <div style={{ padding: 12, background: 'rgba(31,41,55,0.5)', borderRadius: 10, border: '1px solid rgba(55,65,81,0.4)' }}>
+              <div style={{ padding: 12, background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
                 <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>🎉 Classmate Shoutout</div>
                 <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>Aiden hit a 10-day streak!</div>
               </div>
               <div style={{ marginTop: 14 }}>
-                <div style={{ fontSize: 11, color: '#9ca3af', marginBottom: 6 }}>Class Practice Goal — 620 / 1000 min</div>
-                <div style={{ width: '100%', height: 8, background: 'rgba(55,65,81,0.5)', borderRadius: 4, overflow: 'hidden' }}>
+                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Class Practice Goal — 620 / 1000 min</div>
+                <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: '62%', background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 4 }} />
                 </div>
               </div>
@@ -600,7 +607,7 @@ function GameView({ navigate }) {
               {[{ v: '5+', l: 'Games' }, { v: 'Live', l: 'Scores' }, { v: 'Global', l: 'Ranks' }].map(s => (
                 <div key={s.l} style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#eab308' }}>{s.v}</div>
-                  <div style={{ fontSize: 9, color: '#9ca3af', marginTop: 1 }}>{s.l}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>{s.l}</div>
                 </div>
               ))}
             </div>
@@ -615,7 +622,7 @@ function GameView({ navigate }) {
             {[{ v: '0', l: 'Best Streak', c: '#f97316' }, { v: '0', l: 'Lives Lost', c: '#a855f7' }, { v: '0', l: 'On Fire Runs', c: '#14b8a6' }].map(s => (
               <div key={s.l} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: s.c }}>{s.v}</div>
-                <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 2 }}>{s.l}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -625,7 +632,7 @@ function GameView({ navigate }) {
             {[{ v: '0%', l: 'Drive', c: '#3b82f6' }, { v: '0%', l: 'Passion', c: '#f97316' }, { v: '0%', l: 'Motivation', c: '#22c55e' }].map(s => (
               <div key={s.l} style={{ textAlign: 'center' }}>
                 <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: s.c }}>{s.v}</div>
-                <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 2 }}>{s.l}</div>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{s.l}</div>
               </div>
             ))}
           </div>
@@ -634,7 +641,7 @@ function GameView({ navigate }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 12 }}>
         <Card title="Game Sessions">
-          <p style={{ color: '#9ca3af', fontSize: 12 }}>No game sessions yet. Hit Play to start!</p>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>No game sessions yet. Hit Play to start!</p>
         </Card>
         <Card title="Game Leaderboard">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, background: 'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border: '1px solid rgba(147,51,234,0.3)', borderRadius: 8 }}>
@@ -655,12 +662,12 @@ function GameView({ navigate }) {
 function Card({ title, children, headerRight }) {
   return (
     <div style={{
-      background: 'rgba(31,41,55,0.8)', backdropFilter: 'blur(8px)',
-      borderRadius: 12, border: '1px solid rgba(55,65,81,0.5)', overflow: 'hidden',
+      background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)',
+      borderRadius: 12, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
     }}>
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 16px', borderBottom: '1px solid rgba(55,65,81,0.5)',
+        padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}>
         <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>{title}</span>
         {headerRight}

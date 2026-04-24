@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 /* ── Placeholder data — replaced by API when wired ── */
@@ -156,6 +157,7 @@ const FILTERS = ['All','Due Soon','Overdue','Completed']
 
 export default function HomeworkDashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [tab, setTab] = useState('asgn')
   const [filter, setFilter] = useState('All')
   const [detOpen, setDetOpen] = useState(false)
@@ -219,6 +221,10 @@ export default function HomeworkDashboard() {
                   <span className={`hw-cpill ${a.cpCls}`}>{a.countdown}</span>
                 </div>
                 <div className="hw-prog-track"><div className={`hw-prog-fill${a.overdue?' red':''}`} style={{width:`${a.progress}%`}} /></div>
+                <button
+                  onClick={e => { e.stopPropagation(); navigate(a.type === 'Quiz' ? `/game?mode=academic&concept=T_HALF_STEP&assignment_id=${a.id}` : `/practice-live?concept=T_HALF_STEP&assignment_id=${a.id}`) }}
+                  style={{marginTop:8,padding:'5px 14px',borderRadius:20,border:'none',background:'#14b8a6',color:'#fff',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif"}}
+                >Launch →</button>
               </div>
               <div className="hw-chev">{'\u203A'}</div>
             </div>
