@@ -56,11 +56,11 @@ const css = `
   .piano-container {
     position: relative;
     width: 100%;
-    height: 160px;
-    background: linear-gradient(180deg, #2c1810, #1a0f08);
+    height: 140px;
+    background: linear-gradient(180deg,#111,#000);
     border-radius: 12px;
-    border: 3px solid #5c3d2e;
-    border-top: 6px solid #7a5240;
+    border: 2px solid #222;
+    border-top: 4px solid #333;
     overflow: visible;
     user-select: none;
   }
@@ -114,7 +114,7 @@ const css = `
   }
   .pcv-stat-val { font-size: 22px; }
   .pcv-stats { padding: 16px 24px; }
-  .pcv-speech-card { padding: 22px 26px; }
+  .pcv-speech-card { padding: 20px 22px; }
   .pcv-speech-text { font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.65; }
   @media (max-width: 520px) {
     .pcv-inner { max-width: 100%; }
@@ -175,7 +175,7 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
         {Array.from({ length: 8 }).map((_, i) => {
           const isFocus = highlightedKeys.includes(i)
           const isHome  = showHomeKey && i === homeKeyIndex
-          const bg = isFocus ? '#d4f5e0' : isHome ? '#fde8c8' : '#ffffff'
+          const bg = isFocus ? '#d4f5e0' : isHome ? '#fde8c8' : '#f8f8f8'
           const bdrB = isFocus ? '4px solid #90d4a8' : isHome ? '4px solid #e8c890' : '4px solid #c8c8c8'
           return (
             <div key={i} style={{
