@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../services/api.js'
 import { COLORS, FONTS, GRADIENTS, ANIMATIONS, SHARED, logoStyles } from '../styles/theme.js'
 
-const LOGO = logoStyles(64, 90)
+const LOGO = logoStyles(104, 130)
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
@@ -272,7 +272,7 @@ export default function RegistrationPage() {
                     ...(role === r.name ? S.roleCardSel : {}),
                   }}
                 >
-                  <div style={{ fontSize: 22, marginBottom: 6 }}>{r.icon}</div>
+                  <div style={{ fontSize: 26, marginBottom: 6 }}>{r.icon}</div>
                   <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{r.name}</div>
                   <div style={{ fontSize: 10, color: COLORS.textSecondary, marginTop: 2 }}>{r.desc}</div>
                 </div>
@@ -415,7 +415,7 @@ export default function RegistrationPage() {
                   style={{...S.avatarCard, ...(avatar === i ? S.avatarCardSel : {})}}
                 >
                   {avatar === i && <div style={S.avatarCheck}>✓</div>}
-                  <div style={{ fontSize: 32, marginBottom: 6 }}>{a.emoji}</div>
+                  <div style={{ fontSize: 36, marginBottom: 6 }}>{a.emoji}</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#fff' }}>{a.name}</div>
                   <div style={{ fontSize: 9, color: COLORS.textSecondary, marginTop: 2 }}>{a.role}</div>
                 </div>
@@ -515,7 +515,7 @@ const S = {
     background: COLORS.cardBg,
     border: `1px solid ${COLORS.cardBorder}`,
     borderRadius: 20,
-    padding: '40px 48px',
+    padding: '36px 40px 28px',
     width: '100%', maxWidth: 680,
     backdropFilter: 'blur(20px)',
     boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
@@ -537,8 +537,8 @@ const S = {
   dotDone:     { width: 14, background: COLORS.accent, opacity: 0.4 },
   dotInactive: { width: 14, background: 'rgba(255,255,255,0.1)' },
   stepBody:    { width: '100%' },
-  stepTitle:   { fontSize: 20, fontWeight: 800, color: '#fff', marginBottom: 3, fontFamily: FONTS.display },
-  stepSub:     { fontSize: 12, color: COLORS.textSecondary, marginBottom: 10 },
+  stepTitle:   { fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 3, fontFamily: FONTS.display },
+  stepSub:     { fontSize: 13, color: COLORS.textSecondary, marginBottom: 10 },
   confidenceAnchor: {
     fontSize: 11, color: COLORS.textMuted,
     background: 'rgba(217,70,239,0.07)',
@@ -552,22 +552,22 @@ const S = {
   input: {
     width: '100%', background: 'rgba(255,255,255,0.07)',
     border: `1px solid ${COLORS.cardBorder}`,
-    borderRadius: 10, padding: '11px 13px',
-    color: '#fff', fontSize: 13, fontFamily: FONTS.body,
+    borderRadius: 10, padding: '12px 14px',
+    color: '#fff', fontSize: 14, fontFamily: FONTS.body,
     outline: 'none', boxSizing: 'border-box',
   },
   btnPrimary: {
     background: GRADIENTS.primary,
     color: '#fff', border: 'none', borderRadius: 12,
-    padding: '12px 0', fontSize: 14, fontWeight: 700,
+    padding: '13px 0', fontSize: 15, fontWeight: 700,
     fontFamily: FONTS.body, cursor: 'pointer', width: '100%',
   },
   btnSecondary: {
     background: 'rgba(255,255,255,0.06)',
     color: COLORS.textSecondary,
     border: `1px solid ${COLORS.cardBorder}`,
-    borderRadius: 12, padding: '12px 0',
-    fontSize: 13, fontWeight: 600,
+    borderRadius: 12, padding: '13px 0',
+    fontSize: 15, fontWeight: 600,
     fontFamily: FONTS.body, cursor: 'pointer', flex: 1,
   },
   btnRow:  { display: 'flex', gap: 8, marginTop: 14, width: '100%' },
@@ -576,8 +576,8 @@ const S = {
   chip: {
     background: 'rgba(255,255,255,0.06)',
     border: `1px solid ${COLORS.cardBorder}`,
-    borderRadius: 8, padding: '6px 12px',
-    fontSize: 11, cursor: 'pointer', color: COLORS.textSecondary,
+    borderRadius: 8, padding: '8px 14px',
+    fontSize: 12, cursor: 'pointer', color: COLORS.textSecondary,
     transition: 'all .15s',
   },
   chipSel: {
@@ -589,7 +589,7 @@ const S = {
   roleCard: {
     background: 'rgba(255,255,255,0.05)',
     border: `1.5px solid ${COLORS.cardBorder}`,
-    borderRadius: 12, padding: '12px 10px',
+    borderRadius: 12, padding: '14px 12px',
     cursor: 'pointer', textAlign: 'center', transition: 'all .2s',
   },
   roleCardSel: {
@@ -608,8 +608,8 @@ const S = {
   wylQAnswered: { borderColor: 'rgba(217,70,239,0.3)' },
   wylOpt: {
     display: 'flex', alignItems: 'center', gap: 8,
-    padding: '7px 8px', borderRadius: 7,
-    fontSize: 11, color: COLORS.textSecondary,
+    padding: '9px 10px', borderRadius: 7,
+    fontSize: 12, color: COLORS.textSecondary,
     marginBottom: 2, cursor: 'pointer', transition: 'all .15s',
   },
   radio: {
@@ -623,7 +623,7 @@ const S = {
   avatarCard: {
     background: 'rgba(255,255,255,0.05)',
     border: `2px solid ${COLORS.cardBorder}`,
-    borderRadius: 14, padding: '14px 8px 10px',
+    borderRadius: 14, padding: '16px 10px 12px',
     textAlign: 'center', cursor: 'pointer',
     position: 'relative', transition: 'all .2s',
   },
