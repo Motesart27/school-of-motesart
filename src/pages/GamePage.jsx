@@ -393,6 +393,8 @@ export default function GamePage() {
  const [nameItAnswer, setNameItAnswer] = useState(null)
  const [nameItCorrect, setNameItCorrect] = useState(null)
  const [targetNoteNumber, setTargetNoteNumber] = useState(null)
+ const [singItPhase, setSingItPhase] = useState(false)
+ const [sungPitchAccuracy, setSungPitchAccuracy] = useState(null)
 
  const playingRef = useRef(false)
  const sessionRef = useRef({
@@ -525,9 +527,11 @@ export default function GamePage() {
  setLitNote(null)
  setTimeout(() => playSequenceHidden(mystery, () => {
   if (isHomeworkSession) {
-   setNameItPhase(true)
+   setSingItPhase(true)
+   setNameItPhase(false)
    setNameItAnswer(null)
    setNameItCorrect(null)
+   setSungPitchAccuracy(null)
   }
  }), 600)
  })
@@ -541,9 +545,11 @@ export default function GamePage() {
  // Hidden no lighting
  playSequenceHidden(mystery, () => {
   if (isHomeworkSession) {
-   setNameItPhase(true)
+   setSingItPhase(true)
+   setNameItPhase(false)
    setNameItAnswer(null)
    setNameItCorrect(null)
+   setSungPitchAccuracy(null)
   }
  })
  }
@@ -579,7 +585,7 @@ export default function GamePage() {
  const pressKey = useCallback((noteIdx, keyPos, scaleNote) => {
  if (isPlaying) return
  if (isEvaluating) return
- if (isHomeworkSession && nameItPhase) return
+ if (isHomeworkSession && (singItPhase || nameItPhase)) return
  if (mode === 'game' && lives <= 0) return
  if (!audioCtx || audioCtx.state === 'suspended') {
  audioCtx = new (window.AudioContext || window.webkitAudioContext)()
@@ -667,7 +673,7 @@ export default function GamePage() {
  setFindReplays(getMaxFindReplays())
  }, 1600)
  }
- }, [answers, isPlaying, isEvaluating, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp, nameItPhase])
+ }, [answers, isPlaying, isEvaluating, mystery, noteCount, mode, maxLives, logSession, level, doLevelUp, nameItPhase, singItPhase])
 
  const resetGame = () => {
  setLevel(1)
@@ -866,6 +872,66 @@ export default function GamePage() {
  ♪ Find Note {!isHomeworkSession && <span>({findReplays})</span>}
  </button>
  </div>
+
+ {isHomeworkSession && singItPhase && (
+  <div style={{
+   background:'rgba(255,255,255,.05)',
+   border:'1px solid rgba(255,255,255,.1)',
+   borderRadius:16,
+   padding:'20px 16px',
+   margin:'12px 0',
+   textAlign:'center'
+  }}>
+   <div style={{
+    fontSize:12,
+    color:'rgba(255,255,255,.4)',
+    letterSpacing:'.1em',
+    textTransform:'uppercase',
+    marginBottom:8
+   }}>Sing It</div>
+   <div style={{display:'flex',alignItems:'center',justifyContent:'center',marginBottom:12}}>
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+     <circle cx="26" cy="26" r="25" fill="rgba(217,70,239,.1)" stroke="rgba(217,70,239,.4)" strokeWidth="1.5"/>
+     <rect x="20" y="11" width="12" height="20" rx="6" fill="rgba(217,70,239,.65)"/>
+     <path d="M14 30C14 37.18 19.373 43 26 43C32.627 43 38 37.18 38 30" stroke="rgba(217,70,239,.85)" strokeWidth="2" strokeLinecap="round" fill="none"/>
+     <line x1="26" y1="43" x2="26" y2="47" stroke="rgba(217,70,239,.85)" strokeWidth="2" strokeLinecap="round"/>
+     <line x1="21" y1="47" x2="31" y2="47" stroke="rgba(217,70,239,.85)" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+   </div>
+   <div style={{
+    fontSize:16,
+    fontWeight:600,
+    color:'#fff',
+    marginBottom:6,
+    fontFamily:'DM Sans,sans-serif'
+   }}>Sing the note you heard.</div>
+   <div style={{
+    fontSize:12,
+    color:'rgba(255,255,255,.38)',
+    marginBottom:18
+   }}>Match the pitch with your voice before naming it.</div>
+   <button
+    onClick={() => {
+     setSungPitchAccuracy(null)
+     setSingItPhase(false)
+     setNameItPhase(true)
+     setNameItAnswer(null)
+     setNameItCorrect(null)
+    }}
+    style={{
+     background:'rgba(255,255,255,.07)',
+     border:'1px solid rgba(255,255,255,.14)',
+     borderRadius:10,
+     padding:'10px 24px',
+     color:'rgba(255,255,255,.55)',
+     fontSize:13,
+     fontWeight:600,
+     cursor:'pointer',
+     fontFamily:'DM Sans,sans-serif'
+    }}
+   >Skip for now →</button>
+  </div>
+ )}
 
  {isHomeworkSession && nameItPhase && (
   <div style={{
