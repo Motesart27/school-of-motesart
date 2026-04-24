@@ -32,16 +32,32 @@ const css = `
     font-family: 'DM Sans',-apple-system,sans-serif;
     display: flex;
     justify-content: center;
+    align-items: flex-start;
     padding-bottom: 32px;
     color: #fff;
   }
   .pcv-root * { box-sizing: border-box; }
   .pcv-inner {
     width: 100%;
-    max-width: 480px;
+    max-width: 640px;
     display: flex;
     flex-direction: column;
     animation: pcvFadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .mot-av {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid rgba(232,75,138,0.5);
+    background: rgba(20,20,40,0.8);
+    flex-shrink: 0;
+  }
+  .piano-container {
+    position: relative;
+    width: 100%;
+    height: 170px;
+    user-select: none;
   }
   .pcv-speak-bar {
     width: 3px;
@@ -51,7 +67,8 @@ const css = `
     transform-origin: bottom;
   }
   .pcv-btn-answer {
-    min-height: 52px;
+    min-height: 54px;
+    padding: 16px;
     background: rgba(255,255,255,0.06);
     border: 1.5px solid rgba(255,255,255,0.11);
     border-radius: 14px;
@@ -78,6 +95,12 @@ const css = `
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media (max-width: 520px) {
+    .pcv-inner { max-width: 100%; }
+    .mot-av { width: 52px; height: 52px; }
+    .piano-container { height: 150px; }
   }
 `
 
@@ -128,7 +151,7 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
   const kW = 100 / 8       // white key span per key
 
   return (
-    <div style={{ position:'relative', width:'100%', height:162, userSelect:'none' }}>
+    <div className="piano-container">
       {/* White keys */}
       <div style={{ display:'flex', height:'100%', gap:2 }}>
         {Array.from({ length: 8 }).map((_, i) => {
@@ -261,29 +284,38 @@ export default function PracticeConceptView({
           <div style={{ ...S.label }}>{PHASE_LABELS[phase] || phase}</div>
         </div>
 
-        {/* ── Motesart speech row ── */}
-        <div style={{ ...S.glass, margin:'0 12px 14px', padding:'14px 14px', display:'flex', gap:12, alignItems:'flex-start' }}>
-          <div style={{ position:'relative', flexShrink:0 }}>
-            <div style={{ width:52, height:52, borderRadius:'50%', overflow:'hidden',
-              border:'2px solid rgba(232,75,138,0.5)', background:'rgba(20,20,40,0.8)' }}>
+        {/* ── Motesart speech card ── */}
+        <div style={{
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 18,
+          margin: '0 12px 16px',
+          overflow: 'hidden',
+        }}>
+          {/* Avatar + text row */}
+          <div style={{ display:'flex', gap:16, alignItems:'flex-start', padding:'16px 16px 14px' }}>
+            <div className="mot-av">
               <img src="/Motesart Avatar 1.PNG" alt="Motesart"
                 onError={e => { e.currentTarget.style.display='none' }}
                 style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'center top' }} />
             </div>
-            <div style={{ position:'absolute', bottom:-2, right:-3,
-              background:'rgba(10,10,26,0.92)', border:'1px solid rgba(232,75,138,0.28)',
-              borderRadius:8, padding:'3px 4px',
-              display:'flex', alignItems:'center', gap:1.5,
-            }}>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:13, fontWeight:700, color:'#e84b8a', letterSpacing:'0.04em', marginBottom:2 }}>Motesart</div>
+              <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Speaking now</div>
+              <div style={{ fontSize:14, color:'rgba(255,255,255,0.85)', lineHeight:1.65 }}>{speechText}</div>
+            </div>
+          </div>
+          {/* Speak bars + Replay row */}
+          <div style={{
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            padding: '10px 16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}>
+            <div style={{ display:'flex', alignItems:'center', gap:3 }}>
               {[6, 10, 7, 12, 5].map((h, i) => (
                 <div key={i} className="pcv-speak-bar" style={{ height: h, animationDelay:`${[0,0.14,0.28,0.08,0.22][i]}s` }} />
               ))}
             </div>
-          </div>
-
-          <div style={{ flex:1, minWidth:0 }}>
-            <div style={{ fontSize:9, fontWeight:700, color:'#e84b8a', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Motesart</div>
-            <div style={{ fontSize:13, color:'rgba(255,255,255,0.82)', lineHeight:1.68, marginBottom:9 }}>{speechText}</div>
             <button onClick={onReplay} style={{
               minHeight:34, padding:'5px 13px', borderRadius:10,
               background:'rgba(232,75,138,0.1)', border:'1px solid rgba(232,75,138,0.25)',
@@ -348,7 +380,7 @@ export default function PracticeConceptView({
         )}
 
         {/* ── Stats footer ── */}
-        <div style={{ margin:'4px 12px 0', ...S.glass, borderRadius:14, padding:'12px 16px',
+        <div style={{ margin:'4px 12px 0', ...S.glass, borderRadius:14, padding:'14px 20px',
           display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, textAlign:'center' }}>
           {[
             { label:'Correct',  value: stats?.correct  ?? 0,    color: COLORS.teal },
@@ -357,7 +389,7 @@ export default function PracticeConceptView({
             { label:'Accuracy', value:`${stats?.accuracy ?? 0}%`, color:'#e84b8a' },
           ].map(s => (
             <div key={s.label}>
-              <div style={{ fontFamily:FONTS.display, fontSize:17, fontWeight:800, color:s.color, lineHeight:1 }}>{s.value}</div>
+              <div style={{ fontFamily:FONTS.display, fontSize:20, fontWeight:800, color:s.color, lineHeight:1 }}>{s.value}</div>
               <div style={{ ...S.label, marginTop:4 }}>{s.label}</div>
             </div>
           ))}
