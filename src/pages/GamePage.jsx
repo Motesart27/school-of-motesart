@@ -3,6 +3,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { updateWYLFromBehavior } from "../services/wylEvolution.js"
+import { getState, setState } from '../lesson_engine/concept_state_store.js'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
@@ -341,6 +342,10 @@ export default function GamePage() {
  const urlConcept = searchParams.get('concept')
  const urlAssignmentId = searchParams.get('assignment_id')
  const isHomeworkSession = !!(urlAssignmentId && urlMode === 'academic')
+ const conceptDisplayName = urlConcept === 'T_HALF_STEP' ? 'The Half Step'
+   : urlConcept ? urlConcept.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+   : 'This Concept'
+ const completeAssignment = (id) => { console.log('[SOM] Assignment complete:', id) }
  const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 
  // Level lives in state so UI updates when it changes
@@ -417,6 +422,7 @@ export default function GamePage() {
  game_name: 'Find the Note',
  })
  })
+ if (!isHomeworkSession) {
  await fetch(`${BACKEND_URL}/leaderboard/submit`, {
  method: 'POST',
  headers: { 'Content-Type': 'application/json' },
@@ -430,8 +436,21 @@ export default function GamePage() {
  best_streak: s.bestStreak,
  })
  })
+ }
  setSessionLogged(true)
  updateWYLFromBehavior("ear_training_session", { accuracy, level })
+ if (isHomeworkSession && urlAssignmentId) {
+ completeAssignment(urlAssignmentId)
+ const sessionAccuracy = s.attempts > 0 ? s.correct / s.attempts : 0
+ const prev = getState(urlConcept) || {}
+ setState(urlConcept, {
+ ...prev,
+ attempts: (prev.attempts || 0) + s.attempts,
+ confidence: Math.min(1, ((prev.confidence || 0) + sessionAccuracy) / 2),
+ last_session_date: new Date().toISOString(),
+ ownership_state: prev.ownership_state || 'practicing'
+ })
+ }
  } catch (e) {
  console.warn('Session/leaderboard log failed:', e)
  }
@@ -766,6 +785,12 @@ export default function GamePage() {
  </div>
  </div>
 
+ {isHomeworkSession && (
+ <div style={{background:'rgba(217,70,239,.1)',border:'1px solid rgba(217,70,239,.25)',borderRadius:10,padding:'8px 16px',fontSize:12,color:'#d946ef',textAlign:'center',marginBottom:12}}>
+ <div style={{fontWeight:700}}>Academic Session — {conceptDisplayName}</div>
+ <div style={{marginTop:2,opacity:.8}}>Assigned by your teacher</div>
+ </div>
+ )}
  {/* Action buttons */}
  <div className="gp-action-row">
  <button className={`gp-abtn gp-abtn-scale ${scaleReplays<=0?'depleted':''}`}
@@ -883,8 +908,8 @@ export default function GamePage() {
  <div className="gp-modal-backdrop" onClick={()=>setShowGameOver(false)}/>
  <div className="gp-modal gp-go-modal">
  <div style={{fontSize:44,marginBottom:4}}></div>
- <div style={{fontSize:26,fontWeight:900}}>Game Over!</div>
- <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>Level {level} · Session Complete</div>
+ <div style={{fontSize:26,fontWeight:900}}>{isHomeworkSession ? 'Assignment Complete!' : 'Game Over!'}</div>
+ <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>{isHomeworkSession ? `You trained your ear on ${conceptDisplayName}` : `Level ${level} · Session Complete`}</div>
  <div className="gp-go-stats">
  {[[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],
  [accuracy+'%','Accuracy','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']
@@ -895,10 +920,12 @@ export default function GamePage() {
  </div>
  ))}
  </div>
+ {!isHomeworkSession && (
  <div style={{padding:12,borderRadius:10,background:'rgba(234,179,8,.1)',border:'1px solid rgba(234,179,8,.3)',marginBottom:16}}>
  <div style={{fontSize:22,fontWeight:900,color:'#fbbf24'}}> {s.correct * 100 + s.bestStreak * 50} pts</div>
  <div style={{fontSize:11,color:'#92400e'}}>Logged to leaderboard</div>
  </div>
+ )}
  {/* Ear Training Meter */}
  <div className="gp-ear-meter">
  <div style={{fontSize:14,fontWeight:700,color:'#0ea5e9',marginBottom:12}}> Ear Training Meter</div>
