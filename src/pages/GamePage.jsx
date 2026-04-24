@@ -113,8 +113,8 @@ function Piano({ keys, octaves, pressed, onKeyPress, mob, labelMode }) {
  width:'100%', maxWidth: mob ? '100%' : 960, position:'relative', height: mob ? 110 : 150,
  background:'linear-gradient(180deg,#1a2744,#0f172a)',
  borderRadius:'0 0 12px 12px',
- border:'2px solid #2d3f5e',
- borderTop:'6px solid #3b4f6b',
+ border:'3px solid #111',
+ borderTop:'8px solid #222',
  overflow:'visible',
  display:'flex',
  padding:'0 2px',
@@ -238,7 +238,7 @@ const css = `
 .gp-staff-outer{position:relative;height:130px}
 .gp-staff-line{position:absolute;left:52px;right:8px;height:2px;background:rgba(148,163,184,.5);border-radius:1px}
 .gp-ledger{position:absolute;height:2px;background:rgba(148,163,184,.5);border-radius:1px;width:26px}
-.gp-clef{position:absolute;left:2px;top:6px;font-size:76px;line-height:1;opacity:.72;color:#94a3b8;user-select:none}
+.gp-clef{position:absolute;left:2px;top:4px;width:38px;height:122px;overflow:visible;user-select:none}
 .gp-nh{position:absolute;width:16px;height:11px;border-radius:50%;transform:rotate(-18deg);transition:background .12s,box-shadow .12s,border-color .12s}
 .gp-nh-idle{background:rgba(100,116,139,.2);border:2px solid rgba(100,116,139,.35)}
 .gp-nh-lit{background:#3b82f6;border:2px solid #93c5fd;box-shadow:0 0 18px rgba(59,130,246,1),0 0 36px rgba(59,130,246,.5)}
@@ -263,7 +263,7 @@ const css = `
 .gp-mbtn{flex:1;padding:8px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
 .gp-mbtn-off{background:rgba(55,65,81,.8);color:#9ca3af}
 .gp-mbtn-game{background:#9333ea;color:#fff;box-shadow:0 2px 8px rgba(147,51,234,.3)}
-.gp-mbtn-academic{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;box-shadow:0 2px 8px rgba(14,165,233,.3)}
+.gp-mbtn-academic{background:rgba(217,70,239,.2);color:#d946ef;border:1px solid rgba(217,70,239,.5);box-shadow:0 2px 8px rgba(217,70,239,.15)}
 .gp-dpm-bar{width:100%;max-width:384px;background:rgba(30,41,59,.8);border:1px solid rgba(14,165,233,.3);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px}
 .gp-kb{flex:1;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
 .gp-lvl-badge{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;border-radius:10px;padding:8px 14px;text-align:center;box-shadow:0 4px 12px rgba(37,99,235,.3)}
@@ -774,10 +774,18 @@ export default function GamePage() {
 
  {/* TOP BAR */}
  <div className="gp-top"><div className="gp-top-inner">
- <div className="gp-pill-pts">° {sessionPoints + (s.correct * 100)}</div>
+ <div style={{display:'flex',alignItems:'center',gap:8}}>
+  <div style={{width:32,height:32,borderRadius:'50%',background:'linear-gradient(135deg,#7c3aed,#a855f7)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:900,color:'#fff',flexShrink:0}}>
+   {(storedUser.name||'S')[0].toUpperCase()}
+  </div>
+  <div className="gp-pill-pts">{sessionPoints + (s.correct * 100)} pts</div>
+ </div>
  {mode === 'game'
  ? <div className="gp-lives">{Array.from({length:3}, (_,i) => i < lives ? '¤¸' : '¤')}</div>
- : <div style={{fontSize:11,color:'#0ea5e9',fontWeight:700}}> Academic</div>
+ : <div style={{display:'flex',alignItems:'center',gap:6,padding:'4px 10px',borderRadius:8,background:'rgba(217,70,239,.1)',border:'1px solid rgba(217,70,239,.25)'}}>
+    <span style={{fontSize:10,fontWeight:700,color:'#d946ef',textTransform:'uppercase',letterSpacing:'.05em'}}>Academic</span>
+    {urlConcept && <span style={{fontSize:10,color:'rgba(255,255,255,.5)',fontWeight:500,marginLeft:4}}>{conceptDisplayName}</span>}
+   </div>
  }
  <div className="gp-bpm">Lv {level}</div>
  <div style={{textAlign:'center'}}>
@@ -801,7 +809,7 @@ export default function GamePage() {
  {/* TREBLE STAFF */}
  <div className="gp-staff-wrap">
  <div className="gp-staff-outer">
- <div className="gp-clef"></div>
+ <svg className="gp-clef" viewBox="0 0 38 122" xmlns="http://www.w3.org/2000/svg"><text x="1" y="106" fontFamily="'Times New Roman',Georgia,serif" fontSize="78" fill="#94a3b8" fillOpacity="0.68">𝄞</text></svg>
  <div className="gp-staff-line" style={{top:88}}/>
  <div className="gp-staff-line" style={{top:72}}/>
  <div className="gp-staff-line" style={{top:56}}/>
