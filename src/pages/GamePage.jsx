@@ -517,6 +517,9 @@ export default function GamePage() {
  step()
  }, [])
 
+ // Only show Sing It + Name It on the level-up qualifying round
+ const isCheckpointRound = isHomeworkSession && (levelProgress + 1 >= CORRECT_TO_LEVELUP)
+
  const playScale = () => {
  if (scaleReplays <= 0 || isPlaying) return
  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume()
@@ -526,7 +529,7 @@ export default function GamePage() {
  playSequence([0,1,2,3,4,5,6,7], () => {
  setLitNote(null)
  setTimeout(() => playSequenceHidden(mystery, () => {
-  if (isHomeworkSession) {
+  if (isCheckpointRound) {
    setSingItPhase(true)
    setNameItPhase(false)
    setNameItAnswer(null)
@@ -544,7 +547,7 @@ export default function GamePage() {
  sessionRef.current.replaysUsed++
  // Hidden no lighting
  playSequenceHidden(mystery, () => {
-  if (isHomeworkSession) {
+  if (isCheckpointRound) {
    setSingItPhase(true)
    setNameItPhase(false)
    setNameItAnswer(null)
