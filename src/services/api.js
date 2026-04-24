@@ -166,7 +166,10 @@ export const api = {
   },
 
   speakText: async (text, voiceType = 'coach') => {
-    const res = await fetch('/api/tts/speak', {
+    const ttsUrl = import.meta.env.VITE_RAILWAY_URL
+      ? `${import.meta.env.VITE_RAILWAY_URL}/api/tts/speak`
+      : '/api/tts/speak'
+    const res = await fetch(ttsUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text, voice: voiceType }),
