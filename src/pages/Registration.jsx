@@ -28,12 +28,18 @@ const ROLES = [
 ]
 
 const AVATARS = [
-  { emoji: '👩🏿‍🎤', name: 'Lyric',  role: 'The Storyteller' },
-  { emoji: '🦸🏽',  name: 'Jazz',   role: 'The Performer' },
-  { emoji: '🧒🏻',  name: 'Coda',   role: 'The Dreamer' },
-  { emoji: '🧒🏾',  name: 'Forte',  role: 'The Rockstar' },
-  { emoji: '🧒🏾',  name: 'Sol',    role: 'The Composer' },
-  { emoji: '🦸🏻',  name: 'Riff',   role: 'The Freestyler' },
+  { emoji: '👩🏾', name: 'Zara',   role: 'The Performer' },
+  { emoji: '👨🏽', name: 'Marco',  role: 'The Rockstar' },
+  { emoji: '👩🏻', name: 'Mia',    role: 'The Scholar' },
+  { emoji: '👨🏿', name: 'Dre',    role: 'The Maestro' },
+  { emoji: '👧🏽', name: 'Luna',   role: 'The Dreamer' },
+  { emoji: '👦🏻', name: 'Kai',    role: 'The Explorer' },
+  { emoji: '👩🏼', name: 'Sofia',  role: 'The Composer' },
+  { emoji: '👨🏾', name: 'Miles',  role: 'The Mentor' },
+  { emoji: '🧑🏽', name: 'River',  role: 'The Freestyler' },
+  { emoji: '👩🏿', name: 'Nova',   role: 'The Producer' },
+  { emoji: '👨🏻', name: 'Victor', role: 'The Veteran' },
+  { emoji: '👩🏽', name: 'Reina',  role: 'The Director' },
 ]
 
 const WYL_QUESTIONS = [
@@ -619,7 +625,7 @@ const S = {
   },
   radioSel: { borderColor: COLORS.accent, background: COLORS.accent },
   assessLabel: { fontSize: 12, fontWeight: 500, color: '#fff', marginBottom: 8 },
-  avatarGrid: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 14, width: '100%' },
+  avatarGrid: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 8, marginBottom: 14, width: '100%' },
   avatarCard: {
     background: 'rgba(255,255,255,0.05)',
     border: `2px solid ${COLORS.cardBorder}`,
