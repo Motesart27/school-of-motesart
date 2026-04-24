@@ -33,13 +33,13 @@ const css = `
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 24px 32px 36px;
+    padding: 20px 16px 32px;
     color: #fff;
   }
   .pcv-root * { box-sizing: border-box; }
   .pcv-inner {
     width: 100%;
-    max-width: 960px;
+    max-width: 640px;
     display: flex;
     flex-direction: column;
     animation: pcvFadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
@@ -56,8 +56,12 @@ const css = `
   .piano-container {
     position: relative;
     width: 100%;
-    height: 140px;
-    border-top: 4px solid #475569;
+    height: 160px;
+    background: linear-gradient(180deg, #2c1810, #1a0f08);
+    border-radius: 12px;
+    border: 3px solid #5c3d2e;
+    border-top: 6px solid #7a5240;
+    overflow: visible;
     user-select: none;
   }
   .pcv-speak-bar {
@@ -101,7 +105,7 @@ const css = `
 
   .pcv-answer-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-bottom: 8px;
   }
@@ -171,23 +175,23 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
         {Array.from({ length: 8 }).map((_, i) => {
           const isFocus = highlightedKeys.includes(i)
           const isHome  = showHomeKey && i === homeKeyIndex
-          const bg      = isFocus ? '#d4f5e0' : isHome ? '#fde8c8' : '#f8f8f6'
-          const bdr     = isFocus ? '2px solid #6ee7b7' : isHome ? '2px solid #f6ad55' : '1px solid #d1d5db'
+          const bg = isFocus ? '#d4f5e0' : isHome ? '#fde8c8' : '#ffffff'
+          const bdrB = isFocus ? '4px solid #90d4a8' : isHome ? '4px solid #e8c890' : '4px solid #c8c8c8'
           return (
             <div key={i} style={{
               flex: 1, background: bg, borderRadius: '0 0 9px 9px',
-              border: bdr, position: 'relative',
+              borderRight: '1px solid #e0e0e0', borderBottom: bdrB, position: 'relative',
               animation: isFocus ? 'keyGlow 1.6s ease-in-out infinite' : 'none',
             }}>
               <span style={{
                 position:'absolute', bottom:22, left:0, right:0, textAlign:'center',
-                display:'block', fontSize:11, fontWeight:800, lineHeight:1,
+                display:'block', fontSize:16, fontWeight:900, lineHeight:1,
                 color: isFocus ? '#059669' : isHome ? '#b7791f' : '#555',
                 animation: isFocus ? 'numGlow 1.6s ease-in-out infinite' : 'none',
               }}>{i + 1}</span>
               <span style={{
                 position:'absolute', bottom:7, left:0, right:0, textAlign:'center',
-                display:'block', fontSize:9, fontWeight:600,
+                display:'block', fontSize:11, fontWeight:700,
                 color: isFocus ? '#047857' : isHome ? '#975a16' : '#999',
               }}>{WHITE_KEY_NAMES[i]}</span>
             </div>
@@ -199,11 +203,12 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
       {BLACK_OFFSETS.map(offset => (
         <div key={offset} style={{
           position:'absolute', top:0, zIndex:2,
-          left: `${(offset + 1) * kW - kW * 0.35}%`,
-          width: `${kW * 0.65}%`, height:'61%',
-          background: 'linear-gradient(180deg,#2d3250 0%,#1a1a2e 100%)',
-          borderRadius:'0 0 6px 6px',
-          boxShadow:'0 5px 14px rgba(0,0,0,0.65)',
+          left: `${(offset + 1) * kW - kW * 0.32}%`,
+          width: `${kW * 0.62}%`, height:'62%',
+          background: 'linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%)',
+          border: 'none',
+          borderRadius: '0 0 6px 6px',
+          boxShadow: '0 6px 12px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06)',
         }} />
       ))}
 
