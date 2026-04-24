@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { api } from '../services/api.js'
 import { COLORS, FONTS, GRADIENTS, ANIMATIONS, SHARED, logoStyles } from '../styles/theme.js'
 
-const LOGO = logoStyles(104, 130)
+const LOGO = logoStyles(138, 165)
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
