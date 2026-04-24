@@ -5,6 +5,7 @@ import { VisualOverlay, VISUAL_COMPONENT_MAP, VISUAL_LABELS, C_MAJOR_NOTES, Keyb
 import useTamiQuestions from '../hooks/useTamiQuestions'
 import TelemetryPanel from '../components/TelemetryPanel'
 import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
+import PracticeConceptView from '../components/PracticeConceptView.jsx'
 
 // ============================================
 // PHASE 1A: Real-Time Adaptive Teaching Layer
@@ -1170,9 +1171,26 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     )
   }
 
-  if (practiceView === 'cockpit') {
-    return <PracticeSessionCockpit onBegin={() => setPracticeView('lesson')} />
-  }
+  if (practiceView === 'cockpit') return (
+    <PracticeSessionCockpit onBegin={() => setPracticeView('concept')} />
+  )
+  if (practiceView === 'concept') return (
+    <PracticeConceptView
+      conceptName="The Half Step"
+      conceptDesc="The smallest distance in music"
+      phase="guide"
+      speechText="Look — 3 and 4 are neighbors. No key between them. That's a half step."
+      highlightedKeys={[2, 3]}
+      homeKeyIndex={0}
+      answerOptions={["1 & 2", "3 & 4", "5 & 6", "7 & 8"]}
+      correctAnswer="3 & 4"
+      stats={{ correct: 4, attempts: 6, streak: 3, accuracy: 67 }}
+      bpm={92}
+      onAnswer={(ans) => console.log('answer:', ans)}
+      onReplay={() => console.log('replay')}
+      onBack={() => setPracticeView('cockpit')}
+    />
+  )
 
   return (
     <>
