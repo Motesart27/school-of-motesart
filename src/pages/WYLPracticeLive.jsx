@@ -6,6 +6,8 @@ import useTamiQuestions from '../hooks/useTamiQuestions'
 import TelemetryPanel from '../components/TelemetryPanel'
 import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
 import PracticeConceptView from '../components/PracticeConceptView.jsx'
+import { CONCEPT_VIEW_CONFIG } from '../config/conceptViewConfig.js'
+import { getState, setState } from '../lesson_engine/concept_state_store.js'
 
 // ============================================
 // PHASE 1A: Real-Time Adaptive Teaching Layer
@@ -658,6 +660,19 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [teachingStep, setTeachingStep] = React.useState(0);
   const [awaitingResponse, setAwaitingResponse] = React.useState(false);
   const [responseTimeout, setResponseTimeout] = React.useState(null);
+  const [conceptState, setConceptState] = useState(() => getState('T_HALF_STEP') || {})
+  const [sessionCorrect, setSessionCorrect] = useState(0)
+
+  const ACTIVE_CONCEPT_ID = 'T_HALF_STEP'
+  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID]
+  const phaseMap = {
+    introduced: 'teach',
+    practicing: 'guide',
+    accurate_with_support: 'confirm',
+    accurate_without_support: 'release',
+    owned: 'release'
+  }
+  const currentPhase = phaseMap[conceptState?.ownership_state || 'introduced']
   const teachingStepRef = React.useRef(0);
   // orchestratorRef declared above (line 596)
 
@@ -1177,16 +1192,34 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   if (practiceView === 'concept') return (
     <PracticeConceptView
       conceptName="The Half Step"
-      conceptDesc="The smallest distance in music"
-      phase="guide"
-      speechText="Look — 3 and 4 are neighbors. No key between them. That's a half step."
-      highlightedKeys={[2, 3]}
-      homeKeyIndex={0}
-      answerOptions={["1 & 2", "3 & 4", "5 & 6", "7 & 8"]}
-      correctAnswer="3 & 4"
-      stats={{ correct: 4, attempts: 6, streak: 3, accuracy: 67 }}
-      bpm={92}
-      onAnswer={(ans) => console.log('answer:', ans)}
+      conceptDesc="The closest distance between two notes"
+      phase={currentPhase}
+      speechText={conceptConfig.speechTexts[currentPhase]}
+      highlightedKeys={conceptConfig.highlightedKeys}
+      homeKeyIndex={conceptConfig.homeKeyIndex}
+      answerOptions={conceptConfig.answerOptions}
+      correctAnswer={conceptConfig.correctAnswer}
+      stats={{
+        correct: sessionCorrect,
+        attempts: conceptState?.attempts || 0,
+        streak: conceptState?.correct_streak || 0,
+        accuracy: Math.round((conceptState?.confidence || 0) * 100)
+      }}
+      bpm={conceptConfig.bpm}
+      onAnswer={(isCorrect) => {
+        const prev = getState(ACTIVE_CONCEPT_ID) || {}
+        const newState = {
+          ...prev,
+          attempts: (prev.attempts || 0) + 1,
+          correct_streak: isCorrect ? (prev.correct_streak || 0) + 1 : 0,
+          ownership_state: isCorrect && (prev.correct_streak || 0) >= 2
+            ? 'practicing'
+            : prev.ownership_state || 'introduced'
+        }
+        setState(ACTIVE_CONCEPT_ID, newState)
+        setConceptState(newState)
+        if (isCorrect) setSessionCorrect(s => s + 1)
+      }}
       onReplay={() => console.log('replay')}
       onBack={() => setPracticeView('cockpit')}
     />
