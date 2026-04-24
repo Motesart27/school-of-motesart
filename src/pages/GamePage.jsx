@@ -795,11 +795,11 @@ export default function GamePage() {
  <div className="gp-action-row">
  <button className={`gp-abtn gp-abtn-scale ${scaleReplays<=0?'depleted':''}`}
  onClick={playScale} disabled={isPlaying || scaleReplays<=0}>
- µ Play Scale ({scaleReplays})
+ µ Play Scale {!isHomeworkSession && <span>({scaleReplays})</span>}
  </button>
  <button className={`gp-abtn gp-abtn-find ${findReplays<=0?'depleted':''}`}
  onClick={findNote} disabled={isPlaying || findReplays<=0}>
- ¶ Find Note ({findReplays})
+ ¶ Find Note {!isHomeworkSession && <span>({findReplays})</span>}
  </button>
  </div>
 
@@ -816,22 +816,12 @@ export default function GamePage() {
  {/* Label toggle: ABC / # */}
  <div style={{display:'flex',justifyContent:'center',width:'100%'}}>
  <div style={{display:'flex',gap:0,background:'rgba(30,41,59,.9)',border:'2px solid rgba(100,116,139,.4)',borderRadius:10,padding:3}}>
- <button onClick={()=>setLabelMode('abc')} style={{padding:'8px 20px',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',background:labelMode==='abc'?'linear-gradient(135deg,#3b82f6,#2563eb)':'transparent',color:labelMode==='abc'?'#fff':'#9ca3af',boxShadow:labelMode==='abc'?'0 2px 8px rgba(59,130,246,.3)':'none',transition:'all .2s'}}>ABC</button>
- <button onClick={()=>setLabelMode('num')} style={{padding:'8px 20px',border:'none',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',background:labelMode==='num'?'linear-gradient(135deg,#f97316,#ea580c)':'transparent',color:labelMode==='num'?'#fff':'#9ca3af',boxShadow:labelMode==='num'?'0 2px 8px rgba(249,115,22,.3)':'none',transition:'all .2s'}}>#</button>
+ <button onClick={()=>setLabelMode('abc')} style={{padding:'8px 20px',border:labelMode==='abc'?'none':'1px solid rgba(255,255,255,.1)',borderRadius:20,fontSize:14,fontWeight:700,cursor:'pointer',background:labelMode==='abc'?'#10b981':'rgba(255,255,255,.06)',color:labelMode==='abc'?'#fff':'rgba(255,255,255,.4)',transition:'all .2s'}}>ABC</button>
+ <button onClick={()=>setLabelMode('num')} style={{padding:'8px 20px',border:labelMode==='num'?'none':'1px solid rgba(255,255,255,.1)',borderRadius:20,fontSize:14,fontWeight:700,cursor:'pointer',background:labelMode==='num'?'#10b981':'rgba(255,255,255,.06)',color:labelMode==='num'?'#fff':'rgba(255,255,255,.4)',transition:'all .2s'}}>#</button>
  </div>
  </div>
 
  {mode==='game' && <div style={{fontSize:11,color:'#22c55e',fontWeight:600}}> 5-streak recovers a life!</div>}
- {mode==='academic' && (
- <div className="gp-dpm-bar">
- <span style={{fontSize:18}}></span>
- <div style={{flex:1}}>
- <div style={{fontSize:11,fontWeight:700,color:'#0ea5e9'}}>DPM Tracking</div>
- <div style={{fontSize:10,color:'#64748b'}}>Extra practice beyond homework raises your DPM</div>
- </div>
- <div style={{fontSize:13,fontWeight:700,color:'#38bdf8'}}>+{s.correct * 2} DPM</div>
- </div>
- )}
  </div>
 
  {/* KEYBOARD */}
