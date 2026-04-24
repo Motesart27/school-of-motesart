@@ -403,6 +403,8 @@ export default function GamePage() {
  const [singItSkipped, setSingItSkipped] = useState(false)
 
  const playingRef = useRef(false)
+ const currentMysteryRef = useRef([])
+ const pendingLevelUpRef = useRef(false)
  const sessionRef = useRef({
  correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
  startTime: Date.now(), bestStreak: 0, currentStreak: 0,
@@ -531,8 +533,11 @@ export default function GamePage() {
  sessionRef.current.replaysUsed++
  playSequence([0,1,2,3,4,5,6,7], () => {
  setLitNote(null)
- setTimeout(() => playSequenceHidden(mystery, () => {
- }), 600)
+ setTimeout(() => {
+  currentMysteryRef.current = [...mystery]
+  setTargetNoteNumber(mystery[0] + 1)
+  playSequenceHidden(mystery, () => {})
+ }, 600)
  })
  }
 
@@ -542,8 +547,9 @@ export default function GamePage() {
  setFindReplays(r => r - 1)
  sessionRef.current.replaysUsed++
  // Hidden no lighting
- playSequenceHidden(mystery, () => {
- })
+ currentMysteryRef.current = [...mystery]
+ setTargetNoteNumber(mystery[0] + 1)
+ playSequenceHidden(mystery, () => {})
  }
 
  const showToastMsg = (msg, color, bg, border) => {
@@ -615,6 +621,7 @@ export default function GamePage() {
  if (allCorrect) {
  const isLevelUpCheckpoint = isHomeworkSession && ((sessionRef.current.correct + 1) % CORRECT_TO_LEVELUP === 0)
  if (isLevelUpCheckpoint) {
+  pendingLevelUpRef.current = true
   setSingItPhase(true)
   setNameItPhase(false)
   setNameItAnswer(null)
@@ -630,7 +637,7 @@ export default function GamePage() {
  // Check level up
  setLevelProgress(prev => {
  const newProgress = prev + 1
- if (newProgress >= CORRECT_TO_LEVELUP) {
+ if (newProgress >= CORRECT_TO_LEVELUP && !pendingLevelUpRef.current) {
  setTimeout(() => doLevelUp(level), 1600)
  }
  return newProgress
@@ -694,7 +701,7 @@ export default function GamePage() {
 
  const handleNameItAnswer = (num) => {
   if (nameItAnswer !== null) return
-  const correct = num === targetNoteNumber
+  const correct = num === (currentMysteryRef.current[0] + 1)
   setNameItAnswer(num)
   setNameItCorrect(correct)
 
@@ -720,12 +727,19 @@ export default function GamePage() {
   sessionLog.push({
    concept_id: urlConcept,
    assignment_id: urlAssignmentId,
-   target_note_number: targetNoteNumber,
+   target_note_number: currentMysteryRef.current[0] + 1,
    number_response: num,
    number_correct: correct,
    timestamp: new Date().toISOString()
   })
   localStorage.setItem('som_name_it_log', JSON.stringify(sessionLog))
+  if (correct && pendingLevelUpRef.current) {
+   pendingLevelUpRef.current = false
+   setTimeout(() => doLevelUp(level), 400)
+  } else if (!correct) {
+   pendingLevelUpRef.current = false
+   setTimeout(() => setNameItPhase(false), 1200)
+  }
  }
 
  const streakStyle = getStreakStyle(streak)
