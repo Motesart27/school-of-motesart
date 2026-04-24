@@ -122,9 +122,10 @@ export const logoStyles = (logoSize = 140, wrapSize = 180) => ({
     boxShadow: '0 0 30px rgba(168,85,247,0.25)',
   },
   logoImg: {
-    width: logoSize - 4, height: logoSize - 4,
-    objectFit: 'contain',
-    padding: 1,
+    width: '100%', height: '100%',
+    objectFit: 'cover',
+    objectPosition: 'center top',
+    borderRadius: '50%',
   },
 })
 
