@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { COLORS, FONTS, GRADIENTS } from '../styles/theme.js'
 
 const WHITE_KEY_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C']
@@ -33,13 +33,13 @@ const css = `
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-bottom: 32px;
+    padding: 24px 32px 36px;
     color: #fff;
   }
   .pcv-root * { box-sizing: border-box; }
   .pcv-inner {
     width: 100%;
-    max-width: 640px;
+    max-width: 960px;
     display: flex;
     flex-direction: column;
     animation: pcvFadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
@@ -56,7 +56,8 @@ const css = `
   .piano-container {
     position: relative;
     width: 100%;
-    height: 170px;
+    height: 140px;
+    border-top: 4px solid #475569;
     user-select: none;
   }
   .pcv-speak-bar {
@@ -97,6 +98,20 @@ const css = `
     justify-content: center;
   }
 
+
+  .pcv-answer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 600px) {
+    .pcv-answer-grid { grid-template-columns: 1fr 1fr; }
+  }
+  .pcv-stat-val { font-size: 22px; }
+  .pcv-stats { padding: 16px 24px; }
+  .pcv-speech-card { padding: 22px 26px; }
+  .pcv-speech-text { font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.65; }
   @media (max-width: 520px) {
     .pcv-inner { max-width: 100%; }
     .mot-av { width: 52px; height: 52px; }
@@ -147,7 +162,6 @@ function KeyArrow({ from, to }) {
 
 // ── Piano keyboard — 8 white keys, 5 black keys ──
 function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
-  const bkWidthPct = 7.2   // black key width as % of container
   const kW = 100 / 8       // white key span per key
 
   return (
@@ -185,8 +199,8 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
       {BLACK_OFFSETS.map(offset => (
         <div key={offset} style={{
           position:'absolute', top:0, zIndex:2,
-          left: `calc(${(offset + 1) * kW}% - ${bkWidthPct / 2}%)`,
-          width: `${bkWidthPct}%`, height:'61%',
+          left: `${(offset + 1) * kW - kW * 0.35}%`,
+          width: `${kW * 0.65}%`, height:'61%',
           background: 'linear-gradient(180deg,#2d3250 0%,#1a1a2e 100%)',
           borderRadius:'0 0 6px 6px',
           boxShadow:'0 5px 14px rgba(0,0,0,0.65)',
@@ -219,7 +233,14 @@ export default function PracticeConceptView({
 }) {
   const [showHomeKey, setShowHomeKey] = useState(false)
   const [bpmVal, setBpmVal]           = useState(bpm)
+  const [isSpeaking, setIsSpeaking]   = useState(false)
   const phaseIdx = PHASES.indexOf(phase)
+
+  useEffect(() => {
+    if (!speechText || !onReplay) return
+    setIsSpeaking(true)
+    onReplay().finally(() => setIsSpeaking(false))
+  }, [speechText])
 
   const S = {
     glass: {
@@ -293,7 +314,7 @@ export default function PracticeConceptView({
           overflow: 'hidden',
         }}>
           {/* Avatar + text row */}
-          <div style={{ display:'flex', gap:16, alignItems:'flex-start', padding:'16px 16px 14px' }}>
+          <div className="pcv-speech-card" style={{ display:'flex', gap:16, alignItems:'flex-start' }}>
             <div className="mot-av">
               <img src="/Motesart Avatar 1.PNG" alt="Motesart"
                 onError={e => { e.currentTarget.style.display='none' }}
@@ -302,7 +323,7 @@ export default function PracticeConceptView({
             <div style={{ flex:1, minWidth:0 }}>
               <div style={{ fontSize:13, fontWeight:700, color:'#e84b8a', letterSpacing:'0.04em', marginBottom:2 }}>Motesart</div>
               <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', marginBottom:10 }}>Speaking now</div>
-              <div style={{ fontSize:14, color:'rgba(255,255,255,0.85)', lineHeight:1.65 }}>{speechText}</div>
+              <div className="pcv-speech-text">{speechText}</div>
             </div>
           </div>
           {/* Speak bars + Replay row */}
@@ -316,12 +337,20 @@ export default function PracticeConceptView({
                 <div key={i} className="pcv-speak-bar" style={{ height: h, animationDelay:`${[0,0.14,0.28,0.08,0.22][i]}s` }} />
               ))}
             </div>
-            <button onClick={onReplay} style={{
+            <button onClick={async () => {
+              if (isSpeaking) return
+              setIsSpeaking(true)
+              try {
+                await onReplay()
+              } finally {
+                setIsSpeaking(false)
+              }
+            }} style={{
               minHeight:34, padding:'5px 13px', borderRadius:10,
               background:'rgba(232,75,138,0.1)', border:'1px solid rgba(232,75,138,0.25)',
               color:'#e84b8a', fontFamily:FONTS.body, fontSize:11, fontWeight:700, cursor:'pointer',
               display:'inline-flex', alignItems:'center', gap:5,
-            }}>▶ Replay</button>
+            }}>{isSpeaking ? 'Speaking...' : '↩ Replay'}</button>
           </div>
         </div>
 
@@ -364,7 +393,7 @@ export default function PracticeConceptView({
             <div style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,0.38)', textAlign:'center', marginBottom:10 }}>
               Which pair of keys makes a half step?
             </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:8 }}>
+            <div className="pcv-answer-grid">
               {answerOptions.map(opt => (
                 <button key={opt} className="pcv-btn-answer" onClick={() => onAnswer?.(opt)}>{opt}</button>
               ))}
@@ -380,7 +409,7 @@ export default function PracticeConceptView({
         )}
 
         {/* ── Stats footer ── */}
-        <div style={{ margin:'4px 12px 0', ...S.glass, borderRadius:14, padding:'14px 20px',
+        <div className="pcv-stats" style={{ margin:'4px 12px 0', ...S.glass, borderRadius:14,
           display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, textAlign:'center' }}>
           {[
             { label:'Correct',  value: stats?.correct  ?? 0,    color: COLORS.teal },
@@ -389,7 +418,7 @@ export default function PracticeConceptView({
             { label:'Accuracy', value:`${stats?.accuracy ?? 0}%`, color:'#e84b8a' },
           ].map(s => (
             <div key={s.label}>
-              <div style={{ fontFamily:FONTS.display, fontSize:20, fontWeight:800, color:s.color, lineHeight:1 }}>{s.value}</div>
+              <div className="pcv-stat-val" style={{ fontFamily:FONTS.display, fontWeight:800, color:s.color, lineHeight:1 }}>{s.value}</div>
               <div style={{ ...S.label, marginTop:4 }}>{s.label}</div>
             </div>
           ))}

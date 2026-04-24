@@ -1220,16 +1220,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         setConceptState(newState)
         if (isCorrect) setSessionCorrect(s => s + 1)
       }}
-      onReplay={async () => {
-        try {
-          const url = await api.speakText(conceptConfig.speechTexts[currentPhase], 'coach')
-          const audio = new Audio(url)
-          audio.onended = () => URL.revokeObjectURL(url)
-          await audio.play()
-        } catch (err) {
-          console.error('[TTS] replay failed:', err)
-        }
-      }}
+      onReplay={() => api.speakText(conceptConfig.speechTexts[currentPhase], 'coach').catch(err => console.error('[TTS] replay failed:', err))}
       onBack={() => setPracticeView('cockpit')}
     />
   )

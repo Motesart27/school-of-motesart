@@ -165,18 +165,23 @@ export const api = {
     request(`/tami/history/${encodeURIComponent(userId)}`, { method: 'DELETE' }).catch(() => {})
   },
 
-  speakText: async (text, voice = 'coach') => {
+  speakText: async (text, voiceType = 'coach') => {
     const res = await fetch('/api/tts/speak', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice }),
+      body: JSON.stringify({ text, voice: voiceType }),
     })
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: 'TTS failed' }))
-      throw new Error(err.error || `TTS error ${res.status}`)
-    }
+    if (!res.ok) throw new Error('TTS failed')
     const blob = await res.blob()
-    return URL.createObjectURL(blob)
+    const url = URL.createObjectURL(blob)
+    const audio = new Audio(url)
+    audio.play()
+    return new Promise(resolve => {
+      audio.onended = () => {
+        URL.revokeObjectURL(url)
+        resolve()
+      }
+    })
   },
 
   wake: () => fetch(`${API_URL}/`).then(r => r.json()),
