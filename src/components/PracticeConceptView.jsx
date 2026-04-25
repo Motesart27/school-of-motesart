@@ -436,6 +436,119 @@ function StatusBox({ isSpeaking, isLoading, studentTurn, inputMode, retryMode, p
   </div>
 }
 
+
+// ── Student Response Bar ──
+function StudentResponseBar({ onSubmit, isListening, disabled }) {
+  const [transcript, setTranscript] = React.useState('')
+  const [micActive, setMicActive] = React.useState(false)
+  const recognitionRef = React.useRef(null)
+
+  const startMic = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) { alert('Speech recognition not supported in this browser'); return }
+    const rec = new SR()
+    rec.lang = 'en-US'
+    rec.continuous = true
+    rec.interimResults = true
+    rec.onresult = (e) => {
+      let interim = ''
+      let final = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript
+        else interim += e.results[i][0].transcript
+      }
+      setTranscript((prev) => (final ? prev + final : prev + interim).replace(/ {2,}/g, ' '))
+    }
+    rec.onerror = () => { setMicActive(false) }
+    rec.onend = () => { setMicActive(false) }
+    rec.start()
+    recognitionRef.current = rec
+    setMicActive(true)
+  }
+
+  const stopMic = () => {
+    if (recognitionRef.current) { try { recognitionRef.current.stop() } catch(e) {} }
+    setMicActive(false)
+  }
+
+  const toggleMic = () => { if (micActive) stopMic(); else startMic() }
+
+  const handleSubmit = () => {
+    const text = transcript.trim()
+    if (!text) return
+    onSubmit?.(text)
+    setTranscript('')
+    stopMic()
+  }
+
+  return (
+    <div style={{
+      background: 'rgba(255,255,255,0.05)',
+      border: `1px solid ${micActive ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)'}`,
+      borderRadius: 14, padding: '12px 16px',
+      display: 'flex', flexDirection: 'column', gap: 10,
+      transition: 'border-color 0.3s',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{
+          width: 8, height: 8, borderRadius: '50%',
+          background: micActive ? '#22c55e' : 'rgba(255,255,255,0.2)',
+          animation: micActive ? 'pulseGreen 1.1s ease-in-out infinite' : 'none',
+        }} />
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.8px',
+          color: micActive ? '#22c55e' : 'rgba(255,255,255,0.4)',
+          textTransform: 'uppercase' }}>
+          {micActive ? 'listening...' : 'your response'}
+        </span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Mic button */}
+        <button onClick={toggleMic} disabled={disabled} style={{
+          width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+          background: micActive ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.07)',
+          border: `1.5px solid ${micActive ? 'rgba(34,197,94,0.6)' : 'rgba(255,255,255,0.15)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+        }}>
+          <svg width="16" height="18" viewBox="0 0 16 20" fill="none"
+            stroke={micActive ? '#22c55e' : 'rgba(255,255,255,0.5)'} strokeWidth="1.8">
+            <rect x="5" y="0" width="6" height="11" rx="3"/>
+            <path d="M1 9a7 7 0 0014 0M8 17v3M4 20h8"/>
+          </svg>
+        </button>
+        {/* Text input */}
+        <input
+          value={transcript}
+          onChange={e => setTranscript(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleSubmit() }}
+          placeholder={micActive ? 'Speak now — words appear here...' : 'Type or tap mic to speak...'}
+          disabled={disabled}
+          style={{
+            flex: 1, background: 'rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
+            padding: '8px 12px', color: '#fff', fontSize: 14, outline: 'none',
+            fontFamily: "'DM Sans', sans-serif",
+            opacity: disabled ? 0.4 : 1,
+          }}
+        />
+        {/* Submit button */}
+        <button onClick={handleSubmit} disabled={!transcript.trim() || disabled} style={{
+          padding: '8px 16px', borderRadius: 10, flexShrink: 0,
+          background: transcript.trim() && !disabled
+            ? 'linear-gradient(135deg, #a855f7, #e84b8a)'
+            : 'rgba(255,255,255,0.06)',
+          border: 'none', color: transcript.trim() && !disabled ? '#fff' : 'rgba(255,255,255,0.3)',
+          fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700,
+          cursor: transcript.trim() && !disabled ? 'pointer' : 'not-allowed',
+          transition: 'all 0.2s',
+        }}>
+          Submit
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ──
 export default function PracticeConceptView({
   conceptName      = 'The Half Step',
@@ -455,12 +568,40 @@ export default function PracticeConceptView({
   onReplay,
   onBack,
   onStudentSend,
+  onStudentResponse,
 }) {
-  const [showHomeKey, setShowHomeKey] = useState(false)
-  const [bpmVal, setBpmVal]           = useState(bpm)
-  const [isSpeaking, setIsSpeaking]   = useState(false)
-  const [isLoading, setIsLoading]     = useState(false)
+  const [showHomeKey, setShowHomeKey]   = useState(false)
+  const [bpmVal, setBpmVal]             = useState(bpm)
+  const [isSpeaking, setIsSpeaking]     = useState(false)
+  const [isLoading, setIsLoading]       = useState(false)
+  const [displayedWords, setDisplayedWords] = useState([])
+  const wordTimerRef = React.useRef(null)
   const phaseIdx = PHASES.indexOf(phase)
+
+  // ── Word-by-word animation ──
+  useEffect(() => {
+    if (!speechText) return
+    const words = speechText.split(' ')
+    setDisplayedWords([])
+    if (wordTimerRef.current) clearInterval(wordTimerRef.current)
+    const estimatedDuration = Math.max(2000, (words.length / 2.5) * 1000)
+    const interval = estimatedDuration / words.length
+    let i = 0
+    wordTimerRef.current = setInterval(() => {
+      i++
+      setDisplayedWords(words.slice(0, i))
+      if (i >= words.length) clearInterval(wordTimerRef.current)
+    }, interval)
+    return () => clearInterval(wordTimerRef.current)
+  }, [speechText])
+
+  // Snap to full text when speaking ends
+  useEffect(() => {
+    if (!isSpeaking && speechText) {
+      setDisplayedWords(speechText.split(' '))
+      if (wordTimerRef.current) clearInterval(wordTimerRef.current)
+    }
+  }, [isSpeaking, speechText])
 
   useEffect(() => {
     if (!speechText || !onReplay) return
@@ -561,7 +702,11 @@ export default function PracticeConceptView({
           }}>
             <div className="pcv-speech-card">
               <div style={{ fontSize:13, fontWeight:700, color:'#e84b8a', letterSpacing:'0.04em', marginBottom:2 }}>Motesart</div>
-              <div className="pcv-speech-text">{speechText}</div>
+              <div className="pcv-speech-text">
+                {displayedWords.length > 0
+                  ? displayedWords.join(' ')
+                  : speechText}
+              </div>
             </div>
             <div style={{
               borderTop:'1px solid rgba(255,255,255,0.08)', padding:'10px 16px',
@@ -584,6 +729,13 @@ export default function PracticeConceptView({
               }}>{isSpeaking ? 'Speaking...' : isLoading ? 'Loading...' : '↩ Replay'}</button>
             </div>
           </div>
+
+          {/* Student response bar — shown when it's student's turn */}
+          <StudentResponseBar
+            onSubmit={onStudentResponse}
+            isListening={studentTurn}
+            disabled={isSpeaking || isLoading}
+          />
 
           {/* Keys in focus */}
           <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:7 }}>
