@@ -596,7 +596,11 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
   const handleStudentInput = React.useCallback(async (transcript) => {
     if (!transcript || transcript.trim().length < 1) return
-    if (!awaitingResponse) return
+    // If not in a listen step, give gentle feedback instead of silent ignore
+    if (!awaitingResponse) {
+      setCoaching({ message: "Hold on — let me finish my thought first.", speaking: false, tags: ['Wait'] })
+      return
+    }
 
     setLastTranscript(transcript)
     const step = teachingStepRef.current
