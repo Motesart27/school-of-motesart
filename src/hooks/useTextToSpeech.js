@@ -60,8 +60,11 @@ export default function useTextToSpeech() {
     try {
       const speechText = preprocessText(text)
 
-      console.log('[TTS] fetching /api/tts/speak, text length:', speechText.length)
-      const response = await fetch('/api/tts/speak', {
+      const ttsUrl = import.meta.env.VITE_RAILWAY_URL
+        ? `${import.meta.env.VITE_RAILWAY_URL}/api/tts/speak`
+        : '/api/tts/speak'
+      console.log('[TTS] calling', ttsUrl, 'text length:', speechText.length)
+      const response = await fetch(ttsUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: speechText, voice }),
