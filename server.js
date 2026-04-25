@@ -58,6 +58,13 @@ app.post('/api/tts/speak', async (req, res) => {
   };
   const voiceId = voiceMap[voice] || voiceMap.coach;
 
+  const envPresence = {
+    hasApiKey: !!process.env.ELEVENLABS_API_KEY,
+    hasCoachVoice: !!process.env.ELEVENLABS_VOICE_ID,
+    hasTamiVoice: !!process.env.ELEVENLABS_TAMI_VOICE_ID,
+  };
+  console.log('[TTS] env presence:', JSON.stringify(envPresence), '| voiceId present:', !!voiceId);
+
   if (!process.env.ELEVENLABS_API_KEY) {
     return res.status(500).json({ error: 'TTS not configured' });
   }
@@ -84,9 +91,10 @@ app.post('/api/tts/speak', async (req, res) => {
     );
 
     if (!elResponse.ok) {
-      const errBody = await elResponse.text();
-      console.error('ElevenLabs error:', elResponse.status, errBody);
-      return res.status(elResponse.status).json({ error: 'TTS generation failed' });
+      const elevenStatus = elResponse.status;
+      const elevenBody = await elResponse.text();
+      console.error('[ElevenLabs TTS]', elevenStatus, elevenBody);
+      return res.status(elevenStatus).json({ error: 'TTS generation failed', status: elevenStatus, detail: elevenBody });
     }
 
     res.setHeader('Content-Type', 'audio/mpeg');
