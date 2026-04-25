@@ -339,7 +339,7 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
 }
 
 // ── Status box — driven automatically by component state ──
-function StatusBox({ isSpeaking, isLoading, studentTurn, inputMode, onSend }) {
+function StatusBox({ isSpeaking, isLoading, studentTurn, inputMode, retryMode, promptMode, onSend }) {
   const [text, setText] = useState('')
 
   if (isSpeaking) return (
@@ -366,6 +366,26 @@ function StatusBox({ isSpeaking, isLoading, studentTurn, inputMode, onSend }) {
           <div className="pcv-bd" style={{ background: '#a855f7' }} />
         </div>
       </div>
+    </div>
+  )
+
+  if (retryMode) return (
+    <div className="pcv-status-box">
+      <div className="pcv-status-top">
+        <span className="pcv-status-label" style={{ color: '#f59e0b' }}>almost — try again</span>
+        <div className="pcv-listen-dot" style={{ background: '#f59e0b' }} />
+      </div>
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>I'm still listening...</div>
+    </div>
+  )
+
+  if (promptMode) return (
+    <div className="pcv-status-box">
+      <div className="pcv-status-top">
+        <span className="pcv-status-label" style={{ color: '#60a5fa' }}>go ahead...</span>
+        <div className="pcv-listen-dot" style={{ background: '#60a5fa' }} />
+      </div>
+      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Don't be shy — say it</div>
     </div>
   )
 
@@ -429,6 +449,8 @@ export default function PracticeConceptView({
   bpm              = 92,
   studentTurn      = false,
   inputMode        = 'text',
+  retryMode        = false,
+  promptMode       = false,
   onAnswer,
   onReplay,
   onBack,
@@ -445,9 +467,8 @@ export default function PracticeConceptView({
     setIsLoading(true)
     setIsSpeaking(false)
     onReplay()
-      .then(() => { setIsLoading(false); setIsSpeaking(true) })
+      .then(() => { setIsLoading(false) })
       .catch(() => { setIsLoading(false) })
-      .finally(() => setIsSpeaking(false))
   }, [speechText])
 
   const S = {
@@ -525,6 +546,8 @@ export default function PracticeConceptView({
             isLoading={isLoading}
             studentTurn={studentTurn}
             inputMode={inputMode}
+            retryMode={retryMode}
+            promptMode={promptMode}
             onSend={onStudentSend}
           />
         </div>
