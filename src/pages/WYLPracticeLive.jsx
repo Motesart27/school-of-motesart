@@ -485,6 +485,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [debugState, setDebugState] = useState(null)
   const [showTelemetry, setShowTelemetry] = useState(false)
   const [ttsUnavailable, setTtsUnavailable] = useState(false)
+  const [retryMode, setRetryMode] = useState(false)
+  const [promptMode, setPromptMode] = useState(false)
+  const [theoryIsSpeaking, setTheoryIsSpeaking] = useState(false)
 
   const [waitingForInput, setWaitingForInput] = useState(null)
   const [inputResolver, setInputResolver] = useState(null)
@@ -553,6 +556,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
     if (current.type === 'speak') {
       setAwaitingResponse(false)
+      setRetryMode(false)
+      setPromptMode(false)
+      setTheoryIsSpeaking(true)
       setCoaching({ message: current.text, speaking: true, tags: ['Teaching'] })
       try {
         console.log('[Motesart] speaking:', current.text.substring(0, 40))
@@ -565,12 +571,19 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         // Wait proportional to text length so lesson still flows
         await new Promise(r => setTimeout(r, Math.max(2000, current.text.split(' ').length * 350)))
       }
+      setTheoryIsSpeaking(false)
       setCoaching(prev => ({ ...prev, speaking: false }))
+      // Natural pause before advancing
+      await new Promise(r => setTimeout(r, 400))
       advanceTeaching(step + 1)
     } else if (current.type === 'listen') {
       setAwaitingResponse(true)
+      setRetryMode(false)
+      setPromptMode(false)
+      setTheoryIsSpeaking(false)
       setCoaching({ message: 'Your turn! I am listening...', speaking: false, tags: ['Listening'] })
       const timeout = setTimeout(() => {
+        setPromptMode(true)
         setCoaching({ message: "Do not be shy! Go ahead and say it.", speaking: false, tags: ['Encouraging'] })
       }, 8000)
       setResponseTimeout(timeout)
@@ -608,9 +621,15 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
           console.warn('[WYLPracticeLive] Affirm TTS failed:', e.message)
         }
       }
+      // Natural pause before advancing after correct answer
+      await new Promise(r => setTimeout(r, 800))
+      setRetryMode(false)
+      setPromptMode(false)
       advanceTeaching(step + 1)
     } else {
       setStudentEmotion('confused')
+      setRetryMode(true)
+      setPromptMode(false)
       setCoaching({ message: "Almost! Try again. I am listening.", speaking: false, tags: ['Retry'] })
     }
   }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching])
@@ -870,12 +889,25 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         setConceptState(newState)
         if (isCorrect) setSessionCorrect(s => s + 1)
       }}
-      onReplay={() => api.speakText(conceptConfig.speechTexts[currentPhase], 'coach')
-        .catch(err => {
-          console.warn('[TTS] onReplay failed:', err.message)
-          setTtsUnavailable(true)
-        })
-      }
+      onReplay={() => {
+        // Replay current theory step text — do NOT advance
+        const step = teachingStepRef.current
+        const steps = THEORY_STEPS
+        const currentStepText = (steps[step] && steps[step].type === 'speak')
+          ? steps[step].text
+          : (step > 0 && steps[step - 1] && steps[step - 1].type === 'speak')
+            ? steps[step - 1].text
+            : conceptConfig.speechTexts[currentPhase]
+        return api.speakText(currentStepText, 'coach')
+          .catch(err => {
+            console.warn('[TTS] onReplay failed:', err.message)
+            setTtsUnavailable(true)
+          })
+      }}
+      studentTurn={awaitingResponse}
+      inputMode="voice"
+      retryMode={retryMode}
+      promptMode={promptMode}
       onBack={() => setPracticeView('cockpit')}
     />
   )
