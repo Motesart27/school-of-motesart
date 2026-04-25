@@ -1,1008 +1,741 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../services/api.js'
-import { VisualOverlay, VISUAL_COMPONENT_MAP, VISUAL_LABELS, C_MAJOR_NOTES, KeyboardDiagram } from '../components/TeachingVisuals'
-import useTamiQuestions from '../hooks/useTamiQuestions'
-import TelemetryPanel from '../components/TelemetryPanel'
-import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
-import PracticeConceptView from '../components/PracticeConceptView.jsx'
-import { CONCEPT_VIEW_CONFIG } from '../config/conceptViewConfig.js'
-import { getState, setState } from '../lesson_engine/concept_state_store.js'
+import React, { useState, useEffect } from 'react'
+import { COLORS, FONTS, GRADIENTS } from '../styles/theme.js'
 
-const INTENT_SYSTEM_PROMPT = [
-  'You are an intent classification engine for a real-time music teaching system.',
-  'Analyze short student input and return structured JSON.',
-  'OUTPUT: { "intent": "", "confidence": 0.0, "emotion": "", "content": "", "correctness": null }',
-  'INTENT TYPES: answer_attempt, uncertain_answer, question, confusion, affirmation, hesitation, silence, off_topic',
-  'EMOTIONS: confident, neutral, hesitant, frustrated, curious, disengaged',
-  'CORRECTNESS: true, false, partial, or null. Be generous with beginners.'
-].join(' ')
-
-async function parseIntent(transcript, context) {
-  if (!transcript || transcript.trim().length === 0) {
-    return { intent: 'silence', confidence: 1.0, emotion: 'neutral', content: '', correctness: null }
-  }
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': window.__MOTESART_CLAUDE_KEY || '',
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 150,
-        system: INTENT_SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: 'Student said: "' + transcript + '" Expected: ' + (context.expectedAnswer || 'any') + ' Acceptable: ' + (context.acceptableAnswers || []).join(', ') + ' Concept: ' + (context.concept || 'music') }]
-      })
-    })
-    const data = await resp.json()
-    const text = data.content && data.content[0] ? data.content[0].text : '{}'
-    return JSON.parse(text)
-  } catch (err) {
-    console.error('Intent parse error:', err)
-    return { intent: 'answer_attempt', confidence: 0.5, emotion: 'neutral', content: transcript, correctness: null }
-  }
-}
-
-let _recognition = null
-let _isListening = false
-let _onTranscript = null
-let micAllowed = false
-
-async function ensureMicPermission() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    stream.getTracks().forEach(t => t.stop())
-    micAllowed = true
-    console.log('Mic permission granted')
-    return true
-  } catch (err) {
-    console.error('Mic permission denied:', err)
-    return false
-  }
-}
-
-function startListening(onTranscript) {
-  if (_isListening) return
-  if (!micAllowed) { console.error('Mic not allowed'); return }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-  if (!SR) { console.warn('SpeechRecognition not supported'); return }
-  _onTranscript = onTranscript
-  _recognition = new SR()
-  _recognition.lang = 'en-US'
-  _recognition.continuous = true
-  _recognition.interimResults = true
-  _recognition.onresult = (event) => {
-    let transcript = ''
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript
-    }
-    if (event.results[event.results.length - 1].isFinal && _onTranscript) {
-      _onTranscript(transcript.trim())
-    }
-  }
-  _recognition.onerror = (e) => {
-    console.warn('Speech recognition error:', e.error)
-    if (e.error === 'not-allowed' || e.error === 'audio-capture') {
-      _isListening = false
-    } else if (e.error !== 'no-speech') {
-      setTimeout(() => { _isListening = false; startListening(_onTranscript) }, 1000)
-    }
-  }
-  _recognition.onend = () => { if (_isListening) { try { _recognition.start() } catch(e) {} } }
-  _recognition.start()
-  _isListening = true
-}
-
-function stopListening() {
-  _isListening = false
-  if (_recognition) { try { _recognition.stop() } catch(e) {} _recognition = null }
-}
-
-let _silenceTimer = null
-function resetSilenceTimer(onSilence, delay) {
-  clearTimeout(_silenceTimer)
-  _silenceTimer = setTimeout(() => { if (onSilence) onSilence() }, delay || 5000)
-}
-function clearSilenceTimer() { clearTimeout(_silenceTimer) }
-
-let _isProcessing = false
-let _audioCtx = null
-let _currentSource = null
-
-function getAudioContext() {
-  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-  return _audioCtx
-}
-
-if (typeof document !== 'undefined') {
-  const _unlockAudio = () => {
-    const ctx = getAudioContext()
-    if (ctx.state === 'suspended') ctx.resume()
-    try {
-      const buf = ctx.createBuffer(1, 1, 22050)
-      const src = ctx.createBufferSource()
-      src.buffer = buf
-      src.connect(ctx.destination)
-      src.start(0)
-    } catch(e) {}
-    document.removeEventListener('click', _unlockAudio)
-    document.removeEventListener('touchstart', _unlockAudio)
-    document.removeEventListener('keydown', _unlockAudio)
-  }
-  document.addEventListener('click', _unlockAudio)
-  document.addEventListener('touchstart', _unlockAudio)
-  document.addEventListener('keydown', _unlockAudio)
-}
-
-// ── TTS pronunciation sanitizer ──
-// Display text stays "Motesart" — spoken text uses phonetic "Moatzart"
-const sanitizeTTS = (text) => text.replace(/Motesart/g, 'Moatzart')
-
-const AVATAR_SRC = '/motesart-avatar.png'
-const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
+const WHITE_KEY_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C']
+const BLACK_OFFSETS   = [0, 1, 3, 4, 5]
+const PHASES          = ['teach', 'guide', 'confirm', 'release']
+const PHASE_LABELS    = { teach: 'Teaching', guide: 'Guided Practice', confirm: 'Confirm', release: 'You Got This' }
 
 const css = `
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Outfit:wght@400;500;600;700;800&display=swap');
-
-:root {
-  --bg:#F5F5FA; --bg-white:#FFF;
-  --bg-dark-glass:rgba(20,20,40,0.75);
-  --bg-dark-glass-heavy:rgba(20,20,40,0.88);
-  --border-dark:rgba(255,255,255,0.1);
-  --text:#1A1A2E; --text-secondary:#4A4A6A; --text-muted:#8E8EA8;
-  --teal:#00C49A; --teal-bright:#00D4AA;
-  --tami-pink:#e84b8a; --tami-orange:#f97316;
-  --pink:#FF4F6E;
-  --radius-2xl:24px; --radius-xl:20px; --radius-lg:16px; --radius-md:12px; --radius-sm:8px;
-}
-
-.wyl-root { position:relative; width:100vw; height:100vh; overflow:hidden; background:#0a0a1a; font-family:'DM Sans',-apple-system,sans-serif; }
-.wyl-root *,.wyl-root *::before,.wyl-root *::after { box-sizing:border-box; margin:0; padding:0; }
-.wyl-root h1,.wyl-root h2,.wyl-root h3,.wyl-root h4,.wyl-root h5 { font-family:'Outfit',sans-serif; letter-spacing:-0.02em; }
-
-.wyl-camera { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-.wyl-camera video { width:100%; height:100%; object-fit:cover; }
-.wyl-camera-placeholder { position:absolute; inset:0; background:linear-gradient(150deg,#14142a 0%,#1c1c3a 50%,#1a1a30 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
-.wyl-camera-placeholder__icon { width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; }
-.wyl-camera-placeholder__text { font-size:13px; color:rgba(255,255,255,0.25); }
-
-.wyl-nametag { position:absolute; top:76px; left:20px; display:flex; align-items:center; gap:6px; padding:4px 10px 4px 6px; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); border-radius:12px; z-index:5; }
-.wyl-nametag__dot { width:6px; height:6px; border-radius:50%; background:#ff4f6e; animation:wylPulse 2s infinite; }
-.wyl-nametag__name { font-size:11px; font-weight:600; color:rgba(255,255,255,0.9); }
-
-.wyl-bar { position:absolute; top:12px; left:12px; right:12px; display:flex; align-items:center; justify-content:space-between; padding:0 20px; height:48px; background:var(--bg-dark-glass); backdrop-filter:blur(20px); border:1px solid var(--border-dark); border-radius:var(--radius-lg); z-index:10; }
-.wyl-bar__left { display:flex; align-items:center; gap:12px; }
-.wyl-bar__brand { font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; background:linear-gradient(135deg,#e84b8a,#f97316); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.wyl-bar__sep { width:1px; height:18px; background:rgba(255,255,255,0.1); }
-.wyl-bar__objective { font-size:12px; color:rgba(255,255,255,0.45); font-weight:500; }
-.wyl-bar__right { display:flex; align-items:center; gap:10px; }
-.wyl-bar__timer { font-family:'Outfit',sans-serif; font-size:18px; font-weight:700; color:var(--teal); font-variant-numeric:tabular-nums; padding:0 6px; }
-.wyl-bar__btn { padding:6px 14px; border-radius:20px; border:1px solid rgba(255,255,255,0.1); background:transparent; color:rgba(255,255,255,0.5); font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-.wyl-bar__btn:hover { border-color:rgba(255,255,255,0.2); color:rgba(255,255,255,0.8); }
-.wyl-bar__btn--end { border-color:rgba(255,79,110,0.3); color:var(--pink); }
-.wyl-bar__btn--end:hover { background:var(--pink); color:#fff; border-color:var(--pink); }
-
-.mc { position:absolute; bottom:24px; left:24px; z-index:10; animation:mcSlideUp 0.35s cubic-bezier(0.16,1,0.3,1); }
-@keyframes mcSlideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-.mc__main { display:flex; gap:16px; align-items:center; padding:18px 24px; background:var(--bg-dark-glass-heavy); backdrop-filter:blur(24px); border:1px solid var(--border-dark); border-radius:var(--radius-xl); box-shadow:0 12px 40px rgba(0,0,0,0.4); cursor:pointer; transition:box-shadow 0.2s,border-color 0.2s,border-radius 0.3s; min-width:260px; }
-.mc__main:hover { box-shadow:0 14px 48px rgba(0,0,0,0.5); border-color:rgba(255,255,255,0.12); }
-.mc__av-wrap { position:relative; width:72px; height:72px; flex-shrink:0; }
-.mc__live-ring { position:absolute; inset:-4px; border-radius:50%; border:2px solid var(--teal); animation:mcRing 3s ease-in-out infinite; }
-@keyframes mcRing { 0%,100%{opacity:0.35;transform:scale(1)} 50%{opacity:1;transform:scale(1.06)} }
-.mc__av { width:72px; height:72px; border-radius:50%; overflow:hidden; box-shadow:0 4px 20px rgba(232,75,138,0.35); }
-.mc__av img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
-.mc__info { flex:1; }
-.mc__name { font-family:'Outfit',sans-serif; font-size:16px; font-weight:700; color:rgba(255,255,255,0.95); margin-bottom:4px; }
-.mc__status-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.mc__status { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:600; color:var(--teal); padding:2px 8px; background:rgba(0,196,154,0.12); border-radius:10px; }
-.mc__status-dot { width:5px; height:5px; border-radius:50%; background:var(--teal); animation:wylPulse 2s infinite; }
-@keyframes wylPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-.mc__speech { display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.55); }
-.mc__speech-bars { display:flex; align-items:center; gap:2px; height:14px; }
-.mc__speech-bar { width:3px; border-radius:2px; background:linear-gradient(180deg,var(--tami-pink),var(--tami-orange)); animation:mcSpeak 0.8s ease-in-out infinite alternate; }
-.mc__speech-bar:nth-child(1){height:6px;animation-delay:0s}
-.mc__speech-bar:nth-child(2){height:12px;animation-delay:0.15s}
-.mc__speech-bar:nth-child(3){height:8px;animation-delay:0.3s}
-.mc__speech-bar:nth-child(4){height:14px;animation-delay:0.1s}
-.mc__speech-bar:nth-child(5){height:6px;animation-delay:0.25s}
-@keyframes mcSpeak { 0%{transform:scaleY(0.4)} 100%{transform:scaleY(1)} }
-.mc__tap-hint { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; }
-
-.mc__chat { max-height:0; overflow:hidden; opacity:0; margin-top:0; background:var(--bg-dark-glass-heavy); backdrop-filter:blur(24px); border:1px solid var(--border-dark); border-top:none; border-radius:0 0 var(--radius-xl) var(--radius-xl); transition:max-height 0.4s cubic-bezier(0.16,1,0.3,1),opacity 0.3s ease,margin-top 0.3s ease,padding 0.3s ease; padding:0 24px; }
-.mc.chat-open .mc__chat { max-height:400px; opacity:1; margin-top:-16px; padding:28px 24px 18px; }
-.mc.chat-open .mc__main { border-radius:var(--radius-xl) var(--radius-xl) 0 0; }
-.mc__chat-msg { font-size:13px; line-height:1.65; color:rgba(255,255,255,0.82); margin-bottom:10px; }
-.mc__chat-tags { display:flex; gap:6px; }
-.mc__chat-tag { font-size:9px; font-weight:600; color:rgba(255,255,255,0.4); padding:2px 8px; background:rgba(255,255,255,0.06); border-radius:12px; }
-.mc__chat-tag--focus { color:var(--teal-bright); background:rgba(0,212,170,0.1); }
-
-.wyl-visual-overlay { position:absolute; bottom:140px; left:24px; right:24px; max-width:600px; z-index:8; animation:mcSlideUp 0.35s cubic-bezier(0.16,1,0.3,1); }
-.wyl-visual-card { padding:24px; background:var(--bg-dark-glass-heavy); backdrop-filter:blur(24px); border:1px solid var(--border-dark); border-radius:var(--radius-xl); box-shadow:0 12px 40px rgba(0,0,0,0.4); }
-.wyl-visual-card__title { font-family:'Outfit',sans-serif; font-size:14px; font-weight:700; color:rgba(255,255,255,0.9); margin-bottom:12px; }
-.wyl-visual-card__component { min-height:120px; background:rgba(0,0,0,0.3); border-radius:12px; border:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:center; }
-
-.wyl-celebration { position:absolute; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; pointer-events:none; animation:celebFade 2.5s ease-out forwards; }
-@keyframes celebFade { 0%{opacity:0;transform:scale(0.8)} 15%{opacity:1;transform:scale(1.05)} 25%{transform:scale(1)} 80%{opacity:1} 100%{opacity:0} }
-.wyl-celebration__text { font-family:'Outfit',sans-serif; font-size:48px; font-weight:800; background:linear-gradient(135deg,var(--teal-bright),var(--tami-pink)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap');
+  @keyframes keyGlow {
+    0%,100% { box-shadow: 0 0 0 2px rgba(110,231,183,0); }
+    50%      { box-shadow: 0 0 14px 4px rgba(110,231,183,0.55); }
+  }
+  @keyframes numGlow {
+    0%,100% { color: #059669; text-shadow: none; }
+    50%     { color: #10b981; text-shadow: 0 0 8px rgba(16,185,129,0.65); }
+  }
+  @keyframes speakBar {
+    0%   { transform: scaleY(0.35); }
+    100% { transform: scaleY(1); }
+  }
+  @keyframes pcvFadeUp {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes bounceDot {
+    0%,100% { transform:translateY(0); opacity:0.5; }
+    50%     { transform:translateY(-5px); opacity:1; }
+  }
+  @keyframes pulseGreen {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%     { opacity:0.5; transform:scale(1.4); }
+  }
+  @keyframes doubleArrowPulse {
+    0%,100% { opacity:1; transform:translateX(-50%) scaleX(1); }
+    50%     { opacity:0.45; transform:translateX(-50%) scaleX(0.72); }
+  }
+  .pcv-root {
+    min-height: 100vh;
+    background: linear-gradient(135deg,#0f0c29 0%,#302b63 50%,#24243e 100%);
+    font-family: 'DM Sans',-apple-system,sans-serif;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+  }
+  .pcv-root * { box-sizing: border-box; }
+  .pcv-body {
+    display: flex;
+    flex: 1;
+    gap: 24px;
+    padding: 16px 28px 12px;
+    align-items: flex-start;
+    animation: pcvFadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .pcv-avatar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    min-width: 200px;
+    max-width: 220px;
+  }
+  .mot-av {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(168,85,247,0.55);
+    background: linear-gradient(135deg,#a855f7,#e84b8a);
+    flex-shrink: 0;
+  }
+  .mot-av img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+  }
+  .pcv-av-name {
+    color: #d946ef;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+  .pcv-status-box {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 52px;
+  }
+  .pcv-status-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pcv-status-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+  }
+  .pcv-speak-bars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+  }
+  .pcv-speak-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(180deg,#e84b8a,#f97316);
+    animation: speakBar 0.72s ease-in-out infinite alternate;
+    transform-origin: bottom;
+  }
+  .pcv-bounce-dots {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+  }
+  .pcv-bd {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: bounceDot 0.9s ease-in-out infinite;
+  }
+  .pcv-bd:nth-child(2) { animation-delay: 0.2s; }
+  .pcv-bd:nth-child(3) { animation-delay: 0.4s; }
+  .pcv-listen-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulseGreen 1.1s ease-in-out infinite;
+    margin-left: auto;
+  }
+  .pcv-chat-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .pcv-chat-inp {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 6px 10px;
+    color: #fff;
+    font-size: 13px;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .pcv-chat-inp::placeholder { color: rgba(255,255,255,0.3); }
+  .pcv-send-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(96,165,250,0.2);
+    border: 1px solid rgba(96,165,250,0.4);
+    color: #60a5fa;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .pcv-mic-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(96,165,250,0.1);
+    border: 1px solid rgba(96,165,250,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .pcv-speech-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+  .piano-container {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(180deg,#111,#000);
+    border-radius: 12px;
+    border: 2px solid #222;
+    border-top: 4px solid #333;
+    overflow: visible;
+    user-select: none;
+  }
+  .pcv-btn-answer {
+    min-height: 54px;
+    padding: 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.11);
+    border-radius: 14px;
+    color: rgba(255,255,255,0.88);
+    font-family: 'Outfit',sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .12s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pcv-btn-answer:hover {
+    background: rgba(255,255,255,0.11);
+    border-color: rgba(255,255,255,0.22);
+    transform: translateY(-1px);
+  }
+  .pcv-btn-answer:active { transform: translateY(0); }
+  .pcv-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pcv-answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .pcv-speech-card { padding: 20px 22px; }
+  .pcv-speech-text { font-size: 15px; color: rgba(255,255,255,0.85); line-height: 1.65; }
+  @media (max-width: 700px) {
+    .pcv-body { flex-direction: column; padding: 12px 16px; }
+    .pcv-avatar-col { flex-direction: row; min-width: unset; max-width: unset; width: 100%; align-items: center; }
+    .mot-av { width: 72px; height: 72px; }
+    .piano-container { height: 120px; }
+  }
+  .pcv-unified-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; flex-wrap: nowrap; min-height: 56px;
+  }
+  .pcv-pill {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    flex-shrink: 0; transition: all 0.3s; white-space: nowrap;
+  }
+  .pcv-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pcvPd 1.2s ease-in-out infinite; }
+  @keyframes pcvPd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
+  .pcv-pill-speaking { background:rgba(232,75,138,0.15); color:#e84b8a; border:1px solid rgba(232,75,138,0.3); }
+  .pcv-pill-listening { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); }
+  .pcv-pill-thinking { background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid rgba(168,85,247,0.3); }
+  .pcv-pill-retry { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+  .pcv-row-wave { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+  .pcv-row-wb { width:3px; border-radius:2px; background:#e84b8a; transform-origin:bottom; animation:pcvWv 0.65s ease-in-out infinite alternate; }
+  .pcv-row-wb:nth-child(1){height:5px;animation-delay:0s}
+  .pcv-row-wb:nth-child(2){height:11px;animation-delay:0.1s}
+  .pcv-row-wb:nth-child(3){height:7px;animation-delay:0.2s}
+  .pcv-row-wb:nth-child(4){height:13px;animation-delay:0.15s}
+  .pcv-row-wb:nth-child(5){height:4px;animation-delay:0.05s}
+  @keyframes pcvWv{0%{transform:scaleY(0.3)}100%{transform:scaleY(1)}}
+  .pcv-think-dots { display:flex; align-items:center; gap:3px; flex-shrink:0; }
+  .pcv-td { width:5px; height:5px; border-radius:50%; background:#a855f7; animation:pcvBounce 0.9s ease-in-out infinite; }
+  .pcv-td:nth-child(2){animation-delay:0.2s}.pcv-td:nth-child(3){animation-delay:0.4s}
+  @keyframes pcvBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .pcv-row-replay {
+    background:rgba(232,75,138,0.12); border:1px solid rgba(232,75,138,0.3);
+    color:#e84b8a; border-radius:20px; padding:5px 13px;
+    font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; white-space:nowrap;
+  }
+  .pcv-row-spacer { flex:1; }
+  .pcv-row-mic {
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.3s; border:none; position:relative;
+  }
+  .pcv-row-mic.listening { background:rgba(34,197,94,0.2); border:1.5px solid rgba(34,197,94,0.6); }
+  .pcv-row-mic.retry { background:rgba(245,158,11,0.2); border:1.5px solid rgba(245,158,11,0.5); }
+  .pcv-row-inp {
+    flex:1; min-width:0;
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+    border-radius:10px; padding:8px 13px; color:#fff; font-size:14px;
+    font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s;
+  }
+  .pcv-row-inp.active { border-color:rgba(34,197,94,0.45); }
+  .pcv-row-inp::placeholder { color:rgba(255,255,255,0.28); }
+  .pcv-row-inp:disabled { opacity:0.25; }
+  .pcv-row-sub {
+    padding:7px 16px; border-radius:10px; border:none; flex-shrink:0;
+    background:linear-gradient(135deg,#a855f7,#e84b8a);
+    color:#fff; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .pcv-row-sub:disabled { opacity:0.2; cursor:not-allowed; background:rgba(255,255,255,0.08); }
 `
 
-function createUIBridge(setters) {
-  return {
-    renderMoment(moment, visual, options) {
-      setters.setCurrentMoment(moment)
-      if (visual) setters.setCurrentVisual(visual)
-    },
+// ── Double-sided pulsing arrow ──
+function KeyArrow({ from, to }) {
+  const kW = 100 / 8
+  const x1 = (from + 0.5) * kW
+  const x2 = (to + 0.5) * kW
+  const cx = (x1 + x2) / 2
+  const y  = 44
+  const hw = (x2 - x1) * 0.38
 
-    showFeedback(feedback) {
-      setters.setFeedback(feedback)
-      const holdMs = feedback?.timing?.after || 2000
-      setTimeout(() => setters.setFeedback(null), holdMs)
-    },
-
-    async waitForStudent(interactionMode, timeoutMs) {
-      setters.setWaitingForInput({ mode: interactionMode, timeout: timeoutMs })
-      return new Promise((resolve, reject) => {
-        setters.setInputResolver({ resolve, reject })
-        if (timeoutMs > 0) {
-          setTimeout(() => {
-            setters.setWaitingForInput(null)
-            setters.setInputResolver(null)
-            reject(new Error('timeout'))
-          }, timeoutMs)
-        }
-      })
-    },
-
-    async playSpeech(text, options) {
-      if (_currentSource) { try { _currentSource.stop() } catch(e) {} _currentSource = null }
-      if (window.speechSynthesis) window.speechSynthesis.cancel()
-
-      setters.setCoaching(prev => ({ ...prev, message: text, speaking: true }))
-
-      if (options?.audio) {
-        const audio = new Audio(options.audio)
-        await audio.play().catch(() => {})
-        await new Promise(r => {
-          audio.onended = r
-          setTimeout(r, 10000)
-        })
-      } else {
-        // ── Use api.speakText (routes to Railway via VITE_RAILWAY_URL) ──
-        let played = false
-        try {
-          await api.speakText(text, 'coach')
-          played = true
-        } catch (e) {
-          console.warn('[WYLPracticeLive] TTS via api.speakText failed:', e.message)
-        }
-
-        // Browser speechSynthesis fallback
-        if (!played && window.speechSynthesis) {
-          const utterance = new SpeechSynthesisUtterance(text)
-          utterance.lang = 'en-US'
-          utterance.rate = 0.95
-          utterance.pitch = 1.0
-          utterance.volume = 1.0
-          let voices = window.speechSynthesis.getVoices()
-          if (voices.length === 0) {
-            await new Promise(r => {
-              window.speechSynthesis.onvoiceschanged = () => r()
-              setTimeout(r, 1000)
-            })
-            voices = window.speechSynthesis.getVoices()
-          }
-          const preferred = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
-            || voices.find(v => v.lang === 'en-US' && v.name.includes('Samantha'))
-            || voices.find(v => v.lang === 'en-US')
-            || voices.find(v => v.lang.startsWith('en'))
-          if (preferred) utterance.voice = preferred
-          utterance.lang = 'en-US'
-          await new Promise(resolve => {
-            utterance.onend = resolve
-            utterance.onerror = resolve
-            window.speechSynthesis.speak(utterance)
-            const words = text.split(' ').length
-            setTimeout(resolve, Math.max(3000, (words / 130) * 60000))
-          })
-        } else if (!played) {
-          const words = text.split(' ').length
-          const durationMs = Math.max(1500, (words / 150) * 60000)
-          await new Promise(r => setTimeout(r, durationMs))
-        }
-      }
-      setters.setCoaching(prev => ({ ...prev, speaking: false }))
-    },
-
-    async playTones(tones, options) {
-      setters.setActiveTones(tones)
-      const duration = options?.tempo ? (tones.length * (60000 / options.tempo)) : 2000
-      await new Promise(r => setTimeout(r, duration))
-      setters.setActiveTones(null)
-    },
-
-    showCelebration(type) {
-      setters.setCelebration(type)
-      setTimeout(() => setters.setCelebration(null), 2800)
-    },
-
-    clearVisual() { setters.setCurrentVisual(null) },
-    updateDebug(state) { setters.setDebugState(state) },
-    onLessonStart(info) { setters.setLessonInfo(info) },
-    onLessonComplete(summary) { setters.setLessonComplete(summary) },
-
-    showReinforcement(data) {
-      setters.setReinforcement(data)
-      setTimeout(() => setters.setReinforcement(null), 4000)
-    },
-
-    startMicroGame(game, moment) {
-      console.log('[UI] Micro-game triggered:', game)
-    },
-  }
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      style={{
+        position: 'absolute', inset: 0, width: '100%', height: '100%',
+        pointerEvents: 'none', zIndex: 3, overflow: 'visible',
+      }}
+    >
+      <g style={{
+        transformOrigin: `${cx}% ${y}%`,
+        animation: 'doubleArrowPulse 1s ease-in-out infinite',
+        transform: 'scaleX(1)',
+      }}>
+        {/* left arrowhead */}
+        <polygon
+          points={`${x1},${y} ${x1 + 3.5},${y - 3} ${x1 + 3.5},${y + 3}`}
+          fill="#34d399"
+        />
+        {/* shaft */}
+        <rect
+          x={x1 + 3} y={y - 1.2}
+          width={x2 - x1 - 6} height={2.4}
+          rx="1.2" fill="#34d399"
+        />
+        {/* right arrowhead */}
+        <polygon
+          points={`${x2},${y} ${x2 - 3.5},${y - 3} ${x2 - 3.5},${y + 3}`}
+          fill="#34d399"
+        />
+      </g>
+    </svg>
+  )
 }
 
-function TopBar({ timer, objective, onPause, onEnd, paused }) {
+// ── Piano keyboard ──
+function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
+  const kW = 100 / 8
   return (
-    <div className="wyl-bar">
-      <div className="wyl-bar__left">
-        <span className="wyl-bar__brand">School of Motesart</span>
-        <div className="wyl-bar__sep" />
-        <span className="wyl-bar__objective">{objective}</span>
+    <div className="piano-container">
+      <div style={{ display: 'flex', height: '100%', gap: 2 }}>
+        {Array.from({ length: 8 }).map((_, i) => {
+          const isFocus = highlightedKeys.includes(i)
+          const isHome  = showHomeKey && i === homeKeyIndex
+          const bg   = isFocus ? '#d4f5e0' : isHome ? '#fde8c8' : '#f8f8f8'
+          const bdrB = isFocus ? '4px solid #90d4a8' : isHome ? '4px solid #e8c890' : '4px solid #c8c8c8'
+          return (
+            <div key={i} style={{
+              flex: 1, background: bg, borderRadius: '0 0 9px 9px',
+              borderRight: '1px solid #e0e0e0', borderBottom: bdrB, position: 'relative',
+              animation: isFocus ? 'keyGlow 1.6s ease-in-out infinite' : 'none',
+            }}>
+              <span style={{
+                position: 'absolute', bottom: 22, left: 0, right: 0,
+                textAlign: 'center', display: 'block', fontSize: 16, fontWeight: 900, lineHeight: 1,
+                color: isFocus ? '#059669' : isHome ? '#b7791f' : '#555',
+                animation: isFocus ? 'numGlow 1.6s ease-in-out infinite' : 'none',
+              }}>{i + 1}</span>
+              <span style={{
+                position: 'absolute', bottom: 7, left: 0, right: 0,
+                textAlign: 'center', display: 'block', fontSize: 11, fontWeight: 700,
+                color: isFocus ? '#047857' : isHome ? '#975a16' : '#999',
+              }}>{WHITE_KEY_NAMES[i]}</span>
+            </div>
+          )
+        })}
       </div>
-      <div className="wyl-bar__right">
-        <span className="wyl-bar__timer">{timer}</span>
-        <button className="wyl-bar__btn" onClick={onPause}>{paused ? 'Resume' : 'Pause'}</button>
-        <button className="wyl-bar__btn wyl-bar__btn--end" onClick={onEnd}>End Session</button>
-      </div>
+      {BLACK_OFFSETS.map(offset => (
+        <div key={offset} style={{
+          position: 'absolute', top: 0, zIndex: 2,
+          left: `${(offset + 1) * kW - kW * 0.32}%`,
+          width: `${kW * 0.62}%`, height: '62%',
+          background: 'linear-gradient(180deg,#1a1a2e 0%,#0d0d1a 100%)',
+          borderRadius: '0 0 6px 6px',
+          boxShadow: '0 6px 12px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06)',
+        }} />
+      ))}
+      {highlightedKeys.length >= 2 && (
+        <KeyArrow from={highlightedKeys[0]} to={highlightedKeys[1]} />
+      )}
     </div>
   )
 }
 
-function MotesartCard({ coaching, onToggleChat, chatOpen, onStudentQuestion }) {
-  const isSpeaking = coaching?.speaking
-  const [chatInput, setChatInput] = useState('')
 
-  const handleSend = () => {
-    const text = chatInput.trim()
+
+// ── Unified Row — Motesart status + student response in one bar ──
+function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, onReplay, onStudentResponse }) {
+  const [transcript, setTranscript] = React.useState('')
+  const [micActive, setMicActive] = React.useState(false)
+  const recognitionRef = React.useRef(null)
+
+  const startMic = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SR) return
+    const rec = new SR()
+    rec.lang = 'en-US'
+    rec.continuous = true
+    rec.interimResults = true
+    rec.onresult = (e) => {
+      let text = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        text += e.results[i][0].transcript
+      }
+      setTranscript(text)
+    }
+    rec.onerror = () => setMicActive(false)
+    rec.onend = () => setMicActive(false)
+    rec.start()
+    recognitionRef.current = rec
+    setMicActive(true)
+  }
+
+  const stopMic = () => {
+    if (recognitionRef.current) { try { recognitionRef.current.stop() } catch(e) {} }
+    setMicActive(false)
+  }
+
+  const handleSubmit = () => {
+    const text = transcript.trim()
     if (!text) return
-    setChatInput('')
-    if (onStudentQuestion) onStudentQuestion(text)
+    onStudentResponse?.(text)
+    setTranscript('')
+    stopMic()
   }
 
-  const handleKeyDown = (e) => {
-    if (!window.__MOTESART_DEV_MODE) return
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.stopPropagation(); handleSend() }
-  }
+  // Determine pill state
+  const pillClass = isSpeaking ? 'pcv-pill pcv-pill-speaking'
+    : isLoading ? 'pcv-pill pcv-pill-thinking'
+    : retryMode ? 'pcv-pill pcv-pill-retry'
+    : studentTurn ? 'pcv-pill pcv-pill-listening'
+    : 'pcv-pill pcv-pill-speaking'
+
+  const pillText = isSpeaking ? 'speaking now'
+    : isLoading ? 'thinking...'
+    : retryMode ? 'almost — try again'
+    : studentTurn ? 'your turn'
+    : '—'
+
+  const showStudentInput = (studentTurn || retryMode) && !isSpeaking && !isLoading
+  const micColor = retryMode ? '#f59e0b' : '#22c55e'
+  const micClass = `pcv-row-mic ${retryMode ? 'retry' : 'listening'}`
 
   return (
-    <div className={`mc${chatOpen ? ' chat-open' : ''}`}>
-      <div className="mc__main" onClick={onToggleChat}>
-        <div className="mc__av-wrap">
-          <div className="mc__live-ring" />
-          <div className="mc__av"><img src={AVATAR_SRC} alt="Motesart" /></div>
-        </div>
-        <div className="mc__info">
-          <div className="mc__name">Motesart</div>
-          <div className="mc__status-row">
-            <span className="mc__status">
-              <span className="mc__status-dot" />
-              {isSpeaking ? 'Speaking' : 'Listening'}
-            </span>
-          </div>
-          {isSpeaking && (
-            <div className="mc__speech">
-              <div className="mc__speech-bars">
-                {[0,1,2,3,4].map(i => <div key={i} className="mc__speech-bar" />)}
-              </div>
-              <span>Speaking aloud...</span>
-            </div>
-          )}
-          <div className="mc__tap-hint">Tap to chat with Motesart</div>
-        </div>
+    <div className="pcv-unified-row">
+      <span style={{ fontSize:13, fontWeight:800, color:'#e84b8a', flexShrink:0, letterSpacing:'0.04em' }}>Motesart</span>
+
+      <div className={pillClass}>
+        <div className="pcv-pill-dot" />
+        <span>{pillText}</span>
       </div>
-      <div className="mc__chat">
-        <p className="mc__chat-msg">{coaching?.message || 'Listening...'}</p>
-        {coaching?.tags && coaching.tags.length > 0 && (
-          <div className="mc__chat-tags">
-            {coaching.tags.map((t, i) => (
-              <span key={i} className={`mc__chat-tag${i === 0 ? ' mc__chat-tag--focus' : ''}`}>{t}</span>
+
+      {/* Speaking: waveform + replay */}
+      {(isSpeaking || (!studentTurn && !retryMode && !isLoading)) && (
+        <>
+          <div className="pcv-row-wave">
+            {[5,11,7,13,4].map((h,i) => (
+              <div key={i} className="pcv-row-wb" style={{ height:h, opacity: isSpeaking ? 1 : 0.25 }} />
             ))}
           </div>
-        )}
-        <div style={{ display:'flex', gap:8, marginTop:12, borderTop:'1px solid rgba(255,255,255,0.06)', paddingTop:12 }}>
+          <button className="pcv-row-replay" onClick={onReplay}>↺ Replay</button>
+        </>
+      )}
+
+      {/* Thinking: dots */}
+      {isLoading && (
+        <div className="pcv-think-dots">
+          <div className="pcv-td" /><div className="pcv-td" /><div className="pcv-td" />
+        </div>
+      )}
+
+      {/* Student turn: mic + input + submit */}
+      {showStudentInput && (
+        <>
+          <div className="pcv-row-spacer" />
+          <button
+            className={micClass}
+            onClick={() => micActive ? stopMic() : startMic()}
+            style={{ background: micActive ? `rgba(${retryMode?'245,158,11':'34,197,94'},0.3)` : undefined }}
+          >
+            <svg width="15" height="18" viewBox="0 0 15 20" fill="none" stroke={micActive ? micColor : 'rgba(255,255,255,0.5)'} strokeWidth="1.8">
+              <rect x="4.5" y="0" width="6" height="11" rx="3"/>
+              <path d="M1 9a6.5 6.5 0 0013 0M7.5 17v3M4 20h7"/>
+            </svg>
+          </button>
           <input
-            type="text" value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onClick={(e) => e.stopPropagation()}
-            placeholder="Ask Motesart a question..."
-            style={{ flex:1, padding:'8px 12px', fontSize:12, background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'rgba(255,255,255,0.85)', outline:'none', fontFamily:'DM Sans, sans-serif' }}
+            className={`pcv-row-inp${micActive ? ' active' : ''}`}
+            placeholder={micActive ? 'Listening — speak now...' : 'Type or tap mic to speak...'}
+            value={transcript}
+            onChange={e => setTranscript(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && transcript.trim()) handleSubmit() }}
           />
           <button
-            onClick={(e) => { e.stopPropagation(); handleSend() }}
-            disabled={!chatInput.trim()}
-            style={{ padding:'8px 14px', fontSize:11, fontWeight:600, background:chatInput.trim() ? 'linear-gradient(135deg,#e84b8a,#f97316)' : 'rgba(255,255,255,0.06)', border:'none', borderRadius:10, color:chatInput.trim() ? '#fff' : 'rgba(255,255,255,0.3)', cursor:chatInput.trim() ? 'pointer' : 'default', fontFamily:'DM Sans, sans-serif', transition:'all 0.2s' }}>
-            Ask
-          </button>
-        </div>
-      </div>
+            className="pcv-row-sub"
+            disabled={!transcript.trim()}
+            onClick={handleSubmit}
+          >Submit</button>
+        </>
+      )}
     </div>
   )
 }
 
-function CelebrationOverlay({ type }) {
-  if (!type) return null
-  const messages = {
-    confetti: 'Perfect!', mastery_achieved: 'Mastered!',
-    streak: 'On Fire!', level_up: 'Level Up!', breakthrough: 'Breakthrough!',
+// ── Main component ──
+export default function PracticeConceptView({
+  conceptName      = 'The Half Step',
+  conceptDesc      = 'The smallest distance in music',
+  phase            = 'teach',
+  speechText       = 'Listen to how close together these two keys are. This is a half step — the smallest move in music.',
+  highlightedKeys  = [2, 3],
+  homeKeyIndex     = 0,
+  answerOptions    = ['1 & 2', '3 & 4', '5 & 6', '7 & 8'],
+  correctAnswer    = '3 & 4',
+  bpm              = 92,
+  studentTurn      = false,
+  retryMode        = false,
+  promptMode       = false,
+  onAnswer,
+  onReplay,
+  onBack,
+  onStudentSend,
+  onStudentResponse,
+}) {
+  const [showHomeKey, setShowHomeKey]   = useState(false)
+  const [bpmVal, setBpmVal]             = useState(bpm)
+  const [isSpeaking, setIsSpeaking]     = useState(false)
+  const [isLoading, setIsLoading]       = useState(false)
+  const [displayedWords, setDisplayedWords] = useState([])
+  const wordTimerRef = React.useRef(null)
+  const phaseIdx = PHASES.indexOf(phase)
+
+  // ── Word-by-word animation ──
+  useEffect(() => {
+    if (!speechText) return
+    const words = speechText.split(' ')
+    setDisplayedWords([])
+    if (wordTimerRef.current) clearInterval(wordTimerRef.current)
+    const estimatedDuration = Math.max(2000, (words.length / 2.5) * 1000)
+    const interval = estimatedDuration / words.length
+    let i = 0
+    wordTimerRef.current = setInterval(() => {
+      i++
+      setDisplayedWords(words.slice(0, i))
+      if (i >= words.length) clearInterval(wordTimerRef.current)
+    }, interval)
+    return () => clearInterval(wordTimerRef.current)
+  }, [speechText])
+
+  // Snap to full text when speaking ends
+  useEffect(() => {
+    if (!isSpeaking && speechText) {
+      setDisplayedWords(speechText.split(' '))
+      if (wordTimerRef.current) clearInterval(wordTimerRef.current)
+    }
+  }, [isSpeaking, speechText])
+
+  useEffect(() => {
+    if (!speechText || !onReplay) return
+    setIsLoading(true)
+    setIsSpeaking(false)
+    onReplay()
+      .then(() => { setIsLoading(false) })
+      .catch(() => { setIsLoading(false) })
+  }, [speechText])
+
+  const S = {
+    glass: {
+      background: 'rgba(20,20,40,0.65)',
+      backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
+      border: '1px solid rgba(255,255,255,0.08)',
+      borderRadius: 18,
+    },
+    label: { fontSize:9, fontWeight:700, color:'rgba(255,255,255,0.35)', textTransform:'uppercase', letterSpacing:'0.09em' },
   }
-  return (
-    <div className="wyl-celebration">
-      <div className="wyl-celebration__text">{messages[type] || 'Nice!'}</div>
-    </div>
-  )
-}
-
-export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studentId, studentProfile, wylProfile }) {
-  const navigate = useNavigate()
-  const videoRef = useRef(null)
-
-  const [practiceView, setPracticeView] = useState('cockpit')
-  const [timer, setTimer] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const [chatOpen, setChatOpen] = useState(true)
-  const [cameraReady, setCameraReady] = useState(false)
-  const [cameraError, setCameraError] = useState(null)
-  const [micError, setMicError] = useState(null)
-  const [sessionStarted, setSessionStarted] = useState(false)
-  const uiBridgeRef = useRef(null)
-
-  const cachedVoicesRef = React.useRef([])
-  const loadVoices = React.useCallback(() => {
-    return new Promise((resolve) => {
-      let voices = window.speechSynthesis.getVoices()
-      if (voices.length > 0) { cachedVoicesRef.current = voices; return resolve(voices) }
-      const onVoices = () => {
-        voices = window.speechSynthesis.getVoices()
-        cachedVoicesRef.current = voices
-        window.speechSynthesis.removeEventListener('voiceschanged', onVoices)
-        resolve(voices)
-      }
-      window.speechSynthesis.addEventListener('voiceschanged', onVoices)
-      setTimeout(() => resolve(window.speechSynthesis.getVoices()), 3000)
-    })
-  }, [])
-
-  const [lessonInfo, setLessonInfo] = useState(null)
-  const [lessonComplete, setLessonComplete] = useState(null)
-  const [currentMoment, setCurrentMoment] = useState(null)
-  const [currentVisual, setCurrentVisual] = useState(null)
-  const [coaching, setCoaching] = useState({ message: 'Starting lesson...', speaking: false, tags: [] })
-  const [feedback, setFeedback] = useState(null)
-  const [celebration, setCelebration] = useState(null)
-  const [reinforcement, setReinforcement] = useState(null)
-  const [activeTones, setActiveTones] = useState(null)
-  const [debugState, setDebugState] = useState(null)
-  const [showTelemetry, setShowTelemetry] = useState(false)
-  const [ttsUnavailable, setTtsUnavailable] = useState(false)
-  const [retryMode, setRetryMode] = useState(false)
-  const [promptMode, setPromptMode] = useState(false)
-  const [theoryIsSpeaking, setTheoryIsSpeaking] = useState(false)
-
-  const [waitingForInput, setWaitingForInput] = useState(null)
-  const [inputResolver, setInputResolver] = useState(null)
-
-  const engineRef = useRef(null)
-  const orchestratorRef = useRef(null)
-  const bridgeRef = useRef(null)
-  const tamiStackRef = useRef(null)
-  const perceptionBridgeRef = useRef(null)
-
-  const [isListeningActive, setIsListeningActive] = React.useState(false)
-  const [lastTranscript, setLastTranscript] = React.useState('')
-  const [studentEmotion, setStudentEmotion] = React.useState('neutral')
-  const [teachingStep, setTeachingStep] = React.useState(0)
-  const [awaitingResponse, setAwaitingResponse] = React.useState(false)
-  const [responseTimeout, setResponseTimeout] = React.useState(null)
-  const [conceptState, setConceptState] = useState(() => getState('T_HALF_STEP') || {})
-  const [sessionCorrect, setSessionCorrect] = useState(0)
-
-  const ACTIVE_CONCEPT_ID = 'T_HALF_STEP'
-  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID]
-  const phaseMap = {
-    introduced: 'teach', practicing: 'guide',
-    accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release'
-  }
-  const currentPhase = phaseMap[conceptState?.ownership_state || 'introduced']
-  const teachingStepRef = React.useRef(0)
-
-  const THEORY_STEPS = React.useMemo(() => [
-    { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
-    { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'yea'], prompt: 'ready_check' },
-    { type: 'speak', text: "Awesome! Here is the secret. There is ONE pattern that unlocks ALL 12 major scales. Just one! It is called the Whole and Half Step Pattern. Say it with me: Whole, Whole, Half, Whole, Whole, Whole, Half." },
-    { type: 'listen', expect: ['whole', 'half'], prompt: 'pattern_repeat' },
-    { type: 'speak', text: "Great effort! Let me break it down. A Whole step means you skip one key. A Half step means you go to the very next key. No skipping. Now, the pattern is: Whole, Whole, Half, Whole, Whole, Whole, Half. Let us try it together. I say it, then you say it. Ready?" },
-    { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok'], prompt: 'ready_check' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Half." },
-    { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Half." },
-    { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
-    { type: 'speak', text: "You did it! That pattern, Whole Whole Half Whole Whole Whole Half, works for EVERY major scale. C major, G major, D major, all 12 of them. You just learned the master key to all major scales!" },
-    { type: 'speak', text: "Now lets apply it. Starting on C, we go: C, whole step to D, whole step to E, half step to F, whole step to G, whole step to A, whole step to B, and half step back to C. That is the C major scale!" },
-    { type: 'speak', text: "Can you say the pattern one more time for me? The whole and half step pattern." },
-    { type: 'listen', expect: ['whole', 'half'], prompt: 'full_pattern' },
-    { type: 'speak', text: "Excellent work! You now know the secret that unlocks all 12 major scales. In our next lesson, we will apply this pattern starting on different notes. But for now, just remember: Whole, Whole, Half, Whole, Whole, Whole, Half. Great job today!" },
-  ], [])
-
-  const advanceTeaching = React.useCallback(async (step) => {
-    if (step >= THEORY_STEPS.length) {
-      setCoaching({ message: 'Lesson complete! You learned the major scale pattern.', speaking: false, tags: ['Complete'] })
-      setLessonComplete({ engagement: { attentionScore: 100 } })
-      return
-    }
-    teachingStepRef.current = step
-    setTeachingStep(step)
-    const current = THEORY_STEPS[step]
-
-    if (current.type === 'speak') {
-      setAwaitingResponse(false)
-      setRetryMode(false)
-      setPromptMode(false)
-      setTheoryIsSpeaking(true)
-      setCoaching({ message: current.text, speaking: true, tags: ['Teaching'] })
-      try {
-        console.log('[Motesart] speaking:', current.text.substring(0, 40))
-        // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
-        await api.speakText(sanitizeTTS(current.text), 'coach')
-        setTtsUnavailable(false)
-      } catch (err) {
-        console.warn('[WYLPracticeLive] TTS failed:', err.message)
-        setTtsUnavailable(true)
-        // Wait proportional to text length so lesson still flows
-        await new Promise(r => setTimeout(r, Math.max(2000, current.text.split(' ').length * 350)))
-      }
-      setTheoryIsSpeaking(false)
-      setCoaching(prev => ({ ...prev, speaking: false }))
-      // Natural pause before advancing
-      await new Promise(r => setTimeout(r, 400))
-      advanceTeaching(step + 1)
-    } else if (current.type === 'listen') {
-      setAwaitingResponse(true)
-      setRetryMode(false)
-      setPromptMode(false)
-      setTheoryIsSpeaking(false)
-      setCoaching({ message: 'Your turn! I am listening...', speaking: false, tags: ['Listening'] })
-      const timeout = setTimeout(() => {
-        setPromptMode(true)
-        setCoaching({ message: "Do not be shy! Go ahead and say it.", speaking: false, tags: ['Encouraging'] })
-      }, 8000)
-      setResponseTimeout(timeout)
-    }
-  }, [THEORY_STEPS])
-
-  const handleStudentInput = React.useCallback(async (transcript) => {
-    if (!transcript || transcript.trim().length < 1) return
-    // If not in a listen step, give gentle feedback instead of silent ignore
-    if (!awaitingResponse) {
-      setCoaching({ message: "Hold on — let me finish my thought first.", speaking: false, tags: ['Wait'] })
-      return
-    }
-
-    setLastTranscript(transcript)
-    const step = teachingStepRef.current
-    const current = THEORY_STEPS[step]
-    if (!current || current.type !== 'listen') return
-
-    if (responseTimeout) clearTimeout(responseTimeout)
-
-    const heard = transcript.toLowerCase().trim()
-    const expected = current.expect
-    const matched = expected.some(e => heard.includes(e))
-
-    console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Match:', matched)
-
-    if (matched || current.prompt === 'ready_check') {
-      setStudentEmotion('happy')
-      setAwaitingResponse(false)
-
-      if (current.prompt === 'call_response') {
-        const affirmText = matched ? 'Yes!' : 'Good try!'
-        setCoaching({ message: affirmText, speaking: true, tags: ['Affirm'] })
-        try {
-          // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
-          await api.speakText(sanitizeTTS(affirmText), 'coach')
-        } catch(e) {
-          console.warn('[WYLPracticeLive] Affirm TTS failed:', e.message)
-        }
-      }
-      // Natural pause before advancing after correct answer
-      await new Promise(r => setTimeout(r, 800))
-      setRetryMode(false)
-      setPromptMode(false)
-      advanceTeaching(step + 1)
-    } else {
-      setStudentEmotion('confused')
-      setRetryMode(true)
-      setPromptMode(false)
-      setCoaching({ message: "Almost! Try again. I am listening.", speaking: false, tags: ['Retry'] })
-    }
-  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching])
-
-  const startLesson = React.useCallback(async () => {
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-      await audioCtx.resume()
-      await loadVoices()
-      window.speechSynthesis.cancel()
-      const micOk = await ensureMicPermission()
-      if (!micOk) setMicError('Microphone access blocked. Please allow and retry.')
-      else setMicError(null)
-      setSessionStarted(true)
-    } catch (err) {
-      console.error('Start lesson error:', err)
-      setSessionStarted(true)
-    }
-  }, [loadVoices])
-
-  React.useEffect(() => {
-    if (!sessionStarted) return
-    setIsListeningActive(true)
-    const t = setTimeout(() => advanceTeaching(0), 600)
-    return () => clearTimeout(t)
-  }, [sessionStarted])
-
-  React.useEffect(() => {
-    if (isListeningActive) startListening((transcript) => handleStudentInput(transcript))
-    return () => stopListening()
-  }, [isListeningActive, handleStudentInput])
-
-  const getCurrentMoment = useCallback(() => currentMoment, [currentMoment])
-  const { initQuestionHandler, handleStudentQuestion, questionHandlerRef, questionHistory } =
-    useTamiQuestions({
-      engineRef, tamiStackRef, bridgeRef, setCoaching, setCurrentVisual,
-      getCurrentMoment, inputResolver, handleStudentInput,
-    })
-
-  const objective = lessonInfo ? `${lessonInfo.title}` : 'Loading lesson...'
-
-  useEffect(() => {
-    if (paused || lessonComplete) return
-    const id = setInterval(() => setTimer(t => t + 1), 1000)
-    return () => clearInterval(id)
-  }, [paused, lessonComplete])
-
-  const fmtTime = (s) => {
-    const m = Math.floor(s / 60).toString().padStart(2, '0')
-    const sec = (s % 60).toString().padStart(2, '0')
-    return `${m}:${sec}`
-  }
-
-  useEffect(() => {
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
-        if (videoRef.current) { videoRef.current.srcObject = stream; setCameraReady(true) }
-      } catch (err) {
-        console.log('Camera not available:', err.message)
-        setCameraError(err.message.includes('denied') ? 'Camera access denied. You can still continue without it.' : err.message)
-      }
-    }
-    startCamera()
-    return () => {
-      if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach(t => t.stop())
-    }
-  }, [])
-
-  useEffect(() => {
-    async function initLesson() {
-      const ui = createUIBridge({
-        setCurrentMoment, setCurrentVisual, setCoaching, setFeedback,
-        setCelebration, setReinforcement, setActiveTones, setDebugState,
-        setLessonInfo, setLessonComplete, setWaitingForInput, setInputResolver,
-      })
-      uiBridgeRef.current = ui
-
-      const { MotesartLessonEngine } = await import('../lesson_engine/motesart_lesson_engine.js')
-      const { LessonOrchestrator } = await import('../lesson_engine/lesson_orchestrator.js')
-      const { TAMiBridge } = await import('../lesson_engine/tami_bridge.js')
-      const { TAMiIntelligenceLayer } = await import('../lesson_engine/tami_intelligence_layer.js')
-      const { TAMiResponseContract } = await import('../lesson_engine/tami_response_contract.js')
-      const { TAMiStrategyResolver } = await import('../lesson_engine/tami_strategy_resolver.js')
-      const { TAMiMicroMemory } = await import('../lesson_engine/tami_micro_memory.js')
-      const { TAMiStateManager } = await import('../lesson_engine/tami_state_manager.js')
-      const { TAMiTimingEngine } = await import('../lesson_engine/tami_timing_engine.js')
-      const { TAMiDifficultyLadder } = await import('../lesson_engine/tami_difficulty_ladder.js')
-      const { TAMiProfileManager } = await import('../lesson_engine/tami_teaching_profiles.js')
-      const { replaceState: storeReplaceState } = await import('../lesson_engine/concept_state_store.js')
-
-      const engine = new MotesartLessonEngine()
-      const orchestrator = new LessonOrchestrator(engine, ui, {
-        enableDebug: true, difficulty: 'beginner',
-        visualRegistryPath: '/lesson_data/visual_asset_registry.json',
-      })
-
-      if (typeof window !== 'undefined') {
-        window.TAMiDifficultyLadder = TAMiDifficultyLadder
-        window.TAMiProfileManager = TAMiProfileManager
-      }
-
-      const tami = TAMiBridge.createStack({
-        engine, orchestrator, apiUrl: API_URL, debugMode: false,
-        config: {
-          intelligence: { maxAICallsPerLesson: 10 },
-          timing: {}, resolver: {},
-          memory: { windowMinutes: 10 }, difficulty: {},
-        },
-      })
-
-      if (tami.difficultyLadder) {
-        const conceptIds = ['C_KEYBOARD','C_HALFWHOLE','C_MAJSCALE','C_CMAJOR','C_FINGERS','C_OCTAVE']
-        const initialConf = {}
-        conceptIds.forEach(id => { initialConf[id] = 50 })
-        tami.difficultyLadder.init(conceptIds, initialConf)
-      }
-
-      if (tami.profileManager) {
-        tami.profileManager.initFromWYL(wylProfile || { visual:30, auditory:25, readwrite:20, kinesthetic:25 })
-      }
-
-      await initQuestionHandler()
-
-      tami.bridge.onAction((action) => {
-        console.log('[T.A.M.i Action]', action.source, action.type, action.dialogue?.substring(0, 50))
-        if (action.celebration) {
-          setCelebration(action.celebration)
-          setTimeout(() => setCelebration(null), 2800)
-        }
-        if (action.visualAsset) {
-          setCurrentVisual({ component: action.visualAsset, props: { mode: action.strategyType } })
-        }
-      })
-
-      engineRef.current = engine
-      orchestratorRef.current = orchestrator
-      bridgeRef.current = tami.bridge
-      tamiStackRef.current = tami
-
-      const { createPerceptionBridge } = await import('../lesson_engine/perception_integration.js')
-      const perceptionBridge = createPerceptionBridge({
-        engine, stateManager: tami.stateManager,
-        studentId: studentId || 'default_student',
-        onStateUpdate: (conceptId, state) => {
-          storeReplaceState(conceptId, state)
-        },
-        onError: (err) => console.warn('[Perception] Error:', err.message),
-      })
-      perceptionBridgeRef.current = perceptionBridge
-
-      tami.bridge.connect({
-        lessonId, studentId: studentId || 'default_student',
-        studentProfile: studentProfile || {},
-        wylProfile: wylProfile || { visual:30, auditory:25, readwrite:20, kinesthetic:25 },
-        ambassadorPrompt: 'You are Motesart, a warm piano teacher.',
-        lessonData: { concepts: [
-          { id:'C_KEYBOARD', startConfidence:50 }, { id:'C_HALFWHOLE', startConfidence:50 },
-          { id:'C_MAJSCALE', startConfidence:50 }, { id:'C_CMAJOR', startConfidence:50 },
-          { id:'C_FINGERS', startConfidence:50 }, { id:'C_OCTAVE', startConfidence:50 },
-        ]},
-      })
-    }
-
-    console.log('[WYLPracticeLive] Theory Phase active - engine init skipped')
-
-    return () => {
-      if (bridgeRef.current) bridgeRef.current.disconnect()
-      if (orchestratorRef.current) orchestratorRef.current.stop()
-    }
-  }, [lessonId, studentId])
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (!waitingForInput) return
-      if (e.key === ' ') { e.preventDefault(); handleStudentInput({ type:'verbal', value:'correct', timestamp:Date.now() }) }
-      else if (e.key === 'x') { e.preventDefault(); handleStudentInput({ type:'verbal', value:'wrong', timestamp:Date.now() }) }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [waitingForInput, handleStudentInput])
-
-  useEffect(() => {
-    const handler = (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'T') { e.preventDefault(); setShowTelemetry(prev => !prev) }
-    }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
-
-  const handleEnd = useCallback(async () => {
-    if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach(t => t.stop())
-    if (tamiStackRef.current?.stateManager) {
-      console.log('[Session Export]', tamiStackRef.current.stateManager.exportForStorage())
-    }
-    if (perceptionBridgeRef.current) {
-      console.log('[Perception Export]', perceptionBridgeRef.current.exportForStorage())
-      perceptionBridgeRef.current.detach()
-      perceptionBridgeRef.current = null
-    }
-    if (orchestratorRef.current) await orchestratorRef.current.stop()
-    navigate('/session-summary')
-  }, [navigate])
-
-  const handlePause = useCallback(() => {
-    setPaused(p => {
-      if (p) orchestratorRef.current?.resume()
-      else orchestratorRef.current?.pause()
-      return !p
-    })
-  }, [])
-
-  if (lessonComplete) {
-    return (
-      <>
-        <style>{css}</style>
-        <div className="wyl-root" style={{ display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <div style={{ textAlign:'center', color:'rgba(255,255,255,0.9)' }}>
-            <h2 style={{ fontFamily:'Outfit', fontSize:32, marginBottom:16 }}>Session Complete</h2>
-            <p style={{ fontSize:14, color:'rgba(255,255,255,0.5)', marginBottom:24 }}>
-              {fmtTime(timer)} · {lessonComplete.engagement?.attentionScore || 0}% attention
-            </p>
-            <button className="wyl-bar__btn" onClick={() => navigate('/dashboard')} style={{ fontSize:14, padding:'10px 24px' }}>
-              Back to Dashboard
-            </button>
-          </div>
-        </div>
-      </>
-    )
-  }
-
-  if (practiceView === 'cockpit') return (
-    <PracticeSessionCockpit onBegin={() => setPracticeView('concept')} />
-  )
-
-  if (practiceView === 'concept') return (
-    <PracticeConceptView
-      conceptName="The Half Step"
-      conceptDesc="The closest distance between two notes"
-      phase={currentPhase}
-      speechText={conceptConfig.speechTexts[currentPhase]}
-      highlightedKeys={conceptConfig.highlightedKeys}
-      homeKeyIndex={conceptConfig.homeKeyIndex}
-      answerOptions={conceptConfig.answerOptions}
-      correctAnswer={conceptConfig.correctAnswer}
-      bpm={conceptConfig.bpm}
-      onAnswer={(isCorrect) => {
-        const prev = getState(ACTIVE_CONCEPT_ID) || {}
-        const newState = {
-          ...prev,
-          attempts: (prev.attempts || 0) + 1,
-          correct_streak: isCorrect ? (prev.correct_streak || 0) + 1 : 0,
-          ownership_state: isCorrect && (prev.correct_streak || 0) >= 2
-            ? 'practicing' : prev.ownership_state || 'introduced'
-        }
-        setState(ACTIVE_CONCEPT_ID, newState)
-        setConceptState(newState)
-        if (isCorrect) setSessionCorrect(s => s + 1)
-      }}
-      onReplay={() => {
-        // Replay current theory step text — do NOT advance
-        const step = teachingStepRef.current
-        const steps = THEORY_STEPS
-        const currentStepText = (steps[step] && steps[step].type === 'speak')
-          ? steps[step].text
-          : (step > 0 && steps[step - 1] && steps[step - 1].type === 'speak')
-            ? steps[step - 1].text
-            : conceptConfig.speechTexts[currentPhase]
-        return api.speakText(sanitizeTTS(currentStepText), 'coach')
-          .catch(err => {
-            console.warn('[TTS] onReplay failed:', err.message)
-            setTtsUnavailable(true)
-          })
-      }}
-      studentTurn={awaitingResponse}
-      inputMode="voice"
-      retryMode={retryMode}
-      promptMode={promptMode}
-      onStudentResponse={(transcript) => handleStudentInput(transcript)}
-      onBack={() => setPracticeView('cockpit')}
-    />
-  )
 
   return (
-    <>
+    <div className="pcv-root">
       <style>{css}</style>
-      <div className="wyl-root">
-        <div className="wyl-camera">
-          <video ref={videoRef} autoPlay playsInline muted style={{ display: cameraReady ? 'block' : 'none' }} />
-          {!sessionStarted && (
-            <div style={{ position:'absolute', top:0, left:0, right:0, bottom:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'rgba(10,10,30,0.92)', zIndex:50 }}>
-              <div style={{ textAlign:'center', color:'#fff' }}>
-                <div style={{ fontSize:'32px', fontWeight:700, marginBottom:'8px', fontFamily:'Outfit, sans-serif' }}>Ready to Begin?</div>
-                <div style={{ fontSize:'16px', opacity:0.7, marginBottom:'36px' }}>I'll use your voice and piano to guide you step-by-step.</div>
-                <button onClick={startLesson} style={{ background:'linear-gradient(135deg,#6c63ff,#48c6ef)', border:'none', borderRadius:'50px', padding:'18px 48px', color:'#fff', fontSize:'20px', fontWeight:700, cursor:'pointer', boxShadow:'0 4px 24px rgba(108,99,255,0.4)', fontFamily:'Outfit, sans-serif' }}>
-                  Tap to begin — I'll guide you.
-                </button>
-                {ttsUnavailable && (
-                  <div style={{ marginTop:16, padding:'10px 20px', background:'rgba(251,191,36,0.12)', border:'1px solid rgba(251,191,36,0.3)', borderRadius:10, color:'#fbbf24', fontSize:13, maxWidth:380 }}>
-                    Voice unavailable — use Replay after server wakes
-                  </div>
-                )}
-                {micError && (
-                  <div style={{ marginTop:'20px', padding:'16px 24px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.4)', borderRadius:'12px', color:'#fca5a5', fontSize:'15px', textAlign:'center', maxWidth:'400px' }}>
-                    <div style={{ marginBottom:'8px' }}>{micError}</div>
-                    <div style={{ fontSize:'12px', color:'#9ca3af', marginBottom:'12px' }}>Tap the lock icon in your address bar, set Microphone to Allow, then tap Retry.</div>
-                    <button onClick={async () => {
-                      try {
-                        const s = await navigator.mediaDevices.getUserMedia({audio:true})
-                        s.getTracks().forEach(t=>t.stop())
-                        micAllowed = true
-                        setMicError(null)
-                        setIsListeningActive(true)
-                      } catch(e) {
-                        setMicError('Still blocked. Open browser Settings > Site Settings > Microphone and allow this site.')
-                      }
-                    }} style={{ padding:'8px 20px', background:'rgba(139,92,246,0.8)', border:'none', borderRadius:'8px', color:'white', fontSize:'14px', cursor:'pointer' }}>
-                      Retry Microphone
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {!cameraReady && (
-            <div className="wyl-camera-placeholder">
-              <div className="wyl-camera-placeholder__icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5">
-                  <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-                </svg>
-              </div>
-              <span className="wyl-camera-placeholder__text">{cameraError || 'Connecting camera...'}</span>
-            </div>
-          )}
+
+      {/* ── Top nav ── */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 28px 10px', gap:10, borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
+        <button onClick={onBack} style={{
+          minHeight:40, padding:'7px 16px', borderRadius:12,
+          background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.11)',
+          color:'rgba(255,255,255,0.65)', fontFamily:FONTS.body, fontSize:13, fontWeight:600, cursor:'pointer',
+        }}>← Back</button>
+        <div style={{
+          flex:1, textAlign:'center', padding:'6px 12px', borderRadius:20,
+          background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.12)',
+          fontFamily:FONTS.display, fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.92)',
+          whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+        }}>{conceptName}</div>
+        <div style={{ display:'flex', alignItems:'center', gap:2, padding:'4px 10px', borderRadius:12,
+          background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)' }}>
+          <button className="pcv-icon-btn" style={{ color:'rgba(255,255,255,0.45)', fontSize:15, minWidth:28, minHeight:40 }}
+            onClick={() => setBpmVal(b => Math.max(40, b - 4))}>−</button>
+          <div style={{ minWidth:38, textAlign:'center' }}>
+            <div style={{ fontFamily:FONTS.display, fontSize:14, fontWeight:700, color:'#fff', lineHeight:1 }}>{bpmVal}</div>
+            <div style={{ fontSize:8, color:'rgba(255,255,255,0.3)', letterSpacing:'0.07em' }}>BPM</div>
+          </div>
+          <button className="pcv-icon-btn" style={{ color:'rgba(255,255,255,0.45)', fontSize:15, minWidth:28, minHeight:40 }}
+            onClick={() => setBpmVal(b => Math.min(200, b + 4))}>+</button>
         </div>
-
-        <div className="wyl-nametag">
-          <div className="wyl-nametag__dot" />
-          <span className="wyl-nametag__name">{studentProfile?.name || 'Student'}</span>
-        </div>
-
-        <TopBar timer={fmtTime(timer)} objective={objective} paused={paused} onPause={handlePause} onEnd={handleEnd} />
-        <VisualOverlay visual={currentVisual} activeTones={activeTones} />
-        <MotesartCard coaching={coaching} chatOpen={chatOpen} onToggleChat={() => setChatOpen(!chatOpen)} onStudentQuestion={handleStudentQuestion} />
-        <CelebrationOverlay type={celebration} />
-        <TelemetryPanel engineRef={engineRef} tamiStackRef={tamiStackRef} questionHistory={questionHistory} visible={showTelemetry} />
-
-        {ttsUnavailable && sessionStarted && (
-          <div style={{ position:'absolute', top:68, left:'50%', transform:'translateX(-50%)', zIndex:20, padding:'8px 18px', background:'rgba(251,191,36,0.12)', border:'1px solid rgba(251,191,36,0.3)', borderRadius:10, color:'#fbbf24', fontSize:12, fontWeight:600, whiteSpace:'nowrap' }}>
-            Voice unavailable — use Replay after server wakes
-          </div>
-        )}
-
-        {waitingForInput && (
-          <div style={{ position:'absolute', bottom:140, right:24, zIndex:10, padding:'8px 16px', background:'rgba(0,196,154,0.15)', border:'1px solid rgba(0,196,154,0.3)', borderRadius:12, fontSize:11, color:'var(--teal)', fontWeight:600 }}>
-            {waitingForInput.mode === 'midi' ? 'Play now...' : waitingForInput.mode === 'speech' ? 'Voice Mode Active' : 'Tap to respond...'}
-          </div>
-        )}
-
-        {feedback && (
-          <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', zIndex:30, fontSize:24, fontWeight:800, fontFamily:'Outfit', color: feedback.type === 'correct' || feedback.type === 'perfect' ? 'var(--teal-bright)' : 'var(--pink)', pointerEvents:'none' }}>
-            {feedback.type === 'perfect' ? 'Perfect!' : feedback.type === 'correct' ? 'Correct' : feedback.type === 'wrong' ? 'Try again' : ''}
-          </div>
-        )}
       </div>
-    </>
+
+      {/* ── Phase dots ── */}
+      <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7, padding:'8px 14px 10px' }}>
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          {PHASES.map((p, i) => {
+            const done   = i < phaseIdx
+            const active = i === phaseIdx
+            return (
+              <div key={p} style={{
+                height:7, borderRadius:4,
+                width: active ? 28 : done ? 22 : 16,
+                background: done ? COLORS.teal : active ? '#e84b8a' : 'rgba(255,255,255,0.14)',
+                boxShadow: active ? '0 0 10px rgba(232,75,138,0.7)' : 'none',
+                transition: 'all .3s',
+              }} />
+            )
+          })}
+        </div>
+        <div style={{ ...S.label }}>{PHASE_LABELS[phase] || phase}</div>
+      </div>
+
+      {/* ── Main body: avatar left, speech right ── */}
+      <div className="pcv-body">
+
+        {/* Avatar column */}
+        <div className="pcv-avatar-col">
+          <div className="mot-av">
+            <img src="/Motesart Avatar 1.PNG" alt="Motesart"
+              onError={e => { e.currentTarget.style.display = 'none' }} />
+          </div>
+          <div className="pcv-av-name">MOTESART</div>
+          <StatusBox
+            isSpeaking={isSpeaking}
+            isLoading={isLoading}
+            studentTurn={studentTurn}
+            inputMode={inputMode}
+            retryMode={retryMode}
+            promptMode={promptMode}
+            onSend={onStudentSend}
+          />
+        </div>
+
+        {/* Speech + keys col */}
+        <div className="pcv-speech-col">
+          {/* Unified row card */}
+          <div style={{
+            background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)',
+            borderRadius:18, overflow:'hidden',
+          }}>
+            <UnifiedRow
+              isSpeaking={isSpeaking}
+              isLoading={isLoading}
+              studentTurn={studentTurn}
+              retryMode={retryMode}
+              promptMode={promptMode}
+              onReplay={async () => {
+                if (isSpeaking || isLoading) return
+                setIsLoading(true)
+                try { await onReplay?.() } finally { setIsLoading(false); setIsSpeaking(false) }
+              }}
+              onStudentResponse={onStudentResponse}
+            />
+            <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', padding:'14px 20px 16px' }}>
+              <div className="pcv-speech-text">
+                {displayedWords.length > 0 ? displayedWords.join(' ') : speechText}
+              </div>
+            </div>
+          </div>
+
+                    {/* Keys in focus */}
+          <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:7 }}>
+            <span style={{ ...S.label }}>Keys in focus</span>
+            {highlightedKeys.map(ki => (
+              <div key={ki} style={{ background:'#d4f5e0', borderRadius:8, padding:'3px 10px', fontSize:11, fontWeight:700, color:'#047857' }}>
+                {WHITE_KEY_NAMES[ki]} {ki + 1}
+              </div>
+            ))}
+            <div style={{ background:'#fde8c8', borderRadius:8, padding:'3px 10px', fontSize:11, fontWeight:700, color:'#b7791f' }}>
+              Home: {WHITE_KEY_NAMES[homeKeyIndex]} {homeKeyIndex + 1}
+            </div>
+          </div>
+
+          {/* Home key toggle */}
+          <div style={{ display:'flex', alignItems:'center', gap:9, cursor:'pointer' }} onClick={() => setShowHomeKey(s => !s)}>
+            <div style={{ width:36, height:20, borderRadius:10, position:'relative',
+              background: showHomeKey ? '#e84b8a' : 'rgba(255,255,255,0.14)', transition:'background .2s' }}>
+              <div style={{ position:'absolute', top:3,
+                left: showHomeKey ? 18 : 3,
+                width:14, height:14, borderRadius:'50%', background:'#fff',
+                transition:'left .2s', boxShadow:'0 1px 5px rgba(0,0,0,0.3)' }} />
+            </div>
+            <span style={{ fontSize:12, color:'rgba(255,255,255,0.48)', fontWeight:500, userSelect:'none' }}>Show home key</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Piano — full width ── */}
+      <div style={{ padding:'0 28px 14px' }}>
+        <div style={{ ...S.glass, borderRadius:16, padding:'14px 10px 10px', boxShadow:'0 8px 32px rgba(0,0,0,0.45)' }}>
+          <Piano highlightedKeys={highlightedKeys} homeKeyIndex={homeKeyIndex} showHomeKey={showHomeKey} />
+        </div>
+      </div>
+
+      {/* ── Answer options ── */}
+      {answerOptions.length > 0 && (
+        <div style={{ padding:'0 28px 24px' }}>
+          <div style={{ fontSize:12, fontWeight:600, color:'rgba(255,255,255,0.38)', textAlign:'center', marginBottom:10 }}>
+            Which pair of keys makes a half step?
+          </div>
+          <div className="pcv-answer-grid">
+            {answerOptions.map(opt => (
+              <button key={opt} className="pcv-btn-answer" onClick={() => onAnswer?.(opt)}>{opt}</button>
+            ))}
+          </div>
+          <div style={{ textAlign:'right' }}>
+            <button style={{
+              minHeight:34, padding:'6px 14px', borderRadius:10,
+              background:'none', border:'1px solid rgba(255,255,255,0.1)',
+              color:'rgba(255,255,255,0.32)', fontFamily:FONTS.body, fontSize:11, fontWeight:600, cursor:'pointer',
+            }}>Hint</button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
