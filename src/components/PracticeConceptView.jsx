@@ -243,6 +243,61 @@ const css = `
     .mot-av { width: 72px; height: 72px; }
     .piano-container { height: 120px; }
   }
+  .pcv-unified-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; flex-wrap: nowrap; min-height: 56px;
+  }
+  .pcv-pill {
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    flex-shrink: 0; transition: all 0.3s; white-space: nowrap;
+  }
+  .pcv-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pcvPd 1.2s ease-in-out infinite; }
+  @keyframes pcvPd { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
+  .pcv-pill-speaking { background:rgba(232,75,138,0.15); color:#e84b8a; border:1px solid rgba(232,75,138,0.3); }
+  .pcv-pill-listening { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); }
+  .pcv-pill-thinking { background:rgba(168,85,247,0.15); color:#a855f7; border:1px solid rgba(168,85,247,0.3); }
+  .pcv-pill-retry { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+  .pcv-row-wave { display:flex; align-items:center; gap:2px; flex-shrink:0; }
+  .pcv-row-wb { width:3px; border-radius:2px; background:#e84b8a; transform-origin:bottom; animation:pcvWv 0.65s ease-in-out infinite alternate; }
+  .pcv-row-wb:nth-child(1){height:5px;animation-delay:0s}
+  .pcv-row-wb:nth-child(2){height:11px;animation-delay:0.1s}
+  .pcv-row-wb:nth-child(3){height:7px;animation-delay:0.2s}
+  .pcv-row-wb:nth-child(4){height:13px;animation-delay:0.15s}
+  .pcv-row-wb:nth-child(5){height:4px;animation-delay:0.05s}
+  @keyframes pcvWv{0%{transform:scaleY(0.3)}100%{transform:scaleY(1)}}
+  .pcv-think-dots { display:flex; align-items:center; gap:3px; flex-shrink:0; }
+  .pcv-td { width:5px; height:5px; border-radius:50%; background:#a855f7; animation:pcvBounce 0.9s ease-in-out infinite; }
+  .pcv-td:nth-child(2){animation-delay:0.2s}.pcv-td:nth-child(3){animation-delay:0.4s}
+  @keyframes pcvBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+  .pcv-row-replay {
+    background:rgba(232,75,138,0.12); border:1px solid rgba(232,75,138,0.3);
+    color:#e84b8a; border-radius:20px; padding:5px 13px;
+    font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0; white-space:nowrap;
+  }
+  .pcv-row-spacer { flex:1; }
+  .pcv-row-mic {
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all 0.3s; border:none; position:relative;
+  }
+  .pcv-row-mic.listening { background:rgba(34,197,94,0.2); border:1.5px solid rgba(34,197,94,0.6); }
+  .pcv-row-mic.retry { background:rgba(245,158,11,0.2); border:1.5px solid rgba(245,158,11,0.5); }
+  .pcv-row-inp {
+    flex:1; min-width:0;
+    background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+    border-radius:10px; padding:8px 13px; color:#fff; font-size:14px;
+    font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s;
+  }
+  .pcv-row-inp.active { border-color:rgba(34,197,94,0.45); }
+  .pcv-row-inp::placeholder { color:rgba(255,255,255,0.28); }
+  .pcv-row-inp:disabled { opacity:0.25; }
+  .pcv-row-sub {
+    padding:7px 16px; border-radius:10px; border:none; flex-shrink:0;
+    background:linear-gradient(135deg,#a855f7,#e84b8a);
+    color:#fff; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap;
+  }
+  .pcv-row-sub:disabled { opacity:0.2; cursor:not-allowed; background:rgba(255,255,255,0.08); }
 `
 
 // ── Double-sided pulsing arrow ──
@@ -338,129 +393,30 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
   )
 }
 
-// ── Status box — driven automatically by component state ──
-function StatusBox({ isSpeaking, isLoading, studentTurn, inputMode, retryMode, promptMode, onSend }) {
-  const [text, setText] = useState('')
-
-  if (isSpeaking) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#d946ef' }}>speaking...</span>
-        <div className="pcv-speak-bars">
-          {[6,10,7,12,5].map((h,i) => (
-            <div key={i} className="pcv-speak-bar"
-              style={{ height: h, animationDelay: `${[0,0.14,0.28,0.08,0.22][i]}s` }} />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  if (isLoading) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#a855f7' }}>thinking...</span>
-        <div className="pcv-bounce-dots">
-          <div className="pcv-bd" style={{ background: '#a855f7' }} />
-          <div className="pcv-bd" style={{ background: '#a855f7' }} />
-          <div className="pcv-bd" style={{ background: '#a855f7' }} />
-        </div>
-      </div>
-    </div>
-  )
-
-  if (retryMode) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#f59e0b' }}>almost — try again</span>
-        <div className="pcv-listen-dot" style={{ background: '#f59e0b' }} />
-      </div>
-      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>I'm still listening...</div>
-    </div>
-  )
-
-  if (promptMode) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#60a5fa' }}>go ahead...</span>
-        <div className="pcv-listen-dot" style={{ background: '#60a5fa' }} />
-      </div>
-      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Don't be shy — say it</div>
-    </div>
-  )
-
-  if (studentTurn && inputMode === 'voice') return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#22c55e' }}>listening...</span>
-        <div className="pcv-listen-dot" />
-      </div>
-      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Speak your answer</div>
-    </div>
-  )
-
-  if (studentTurn && inputMode === 'text') return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#60a5fa' }}>your turn</span>
-        <div className="pcv-bounce-dots">
-          <div className="pcv-bd" style={{ background: '#60a5fa' }} />
-          <div className="pcv-bd" style={{ background: '#60a5fa' }} />
-          <div className="pcv-bd" style={{ background: '#60a5fa' }} />
-        </div>
-      </div>
-      <div className="pcv-chat-row">
-        <input
-          className="pcv-chat-inp"
-          placeholder="Type your response..."
-          value={text}
-          onChange={e => setText(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && text.trim()) { onSend?.(text); setText('') } }}
-        />
-        <div className="pcv-mic-btn">
-          <svg width="12" height="14" viewBox="0 0 14 18" fill="none" stroke="#60a5fa" strokeWidth="1.5">
-            <rect x="4" y="0" width="6" height="10" rx="3"/>
-            <path d="M1 9a6 6 0 0012 0M7 16v2M4 18h6"/>
-          </svg>
-        </div>
-        <div className="pcv-send-btn" onClick={() => { if (text.trim()) { onSend?.(text); setText('') } }}>↑</div>
-      </div>
-    </div>
-  )
-
-  // idle — nothing to show
-  return <div className="pcv-status-box" style={{ opacity: 0.4 }}>
-    <div className="pcv-status-top">
-      <span className="pcv-status-label" style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>
-    </div>
-  </div>
-}
 
 
-// ── Student Response Bar ──
-function StudentResponseBar({ onSubmit, isListening, disabled }) {
+// ── Unified Row — Motesart status + student response in one bar ──
+function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, onReplay, onStudentResponse }) {
   const [transcript, setTranscript] = React.useState('')
   const [micActive, setMicActive] = React.useState(false)
   const recognitionRef = React.useRef(null)
 
   const startMic = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SR) { alert('Speech recognition not supported in this browser'); return }
+    if (!SR) return
     const rec = new SR()
     rec.lang = 'en-US'
     rec.continuous = true
     rec.interimResults = true
     rec.onresult = (e) => {
-      let interim = ''
-      let final = ''
+      let text = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript
-        else interim += e.results[i][0].transcript
+        text += e.results[i][0].transcript
       }
-      setTranscript((prev) => (final ? prev + final : prev + interim).replace(/ {2,}/g, ' '))
+      setTranscript(text)
     }
-    rec.onerror = () => { setMicActive(false) }
-    rec.onend = () => { setMicActive(false) }
+    rec.onerror = () => setMicActive(false)
+    rec.onend = () => setMicActive(false)
     rec.start()
     recognitionRef.current = rec
     setMicActive(true)
@@ -471,80 +427,87 @@ function StudentResponseBar({ onSubmit, isListening, disabled }) {
     setMicActive(false)
   }
 
-  const toggleMic = () => { if (micActive) stopMic(); else startMic() }
-
   const handleSubmit = () => {
     const text = transcript.trim()
     if (!text) return
-    onSubmit?.(text)
+    onStudentResponse?.(text)
     setTranscript('')
     stopMic()
   }
 
+  // Determine pill state
+  const pillClass = isSpeaking ? 'pcv-pill pcv-pill-speaking'
+    : isLoading ? 'pcv-pill pcv-pill-thinking'
+    : retryMode ? 'pcv-pill pcv-pill-retry'
+    : studentTurn ? 'pcv-pill pcv-pill-listening'
+    : 'pcv-pill pcv-pill-speaking'
+
+  const pillText = isSpeaking ? 'speaking now'
+    : isLoading ? 'thinking...'
+    : retryMode ? 'almost — try again'
+    : studentTurn ? 'your turn'
+    : '—'
+
+  const showStudentInput = (studentTurn || retryMode) && !isSpeaking && !isLoading
+  const micColor = retryMode ? '#f59e0b' : '#22c55e'
+  const micClass = `pcv-row-mic ${retryMode ? 'retry' : 'listening'}`
+
   return (
-    <div style={{
-      background: 'rgba(255,255,255,0.05)',
-      border: `1px solid ${micActive ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)'}`,
-      borderRadius: 14, padding: '12px 16px',
-      display: 'flex', flexDirection: 'column', gap: 10,
-      transition: 'border-color 0.3s',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <div style={{
-          width: 8, height: 8, borderRadius: '50%',
-          background: micActive ? '#22c55e' : 'rgba(255,255,255,0.2)',
-          animation: micActive ? 'pulseGreen 1.1s ease-in-out infinite' : 'none',
-        }} />
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.8px',
-          color: micActive ? '#22c55e' : 'rgba(255,255,255,0.4)',
-          textTransform: 'uppercase' }}>
-          {micActive ? 'listening...' : 'your response'}
-        </span>
+    <div className="pcv-unified-row">
+      <span style={{ fontSize:13, fontWeight:800, color:'#e84b8a', flexShrink:0, letterSpacing:'0.04em' }}>Motesart</span>
+
+      <div className={pillClass}>
+        <div className="pcv-pill-dot" />
+        <span>{pillText}</span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        {/* Mic button */}
-        <button onClick={toggleMic} disabled={disabled} style={{
-          width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-          background: micActive ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.07)',
-          border: `1.5px solid ${micActive ? 'rgba(34,197,94,0.6)' : 'rgba(255,255,255,0.15)'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
-        }}>
-          <svg width="16" height="18" viewBox="0 0 16 20" fill="none"
-            stroke={micActive ? '#22c55e' : 'rgba(255,255,255,0.5)'} strokeWidth="1.8">
-            <rect x="5" y="0" width="6" height="11" rx="3"/>
-            <path d="M1 9a7 7 0 0014 0M8 17v3M4 20h8"/>
-          </svg>
-        </button>
-        {/* Text input */}
-        <input
-          value={transcript}
-          onChange={e => setTranscript(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') handleSubmit() }}
-          placeholder={micActive ? 'Speak now — words appear here...' : 'Type or tap mic to speak...'}
-          disabled={disabled}
-          style={{
-            flex: 1, background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
-            padding: '8px 12px', color: '#fff', fontSize: 14, outline: 'none',
-            fontFamily: "'DM Sans', sans-serif",
-            opacity: disabled ? 0.4 : 1,
-          }}
-        />
-        {/* Submit button */}
-        <button onClick={handleSubmit} disabled={!transcript.trim() || disabled} style={{
-          padding: '8px 16px', borderRadius: 10, flexShrink: 0,
-          background: transcript.trim() && !disabled
-            ? 'linear-gradient(135deg, #a855f7, #e84b8a)'
-            : 'rgba(255,255,255,0.06)',
-          border: 'none', color: transcript.trim() && !disabled ? '#fff' : 'rgba(255,255,255,0.3)',
-          fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700,
-          cursor: transcript.trim() && !disabled ? 'pointer' : 'not-allowed',
-          transition: 'all 0.2s',
-        }}>
-          Submit
-        </button>
-      </div>
+
+      {/* Speaking: waveform + replay */}
+      {(isSpeaking || (!studentTurn && !retryMode && !isLoading)) && (
+        <>
+          <div className="pcv-row-wave">
+            {[5,11,7,13,4].map((h,i) => (
+              <div key={i} className="pcv-row-wb" style={{ height:h, opacity: isSpeaking ? 1 : 0.25 }} />
+            ))}
+          </div>
+          <button className="pcv-row-replay" onClick={onReplay}>↺ Replay</button>
+        </>
+      )}
+
+      {/* Thinking: dots */}
+      {isLoading && (
+        <div className="pcv-think-dots">
+          <div className="pcv-td" /><div className="pcv-td" /><div className="pcv-td" />
+        </div>
+      )}
+
+      {/* Student turn: mic + input + submit */}
+      {showStudentInput && (
+        <>
+          <div className="pcv-row-spacer" />
+          <button
+            className={micClass}
+            onClick={() => micActive ? stopMic() : startMic()}
+            style={{ background: micActive ? `rgba(${retryMode?'245,158,11':'34,197,94'},0.3)` : undefined }}
+          >
+            <svg width="15" height="18" viewBox="0 0 15 20" fill="none" stroke={micActive ? micColor : 'rgba(255,255,255,0.5)'} strokeWidth="1.8">
+              <rect x="4.5" y="0" width="6" height="11" rx="3"/>
+              <path d="M1 9a6.5 6.5 0 0013 0M7.5 17v3M4 20h7"/>
+            </svg>
+          </button>
+          <input
+            className={`pcv-row-inp${micActive ? ' active' : ''}`}
+            placeholder={micActive ? 'Listening — speak now...' : 'Type or tap mic to speak...'}
+            value={transcript}
+            onChange={e => setTranscript(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter' && transcript.trim()) handleSubmit() }}
+          />
+          <button
+            className="pcv-row-sub"
+            disabled={!transcript.trim()}
+            onClick={handleSubmit}
+          >Submit</button>
+        </>
+      )}
     </div>
   )
 }
@@ -562,6 +525,7 @@ export default function PracticeConceptView({
   bpm              = 92,
   studentTurn      = false,
   inputMode        = 'text',
+  studentTurn      = false,
   retryMode        = false,
   promptMode       = false,
   onAnswer,
@@ -695,49 +659,32 @@ export default function PracticeConceptView({
 
         {/* Speech + keys col */}
         <div className="pcv-speech-col">
-          {/* Speech card */}
+          {/* Unified row card */}
           <div style={{
             background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)',
             borderRadius:18, overflow:'hidden',
           }}>
-            <div className="pcv-speech-card">
-              <div style={{ fontSize:13, fontWeight:700, color:'#e84b8a', letterSpacing:'0.04em', marginBottom:2 }}>Motesart</div>
-              <div className="pcv-speech-text">
-                {displayedWords.length > 0
-                  ? displayedWords.join(' ')
-                  : speechText}
-              </div>
-            </div>
-            <div style={{
-              borderTop:'1px solid rgba(255,255,255,0.08)', padding:'10px 16px',
-              display:'flex', alignItems:'center', justifyContent:'space-between',
-            }}>
-              <div style={{ display:'flex', alignItems:'center', gap:3 }}>
-                {[6,10,7,12,5].map((h,i) => (
-                  <div key={i} className="pcv-speak-bar" style={{ height: h, animationDelay:`${[0,0.14,0.28,0.08,0.22][i]}s`, opacity: isSpeaking ? 1 : 0.25 }} />
-                ))}
-              </div>
-              <button onClick={async () => {
+            <UnifiedRow
+              isSpeaking={isSpeaking}
+              isLoading={isLoading}
+              studentTurn={studentTurn}
+              retryMode={retryMode}
+              promptMode={promptMode}
+              onReplay={async () => {
                 if (isSpeaking || isLoading) return
                 setIsLoading(true)
                 try { await onReplay?.() } finally { setIsLoading(false); setIsSpeaking(false) }
-              }} style={{
-                minHeight:34, padding:'5px 13px', borderRadius:10,
-                background:'rgba(232,75,138,0.1)', border:'1px solid rgba(232,75,138,0.25)',
-                color:'#e84b8a', fontFamily:FONTS.body, fontSize:11, fontWeight:700, cursor:'pointer',
-                display:'inline-flex', alignItems:'center', gap:5,
-              }}>{isSpeaking ? 'Speaking...' : isLoading ? 'Loading...' : '↩ Replay'}</button>
+              }}
+              onStudentResponse={onStudentResponse}
+            />
+            <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', padding:'14px 20px 16px' }}>
+              <div className="pcv-speech-text">
+                {displayedWords.length > 0 ? displayedWords.join(' ') : speechText}
+              </div>
             </div>
           </div>
 
-          {/* Student response bar — shown when it's student's turn */}
-          <StudentResponseBar
-            onSubmit={onStudentResponse}
-            isListening={studentTurn}
-            disabled={isSpeaking || isLoading}
-          />
-
-          {/* Keys in focus */}
+                    {/* Keys in focus */}
           <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:7 }}>
             <span style={{ ...S.label }}>Keys in focus</span>
             {highlightedKeys.map(ki => (
