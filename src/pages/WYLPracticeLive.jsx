@@ -138,6 +138,10 @@ if (typeof document !== 'undefined') {
   document.addEventListener('keydown', _unlockAudio)
 }
 
+// ── TTS pronunciation sanitizer ──
+// Display text stays "Motesart" — spoken text uses phonetic "Moatzart"
+const sanitizeTTS = (text) => text.replace(/Motesart/g, 'Moatzart')
+
 const AVATAR_SRC = '/motesart-avatar.png'
 const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
@@ -563,7 +567,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       try {
         console.log('[Motesart] speaking:', current.text.substring(0, 40))
         // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
-        await api.speakText(current.text, 'coach')
+        await api.speakText(sanitizeTTS(current.text), 'coach')
         setTtsUnavailable(false)
       } catch (err) {
         console.warn('[WYLPracticeLive] TTS failed:', err.message)
@@ -616,7 +620,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         setCoaching({ message: affirmText, speaking: true, tags: ['Affirm'] })
         try {
           // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
-          await api.speakText(affirmText, 'coach')
+          await api.speakText(sanitizeTTS(affirmText), 'coach')
         } catch(e) {
           console.warn('[WYLPracticeLive] Affirm TTS failed:', e.message)
         }
@@ -898,7 +902,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
           : (step > 0 && steps[step - 1] && steps[step - 1].type === 'speak')
             ? steps[step - 1].text
             : conceptConfig.speechTexts[currentPhase]
-        return api.speakText(currentStepText, 'coach')
+        return api.speakText(sanitizeTTS(currentStepText), 'coach')
           .catch(err => {
             console.warn('[TTS] onReplay failed:', err.message)
             setTtsUnavailable(true)
@@ -908,6 +912,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       inputMode="voice"
       retryMode={retryMode}
       promptMode={promptMode}
+      onStudentResponse={(transcript) => handleStudentInput(transcript)}
       onBack={() => setPracticeView('cockpit')}
     />
   )
