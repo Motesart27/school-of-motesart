@@ -524,8 +524,6 @@ export default function PracticeConceptView({
   correctAnswer    = '3 & 4',
   bpm              = 92,
   studentTurn      = false,
-  inputMode        = 'text',
-  studentTurn      = false,
   retryMode        = false,
   promptMode       = false,
   onAnswer,
@@ -646,15 +644,6 @@ export default function PracticeConceptView({
               onError={e => { e.currentTarget.style.display = 'none' }} />
           </div>
           <div className="pcv-av-name">MOTESART</div>
-          <StatusBox
-            isSpeaking={isSpeaking}
-            isLoading={isLoading}
-            studentTurn={studentTurn}
-            inputMode={inputMode}
-            retryMode={retryMode}
-            promptMode={promptMode}
-            onSend={onStudentSend}
-          />
         </div>
 
         {/* Speech + keys col */}
