@@ -10,6 +10,24 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+/* ── CORS ── */
+const ALLOWED_ORIGINS = [
+  'https://school-of-motesart.netlify.app',
+  'https://motesart-frontend-production.up.railway.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 /* ────────────────────────────────────────────
    TTS Proxy  –  POST /api/tts/speak
    Body: { text: string, voice: 'coach' | 'tami' }
