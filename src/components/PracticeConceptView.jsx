@@ -520,13 +520,13 @@ export default function PracticeConceptView({
               onError={e => { e.currentTarget.style.display = 'none' }} />
           </div>
           <div className="pcv-av-name">MOTESART</div>
-          <StatusBox
-            isSpeaking={isSpeaking}
-            isLoading={isLoading}
-            studentTurn={studentTurn}
-            inputMode={inputMode}
-            onSend={onStudentSend}
-          />
+          <div style={{
+            fontSize: 12,
+            color: 'rgba(255,255,255,.5)',
+            marginTop: 6
+          }}>
+            {status || 'Idle'}
+          </div>
         </div>
 
         {/* Speech + keys col */}
