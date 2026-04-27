@@ -396,72 +396,76 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
 
 
 // ── Unified Row — Motesart status + student response in one bar ──
-function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, autoSpeak, onReplay, onStudentResponse }) {
-  const [transcript, setTranscript] = React.useState('')
+function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, autoSpeak, onReplay, onStudentResponse, studentText = '', onStudentTextChange }) {
   const [micActive, setMicActive] = React.useState(false)
+  const studentTextRef = React.useRef(studentText)
+  React.useEffect(() => { studentTextRef.current = studentText }, [studentText])
   const recognitionRef = React.useRef(null)
-  const recognitionActiveRef = React.useRef(false)
-  const intentionalStopRef = React.useRef(false)
+  const micRunningRef = React.useRef(false)
 
   const startMic = () => {
-    if (recognitionActiveRef.current) return
+    if (micRunningRef.current) return
+
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) return
-    intentionalStopRef.current = false
+
     const rec = new SR()
-    rec.lang = 'en-US'
-    rec.continuous = true
+
+    rec.continuous = false
     rec.interimResults = true
-    rec.onresult = (e) => {
-      let text = ''
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        text += e.results[i][0].transcript
-      }
-      setTranscript(text)
+    rec.lang = 'en-US'
+
+    rec.onstart = () => {
+      micRunningRef.current = true
+      setMicActive(true)
+      console.log('[MIC] started')
     }
-    rec.onerror = (err) => {
-      if (err.error === 'aborted' && intentionalStopRef.current) {
-        intentionalStopRef.current = false
-        recognitionActiveRef.current = false
-        return
-      }
-      console.warn('[Mic] error:', err.error)
-      recognitionActiveRef.current = false
-      setMicActive(false)
-    }
+
     rec.onend = () => {
-      recognitionActiveRef.current = false
+      micRunningRef.current = false
       setMicActive(false)
-      // Auto-submit final transcript (2+ chars) when speech ends naturally
-      setTranscript(prev => {
-        if (!intentionalStopRef.current && prev && prev.trim().length >= 2) {
-          setTimeout(() => {
-            const t = prev.trim()
-            if (t.length >= 2) onStudentResponse?.(t)
-          }, 300)
-        }
-        intentionalStopRef.current = false
-        return prev
-      })
+      console.log('[MIC] ended')
     }
-    rec.start()
-    recognitionActiveRef.current = true
+
+    rec.onerror = (e) => {
+      micRunningRef.current = false
+      setMicActive(false)
+      console.warn('[MIC ERROR]', e.error)
+    }
+
+    rec.onresult = (e) => {
+      let interim = ''
+      let final = ''
+
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) final += e.results[i][0].transcript
+        else interim += e.results[i][0].transcript
+      }
+
+      const text = final || interim
+      onStudentTextChange(text)
+    }
+
+    try {
+      rec.start()
+    } catch (e) {
+      console.warn('[MIC START FAILED]', e)
+    }
+
     recognitionRef.current = rec
-    setMicActive(true)
   }
 
   const stopMic = () => {
-    intentionalStopRef.current = true
-    recognitionActiveRef.current = false
+    micRunningRef.current = false
     if (recognitionRef.current) { try { recognitionRef.current.stop() } catch(e) {} }
     setMicActive(false)
   }
 
   const handleSubmit = () => {
-    const text = transcript.trim()
+    const text = studentText.trim()
     if (!text || text.length < 2) return
     onStudentResponse?.(text)
-    setTranscript('')
+    onStudentTextChange?.('')
     stopMic()
   }
 
@@ -511,13 +515,20 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
         </div>
       )}
 
-      {/* Student turn: mic + input + submit */}
+      {/* Student turn: mic + submit */}
       {showStudentInput && (
         <>
           <div className="pcv-row-spacer" />
           <button
             className={micClass}
-            onClick={() => micActive ? stopMic() : startMic()}
+            onClick={() => {
+              if (recognitionRef.current && micRunningRef.current) {
+                recognitionRef.current.stop()
+                micRunningRef.current = false
+              } else {
+                startMic()
+              }
+            }}
             style={{ background: micActive ? `rgba(${retryMode?'245,158,11':'34,197,94'},0.3)` : undefined }}
           >
             <svg width="15" height="18" viewBox="0 0 15 20" fill="none" stroke={micActive ? micColor : 'rgba(255,255,255,0.5)'} strokeWidth="1.8">
@@ -525,16 +536,9 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
               <path d="M1 9a6.5 6.5 0 0013 0M7.5 17v3M4 20h7"/>
             </svg>
           </button>
-          <input
-            className={`pcv-row-inp${micActive ? ' active' : ''}`}
-            placeholder={micActive ? 'Listening — speak now...' : 'Type or tap mic to speak...'}
-            value={transcript}
-            onChange={e => setTranscript(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && transcript.trim()) handleSubmit() }}
-          />
           <button
             className="pcv-row-sub"
-            disabled={!transcript.trim()}
+            disabled={!studentText?.trim()}
             onClick={handleSubmit}
           >Submit</button>
         </>
@@ -570,6 +574,7 @@ export default function PracticeConceptView({
   const [isLoading, setIsLoading]       = useState(false)
   const [displayedWords, setDisplayedWords] = useState([])
   const wordTimerRef = React.useRef(null)
+  const [studentText, setStudentText] = useState('')
   const phaseIdx = PHASES.indexOf(phase)
 
   // ── Word-by-word animation ──
@@ -596,6 +601,11 @@ export default function PracticeConceptView({
       if (wordTimerRef.current) clearInterval(wordTimerRef.current)
     }
   }, [isSpeaking, speechText])
+
+  // Clear student text at the start of each new turn
+  useEffect(() => {
+    if (studentTurn) setStudentText('')
+  }, [studentTurn])
 
   useEffect(() => {
     if (!autoSpeak || !speechText || !onReplay) return
@@ -697,12 +707,25 @@ export default function PracticeConceptView({
                 setIsLoading(true)
                 try { await onReplay?.() } finally { setIsLoading(false); setIsSpeaking(false) }
               }}
-              onStudentResponse={onStudentResponse}
+              onStudentResponse={(t) => { setStudentText(''); onStudentResponse?.(t) }}
+              studentText={studentText}
+              onStudentTextChange={setStudentText}
             />
             <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', padding:'14px 20px 16px' }}>
-              <div className="pcv-speech-text">
-                {displayedWords.length > 0 ? displayedWords.join(' ') : speechText}
-              </div>
+              {studentTurn ? (
+                <textarea
+                  className="pcv-speech-text"
+                  style={{ background:'none', border:'none', resize:'none', width:'100%', color:'rgba(255,255,255,0.85)', fontFamily:'DM Sans,-apple-system,sans-serif', fontSize:15, lineHeight:1.65, outline:'none', minHeight:52, display:'block' }}
+                  placeholder="Say your answer — or type here and press Submit..."
+                  value={studentText}
+                  onChange={e => setStudentText(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && studentText.trim()) { e.preventDefault(); setStudentText(''); onStudentResponse?.(studentText.trim()) } }}
+                />
+              ) : (
+                <div className="pcv-speech-text">
+                  {displayedWords.length > 0 ? displayedWords.join(' ') : speechText}
+                </div>
+              )}
             </div>
           </div>
 
