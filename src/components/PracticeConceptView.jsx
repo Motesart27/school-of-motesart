@@ -463,7 +463,7 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
     : studentTurn ? 'your turn'
     : '—'
 
-  const showStudentInput = (studentTurn || retryMode) && !isSpeaking && !isLoading
+  const showStudentInput = (studentTurn || retryMode || promptMode) && !isSpeaking && (autoSpeak ? !isLoading : true)
   const micColor = retryMode ? '#f59e0b' : '#22c55e'
   const micClass = `pcv-row-mic ${retryMode ? 'retry' : 'listening'}`
 
