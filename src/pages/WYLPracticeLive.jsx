@@ -53,6 +53,9 @@ let _onTranscript = null
 let micAllowed = false
 let _recognitionActive = false
 let _intentionalStop = false
+let _micErrorCount = 0
+let _micFailed = false
+let _onMicFail = null
 
 async function ensureMicPermission() {
   try {
@@ -93,8 +96,18 @@ function startListening(onTranscript) {
     _recognitionActive = false
     if (e.error === 'not-allowed' || e.error === 'audio-capture') {
       _isListening = false
+      _micFailed = true
+      if (_onMicFail) _onMicFail()
     } else if (e.error !== 'no-speech') {
-      setTimeout(() => { _isListening = false; startListening(_onTranscript) }, 1000)
+      _micErrorCount++
+      if (_micErrorCount >= 2) {
+        _micFailed = true
+        _isListening = false
+        console.warn('[Mic] Stopped retrying after 2 errors')
+        if (_onMicFail) _onMicFail()
+      } else {
+        setTimeout(() => { _isListening = false; startListening(_onTranscript) }, 1000)
+      }
     }
   }
   _recognition.onend = () => {
@@ -113,6 +126,49 @@ function stopListening() {
   _isListening = false
   _recognitionActive = false
   if (_recognition) { try { _recognition.stop() } catch(e) {} _recognition = null }
+}
+
+function evaluateStudentResponse(text, expected, promptType, conceptName) {
+  const normalized = text.toLowerCase().trim()
+  const isQuestion = normalized.endsWith('?') || /^(what|how|why|can you|could you|do you|is it|are they)/.test(normalized)
+  const isConfused = /(i don|don't know|not sure|idk|confused|huh|what do you mean)/.test(normalized)
+
+  if (isQuestion || isConfused) {
+    return {
+      correct: false, confidence: 0.9, reason: 'question_or_confusion',
+      motesartReply: isQuestion
+        ? 'Great question! The answer is "' + (expected[0] || 'try again') + '". Say it aloud!'
+        : 'No worries! Try repeating what I said.'
+    }
+  }
+
+  const keywordMatch = expected.some(e => normalized.includes(e.toLowerCase()))
+  const naturalPatterns = [
+    /\b3\s*and\s*4\b/, /three\s*and\s*four/, /\be\s*(and|to)\s*f\b/,
+    /next\s*to\s*each\s*other/, /neighbor/, /half\s*step/,
+    /no\s*black\s*key/, /right\s*next/, /adjacent/, /closest/,
+    /smallest\s*(distance|interval|move)/, /one\s*semitone/,
+  ]
+  const naturalMatch = naturalPatterns.some(p => p.test(normalized))
+
+  if (keywordMatch || naturalMatch) {
+    return { correct: true, confidence: keywordMatch ? 0.95 : 0.85, reason: 'matched', motesartReply: 'Yes!' }
+  }
+
+  const partialWords = ['step', 'note', 'key', 'close', 'small', 'near', 'short', 'distance']
+  const partialMatch = partialWords.some(w => normalized.includes(w))
+
+  if (partialMatch) {
+    return {
+      correct: false, confidence: 0.5, reason: 'partial',
+      motesartReply: 'You are on the right track! Can you say the full answer?'
+    }
+  }
+
+  return {
+    correct: false, confidence: 0.9, reason: 'wrong',
+    motesartReply: 'Not quite — a half step is the smallest distance, like E to F or B to C!'
+  }
 }
 
 let _silenceTimer = null
@@ -523,6 +579,8 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [responseTimeout, setResponseTimeout] = React.useState(null)
   const [conceptState, setConceptState] = useState(() => getState('T_HALF_STEP') || {})
   const [sessionCorrect, setSessionCorrect] = useState(0)
+  const [micCheckState, setMicCheckState] = React.useState('idle')
+  const [micFailed, setMicFailed] = React.useState(false)
 
   const ACTIVE_CONCEPT_ID = 'T_HALF_STEP'
   const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID]
@@ -535,6 +593,16 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const handleStudentInputRef = React.useRef(null)
   const practiceViewRef = React.useRef('cockpit')
   React.useEffect(() => { practiceViewRef.current = practiceView }, [practiceView])
+
+  const showDebug = React.useMemo(() => {
+    try { return (new URLSearchParams(window.location.search)).get('debug') === '1' || studentProfile?.role === 'admin' }
+    catch { return false }
+  }, [studentProfile?.role])
+
+  React.useEffect(() => {
+    _onMicFail = () => setMicFailed(true)
+    return () => { _onMicFail = null }
+  }, [])
 
   const THEORY_STEPS = React.useMemo(() => [
     { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
@@ -620,10 +688,6 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
   const handleStudentInput = React.useCallback(async (transcript) => {
     if (!transcript || transcript.trim().length < 1) return
-    // Never process student input while Motesart is speaking
-    if (_isListening === false && awaitingResponse) {
-      return
-    }
     // Gate: ignore noise/empty input
     if (!transcript || transcript.trim().length < 2) return
     // If not in a listen step, give gentle feedback
@@ -641,16 +705,21 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
     const heard = transcript.toLowerCase().trim()
     const expected = current.expect
-    const matched = expected.some(e => heard.includes(e))
+    const evaluation = evaluateStudentResponse(heard, expected, current.prompt, 'The Half Step')
 
-    console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Match:', matched)
+    console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Eval:', evaluation.reason, evaluation.correct)
 
-    if (matched || current.prompt === 'ready_check') {
+    if (evaluation.reason === 'question_or_confusion') {
+      setCoaching({ message: evaluation.motesartReply, speaking: false, tags: ['Explain'] })
+      return
+    }
+
+    if (evaluation.correct || current.prompt === 'ready_check') {
       setStudentEmotion('happy')
       setAwaitingResponse(false)
 
       if (current.prompt === 'call_response') {
-        const affirmText = matched ? 'Yes!' : 'Good try!'
+        const affirmText = evaluation.motesartReply || 'Yes!'
         setCoaching({ message: affirmText, speaking: true, tags: ['Affirm'] })
         try {
           // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
@@ -664,11 +733,16 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setRetryMode(false)
       setPromptMode(false)
       advanceTeaching(step + 1)
+    } else if (evaluation.reason === 'partial') {
+      setStudentEmotion('neutral')
+      setRetryMode(true)
+      setPromptMode(false)
+      setCoaching({ message: evaluation.motesartReply, speaking: false, tags: ['Partial'] })
     } else {
       setStudentEmotion('confused')
       setRetryMode(true)
       setPromptMode(false)
-      setCoaching({ message: "Almost! Try again. I am listening.", speaking: false, tags: ['Retry'] })
+      setCoaching({ message: evaluation.motesartReply || 'Almost! Try again. I am listening.', speaking: false, tags: ['Retry'] })
     }
   }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching])
   handleStudentInputRef.current = handleStudentInput
@@ -680,8 +754,16 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       await loadVoices()
       window.speechSynthesis.cancel()
       const micOk = await ensureMicPermission()
-      if (!micOk) setMicError('Microphone access blocked. Please allow and retry.')
-      else setMicError(null)
+      if (!micOk) {
+        setMicError('Microphone access blocked. Please allow and retry.')
+        setMicCheckState('denied')
+        setCoaching({ message: 'Mic unavailable — type your answer instead.', speaking: false, tags: ['Setup'] })
+      } else {
+        setMicCheckState('ready')
+        setMicError(null)
+        setCoaching({ message: 'Mic ready ✅ — Speak a test word: Hello', speaking: false, tags: ['Setup'] })
+        await new Promise(r => setTimeout(r, 1500))
+      }
       setSessionStarted(true)
     } catch (err) {
       console.error('Start lesson error:', err)
@@ -924,29 +1006,45 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   )
 
   if (practiceView === 'concept') return (
-    <PracticeConceptView
-      conceptName={coaching.concept || 'The Half Step'}
-      conceptDesc="The closest distance between two notes"
-      phase={currentPhase}
-      speechText={coaching.message || ''}
-      highlightedKeys={conceptConfig.highlightedKeys}
-      homeKeyIndex={conceptConfig.homeKeyIndex}
-      answerOptions={[]}
-      correctAnswer={null}
-      bpm={conceptConfig.bpm}
-      autoSpeak={false}
-      studentTurn={awaitingResponse}
-      retryMode={retryMode}
-      promptMode={promptMode}
-      isSpeaking={theoryIsSpeaking}
-      onStudentResponse={handleStudentInput}
-      onStudentTextChange={() => {}}
-      onReplay={() => {
-        const step = THEORY_STEPS[teachingStepRef.current]
-        if (step?.type === 'speak') api.speakText(sanitizeTTS(step.text), 'coach')
-      }}
-      onBack={() => setPracticeView('cockpit')}
-    />
+    <>
+      <PracticeConceptView
+        conceptName={coaching.concept || 'The Half Step'}
+        conceptDesc="The closest distance between two notes"
+        phase={currentPhase}
+        speechText={coaching.message || ''}
+        highlightedKeys={conceptConfig.highlightedKeys}
+        homeKeyIndex={conceptConfig.homeKeyIndex}
+        answerOptions={[]}
+        correctAnswer={null}
+        bpm={conceptConfig.bpm}
+        autoSpeak={false}
+        studentTurn={awaitingResponse}
+        retryMode={retryMode}
+        promptMode={promptMode}
+        isSpeaking={theoryIsSpeaking}
+        onStudentResponse={handleStudentInput}
+        onStudentTextChange={() => {}}
+        onReplay={() => {
+          const step = THEORY_STEPS[teachingStepRef.current]
+          if (step?.type === 'speak') api.speakText(sanitizeTTS(step.text), 'coach')
+        }}
+        onBack={() => setPracticeView('cockpit')}
+      />
+      {micFailed && (
+        <div style={{ position:'fixed', bottom:80, left:'50%', transform:'translateX(-50%)', zIndex:9998, padding:'8px 18px', background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:10, color:'#fca5a5', fontSize:12, fontWeight:600, whiteSpace:'nowrap' }}>
+          Mic is having trouble. Type your answer instead.
+        </div>
+      )}
+      {showDebug && (
+        <div style={{ position:'fixed', bottom:8, right:8, zIndex:9999, background:'rgba(0,0,0,0.85)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:8, padding:'6px 10px', fontSize:10, color:'rgba(255,255,255,0.7)', fontFamily:'monospace', lineHeight:1.6, pointerEvents:'none' }}>
+          <div>Voice: {theoryIsSpeaking ? 'speaking' : ttsUnavailable ? 'error' : 'ready'}</div>
+          <div>Mic: {micFailed ? 'error' : micCheckState === 'ready' ? 'listening' : 'idle'}</div>
+          <div>Student turn: {String(awaitingResponse)}</div>
+          <div>Concept: {ACTIVE_CONCEPT_ID}</div>
+          <div>Step: {teachingStep}</div>
+        </div>
+      )}
+    </>
   )
 
   return (
@@ -1028,6 +1126,15 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         {feedback && (
           <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', zIndex:30, fontSize:24, fontWeight:800, fontFamily:'Outfit', color: feedback.type === 'correct' || feedback.type === 'perfect' ? 'var(--teal-bright)' : 'var(--pink)', pointerEvents:'none' }}>
             {feedback.type === 'perfect' ? 'Perfect!' : feedback.type === 'correct' ? 'Correct' : feedback.type === 'wrong' ? 'Try again' : ''}
+          </div>
+        )}
+        {showDebug && (
+          <div style={{ position:'fixed', bottom:8, right:8, zIndex:9999, background:'rgba(0,0,0,0.85)', border:'1px solid rgba(255,255,255,0.15)', borderRadius:8, padding:'6px 10px', fontSize:10, color:'rgba(255,255,255,0.7)', fontFamily:'monospace', lineHeight:1.6, pointerEvents:'none' }}>
+            <div>Voice: {theoryIsSpeaking ? 'speaking' : ttsUnavailable ? 'error' : 'ready'}</div>
+            <div>Mic: {micFailed ? 'error' : micCheckState === 'ready' ? 'listening' : 'idle'}</div>
+            <div>Student turn: {String(awaitingResponse)}</div>
+            <div>Concept: {ACTIVE_CONCEPT_ID}</div>
+            <div>Step: {teachingStep}</div>
           </div>
         )}
       </div>
