@@ -395,89 +395,6 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
 
 
 
-// ── Status box — avatar-column status indicator ──
-function StatusBox({ isSpeaking, isLoading, studentTurn, inputMode, retryMode, promptMode, onSend }) {
-  const [text, setText] = useState('')
-
-  if (isSpeaking) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#d946ef' }}>speaking...</span>
-        <div className="pcv-speak-bars">
-          {[6,10,7,12,5].map((h,i) => (
-            <div key={i} className="pcv-speak-bar"
-              style={{ height: h, animationDelay: `${[0,0.14,0.28,0.08,0.22][i]}s` }} />
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-
-  if (isLoading) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#a855f7' }}>thinking...</span>
-        <div className="pcv-bounce-dots">
-          <div className="pcv-bd" style={{ background: '#a855f7' }} />
-          <div className="pcv-bd" style={{ background: '#a855f7' }} />
-          <div className="pcv-bd" style={{ background: '#a855f7' }} />
-        </div>
-      </div>
-    </div>
-  )
-
-  if (retryMode) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#f59e0b' }}>try again</span>
-        <div className="pcv-bounce-dots">
-          <div className="pcv-bd" style={{ background: '#f59e0b' }} />
-          <div className="pcv-bd" style={{ background: '#f59e0b' }} />
-          <div className="pcv-bd" style={{ background: '#f59e0b' }} />
-        </div>
-      </div>
-    </div>
-  )
-
-  if (promptMode || (studentTurn && inputMode === 'voice')) return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#22c55e' }}>listening...</span>
-        <div className="pcv-listen-dot" />
-      </div>
-    </div>
-  )
-
-  if (studentTurn && inputMode === 'text') return (
-    <div className="pcv-status-box">
-      <div className="pcv-status-top">
-        <span className="pcv-status-label" style={{ color: '#60a5fa' }}>your turn</span>
-        <div className="pcv-bounce-dots">
-          <div className="pcv-bd" style={{ background: '#60a5fa' }} />
-          <div className="pcv-bd" style={{ background: '#60a5fa' }} />
-          <div className="pcv-bd" style={{ background: '#60a5fa' }} />
-        </div>
-      </div>
-      <div className="pcv-chat-row">
-        <input
-          className="pcv-chat-inp"
-          placeholder="Type your response..."
-          value={text}
-          onChange={e => setText(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter' && text.trim()) { onSend?.(text); setText('') } }}
-        />
-        <div className="pcv-send-btn" onClick={() => { if (text.trim()) { onSend?.(text); setText('') } }}>↑</div>
-      </div>
-    </div>
-  )
-
-  return <div className="pcv-status-box" style={{ opacity: 0.4 }}>
-    <div className="pcv-status-top">
-      <span className="pcv-status-label" style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>
-    </div>
-  </div>
-}
-
 // ── Unified Row — Motesart status + student response in one bar ──
 function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, onReplay, onStudentResponse }) {
   const [transcript, setTranscript] = React.useState('')
@@ -494,17 +411,30 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
     rec.onresult = (e) => {
       let text = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) final += e.results[i][0].transcript
-        else interim += e.results[i][0].transcript
+        text += e.results[i][0].transcript
       }
-      setTranscript(final || interim)
+      setTranscript(text)
     }
-    rec.onerror = () => setMicActive(false)
-    rec.onend = () => setMicActive(false)
-    try { rec.start() } catch(e) { console.warn("[Mic] start error:", e); return }
+    rec.onerror = () => { console.warn('[Mic] error'); setMicActive(false) }
+    rec.onend = () => {
+      setMicActive(false)
+      // Auto-evaluate on speech end only if transcript is valid (2+ chars)
+      setTranscript(prev => {
+        if (prev && prev.trim().length >= 2) {
+          // Schedule submit after state settles
+          setTimeout(() => {
+            const t = prev.trim()
+            if (t.length >= 2) {
+              onStudentResponse?.(t)
+            }
+          }, 300)
+        }
+        return prev
+      })
+    }
+    rec.start()
     recognitionRef.current = rec
     setMicActive(true)
-    console.log("[Mic] SpeechRecognition started")
   }
 
   const stopMic = () => {
@@ -514,7 +444,7 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
 
   const handleSubmit = () => {
     const text = transcript.trim()
-    if (!text) return
+    if (!text || text.length < 2) return
     onStudentResponse?.(text)
     setTranscript('')
     stopMic()
@@ -652,22 +582,6 @@ export default function PracticeConceptView({
   }, [isSpeaking, speechText])
 
   useEffect(() => {
-    if (!speechText) return
-    const words = speechText.split(" ")
-    setDisplayedWords([])
-    if (wordTimerRef.current) clearInterval(wordTimerRef.current)
-    const dur = Math.max(2000, (words.length / 2.5) * 1000)
-    const iv = dur / words.length
-    let i = 0
-    wordTimerRef.current = setInterval(() => {
-      i++
-      setDisplayedWords(words.slice(0, i))
-      if (i >= words.length) clearInterval(wordTimerRef.current)
-    }, iv)
-    return () => clearInterval(wordTimerRef.current)
-  }, [speechText])
-
-  useEffect(() => {
     if (!autoSpeak || !speechText || !onReplay) return
     setIsLoading(true)
     setIsSpeaking(false)
@@ -746,7 +660,6 @@ export default function PracticeConceptView({
               onError={e => { e.currentTarget.style.display = 'none' }} />
           </div>
           <div className="pcv-av-name">MOTESART</div>
-
         </div>
 
         {/* Speech + keys col */}

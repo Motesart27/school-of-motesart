@@ -587,9 +587,14 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setPromptMode(false)
       setTheoryIsSpeaking(false)
       setCoaching({ message: 'Your turn! I am listening...', speaking: false, tags: ['Listening'] })
-      // Restart mic after Motesart finishes speaking
+      // Restart mic after Motesart finishes — 500ms delay to avoid speaker bleed
       if (micAllowed) {
-        startListening((transcript) => handleStudentInput(transcript))
+        setTimeout(() => {
+          startListening((transcript) => {
+            // Only process if still awaiting response
+            if (awaitingResponse) handleStudentInput(transcript)
+          })
+        }, 500)
       }
       // 15s silence — gentle prompt only, never auto-advance
       const timeout = setTimeout(() => {
@@ -604,10 +609,11 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     if (!transcript || transcript.trim().length < 1) return
     // Never process student input while Motesart is speaking
     if (_isListening === false && awaitingResponse) {
-      // mic was stopped — ignore stale transcript
       return
     }
-    // If not in a listen step, give gentle feedback instead of silent ignore
+    // Gate: ignore noise/empty input
+    if (!transcript || transcript.trim().length < 2) return
+    // If not in a listen step, give gentle feedback
     if (!awaitingResponse) {
       setCoaching({ message: "Hold on — let me finish my thought first.", speaking: false, tags: ['Wait'] })
       return
