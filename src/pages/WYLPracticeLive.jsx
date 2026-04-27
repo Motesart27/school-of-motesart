@@ -211,6 +211,76 @@ if (typeof document !== 'undefined') {
 // Display text stays "Motesart" — spoken text uses phonetic "Moatzart"
 const sanitizeTTS = (text) => text.replace(/Motesart/g, 'Moatzart')
 
+const CONCEPT_CONFIG_MAP = {
+  'half-step': {
+    concept: 'Half Step',
+    conceptId: 'T_HALF_STEP',
+    steps: [
+      { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'yea'], prompt: 'ready_check' },
+      { type: 'speak', text: "Awesome! A Half Step is the smallest distance in music. It is the distance from one key to the very next key with nothing in between. Like from E to F, or B to C. Say it back to me: Half Step." },
+      { type: 'listen', expect: ['half', 'half step', 'have'], prompt: 'call_response' },
+      { type: 'speak', text: "Perfect! Look at the piano — keys 3 and 4 are E and F. There is no black key between them, so E to F is a Half Step. Now here is the big secret: the Whole Half pattern unlocks all 12 major scales. Say it with me: Whole, Whole, Half, Whole, Whole, Whole, Half." },
+      { type: 'listen', expect: ['whole', 'half'], prompt: 'pattern_repeat' },
+      { type: 'speak', text: "Let us do call and response. I say it, you echo it. Ready?" },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok'], prompt: 'ready_check' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Half." },
+      { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Half." },
+      { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
+      { type: 'speak', text: "You did it! That pattern works for EVERY major scale. C major, G major, D major, all 12 of them. What is the pattern one more time?" },
+      { type: 'listen', expect: ['whole', 'half'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Excellent work! You now know the Half Step and the master pattern that unlocks all 12 major scales. Great job today!" },
+    ]
+  },
+  'whole-step': {
+    concept: 'Whole Step',
+    conceptId: 'T_WHOLE_STEP',
+    steps: [
+      { type: 'speak', text: "Welcome! Today we are learning the Whole Step. A Whole Step skips one key — it jumps over one key and lands on the next one. Are you ready to learn?" },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "Great! A Whole Step is twice as big as a Half Step. Instead of going to the very next key, you skip one and go to the key after that. From C to D — there is a black key in between, so that is a Whole Step. Say it back: Whole Step." },
+      { type: 'listen', expect: ['whole', 'whole step'], prompt: 'call_response' },
+      { type: 'speak', text: "Nice! Look at keys 1 and 3 on the piano. That is C and E — one key between them. A Whole Step. Now let us do call and response. I say it, you echo it. Ready?" },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok'], prompt: 'ready_check' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Whole." },
+      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
+      { type: 'speak', text: "Now tell me in your own words — what is a Whole Step?" },
+      { type: 'listen', expect: ['whole', 'skip', 'two', 'twice', 'jump', 'over', 'between', 'black key'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Fantastic! A Whole Step skips one key. You now know both the Half Step and the Whole Step — the two building blocks of every scale in music. Amazing work today!" },
+    ]
+  },
+  'scale-degree': {
+    concept: 'Scale Degrees',
+    conceptId: 'T_SCALE_DEGREES',
+    steps: [
+      { type: 'speak', text: "Hello! Today we are learning Scale Degrees. Every note in the C major scale has a number. C is degree 1, D is degree 2, E is 3, F is 4, G is 5, A is 6, B is 7, and the next C is 8. Are you ready?" },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "Great! Let us count together. Say the numbers 1 through 4 as I point to the keys: 1, 2, 3, 4." },
+      { type: 'listen', expect: ['1', '2', '3', '4', 'one', 'two', 'three', 'four'], prompt: 'call_response' },
+      { type: 'speak', text: "Perfect! Now — what degree is the note F in C major?" },
+      { type: 'listen', expect: ['4', 'four', 'fourth', 'degree 4', 'four degree'], prompt: 'full_pattern' },
+      { type: 'speak', text: "That is right! F is the 4th degree. Now — what degree is G?" },
+      { type: 'listen', expect: ['5', 'five', 'fifth', 'degree 5', 'five degree'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Yes! G is the 5th degree — called the dominant. Scale degrees work the same in every major key. What is the 1st degree always called?" },
+      { type: 'listen', expect: ['1', 'one', 'first', 'tonic', 'root', 'home', 'degree 1'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Excellent! The 1st degree is the tonic — the home base. You now think like a real musician. Scale degrees connect every scale, every chord, every song. Great work today!" },
+    ]
+  }
+}
+
 const AVATAR_SRC = '/motesart-avatar.png'
 const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
@@ -520,6 +590,14 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const navigate = useNavigate()
   const videoRef = useRef(null)
 
+  // Concept routing — read ?concept= from URL, stable for session lifetime
+  const currentConcept = React.useMemo(() => {
+    try {
+      const slug = new URLSearchParams(window.location.search).get('concept') || 'half-step'
+      return CONCEPT_CONFIG_MAP[slug] || CONCEPT_CONFIG_MAP['half-step']
+    } catch { return CONCEPT_CONFIG_MAP['half-step'] }
+  }, [])
+
   const [practiceView, setPracticeView] = useState('cockpit')
   const [timer, setTimer] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -577,13 +655,13 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [teachingStep, setTeachingStep] = React.useState(0)
   const [awaitingResponse, setAwaitingResponse] = React.useState(false)
   const [responseTimeout, setResponseTimeout] = React.useState(null)
-  const [conceptState, setConceptState] = useState(() => getState('T_HALF_STEP') || {})
+  const [conceptState, setConceptState] = useState(() => getState(currentConcept.conceptId) || {})
   const [sessionCorrect, setSessionCorrect] = useState(0)
   const [micCheckState, setMicCheckState] = React.useState('idle')
   const [micFailed, setMicFailed] = React.useState(false)
 
-  const ACTIVE_CONCEPT_ID = 'T_HALF_STEP'
-  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID]
+  const ACTIVE_CONCEPT_ID = currentConcept.conceptId
+  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID] || CONCEPT_VIEW_CONFIG['T_HALF_STEP']
   const phaseMap = {
     introduced: 'teach', practicing: 'guide',
     accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release'
@@ -604,33 +682,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     return () => { _onMicFail = null }
   }, [])
 
-  const THEORY_STEPS = React.useMemo(() => [
-    { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
-    { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'yea'], prompt: 'ready_check' },
-    { type: 'speak', text: "Awesome! Here is the secret. There is ONE pattern that unlocks ALL 12 major scales. Just one! It is called the Whole and Half Step Pattern. Say it with me: Whole, Whole, Half, Whole, Whole, Whole, Half." },
-    { type: 'listen', expect: ['whole', 'half'], prompt: 'pattern_repeat' },
-    { type: 'speak', text: "Great effort! Let me break it down. A Whole step means you skip one key. A Half step means you go to the very next key. No skipping. Now, the pattern is: Whole, Whole, Half, Whole, Whole, Whole, Half. Let us try it together. I say it, then you say it. Ready?" },
-    { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok'], prompt: 'ready_check' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Half." },
-    { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Whole." },
-    { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-    { type: 'speak', text: "Half." },
-    { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
-    { type: 'speak', text: "You did it! That pattern, Whole Whole Half Whole Whole Whole Half, works for EVERY major scale. C major, G major, D major, all 12 of them. You just learned the master key to all major scales!" },
-    { type: 'speak', text: "Now lets apply it. Starting on C, we go: C, whole step to D, whole step to E, half step to F, whole step to G, whole step to A, whole step to B, and half step back to C. That is the C major scale!" },
-    { type: 'speak', text: "Can you say the pattern one more time for me? The whole and half step pattern." },
-    { type: 'listen', expect: ['whole', 'half'], prompt: 'full_pattern' },
-    { type: 'speak', text: "Excellent work! You now know the secret that unlocks all 12 major scales. In our next lesson, we will apply this pattern starting on different notes. But for now, just remember: Whole, Whole, Half, Whole, Whole, Whole, Half. Great job today!" },
-  ], [])
+  const THEORY_STEPS = currentConcept.steps
 
   const advanceTeaching = React.useCallback(async (step) => {
     if (step >= THEORY_STEPS.length) {
@@ -1008,7 +1060,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   if (practiceView === 'concept') return (
     <>
       <PracticeConceptView
-        conceptName={coaching.concept || 'The Half Step'}
+        conceptName={coaching.concept || currentConcept.concept}
         conceptDesc="The closest distance between two notes"
         phase={currentPhase}
         speechText={coaching.message || ''}

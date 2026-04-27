@@ -25,4 +25,18 @@ export const CONCEPT_VIEW_CONFIG = {
       release: "Feel it. No help. Find the whole step by ear."
     }
   }
+,
+  T_SCALE_DEGREES: {
+    highlightedKeys: [0, 1, 2, 3, 4, 5, 6, 7],
+    homeKeyIndex: 0,
+    answerOptions: [],
+    correctAnswer: null,
+    bpm: 88,
+    speechTexts: {
+      teach: "Every note in the scale has a number — degree 1 through 8. C is 1, D is 2, E is 3, and so on.",
+      guide: "Name the degree. Which number is this note in the C major scale?",
+      confirm: "Say the degree number before you play it.",
+      release: "No hints. Name the degree by ear."
+    }
+  }
 }
