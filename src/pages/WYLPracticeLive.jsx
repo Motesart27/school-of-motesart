@@ -897,6 +897,8 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         setConceptState(newState)
         if (isCorrect) setSessionCorrect(s => s + 1)
       }}
+      autoSpeak={false}
+      autoSpeak={false}
       onReplay={() => {
         // Replay current theory step text — do NOT advance
         const step = teachingStepRef.current

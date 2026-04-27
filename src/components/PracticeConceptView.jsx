@@ -609,6 +609,7 @@ export default function PracticeConceptView({
   studentTurn      = false,
   retryMode        = false,
   promptMode       = false,
+  autoSpeak        = true,
   onAnswer,
   onReplay,
   onBack,
@@ -649,13 +650,13 @@ export default function PracticeConceptView({
   }, [isSpeaking, speechText])
 
   useEffect(() => {
-    if (!speechText || !onReplay) return
+    if (!autoSpeak || !speechText || !onReplay) return
     setIsLoading(true)
     setIsSpeaking(false)
     onReplay()
       .then(() => { setIsLoading(false) })
       .catch(() => { setIsLoading(false) })
-  }, [speechText])
+  }, [speechText, autoSpeak])
 
   const S = {
     glass: {
