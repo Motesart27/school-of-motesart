@@ -563,6 +563,8 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setRetryMode(false)
       setPromptMode(false)
       setTheoryIsSpeaking(true)
+      // Stop mic while Motesart is speaking to prevent speaker bleed
+      stopListening()
       setCoaching({ message: current.text, speaking: true, tags: ['Teaching'] })
       try {
         console.log('[Motesart] speaking:', current.text.substring(0, 40))
@@ -572,7 +574,6 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       } catch (err) {
         console.warn('[WYLPracticeLive] TTS failed:', err.message)
         setTtsUnavailable(true)
-        // Wait proportional to text length so lesson still flows
         await new Promise(r => setTimeout(r, Math.max(2000, current.text.split(' ').length * 350)))
       }
       setTheoryIsSpeaking(false)
@@ -586,16 +587,26 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setPromptMode(false)
       setTheoryIsSpeaking(false)
       setCoaching({ message: 'Your turn! I am listening...', speaking: false, tags: ['Listening'] })
+      // Restart mic after Motesart finishes speaking
+      if (micAllowed) {
+        startListening((transcript) => handleStudentInput(transcript))
+      }
+      // 15s silence — gentle prompt only, never auto-advance
       const timeout = setTimeout(() => {
         setPromptMode(true)
-        setCoaching({ message: "Do not be shy! Go ahead and say it.", speaking: false, tags: ['Encouraging'] })
-      }, 8000)
+        setCoaching({ message: "Take your time — I am still listening.", speaking: false, tags: ['Encouraging'] })
+      }, 15000)
       setResponseTimeout(timeout)
     }
   }, [THEORY_STEPS])
 
   const handleStudentInput = React.useCallback(async (transcript) => {
     if (!transcript || transcript.trim().length < 1) return
+    // Never process student input while Motesart is speaking
+    if (_isListening === false && awaitingResponse) {
+      // mic was stopped — ignore stale transcript
+      return
+    }
     // If not in a listen step, give gentle feedback instead of silent ignore
     if (!awaitingResponse) {
       setCoaching({ message: "Hold on — let me finish my thought first.", speaking: false, tags: ['Wait'] })
@@ -870,7 +881,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   }
 
   if (practiceView === 'cockpit') return (
-    <PracticeSessionCockpit onBegin={() => { startLesson(); setPracticeView('concept') }} />
+    <PracticeSessionCockpit onBegin={() => setPracticeView('concept')} />
   )
 
   if (practiceView === 'concept') return (
@@ -897,8 +908,6 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         setConceptState(newState)
         if (isCorrect) setSessionCorrect(s => s + 1)
       }}
-      autoSpeak={false}
-      autoSpeak={false}
       onReplay={() => {
         // Replay current theory step text — do NOT advance
         const step = teachingStepRef.current
@@ -914,6 +923,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
             setTtsUnavailable(true)
           })
       }}
+      autoSpeak={false}
       studentTurn={awaitingResponse}
       inputMode="voice"
       retryMode={retryMode}
