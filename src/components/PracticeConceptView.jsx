@@ -396,7 +396,7 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
 
 
 // ── Unified Row — Motesart status + student response in one bar ──
-function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, onReplay, onStudentResponse }) {
+function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode, autoSpeak, onReplay, onStudentResponse }) {
   const [transcript, setTranscript] = React.useState('')
   const [micActive, setMicActive] = React.useState(false)
   const recognitionRef = React.useRef(null)
@@ -463,7 +463,8 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
     : studentTurn ? 'your turn'
     : '—'
 
-  const showStudentInput = (studentTurn || retryMode || promptMode) && !isSpeaking && (autoSpeak ? !isLoading : true)
+  const showStudentInput = (studentTurn || promptMode || retryMode) && !isSpeaking && (autoSpeak ? !isLoading : true)
+  console.log('[MIC UI DEBUG]', { studentTurn, promptMode, retryMode, showStudentInput })
   const micColor = retryMode ? '#f59e0b' : '#22c55e'
   const micClass = `pcv-row-mic ${retryMode ? 'retry' : 'listening'}`
 
@@ -675,6 +676,7 @@ export default function PracticeConceptView({
               studentTurn={studentTurn}
               retryMode={retryMode}
               promptMode={promptMode}
+              autoSpeak={autoSpeak}
               onReplay={async () => {
                 if (isSpeaking || isLoading) return
                 setIsLoading(true)

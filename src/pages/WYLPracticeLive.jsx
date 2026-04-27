@@ -886,8 +886,19 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     )
   }
 
+  React.useEffect(() => {
+    console.log('[MIC DEBUG]', {
+      awaitingResponse,
+      studentTurn: awaitingResponse,
+      promptMode,
+      retryMode,
+      isSpeaking: theoryIsSpeaking,
+      isLoading: false,
+    })
+  }, [awaitingResponse, promptMode, retryMode, theoryIsSpeaking])
+
   if (practiceView === 'cockpit') return (
-    <PracticeSessionCockpit onBegin={() => setPracticeView('concept')} />
+    <PracticeSessionCockpit onBegin={async () => { setPracticeView('concept'); startLesson() }} />
   )
 
   if (practiceView === 'concept') return (
