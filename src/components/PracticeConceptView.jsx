@@ -494,15 +494,17 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
     rec.onresult = (e) => {
       let text = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        text += e.results[i][0].transcript
+        if (e.results[i].isFinal) final += e.results[i][0].transcript
+        else interim += e.results[i][0].transcript
       }
-      setTranscript(text)
+      setTranscript(final || interim)
     }
     rec.onerror = () => setMicActive(false)
     rec.onend = () => setMicActive(false)
-    rec.start()
+    try { rec.start() } catch(e) { console.warn("[Mic] start error:", e); return }
     recognitionRef.current = rec
     setMicActive(true)
+    console.log("[Mic] SpeechRecognition started")
   }
 
   const stopMic = () => {
@@ -648,6 +650,22 @@ export default function PracticeConceptView({
       if (wordTimerRef.current) clearInterval(wordTimerRef.current)
     }
   }, [isSpeaking, speechText])
+
+  useEffect(() => {
+    if (!speechText) return
+    const words = speechText.split(" ")
+    setDisplayedWords([])
+    if (wordTimerRef.current) clearInterval(wordTimerRef.current)
+    const dur = Math.max(2000, (words.length / 2.5) * 1000)
+    const iv = dur / words.length
+    let i = 0
+    wordTimerRef.current = setInterval(() => {
+      i++
+      setDisplayedWords(words.slice(0, i))
+      if (i >= words.length) clearInterval(wordTimerRef.current)
+    }, iv)
+    return () => clearInterval(wordTimerRef.current)
+  }, [speechText])
 
   useEffect(() => {
     if (!autoSpeak || !speechText || !onReplay) return
