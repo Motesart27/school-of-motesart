@@ -925,49 +925,26 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
   if (practiceView === 'concept') return (
     <PracticeConceptView
-      conceptName="The Half Step"
+      conceptName={coaching.concept || 'The Half Step'}
       conceptDesc="The closest distance between two notes"
       phase={currentPhase}
-      speechText={conceptConfig.speechTexts[currentPhase]}
+      speechText={coaching.message || ''}
       highlightedKeys={conceptConfig.highlightedKeys}
       homeKeyIndex={conceptConfig.homeKeyIndex}
-      answerOptions={conceptConfig.answerOptions}
-      correctAnswer={conceptConfig.correctAnswer}
+      answerOptions={[]}
+      correctAnswer={null}
       bpm={conceptConfig.bpm}
-      onAnswer={(isCorrect) => {
-        const prev = getState(ACTIVE_CONCEPT_ID) || {}
-        const newState = {
-          ...prev,
-          attempts: (prev.attempts || 0) + 1,
-          correct_streak: isCorrect ? (prev.correct_streak || 0) + 1 : 0,
-          ownership_state: isCorrect && (prev.correct_streak || 0) >= 2
-            ? 'practicing' : prev.ownership_state || 'introduced'
-        }
-        setState(ACTIVE_CONCEPT_ID, newState)
-        setConceptState(newState)
-        if (isCorrect) setSessionCorrect(s => s + 1)
-      }}
-      onReplay={() => {
-        // Replay current theory step text — do NOT advance
-        const step = teachingStepRef.current
-        const steps = THEORY_STEPS
-        const currentStepText = (steps[step] && steps[step].type === 'speak')
-          ? steps[step].text
-          : (step > 0 && steps[step - 1] && steps[step - 1].type === 'speak')
-            ? steps[step - 1].text
-            : conceptConfig.speechTexts[currentPhase]
-        return api.speakText(sanitizeTTS(currentStepText), 'coach')
-          .catch(err => {
-            console.warn('[TTS] onReplay failed:', err.message)
-            setTtsUnavailable(true)
-          })
-      }}
       autoSpeak={false}
       studentTurn={awaitingResponse}
-      inputMode="voice"
       retryMode={retryMode}
       promptMode={promptMode}
-      onStudentResponse={(transcript) => handleStudentInput(transcript)}
+      isSpeaking={theoryIsSpeaking}
+      onStudentResponse={handleStudentInput}
+      onStudentTextChange={() => {}}
+      onReplay={() => {
+        const step = THEORY_STEPS[teachingStepRef.current]
+        if (step?.type === 'speak') api.speakText(sanitizeTTS(step.text), 'coach')
+      }}
       onBack={() => setPracticeView('cockpit')}
     />
   )
