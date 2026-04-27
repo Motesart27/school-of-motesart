@@ -214,6 +214,7 @@ const sanitizeTTS = (text) => text.replace(/Motesart/g, 'Moatzart')
 const CONCEPT_CONFIG_MAP = {
   'half-step': {
     concept: 'Half Step',
+    description: 'The smallest distance in music — from one key to the very next key.',
     conceptId: 'T_HALF_STEP',
     steps: [
       { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
@@ -245,6 +246,7 @@ const CONCEPT_CONFIG_MAP = {
   },
   'whole-step': {
     concept: 'Whole Step',
+    description: 'A step that skips one key — twice the size of a half step.',
     conceptId: 'T_WHOLE_STEP',
     steps: [
       { type: 'speak', text: "Welcome! Today we are learning the Whole Step. A Whole Step skips one key — it jumps over one key and lands on the next one. Are you ready to learn?" },
@@ -264,6 +266,7 @@ const CONCEPT_CONFIG_MAP = {
   },
   'scale-degree': {
     concept: 'Scale Degrees',
+    description: 'Every note in the C major scale numbered 1 through 8.',
     conceptId: 'T_SCALE_DEGREES',
     steps: [
       { type: 'speak', text: "Hello! Today we are learning Scale Degrees. Every note in the C major scale has a number. C is degree 1, D is degree 2, E is 3, F is 4, G is 5, A is 6, B is 7, and the next C is 8. Are you ready?" },
@@ -1054,7 +1057,11 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   }, [awaitingResponse, promptMode, retryMode, theoryIsSpeaking])
 
   if (practiceView === 'cockpit') return (
-    <PracticeSessionCockpit onBegin={async () => { setPracticeView('concept'); startLesson() }} />
+    <PracticeSessionCockpit
+      onBegin={async () => { setPracticeView('concept'); startLesson() }}
+      conceptTitle={currentConcept.concept}
+      conceptDesc={currentConcept.description}
+    />
   )
 
   if (practiceView === 'concept') return (
