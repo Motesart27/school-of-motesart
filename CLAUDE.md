@@ -30,10 +30,11 @@
 7. No silent dependency changes — call out new packages explicitly
 
 ## CURRENT STATE (April 27, 2026)
-- Voice loop: WORKING in bundle index-D1HthtYh.js
+- Voice loop: WORKING in bundle index-ByohIFMv.js
 - Active path: Theory Phase (NOT old T.A.M.i visual engine)
-- Key files modified this session: WYLPracticeLive.jsx, PracticeConceptView.jsx
-- Last commits: 151d954 (Pass 2 smart evaluator), 19adf90 (render wiring), c2ddbe2 (mic fix)
+- Dynamic concept routing: WORKING — ?concept=half-step / whole-step / scale-degree
+- Key files modified this session: WYLPracticeLive.jsx, PracticeConceptView.jsx, conceptViewConfig.js
+- Last commits: 904e868 (cockpit concept name), fedd806 (concept routing), 6a01ea3 (CLAUDE.md + handoff)
 - PENDING: Add VITE_MOTESART_CLAUDE_KEY to Netlify env vars for parseIntent AI fallback
 - PENDING: Live test voice loop end-to-end with mic on real device
 
