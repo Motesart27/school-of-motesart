@@ -51,6 +51,8 @@ let _recognition = null
 let _isListening = false
 let _onTranscript = null
 let micAllowed = false
+let _recognitionActive = false
+let _intentionalStop = false
 
 async function ensureMicPermission() {
   try {
@@ -66,11 +68,12 @@ async function ensureMicPermission() {
 }
 
 function startListening(onTranscript) {
-  if (_isListening) return
+  if (_recognitionActive) return
   if (!micAllowed) { console.error('Mic not allowed'); return }
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition
   if (!SR) { console.warn('SpeechRecognition not supported'); return }
   _onTranscript = onTranscript
+  _intentionalStop = false
   _recognition = new SR()
   _recognition.lang = 'en-US'
   _recognition.continuous = true
@@ -85,20 +88,30 @@ function startListening(onTranscript) {
     }
   }
   _recognition.onerror = (e) => {
+    if (e.error === 'aborted' && _intentionalStop) { _intentionalStop = false; _recognitionActive = false; return }
     console.warn('Speech recognition error:', e.error)
+    _recognitionActive = false
     if (e.error === 'not-allowed' || e.error === 'audio-capture') {
       _isListening = false
     } else if (e.error !== 'no-speech') {
       setTimeout(() => { _isListening = false; startListening(_onTranscript) }, 1000)
     }
   }
-  _recognition.onend = () => { if (_isListening) { try { _recognition.start() } catch(e) {} } }
+  _recognition.onend = () => {
+    _recognitionActive = false
+    if (_isListening && !_intentionalStop) {
+      try { if (_recognition) { _recognition.start(); _recognitionActive = true } } catch(e) {}
+    }
+  }
   _recognition.start()
   _isListening = true
+  _recognitionActive = true
 }
 
 function stopListening() {
+  _intentionalStop = true
   _isListening = false
+  _recognitionActive = false
   if (_recognition) { try { _recognition.stop() } catch(e) {} _recognition = null }
 }
 
@@ -519,6 +532,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   }
   const currentPhase = phaseMap[conceptState?.ownership_state || 'introduced']
   const teachingStepRef = React.useRef(0)
+  const handleStudentInputRef = React.useRef(null)
+  const practiceViewRef = React.useRef('cockpit')
+  React.useEffect(() => { practiceViewRef.current = practiceView }, [practiceView])
 
   const THEORY_STEPS = React.useMemo(() => [
     { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
@@ -587,13 +603,10 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setPromptMode(false)
       setTheoryIsSpeaking(false)
       setCoaching({ message: 'Your turn! I am listening...', speaking: false, tags: ['Listening'] })
-      // Restart mic after Motesart finishes — 500ms delay to avoid speaker bleed
-      if (micAllowed) {
+      // Restart WYL mic only when NOT in concept view (concept view uses PCV's own mic)
+      if (micAllowed && practiceViewRef.current !== 'concept') {
         setTimeout(() => {
-          startListening((transcript) => {
-            // Only process if still awaiting response
-            if (awaitingResponse) handleStudentInput(transcript)
-          })
+          startListening((transcript) => handleStudentInputRef.current?.(transcript))
         }, 500)
       }
       // 15s silence — gentle prompt only, never auto-advance
@@ -658,6 +671,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setCoaching({ message: "Almost! Try again. I am listening.", speaking: false, tags: ['Retry'] })
     }
   }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching])
+  handleStudentInputRef.current = handleStudentInput
 
   const startLesson = React.useCallback(async () => {
     try {
@@ -683,9 +697,17 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   }, [sessionStarted])
 
   React.useEffect(() => {
-    if (isListeningActive) startListening((transcript) => handleStudentInput(transcript))
+    // Only start WYL recognition when NOT in concept view; concept view uses PCV's own mic.
+    if (isListeningActive && practiceViewRef.current !== 'concept') {
+      startListening((transcript) => handleStudentInputRef.current?.(transcript))
+    }
     return () => stopListening()
-  }, [isListeningActive, handleStudentInput])
+  }, [isListeningActive, practiceView])
+
+  // Stop WYL recognition immediately on entering concept view
+  React.useEffect(() => {
+    if (practiceView === 'concept') stopListening()
+  }, [practiceView])
 
   const getCurrentMoment = useCallback(() => currentMoment, [currentMoment])
   const { initQuestionHandler, handleStudentQuestion, questionHandlerRef, questionHistory } =

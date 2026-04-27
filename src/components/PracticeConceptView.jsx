@@ -400,10 +400,14 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
   const [transcript, setTranscript] = React.useState('')
   const [micActive, setMicActive] = React.useState(false)
   const recognitionRef = React.useRef(null)
+  const recognitionActiveRef = React.useRef(false)
+  const intentionalStopRef = React.useRef(false)
 
   const startMic = () => {
+    if (recognitionActiveRef.current) return
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SR) return
+    intentionalStopRef.current = false
     const rec = new SR()
     rec.lang = 'en-US'
     rec.continuous = true
@@ -415,29 +419,40 @@ function UnifiedRow({ isSpeaking, isLoading, studentTurn, retryMode, promptMode,
       }
       setTranscript(text)
     }
-    rec.onerror = () => { console.warn('[Mic] error'); setMicActive(false) }
-    rec.onend = () => {
+    rec.onerror = (err) => {
+      if (err.error === 'aborted' && intentionalStopRef.current) {
+        intentionalStopRef.current = false
+        recognitionActiveRef.current = false
+        return
+      }
+      console.warn('[Mic] error:', err.error)
+      recognitionActiveRef.current = false
       setMicActive(false)
-      // Auto-evaluate on speech end only if transcript is valid (2+ chars)
+    }
+    rec.onend = () => {
+      recognitionActiveRef.current = false
+      setMicActive(false)
+      // Auto-submit final transcript (2+ chars) when speech ends naturally
       setTranscript(prev => {
-        if (prev && prev.trim().length >= 2) {
-          // Schedule submit after state settles
+        if (!intentionalStopRef.current && prev && prev.trim().length >= 2) {
           setTimeout(() => {
             const t = prev.trim()
-            if (t.length >= 2) {
-              onStudentResponse?.(t)
-            }
+            if (t.length >= 2) onStudentResponse?.(t)
           }, 300)
         }
+        intentionalStopRef.current = false
         return prev
       })
     }
     rec.start()
+    recognitionActiveRef.current = true
     recognitionRef.current = rec
     setMicActive(true)
   }
 
   const stopMic = () => {
+    intentionalStopRef.current = true
+    recognitionActiveRef.current = false
     if (recognitionRef.current) { try { recognitionRef.current.stop() } catch(e) {} }
     setMicActive(false)
   }
