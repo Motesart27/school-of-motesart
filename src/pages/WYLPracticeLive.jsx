@@ -870,7 +870,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   }
 
   if (practiceView === 'cockpit') return (
-    <PracticeSessionCockpit onBegin={() => setPracticeView('concept')} />
+    <PracticeSessionCockpit onBegin={() => { startLesson(); setPracticeView('concept') }} />
   )
 
   if (practiceView === 'concept') return (
