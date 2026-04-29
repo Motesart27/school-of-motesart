@@ -174,7 +174,7 @@ function evaluateStudentResponse(text, expected, promptType, conceptName) {
 let _silenceTimer = null
 function resetSilenceTimer(onSilence, delay) {
   clearTimeout(_silenceTimer)
-  _silenceTimer = setTimeout(() => { if (onSilence) onSilence() }, delay || 5000)
+  _silenceTimer = setTimeout(() => { if (onSilence) onSilence() }, delay || 8000)
 }
 function clearSilenceTimer() { clearTimeout(_silenceTimer) }
 
@@ -217,7 +217,7 @@ const CONCEPT_CONFIG_MAP = {
     description: 'The smallest distance in music — from one key to the very next key.',
     conceptId: 'T_HALF_STEP',
     steps: [
-      { type: 'speak', text: "Hey there! Welcome to your very first lesson at the School of Motesart. I am Motesart, your music teacher. Today, I am going to blow your mind. Are you ready?" },
+      { type: 'speak', text: "Alright. Let's start with something small — because in music, small is where everything begins. We're working on the half step." },
       { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'yea'], prompt: 'ready_check' },
       { type: 'speak', text: "Awesome! A Half Step is the smallest distance in music. It is the distance from one key to the very next key with nothing in between. Like from E to F, or B to C. Say it back to me: Half Step." },
       { type: 'listen', expect: ['half', 'half step', 'have'], prompt: 'call_response' },
@@ -249,7 +249,7 @@ const CONCEPT_CONFIG_MAP = {
     description: 'A step that skips one key — twice the size of a half step.',
     conceptId: 'T_WHOLE_STEP',
     steps: [
-      { type: 'speak', text: "Welcome! Today we are learning the Whole Step. A Whole Step skips one key — it jumps over one key and lands on the next one. Are you ready to learn?" },
+      { type: 'speak', text: "Good. You know the half step. Now let's go one further. The whole step skips a key — twice the distance. Let's find it." },
       { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
       { type: 'speak', text: "Great! A Whole Step is twice as big as a Half Step. Instead of going to the very next key, you skip one and go to the key after that. From C to D — there is a black key in between, so that is a Whole Step. Say it back: Whole Step." },
       { type: 'listen', expect: ['whole', 'whole step'], prompt: 'call_response' },
@@ -269,7 +269,7 @@ const CONCEPT_CONFIG_MAP = {
     description: 'Every note in the C major scale numbered 1 through 8.',
     conceptId: 'T_SCALE_DEGREES_MAJOR',
     steps: [
-      { type: 'speak', text: "Hello! Today we are learning Scale Degrees. Every note in the C major scale has a number. C is degree 1, D is degree 2, E is 3, F is 4, G is 5, A is 6, B is 7, and the next C is 8. Are you ready?" },
+      { type: 'speak', text: "Now we number the notes. Every note in the scale gets a number, starting from 1. That number tells you exactly where you are. This is the Motesart system." },
       { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
       { type: 'speak', text: "Great! Let us count together. Say the numbers 1 through 4 as I point to the keys: 1, 2, 3, 4." },
       { type: 'listen', expect: ['1', '2', '3', '4', 'one', 'two', 'three', 'four'], prompt: 'call_response' },
