@@ -94,8 +94,8 @@ export const api = {
     request('/practice-logs', { method: 'POST', body: JSON.stringify(data) }),
 
   // ─── Homework ───────────────────────────────────────────────
-  getHomework: (studentId) =>
-    request(`/homework?student_id=${encodeURIComponent(studentId)}`),
+  getHomework: (studentName) =>
+    request(`/assignments/student/${encodeURIComponent(studentName)}`),
 
   createAssignment: (data) =>
     request('/assignments', { method: 'POST', body: JSON.stringify(data) }),

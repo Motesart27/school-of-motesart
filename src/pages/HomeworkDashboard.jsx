@@ -4,11 +4,11 @@ import { useAuth } from '../context/AuthContext'
 
 /* ── Placeholder data — replaced by API when wired ── */
 const ASGN = [
-  { id:'level3', title:'Level 3 Mastery \u2014 C Major Scale', type:'Homework', status:'In Progress', statusCls:'ip', countdown:'2 days left', cpCls:'cp-amber', progress:75, overdue:false,
+  { id:'level3', title:'Level 3 Mastery \u2014 C Major Scale', type:'Homework', concept:'scale-degree', status:'In Progress', statusCls:'ip', countdown:'2 days left', cpCls:'cp-amber', progress:75, overdue:false,
     desc:'Complete 4 correct note identifications at Level 3 using Find the Note. Focus on hands together for your C major scale before Monday\u2019s lesson. Your right hand timing was strong last session \u2014 now bring the left hand up to match.' },
-  { id:'quiz', title:'Scale Recognition Quiz', type:'Quiz', status:'Pending', statusCls:'pn', countdown:'4 days left', cpCls:'cp-teal', progress:0, overdue:false,
+  { id:'quiz', title:'Scale Recognition Quiz', type:'Quiz', concept:'scale-degree', status:'Pending', statusCls:'pn', countdown:'4 days left', cpCls:'cp-teal', progress:0, overdue:false,
     desc:'Complete all 10 scale recognition questions. You\u2019ll hear a scale and identify if it\u2019s Major or Minor. Take your time \u2014 you have 3 attempts before the score locks.' },
-  { id:'weekly', title:'Weekly Practice Goal', type:'Homework', status:'Overdue', statusCls:'ov', countdown:'1 day late', cpCls:'cp-red', progress:70, overdue:true,
+  { id:'weekly', title:'Weekly Practice Goal', type:'Homework', concept:'half-step', status:'Overdue', statusCls:'ov', countdown:'1 day late', cpCls:'cp-red', progress:70, overdue:true,
     desc:'Log at least 150 minutes of practice this week across any type. You have 105 minutes logged so far \u2014 just 45 more to go before the week resets on Sunday.' },
 ]
 const SHEETS = [
@@ -222,7 +222,7 @@ export default function HomeworkDashboard() {
                 </div>
                 <div className="hw-prog-track"><div className={`hw-prog-fill${a.overdue?' red':''}`} style={{width:`${a.progress}%`}} /></div>
                 <button
-                  onClick={e => { e.stopPropagation(); navigate(a.type === 'Quiz' ? `/game?mode=academic&concept=T_HALF_STEP&assignment_id=${a.id}` : `/practice-live?concept=T_HALF_STEP&assignment_id=${a.id}`) }}
+                  onClick={e => { e.stopPropagation(); navigate(a.type === 'Quiz' ? `/game?mode=academic&concept=${a.concept||'T_HALF_STEP'}&assignment_id=${a.id}` : `/practice-live?concept=${a.concept||'T_HALF_STEP'}&assignment_id=${a.id}`) }}
                   style={{marginTop:8,padding:'5px 14px',borderRadius:20,border:'none',background:'#14b8a6',color:'#fff',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif"}}
                 >Launch →</button>
               </div>
