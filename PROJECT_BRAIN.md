@@ -555,3 +555,38 @@ Body:            DM Sans, regular
 ---
 
 > **NEXT SESSION STARTS HERE** — Read this file first. Check the changelog and Known Issues above. You know the stack, the rules, and what's locked in. Get to work.
+
+
+## Session: 2026-04-29 — Phase A Complete + Phase B1 Started
+
+### Phase A Commits (school-of-motesart)
+- 8ab4c8b: ♩ JSX escape fix (MetronomeControl)
+- 9d3fa94: Practice log write on session end (WYLPracticeLive Fix 5)
+- 34bd45c: Dynamic concept routing + HomeworkDashboard (Fix 2 frontend)
+- 9c02440: Unknown concept error screen (Fix 3)
+- b449c98: T_SCALE_DEGREES → T_SCALE_DEGREES_MAJOR rename (bridge sync)
+
+### Phase A Commits (Deployable-python-codebase-som)
+- 4eb0c60: HomeworkAssignmentCreate.student → Optional
+- 01524cc: homework.py mounted in main.py (Fix 2 backend)
+- d8f2de6: TAMi system prompt rewrite (grounded New Orleans voice, hype dropped)
+- e5226fb: try/except added to POST /assignments (Rule 9)
+- 24121ce: Remove linked-record writes causing 422 in POST /assignments
+
+### Diagnostic Patterns Learned
+1. 503 on specific endpoint + /health GREEN = unhandled exception in route handler
+   Fix: add try/except, redeploy, read JSON error body
+2. INVALID_VALUE_FOR_COLUMN on linked record field = send ["recXXX"] not plain string
+3. Orphaned router (not in main.py) = 404/503 on all its endpoints
+4. JSX Unicode escape: \u2669 in JSX tags = literal text. Use {'\u2669'} instead.
+
+### Phase B1 Status
+- Patch 1: T_SCALE_DEGREES → T_SCALE_DEGREES_MAJOR (b449c98) ✅
+- Patch 2: Silent slug fallback guard in WYLPracticeLive line 600 — PENDING
+- Curriculum drafts for 5 new concepts — PENDING
+
+### Phase B1 Next Steps
+1. Add guard at WYLPracticeLive.jsx line 600: return null for unknown slug, add !currentConcept check before conceptConfig guard
+2. Add 5 CONCEPT_CONFIG_MAP entries: keyboard-layout, finger-numbering, octave-recognition, major-scale-pattern, c-major-scale
+3. Add 5 CONCEPT_VIEW_CONFIG entries with keys, BPM, speech texts
+4. Type/Created By Airtable writes deferred to Phase B2 (linked record format required)
