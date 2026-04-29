@@ -55,7 +55,7 @@ export default function MetronomeControl({ bpm = 72, defaultOn = false, onToggle
 
   return (
     <div style={styles.wrap} onClick={toggle}>
-      <span style={styles.icon}>\u2669</span>
+      <span style={styles.icon}>{'\u2669'}</span>
       <span style={styles.bpm}>{bpm}</span>
       <div style={{ ...styles.toggle, background: isOn ? 'rgba(99,102,241,0.35)' : '#2a2a3a' }}>
         <div
