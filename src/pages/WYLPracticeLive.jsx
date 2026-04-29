@@ -1015,6 +1015,20 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       perceptionBridgeRef.current = null
     }
     if (orchestratorRef.current) await orchestratorRef.current.stop()
+    // Fix 5 — write practice log on session end (non-blocking)
+    try {
+      const user = JSON.parse(localStorage.getItem('som_user') || '{}')
+      const duration_min = Math.round((timer || 0) / 60)
+      await api.logPracticeSession({
+        concept_ids: currentConcept?.conceptId || null,
+        activity_type: 'live_practice',
+        duration_min: duration_min < 1 ? 1 : duration_min,
+        student_id: user.student_id || user.id || null,
+        piece_name: currentConcept?.title || currentConcept?.conceptId || null,
+      })
+    } catch (err) {
+      console.error('Practice log save failed:', String(err))
+    }
     navigate('/session-summary')
   }, [navigate])
 

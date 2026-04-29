@@ -100,6 +100,9 @@ export const api = {
   createAssignment: (data) =>
     request('/assignments', { method: 'POST', body: JSON.stringify(data) }),
 
+  logPracticeSession: (data) =>
+    request('/practice-log/sessions', { method: 'POST', body: JSON.stringify(data) }),
+
   // ─── Sessions ───────────────────────────────────────────────
   getSessions: (studentId) =>
     request(`/sessions?student_id=${encodeURIComponent(studentId)}`),
