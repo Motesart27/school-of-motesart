@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { COLORS, FONTS, GRADIENTS } from '../styles/theme.js'
+import MetronomeControl from './MetronomeControl.jsx'
 
 const WHITE_KEY_NAMES = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C']
 const BLACK_OFFSETS   = [0, 1, 3, 4, 5]
@@ -643,14 +644,11 @@ export default function PracticeConceptView({
           fontFamily:FONTS.display, fontSize:14, fontWeight:700, color:'rgba(255,255,255,0.92)',
           whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
         }}>{conceptName}</div>
-        <div style={{ display:'flex', alignItems:'center', gap:2, padding:'4px 10px', borderRadius:12,
+        <div style={{ display:'flex', alignItems:'center', gap:6, padding:'4px 10px', borderRadius:12,
           background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)' }}>
           <button className="pcv-icon-btn" style={{ color:'rgba(255,255,255,0.45)', fontSize:15, minWidth:28, minHeight:40 }}
             onClick={() => setBpmVal(b => Math.max(40, b - 4))}>−</button>
-          <div style={{ minWidth:38, textAlign:'center' }}>
-            <div style={{ fontFamily:FONTS.display, fontSize:14, fontWeight:700, color:'#fff', lineHeight:1 }}>{bpmVal}</div>
-            <div style={{ fontSize:8, color:'rgba(255,255,255,0.3)', letterSpacing:'0.07em' }}>BPM</div>
-          </div>
+          <MetronomeControl bpm={bpmVal} />
           <button className="pcv-icon-btn" style={{ color:'rgba(255,255,255,0.45)', fontSize:15, minWidth:28, minHeight:40 }}
             onClick={() => setBpmVal(b => Math.min(200, b + 4))}>+</button>
         </div>
