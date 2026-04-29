@@ -26,7 +26,7 @@ export const CONCEPT_VIEW_CONFIG = {
     }
   }
 ,
-  T_SCALE_DEGREES: {
+  T_SCALE_DEGREES_MAJOR: {
     highlightedKeys: [0, 1, 2, 3, 4, 5, 6, 7],
     homeKeyIndex: 0,
     answerOptions: [],

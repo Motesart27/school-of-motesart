@@ -267,7 +267,7 @@ const CONCEPT_CONFIG_MAP = {
   'scale-degree': {
     concept: 'Scale Degrees',
     description: 'Every note in the C major scale numbered 1 through 8.',
-    conceptId: 'T_SCALE_DEGREES',
+    conceptId: 'T_SCALE_DEGREES_MAJOR',
     steps: [
       { type: 'speak', text: "Hello! Today we are learning Scale Degrees. Every note in the C major scale has a number. C is degree 1, D is degree 2, E is 3, F is 4, G is 5, A is 6, B is 7, and the next C is 8. Are you ready?" },
       { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
