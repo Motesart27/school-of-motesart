@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import api from '../services/api.js'
 import { useNavigate } from 'react-router-dom'
 import useIsMobile from '../hooks/useIsMobile.js'
 import tamiImg from './assets/image-1-nav-tab-active.png';
@@ -67,6 +68,7 @@ export default function TeacherDashboard() {
 
  // create assignment form
  const [newAssignment, setNewAssignment] = useState({ title:'', assignTo:'all', dueDate:'', notes:'' })
+ const [assignmentSaving, setAssignmentSaving] = useState(false)
 
  // message form
  const [message, setMessage] = useState({ to:'all', subject:'', body:'' })
@@ -93,6 +95,27 @@ export default function TeacherDashboard() {
  const handleSendMessage = () => {
  setMessageSent(true)
  setTimeout(() => { setMessageSent(false); setShowMessagePanel(false); setMessage({ to:'all', subject:'', body:'' }) }, 2000)
+ }
+
+ async function handleCreateAssignment() {
+   if (!newAssignment.title.trim()) return
+   setAssignmentSaving(true)
+   try {
+     const user = JSON.parse(localStorage.getItem('som_user') || '{}')
+     // notes and assignTo not sent — no backend columns exist yet
+     await api.createAssignment({
+       title: newAssignment.title.trim(),
+       due_date: newAssignment.dueDate || null,
+       type: 'Homework',
+       created_by: user.name || user.email || 'Teacher',
+     })
+     setNewAssignment({ title:'', assignTo:'all', dueDate:'', notes:'' })
+     setShowCreateAssignment(false)
+   } catch (err) {
+     console.error('createAssignment failed:', err)
+   } finally {
+     setAssignmentSaving(false)
+   }
  }
 
  const overlayStyle = { position:'fixed', inset:0, background:'rgba(0,0,0,0.6)', zIndex:500, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }
@@ -184,7 +207,7 @@ export default function TeacherDashboard() {
  </div>
  <div style={{ display:'flex', gap:8 }}>
  <button onClick={() => setShowCreateAssignment(false)} style={{ flex:1, padding:'9px', borderRadius:8, border:'1px solid rgba(255,255,255,0.1)', background:'transparent', color:'#9ca3af', fontSize:12, fontWeight:600, cursor:'pointer' }}>Cancel</button>
- <button onClick={() => setShowCreateAssignment(false)} style={{ flex:1, padding:'9px', borderRadius:8, border:'none', background:'linear-gradient(90deg,#7c3aed,#2dd4bf)', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer' }}>Create Assignment</button>
+ <button onClick={handleCreateAssignment} disabled={assignmentSaving} style={{ flex:1, padding:'9px', borderRadius:8, border:'none', background:'linear-gradient(90deg,#7c3aed,#2dd4bf)', color:'#fff', fontSize:12, fontWeight:700, cursor:'pointer', opacity: assignmentSaving ? 0.6 : 1 }}>{assignmentSaving ? 'Saving…' : 'Create Assignment'}</button>
  </div>
  </div>
  </div>

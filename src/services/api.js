@@ -97,6 +97,9 @@ export const api = {
   getHomework: (studentId) =>
     request(`/homework?student_id=${encodeURIComponent(studentId)}`),
 
+  createAssignment: (data) =>
+    request('/assignments', { method: 'POST', body: JSON.stringify(data) }),
+
   // ─── Sessions ───────────────────────────────────────────────
   getSessions: (studentId) =>
     request(`/sessions?student_id=${encodeURIComponent(studentId)}`),
