@@ -597,8 +597,8 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const currentConcept = React.useMemo(() => {
     try {
       const slug = new URLSearchParams(window.location.search).get('concept') || 'half-step'
-      return CONCEPT_CONFIG_MAP[slug] || CONCEPT_CONFIG_MAP['half-step']
-    } catch { return CONCEPT_CONFIG_MAP['half-step'] }
+      return CONCEPT_CONFIG_MAP[slug] || null
+    } catch { return null }
   }, [])
 
   const [practiceView, setPracticeView] = useState('cockpit')
@@ -1069,6 +1069,25 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       isLoading: false,
     })
   }, [awaitingResponse, promptMode, retryMode, theoryIsSpeaking])
+
+  if (!currentConcept) {
+    const badSlug = new URLSearchParams(window.location.search).get('concept')
+    return (
+      <div style={{
+        display:'flex', flexDirection:'column', alignItems:'center',
+        justifyContent:'center', height:'100vh',
+        background:'#0d1117', color:'rgba(255,255,255,0.7)',
+        fontFamily:'DM Sans, sans-serif', gap:16
+      }}>
+        <div style={{fontSize:18, color:'#ef4444'}}>
+          Concept not found: {badSlug || '(none)'}
+        </div>
+        <div style={{fontSize:13, color:'rgba(255,255,255,0.4)'}}>
+          Check the assignment or URL parameter.
+        </div>
+      </div>
+    )
+  }
 
   if (!conceptConfig) return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100vh', background:'#0d1117', color:'#fff', textAlign:'center', padding:'24px', fontFamily:"'DM Sans', sans-serif" }}>
