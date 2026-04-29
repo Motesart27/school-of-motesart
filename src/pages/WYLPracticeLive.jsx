@@ -281,6 +281,86 @@ const CONCEPT_CONFIG_MAP = {
       { type: 'listen', expect: ['1', 'one', 'first', 'tonic', 'root', 'home', 'degree 1'], prompt: 'full_pattern' },
       { type: 'speak', text: "Excellent! The 1st degree is the tonic — the home base. You now think like a real musician. Scale degrees connect every scale, every chord, every song. Great work today!" },
     ]
+  },
+  'keyboard-layout': {
+    concept: 'Keyboard Layout',
+    description: 'Where each key sits on the piano — white keys, black keys, and Middle C.',
+    conceptId: 'T_KEYBOARD_LAYOUT',
+    steps: [
+      { type: 'speak', text: "The piano has a pattern. Two black keys, then three black keys, then repeat. Middle C sits to the left of the first group of two. Find that and you can find any note." },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "Key 1 in our system is Middle C — the anchor of everything. Say it: Middle C." },
+      { type: 'listen', expect: ['middle c', 'middle', 'c', 'one', '1', 'sea'], prompt: 'call_response' },
+      { type: 'speak', text: "Now count across. C is 1. D is 2. E is 3. F is 4. G is 5. A is 6. B is 7. The next C is 8 — same note, higher pitch. What key number is F?" },
+      { type: 'listen', expect: ['4', 'four', 'f', 'key 4', 'four key'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Correct. F is 4. And what is key 8?" },
+      { type: 'listen', expect: ['8', 'eight', 'c', 'high c', 'octave c', 'key 8'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Right. Key 8 is C again — one octave up. Same name, higher pitch. You know the map. Every note has a number and a home." },
+    ]
+  },
+  'finger-numbering': {
+    concept: 'Finger Numbering',
+    description: 'Which finger gets which number — the system every musician uses.',
+    conceptId: 'T_FINGER_NUMBERING',
+    steps: [
+      { type: 'speak', text: "Fingers have numbers. Thumb is 1. Index is 2. Middle is 3. Ring is 4. Pinky is 5. This is how every book, every teacher, and every piece of sheet music talks about your hand." },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "Right hand position: thumb on Middle C. Fingers 1 through 5 land on keys 1 through 5 — C D E F G. Say the finger number for your thumb." },
+      { type: 'listen', expect: ['1', 'one', 'thumb', 'finger 1', 'finger one'], prompt: 'call_response' },
+      { type: 'speak', text: "Correct. Thumb is always 1. If your middle finger is on E — key 3 — what finger number is that?" },
+      { type: 'listen', expect: ['3', 'three', 'middle', 'finger 3', 'finger three'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Right. Middle finger is 3. And the pinky on G?" },
+      { type: 'listen', expect: ['5', 'five', 'pinky', 'finger 5', 'finger five'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Yes. Pinky is 5. Thumb to pinky: 1, 2, 3, 4, 5. Every scale, every chord, every exercise uses these numbers. Know them without thinking." },
+    ]
+  },
+  'octave-recognition': {
+    concept: 'Octave Recognition',
+    description: 'Identifying the same note in two different registers — 8 keys apart.',
+    conceptId: 'T_OCTAVE_RECOGNITION',
+    steps: [
+      { type: 'speak', text: "An octave is the same note at a different pitch. C to C. Same name because it is the same sound — just higher. The distance is always 8 white keys." },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "Key 1 and key 8 are both C. One lower, one higher — but same note name. Say it: octave." },
+      { type: 'listen', expect: ['octave', 'oct', 'ok tave', 'oak tave'], prompt: 'call_response' },
+      { type: 'speak', text: "Good. On this keyboard, which key number is one octave above key 1?" },
+      { type: 'listen', expect: ['8', 'eight', 'key 8', 'eight key', 'octave up'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Right. Key 8. Both are C — that pair is an octave. What two keys on this keyboard form an octave?" },
+      { type: 'listen', expect: ['1 and 8', '1 8', 'one and eight', 'one eight', 'keys 1 and 8', 'key 1 key 8'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Correct. Keys 1 and 8. Same note name, one octave apart. That relationship repeats across the entire piano in both directions." },
+    ]
+  },
+  'major-scale-pattern': {
+    concept: 'Major Scale Pattern',
+    description: 'The Whole-Whole-Half formula that builds every major scale.',
+    conceptId: 'T_MAJOR_SCALE_PATTERN',
+    steps: [
+      { type: 'speak', text: "Every major scale follows the same pattern: Whole, Whole, Half, Whole, Whole, Whole, Half. Seven steps. Same order every time. This is what makes a scale sound major." },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "C major: start on C. Whole step to D. Whole step to E. Half step to F. Say those first three steps." },
+      { type: 'listen', expect: ['whole whole half', 'whole, whole, half', 'w w h', 'whole step whole step half step', 'whole whole half step'], prompt: 'call_response' },
+      { type: 'speak', text: "Good. Whole, Whole, Half. Continue: Whole to G. Whole to A. Whole to B. Half back to C. What is the step that follows three wholes in a row?" },
+      { type: 'listen', expect: ['half', 'half step', 'have', 'h'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Correct. Half. The full pattern: Whole, Whole, Half, Whole, Whole, Whole, Half. Say the complete pattern." },
+      { type: 'listen', expect: ['whole', 'half', 'w w h w w w h', 'whole whole half whole whole whole half'], prompt: 'full_pattern' },
+      { type: 'speak', text: "That is the key. Same pattern works for all 12 major keys — different starting note, same sequence every time." },
+    ]
+  },
+  'c-major-scale': {
+    concept: 'C Major Scale',
+    description: 'All eight notes of the C major scale — the foundation before all others.',
+    conceptId: 'T_C_MAJOR_SCALE',
+    steps: [
+      { type: 'speak', text: "C major is the foundation. No sharps. No flats. Eight white keys from C to C. You know the pattern — now you know exactly where it lives." },
+      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
+      { type: 'speak', text: "Say the notes of the C major scale in order: C, D, E, F, G, A, B, C." },
+      { type: 'listen', expect: ['c d e f g a b c', 'c', 'd', 'e', 'f', 'g'], prompt: 'call_response' },
+      { type: 'speak', text: "Good. Now their degree numbers: 1, 2, 3, 4, 5, 6, 7, 8. What degree number is E?" },
+      { type: 'listen', expect: ['3', 'three', 'degree 3', 'third', 'three degree'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Correct. E is 3. And B?" },
+      { type: 'listen', expect: ['7', 'seven', 'degree 7', 'seventh', 'seven degree'], prompt: 'full_pattern' },
+      { type: 'speak', text: "Right. B is the 7th degree. C major gives you every scale degree in its clearest form — no accidentals, no distractions. You now know this scale by name, by note, and by number." },
+    ]
   }
 }
 
