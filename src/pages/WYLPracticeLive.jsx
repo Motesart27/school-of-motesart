@@ -1103,6 +1103,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       onBegin={async () => { setPracticeView('concept'); startLesson() }}
       conceptTitle={currentConcept.concept}
       conceptDesc={currentConcept.description}
+      motesartSuggestion={conceptConfig?.speechTexts?.teach}
     />
   )
 

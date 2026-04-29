@@ -78,7 +78,7 @@ export default function PracticeSessionCockpit({
   conceptDesc      = 'Finding and playing Middle C with confidence on the piano keyboard.',
   conceptProgress  = 42,
   assignments      = [],
-  motesartSuggestion = "Let's warm up your fingers and find Middle C today. You're making great progress!",
+  motesartSuggestion = "Let's get into it.",
   onBegin,
 }) {
   const pct = Math.max(0, Math.min(100, conceptProgress))
