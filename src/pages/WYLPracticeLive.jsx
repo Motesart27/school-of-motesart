@@ -664,7 +664,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [micFailed, setMicFailed] = React.useState(false)
 
   const ACTIVE_CONCEPT_ID = currentConcept.conceptId
-  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID] || CONCEPT_VIEW_CONFIG['T_HALF_STEP']
+  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID]
   const phaseMap = {
     introduced: 'teach', practicing: 'guide',
     accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release'
@@ -1069,6 +1069,15 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       isLoading: false,
     })
   }, [awaitingResponse, promptMode, retryMode, theoryIsSpeaking])
+
+  if (!conceptConfig) return (
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', height:'100vh', background:'#0d1117', color:'#fff', textAlign:'center', padding:'24px', fontFamily:"'DM Sans', sans-serif" }}>
+      <div style={{ fontSize:'32px', marginBottom:'16px' }}>{'\u26a0\ufe0f'}</div>
+      <div style={{ fontSize:'18px', fontWeight:700, fontFamily:"'Outfit', sans-serif", marginBottom:'8px' }}>Concept not configured</div>
+      <div style={{ fontSize:'13px', color:'rgba(255,255,255,0.45)', marginBottom:'24px' }}>"{ACTIVE_CONCEPT_ID}" has no Practice Live config yet.</div>
+      <button onClick={() => window.history.back()} style={{ padding:'10px 24px', borderRadius:20, border:'none', background:'#14b8a6', color:'#fff', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:"'DM Sans', sans-serif" }}>Go Back</button>
+    </div>
+  )
 
   if (practiceView === 'cockpit') return (
     <PracticeSessionCockpit
