@@ -681,7 +681,7 @@ export default function PracticeConceptView({
         <div className="pcv-avatar-col">
           <div className="mot-av">
             <img src="/Motesart Avatar 1.PNG" alt="Motesart"
-              onError={e => { e.currentTarget.style.display = 'none' }} />
+              onError={e => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.style.background='none' }} />
           </div>
           <div className="pcv-av-name">MOTESART</div>
         </div>
