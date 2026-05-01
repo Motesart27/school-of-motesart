@@ -4,7 +4,7 @@
  * PRONUNCIATION: Preprocesses text for correct name pronunciation
  *
  * Usage:
- *   const { speak, stop, isSpeaking, isLoading, error } = useTextToSpeech()
+ *   const { speak, stop, isSpeaking, isLoading, error, analyserRef, playBase64 } = useTextToSpeech()
  */
 import { useState, useCallback, useRef } from 'react'
 
@@ -28,9 +28,10 @@ export default function useTextToSpeech() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
-  const abortRef   = useRef(null)   // AbortController for fetch
-  const sourceRef  = useRef(null)   // AudioBufferSourceNode (currently playing)
-  const contextRef = useRef(null)   // Shared AudioContext
+  const abortRef    = useRef(null)   // AbortController for fetch
+  const sourceRef   = useRef(null)   // AudioBufferSourceNode (currently playing)
+  const contextRef  = useRef(null)   // Shared AudioContext
+  const analyserRef = useRef(null)   // AnalyserNode for amplitude-driven animations
 
   const stop = useCallback(() => {
     if (abortRef.current) {
@@ -41,13 +42,12 @@ export default function useTextToSpeech() {
       try { sourceRef.current.stop() } catch (_) {}
       sourceRef.current = null
     }
-    // Keep contextRef alive — closing and re-creating AudioContext each time
-    // causes latency; only close if truly done
+    analyserRef.current = null
     setIsSpeaking(false)
     setIsLoading(false)
   }, [])
 
-  const speak = useCallback(async (text, voice = 'coach') => {
+  const speak = useCallback(async (text, voice = 'coach', onEnded = null) => {
     if (!text || text.trim().length === 0) return
 
     stop()
@@ -104,12 +104,19 @@ export default function useTextToSpeech() {
       // Guard again after async decoding
       if (abortRef.current !== controller) return
 
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 256
+      analyserRef.current = analyser
+
       const source = ctx.createBufferSource()
       source.buffer = audioBuffer
-      source.connect(ctx.destination)
+      source.connect(analyser)
+      analyser.connect(ctx.destination)
       source.onended = () => {
         setIsSpeaking(false)
         sourceRef.current = null
+        analyserRef.current = null
+        onEnded?.()
       }
 
       sourceRef.current = source
@@ -127,6 +134,52 @@ export default function useTextToSpeech() {
     }
   }, [stop])
 
+  // Play base64-encoded MP3 — used for Mya voice responses
+  const playBase64 = useCallback(async (base64data, onEnded = null) => {
+    if (!base64data) return
+    stop()
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      if (!contextRef.current || contextRef.current.state === 'closed') {
+        contextRef.current = new (window.AudioContext || window.webkitAudioContext)()
+      }
+      const ctx = contextRef.current
+      if (ctx.state === 'suspended') await ctx.resume()
+
+      const binary = atob(base64data)
+      const bytes = new Uint8Array(binary.length)
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
+      const audioBuffer = await ctx.decodeAudioData(bytes.buffer)
+
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 256
+      analyserRef.current = analyser
+
+      const source = ctx.createBufferSource()
+      source.buffer = audioBuffer
+      source.connect(analyser)
+      analyser.connect(ctx.destination)
+      source.onended = () => {
+        setIsSpeaking(false)
+        sourceRef.current = null
+        analyserRef.current = null
+        onEnded?.()
+      }
+
+      sourceRef.current = source
+      setIsLoading(false)
+      setIsSpeaking(true)
+      source.start(0)
+    } catch (err) {
+      console.error('[TTS] playBase64 error:', err)
+      setError(err.message || 'Playback failed')
+      setIsSpeaking(false)
+      setIsLoading(false)
+    }
+  }, [stop])
+
   // Unlock AudioContext on user gesture — call from onClick before async TTS
   const unlock = useCallback(() => {
     if (!contextRef.current || contextRef.current.state === 'closed') {
@@ -137,5 +190,5 @@ export default function useTextToSpeech() {
     }
   }, [])
 
-  return { speak, stop, unlock, isSpeaking, isLoading, error }
+  return { speak, stop, unlock, isSpeaking, isLoading, error, analyserRef, playBase64 }
 }

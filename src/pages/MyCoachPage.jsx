@@ -1,5 +1,5 @@
 /**
- * MyCoachPage.jsx â Full Coach Dashboard (V5 Sunset Gradient)
+ * MyCoachPage.jsx — Full Coach Dashboard (V5 Sunset Gradient)
  * Located at: src/pages/MyCoachPage.jsx
  *
  * Background: Warm Sunset Gradient (#1a0612 -> #f0b556)
@@ -18,11 +18,11 @@ const COACHES = [
     id: "motesart",
     initials: "M",
     name: "Motesart",
-    title: "Piano \u00b7 Voice \u00b7 Ear Training \u2014 Founder & Lead Coach",
+    title: "Piano · Voice · Ear Training — Founder & Lead Coach",
     specialty: "Piano & Voice",
-    instruments: ["\ud83c\udfb9 Piano", "\ud83c\udfa4 Voice"],
-    styles: ["\u26a1 High Energy", "\ud83c\udfaf Coach"],
-    audience: "Ages 10\u201325",
+    instruments: ["🎹 Piano", "🎤 Voice"],
+    styles: ["⚡ High Energy", "🎯 Coach"],
+    audience: "Ages 10–25",
     tamiScore: 94,
     students: 247,
     sessions: 312,
@@ -75,24 +75,76 @@ const COACHES = [
 ]
 
 const CLASSES = [
-  { icon: "\ud83c\udfb9", name: "Piano Masterclass", desc: "Advanced techniques with Motesart. Classical repertoire, improvisation, and performance prep.", day: "Mon & Wed", status: "Active", featured: true, accentStart: "#f5a623", accentEnd: "#e8622a" },
-  { icon: "\ud83c\udfb8", name: "Guitar Basics", desc: "Beginner chord progressions and strumming.", day: "Tue", status: "Active", accentStart: "#e8622a", accentEnd: "#f5a623" },
-  { icon: "\ud83c\udfa4", name: "Vocal Training", desc: "Breath control and vocal range expansion.", day: "Thu", status: "Pending", accentStart: "#c03c2e", accentEnd: "#e8622a" },
-  { icon: "\ud83c\udfb5", name: "Music Theory", desc: "Harmony, scales, and composition.", day: "Fri", status: "Active", accentStart: "#8B2FC9", accentEnd: "#e8622a" },
-  { icon: "\ud83e\udd41", name: "Rhythm Lab", desc: "Percussion, timing, and beat-making.", day: "Sat", status: "Active", accentStart: "#0891b2", accentEnd: "#f5a623" },
+  { icon: "🎹", name: "Piano Masterclass", desc: "Advanced techniques with Motesart. Classical repertoire, improvisation, and performance prep.", day: "Mon & Wed", status: "Active", featured: true, accentStart: "#f5a623", accentEnd: "#e8622a" },
+  { icon: "🎸", name: "Guitar Basics", desc: "Beginner chord progressions and strumming.", day: "Tue", status: "Active", accentStart: "#e8622a", accentEnd: "#f5a623" },
+  { icon: "🎤", name: "Vocal Training", desc: "Breath control and vocal range expansion.", day: "Thu", status: "Pending", accentStart: "#c03c2e", accentEnd: "#e8622a" },
+  { icon: "🎵", name: "Music Theory", desc: "Harmony, scales, and composition.", day: "Fri", status: "Active", accentStart: "#8B2FC9", accentEnd: "#e8622a" },
+  { icon: "🥁", name: "Rhythm Lab", desc: "Percussion, timing, and beat-making.", day: "Sat", status: "Active", accentStart: "#0891b2", accentEnd: "#f5a623" },
 ]
+
+const MYA_GREETINGS = {
+  morning: [
+    "Good morning! Ready to start your musical journey today?",
+    "Morning! Let's warm up those musical muscles!",
+  ],
+  afternoon: [
+    "Good afternoon! Time for your practice session?",
+    "Hey! Ready to dive into some music this afternoon?",
+  ],
+  evening: [
+    "Good evening! A perfect time to wind down with music.",
+    "Evening! Let's make some music before the day ends.",
+  ],
+}
+
+function getGreeting() {
+  const h = new Date().getHours()
+  const key = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening'
+  const list = MYA_GREETINGS[key]
+  return list[Math.floor(Math.random() * list.length)]
+}
+
+const BUBBLE_ANIM = {
+  idle:           'myaFloat 3s ease-in-out infinite',
+  recording:      'myaRipple 1s ease-in-out infinite',
+  processing:     'myaSpin 1s linear infinite',
+  speaking:       'none',
+  'replay-ready': 'myaBounce 0.6s ease-in-out infinite',
+}
+
+const BUBBLE_BG = {
+  idle:           'linear-gradient(135deg, #f5a623, #e8622a)',
+  recording:      'linear-gradient(135deg, #e8622a, #c03c2e)',
+  processing:     'linear-gradient(135deg, #8B2FC9, #e8622a)',
+  speaking:       'linear-gradient(135deg, #22c55e, #16a34a)',
+  'replay-ready': 'linear-gradient(135deg, #f5a623, #8B2FC9)',
+}
 
 export default function MyCoachPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [selectedCoach, setSelectedCoach] = useState("motesart")
-  const waveRef = useRef(null)
-  const { speak, stop, isSpeaking, isLoading, error: ttsError } = useTextToSpeech()
-  const coach = COACHES.find(c => c.id === selectedCoach) || COACHES[0]
-  const voiceForCoach = selectedCoach === "tami" ? "tami" : "coach"
+  const [voiceState, setVoiceState] = useState("idle")
 
+  const waveRef          = useRef(null)
+  const voiceStateRef    = useRef("idle")
+  const mediaRecorderRef = useRef(null)
+  const audioChunksRef   = useRef([])
+  const vadTimerRef      = useRef(null)
+  const hasGreetedRef    = useRef(false)
+  const micStreamRef     = useRef(null)
+  const myaBubbleRef     = useRef(null)
+
+  const { speak, stop, unlock, isSpeaking, isLoading, error: ttsError, analyserRef, playBase64 } = useTextToSpeech()
+  const voiceForCoach = selectedCoach === "tami" ? "tami" : "coach"
   const activeCoach = COACHES.find(c => c.id === selectedCoach) || COACHES[0]
 
+  function setVoiceStateSynced(s) {
+    voiceStateRef.current = s
+    setVoiceState(s)
+  }
+
+  // Waveform bars
   useEffect(() => {
     if (!waveRef.current || waveRef.current.children.length > 0) return
     for (let i = 0; i < 7; i++) {
@@ -110,11 +162,144 @@ export default function MyCoachPage() {
     }
   }, [])
 
+  // Mya greeting on first mount
+  useEffect(() => {
+    if (hasGreetedRef.current) return
+    hasGreetedRef.current = true
+    const timer = setTimeout(() => { speak(getGreeting(), 'coach') }, 800)
+    return () => clearTimeout(timer)
+  }, [speak])
+
+  // Amplitude-driven bubble scale while speaking
+  useEffect(() => {
+    if (voiceState !== 'speaking' || !myaBubbleRef.current) return
+    let rafId
+    const tick = () => {
+      if (!analyserRef.current || !myaBubbleRef.current) return
+      const data = new Uint8Array(analyserRef.current.frequencyBinCount)
+      analyserRef.current.getByteTimeDomainData(data)
+      let sum = 0
+      for (let i = 0; i < data.length; i++) sum += Math.abs(data[i] - 128)
+      const amplitude = sum / data.length / 128
+      myaBubbleRef.current.style.transform = `scale(${1 + amplitude * 0.5})`
+      rafId = requestAnimationFrame(tick)
+    }
+    rafId = requestAnimationFrame(tick)
+    return () => {
+      cancelAnimationFrame(rafId)
+      if (myaBubbleRef.current) myaBubbleRef.current.style.transform = 'scale(1)'
+    }
+  }, [voiceState]) // analyserRef is a stable ref object, not a dep
+
+  function stopMic() {
+    clearTimeout(vadTimerRef.current)
+    vadTimerRef.current = null
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      try { mediaRecorderRef.current.stop() } catch (_) {}
+    }
+    if (micStreamRef.current) {
+      micStreamRef.current.getTracks().forEach(t => t.stop())
+      micStreamRef.current = null
+    }
+    mediaRecorderRef.current = null
+  }
+
+  async function sendToMya() {
+    const chunks = audioChunksRef.current
+    if (!chunks.length) { setVoiceStateSynced('idle'); return }
+    setVoiceStateSynced('processing')
+    const blob = new Blob(chunks, { type: 'audio/webm' })
+    const form = new FormData()
+    form.append('audio', blob, 'recording.webm')
+    try {
+      const base = import.meta.env.VITE_RAILWAY_URL || ''
+      const resp = await fetch(`${base}/api/mya/voice`, { method: 'POST', body: form })
+      if (!resp.ok) throw new Error(`mya/voice HTTP ${resp.status}`)
+      const reader = resp.body.getReader()
+      const parts = []
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        parts.push(value)
+      }
+      const ab = await new Blob(parts, { type: 'audio/mpeg' }).arrayBuffer()
+      const bytes = new Uint8Array(ab)
+      let binary = ''
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
+      const b64 = btoa(binary)
+      setVoiceStateSynced('speaking')
+      playBase64(b64, () => setVoiceStateSynced('idle'))
+    } catch (err) {
+      console.error('[Mya] voice error:', err)
+      setVoiceStateSynced('idle')
+    }
+  }
+
+  async function handleMicTap() {
+    // VAD gate rule 1: reject tap if not idle
+    if (voiceStateRef.current !== 'idle') return
+    unlock()
+    audioChunksRef.current = []
+    let stream
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    } catch {
+      return
+    }
+    micStreamRef.current = stream
+    setVoiceStateSynced('recording')
+
+    // VAD via separate AudioContext (mic analysis only, not playback)
+    const micCtx = new (window.AudioContext || window.webkitAudioContext)()
+    const src = micCtx.createMediaStreamSource(stream)
+    const vad = micCtx.createAnalyser()
+    vad.fftSize = 256
+    src.connect(vad)
+    const buf = new Uint8Array(vad.frequencyBinCount)
+
+    const silenceCheck = () => {
+      if (voiceStateRef.current !== 'recording') { micCtx.close(); return }
+      vad.getByteTimeDomainData(buf)
+      let sum = 0
+      for (let i = 0; i < buf.length; i++) sum += Math.abs(buf[i] - 128)
+      const rms = sum / buf.length
+      if (rms < 3) {
+        // silence — start timer if not already running
+        if (!vadTimerRef.current) {
+          vadTimerRef.current = setTimeout(() => {
+            vadTimerRef.current = null
+            stopMic()
+            micCtx.close()
+            // sendToMya called from mr.onstop after MediaRecorder flushes
+          }, 1500)
+        }
+      } else {
+        // sound detected — reset silence timer
+        if (vadTimerRef.current) {
+          clearTimeout(vadTimerRef.current)
+          vadTimerRef.current = null
+        }
+      }
+      requestAnimationFrame(silenceCheck)
+    }
+    requestAnimationFrame(silenceCheck)
+
+    const mr = new MediaRecorder(stream)
+    mr.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
+    mr.onstop = () => sendToMya()
+    mediaRecorderRef.current = mr
+    mr.start(100)
+  }
+
   return (
     <>
       <style>{`
         @keyframes coachSpin{to{transform:rotate(360deg)}}
         @keyframes coachWave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0.4)}}
+        @keyframes myaFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+        @keyframes myaRipple{0%,100%{box-shadow:0 0 0 0 rgba(245,166,35,0.7)}50%{box-shadow:0 0 0 14px rgba(245,166,35,0)}}
+        @keyframes myaSpin{to{transform:rotate(360deg)}}
+        @keyframes myaBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
       `}</style>
 
       <div style={{
@@ -159,9 +344,9 @@ export default function MyCoachPage() {
             color: "rgba(255,243,230,0.6)",
             borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 600,
             cursor: "pointer", marginBottom: 24,
-          }}>{"\u2190"} Back</button>
+          }}>{"←"} Back</button>
 
-          {/* ââ HERO SECTION ââ */}
+          {/* ── HERO SECTION ── */}
           <div style={{
             display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32,
             marginBottom: 40, alignItems: "center",
@@ -304,10 +489,10 @@ export default function MyCoachPage() {
             </div>
           </div>
 
-          {/* ââ CLASSES BENTO GRID ââ */}
+          {/* ── CLASSES BENTO GRID ── */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <h2 style={{ fontSize: 22, fontWeight: 700, color: "#fff3e6" }}>Your Classes</h2>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#f5a623", cursor: "pointer" }}>See All {"\u2192"}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#f5a623", cursor: "pointer" }}>See All {"→"}</span>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 48 }}>
@@ -355,10 +540,10 @@ export default function MyCoachPage() {
             ))}
           </div>
 
-          {/* ââ COACH PICKER ââ */}
+          {/* ── COACH PICKER ── */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <h2 style={{ fontSize: 22, fontWeight: 700, color: "#fff3e6" }}>Choose Your Coach</h2>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#f5a623", cursor: "pointer" }}>View All {"\u2192"}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#f5a623", cursor: "pointer" }}>View All {"→"}</span>
           </div>
 
           <div style={{
@@ -404,7 +589,7 @@ export default function MyCoachPage() {
                 </div>
                 <h4 style={{ fontSize: 15, fontWeight: 700, color: "#fff3e6", marginBottom: 2 }}>{coach.name}</h4>
                 <div style={{ fontSize: 12, color: "rgba(255,243,230,0.6)", marginBottom: 10 }}>{coach.specialty}</div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: "#f5a623" }}>{"\u2605"} {coach.rating}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#f5a623" }}>{"★"} {coach.rating}</div>
                 <button style={{
                   marginTop: 12, padding: "8px 20px", border: "none", borderRadius: 100,
                   fontFamily: "'DM Sans', sans-serif", fontSize: 12, fontWeight: 600,
@@ -442,6 +627,38 @@ export default function MyCoachPage() {
             </div>
           </div>
 
+        </div>
+
+        {/* Mya voice bubble — fixed FAB, state-driven animation */}
+        <div
+          ref={myaBubbleRef}
+          onClick={handleMicTap}
+          title={voiceState === 'idle' ? 'Talk to Mya' : voiceState}
+          style={{
+            position: 'fixed',
+            bottom: 32,
+            right: 32,
+            width: 64,
+            height: 64,
+            borderRadius: '50%',
+            background: BUBBLE_BG[voiceState] || BUBBLE_BG.idle,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: voiceState === 'processing' ? 'wait' : 'pointer',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+            zIndex: 100,
+            animation: BUBBLE_ANIM[voiceState] || BUBBLE_ANIM.idle,
+            fontSize: 26,
+            userSelect: 'none',
+            transition: 'background 0.3s ease',
+          }}
+        >
+          {voiceState === 'idle'           && '🎤'}
+          {voiceState === 'recording'      && '⏺'}
+          {voiceState === 'processing'     && '⏳'}
+          {voiceState === 'speaking'       && '🔊'}
+          {voiceState === 'replay-ready'   && '▶'}
         </div>
       </div>
     </>
