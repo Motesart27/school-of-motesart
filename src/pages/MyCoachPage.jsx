@@ -214,21 +214,11 @@ export default function MyCoachPage() {
     try {
       const base = import.meta.env.VITE_RAILWAY_URL || ''
       const resp = await fetch(`${base}/api/mya/voice`, { method: 'POST', body: form })
-      if (!resp.ok) throw new Error(`mya/voice HTTP ${resp.status}`)
-      const reader = resp.body.getReader()
-      const parts = []
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        parts.push(value)
-      }
-      const ab = await new Blob(parts, { type: 'audio/mpeg' }).arrayBuffer()
-      const bytes = new Uint8Array(ab)
-      let binary = ''
-      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i])
-      const b64 = btoa(binary)
+      const data = await resp.json()
+      if (!resp.ok) throw new Error(data?.detail?.error || `mya/voice HTTP ${resp.status}`)
+      if (!data.audio_base64) throw new Error('no audio in response')
       setVoiceStateSynced('speaking')
-      playBase64(b64, () => setVoiceStateSynced('idle'))
+      playBase64(data.audio_base64, () => setVoiceStateSynced('idle'))
     } catch (err) {
       console.error('[Mya] voice error:', err)
       setVoiceStateSynced('idle')
