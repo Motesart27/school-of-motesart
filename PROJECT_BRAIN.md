@@ -603,3 +603,15 @@ Body:            DM Sans, regular
 - Engine selects teach/guide/confirm/release instead of generating generic replacement voice.
 - Admin/dashboard/non-music contexts remain T.A.M.i.
 - Verification required: Half Step must keep concept-specific text and never fall back to Middle C.
+
+### T.A.M.i Intelligence Foundation Phase 1 Added
+
+- T.A.M.i remains the platform intelligence/router for school operations.
+- Motesart remains the lesson-facing music teaching persona.
+- Added tamiSignalIntakeEngine.js to normalize role, route, WYL, DPM, question, and support signals.
+- Added tamiDecisionEngine.js to classify P0/P1/P2/NONE operator decisions.
+- Added tamiOutputFormation.js and tamiVoicePersona.js for short, action-focused T.A.M.i responses.
+- Added useTamiIntelligence.js as the runtime hook for the Phase 1 foundation.
+- useTamiQuestions.js now checks T.A.M.i operational/homework/progress/intervention requests before falling back to existing lesson question handling.
+- Existing Claude escalation, timing behavior, lesson_engine files, WYL signal weighting, DPM formula, and Motesart lesson routing remain intact.
+- Music concept questions inside lessons continue to route away from T.A.M.i and remain Motesart-owned.

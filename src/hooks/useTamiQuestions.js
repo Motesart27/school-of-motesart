@@ -19,6 +19,7 @@
  */
 
 import { useRef, useCallback } from 'react'
+import useTamiIntelligence from './useTamiIntelligence.js'
 
 export default function useTamiQuestions({
   engineRef,
@@ -32,6 +33,7 @@ export default function useTamiQuestions({
 }) {
   const questionHandlerRef = useRef(null)
   const questionHistoryRef = useRef([])
+  const { evaluateTamiIntelligence } = useTamiIntelligence()
 
   // ── Lazy init (called during lesson setup) ──
   const initQuestionHandler = useCallback(async () => {
@@ -54,6 +56,45 @@ export default function useTamiQuestions({
     const currentConcept = moment?.concepts?.[0] || null
     const currentPhase = moment?.phase || null
     const momentIndex = engineRef.current?.state?.momentHistory?.length || 0
+    const stateSnapshot = tamiStackRef.current?.stateManager?.getState?.() || null
+    const memorySnapshot = tamiStackRef.current?.memory?.getTeachingSnapshot?.() || null
+    let userRole = 'student'
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('som_user') || 'null')
+      userRole = storedUser?.role || userRole
+    } catch {}
+
+    const intelligenceResult = evaluateTamiIntelligence({
+      userMessage: text,
+      role: userRole,
+      routeContext: {
+        pathname: window.location.pathname,
+        component: 'useTamiQuestions'
+      },
+      lessonContext: {
+        inLesson: true,
+        currentConcept,
+        currentPhase,
+        momentIndex
+      },
+      stateSnapshot,
+      memorySnapshot,
+      questionHandler: questionHandlerRef.current,
+      hintCount: memorySnapshot?.engagement?.confusionCount || 0,
+      errorCount: stateSnapshot?.performance?.totalWrong || 0
+    })
+
+    if (
+      intelligenceResult.output.shouldDeliver &&
+      !['NOMINAL', 'DELEGATE_TO_MOTESART'].includes(intelligenceResult.decision.action)
+    ) {
+      setCoaching({
+        message: intelligenceResult.output.responseText,
+        speaking: false,
+        tags: ['T.A.M.i', ...(intelligenceResult.output.tags || [])],
+      })
+      return
+    }
 
     const result = questionHandlerRef.current.detect(text, {
       currentConcept,
@@ -152,7 +193,7 @@ export default function useTamiQuestions({
       }
     }
   }, [engineRef, tamiStackRef, bridgeRef, setCoaching, setCurrentVisual,
-      getCurrentMoment, inputResolver, handleStudentInput])
+      getCurrentMoment, inputResolver, handleStudentInput, evaluateTamiIntelligence])
 
   return {
     initQuestionHandler,
