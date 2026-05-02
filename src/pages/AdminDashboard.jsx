@@ -13,6 +13,8 @@ import './AdminDashboard.css';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTamiStudentRoster } from '../hooks/useTamiStudentRoster.js';
+import TamiAdminBrief from '../components/TamiAdminBrief.jsx';
 
 // Image imports
 import tamiImg from './assets/image-1-nav-tab-active.png';
@@ -541,6 +543,7 @@ function QuickActions() {
 // MAIN DASHBOARD (default export)
 // ¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢
 export default function AdminDashboard() {
+ const { students, loading } = useTamiStudentRoster()
  return (
  <>
  <TopNav />
@@ -562,6 +565,7 @@ export default function AdminDashboard() {
  <RevenueBreakdown />
  <QuickActions />
  </div>
+ <TamiAdminBrief students={students} loading={loading} />
  </div>
  </>
  );

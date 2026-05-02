@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import useIsMobile from '../hooks/useIsMobile.js'
+import TamiParentSummary from '../components/TamiParentSummary.jsx'
 
 const children = [
  { name:'Renee', initial:'R', grad:'linear-gradient(135deg,#a855f7,#ec4899)', status:'On Track', statusBg:'rgba(34,197,94,.2)', statusColor:'#4ade80', statusBorder:'rgba(34,197,94,.5)', dpm:92, dpmColor:'#4ade80', dpmFill:'#22c55e', practice:'45 min', days:'5 days', fulfill:'88%', consistency:'95%', pending:2, completed:5, overdue:0 },
@@ -12,6 +13,7 @@ export default function ParentDashboard() {
  const { user, logout } = useAuth()
  const navigate = useNavigate()
  const userName = user?.name || 'Parent'
+ const childEmail = user?.childEmail || user?.child_email || user?.linked_child_email || user?.student_email || user?.child?.email || ''
 
  return (
  <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#111827,#111827,#1f2937)', color:'#fff', fontFamily:"-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
@@ -89,6 +91,7 @@ export default function ParentDashboard() {
  </div>
  ))}
  </div>
+ <TamiParentSummary childEmail={childEmail} />
 
  {/* Quick Actions */}
  <div style={{ display:'grid', gridTemplateColumns: mob ? '1fr 1fr' : 'repeat(4,1fr)', gap:12, marginTop:32 }}>

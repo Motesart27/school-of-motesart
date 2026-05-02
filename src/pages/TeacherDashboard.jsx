@@ -3,6 +3,8 @@ import api from '../services/api.js'
 import { useNavigate } from 'react-router-dom'
 import useIsMobile from '../hooks/useIsMobile.js'
 import tamiImg from './assets/image-1-nav-tab-active.png';
+import { useTamiStudentRoster } from '../hooks/useTamiStudentRoster.js'
+import TamiInterventionQueue from '../components/TamiInterventionQueue.jsx'
 
 const STUDENTS_DATA = [
  { id:1, name:'Emma Rodriguez', initials:'ER', instrument:'Violin', grade:4, dpm:25, dpmColor:'#f87171', drive:18, passion:25, motivation:32, weeklyMin:0, goalMin:150, hw:'0 / 3', status:'critical', statusLabel:'¢  Critical', avBg:'#dc2626', lastPractice:'14 days ago' },
@@ -51,6 +53,7 @@ const STATUS_STYLES = {
 export default function TeacherDashboard() {
  const mob = useIsMobile()
  const navigate = useNavigate()
+ const { atRiskStudents, loading } = useTamiStudentRoster()
 
  // roster state
  const [filter, setFilter] = useState('all')
@@ -511,6 +514,7 @@ export default function TeacherDashboard() {
  <div style={{ marginTop:10, fontSize:10, color:'#6b7280', textAlign:'center' }}>Click any tile to filter roster ¢</div>
  </div>
  </div>
+ <TamiInterventionQueue atRiskStudents={atRiskStudents} loading={loading} />
 
  </div>
  </div>

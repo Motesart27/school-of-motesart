@@ -622,3 +622,34 @@ Body:            DM Sans, regular
 - Preserved expanded derived score names from prior patch
 - No routing changes
 - No Motesart changes
+
+### T.A.M.i Phase 2 — Live Data + Dashboard Intelligence
+
+Date: 2026-05-02
+Baseline entering Phase 2: a403d22a5f1f737b9f632a48afab7ff716aa14b0
+
+Files created:
+  src/ai/tami/tamiDataAdapter.js
+  src/hooks/useTamiStudentRoster.js
+  src/components/TamiInterventionQueue.jsx
+  src/components/TamiParentSummary.jsx
+  src/components/TamiAdminBrief.jsx
+
+Files modified (surgical — lines added below existing content only):
+  src/pages/TeacherDashboard.jsx
+  src/pages/ParentDashboard.jsx
+  src/pages/AdminDashboard.jsx
+
+Data confirmed:
+  api.getStudents() → GET /students (existing route — no backend changes)
+  api.getPracticeLogs() → GET /practice-logs?student_id=... (existing route)
+  ParentDashboard was hardcoded — TamiParentSummary now pulls live data via auth context
+  AdminDashboard was static — TamiAdminBrief now uses live roster from hook
+
+Phase 2 baseline commit: reported in completion
+
+Phase 3 pre-conditions (NOT this session):
+  Teacher intervention log — teacher marks action taken on a flagged student
+  Parent notification system
+  Live lesson session writes into practice log
+  Student progress timeline view
