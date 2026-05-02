@@ -590,3 +590,16 @@ Body:            DM Sans, regular
 2. Add 5 CONCEPT_CONFIG_MAP entries: keyboard-layout, finger-numbering, octave-recognition, major-scale-pattern, c-major-scale
 3. Add 5 CONCEPT_VIEW_CONFIG entries with keys, BPM, speech texts
 4. Type/Created By Airtable writes deferred to Phase B2 (linked record format required)
+
+### Motesart Teaching Thinking Engine Added
+
+- T.A.M.i remains the platform intelligence/router.
+- Motesart is the lesson-facing music teaching persona.
+- conceptViewConfig.js remains the sacred source of truth for Motesart speechTexts.
+- Added motesartThinkingEngine.js for lesson-context teaching decisions.
+- Added motesartVoicePersona.js to preserve Motesart voice output.
+- Added useMotesartStudentState.js to track session-level learning signals.
+- WYLPracticeLive.jsx now routes lesson/practice responses through the Motesart engine.
+- Engine selects teach/guide/confirm/release instead of generating generic replacement voice.
+- Admin/dashboard/non-music contexts remain T.A.M.i.
+- Verification required: Half Step must keep concept-specific text and never fall back to Middle C.

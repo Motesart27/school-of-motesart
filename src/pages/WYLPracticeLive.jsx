@@ -8,6 +8,9 @@ import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
 import PracticeConceptView from '../components/PracticeConceptView.jsx'
 import { CONCEPT_VIEW_CONFIG } from '../config/conceptViewConfig.js'
 import { getState, setState } from '../lesson_engine/concept_state_store.js'
+import { useMotesartStudentState } from '../hooks/useMotesartStudentState.js'
+import { runMotesartThinkingEngine } from '../ai/motesart/motesartThinkingEngine.js'
+import { buildMotesartVoiceResponse } from '../ai/motesart/motesartVoicePersona.js'
 
 const INTENT_SYSTEM_PROMPT = [
   'You are an intent classification engine for a real-time music teaching system.',
@@ -750,6 +753,14 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release'
   }
   const currentPhase = phaseMap[conceptState?.ownership_state || 'introduced']
+  const motesartStudentState = useMotesartStudentState({
+    ageBand: studentProfile?.ageBand || studentProfile?.age_band,
+    currentPhase,
+    currentConcept: ACTIVE_CONCEPT_ID,
+    conceptConfig,
+    wylSignals: wylProfile,
+    dpmSignals: conceptState
+  })
   const teachingStepRef = React.useRef(0)
   const handleStudentInputRef = React.useRef(null)
   const practiceViewRef = React.useRef('cockpit')
@@ -841,20 +852,71 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     const heard = transcript.toLowerCase().trim()
     const expected = current.expect
     const evaluation = evaluateStudentResponse(heard, expected, current.prompt, 'The Half Step')
+    const acceptedAsCorrect = evaluation.correct || current.prompt === 'ready_check'
+    const projectedStudentState = {
+      ...motesartStudentState,
+      correctStreak: acceptedAsCorrect ? (motesartStudentState.correctStreak || 0) + 1 : 0,
+      incorrectStreak: acceptedAsCorrect ? 0 : (motesartStudentState.incorrectStreak || 0) + 1,
+      masteryDetected: acceptedAsCorrect && (motesartStudentState.correctStreak || 0) + 1 >= 2
+    }
+    const engineDecision = runMotesartThinkingEngine({
+      userMessage: heard,
+      routeContext: {
+        pathname: window.location.pathname,
+        component: 'WYLPracticeLive'
+      },
+      lessonContext: {
+        lessonId,
+        phase: currentPhase,
+        step: teachingStepRef.current,
+        prompt: current.prompt
+      },
+      conceptContext: {
+        conceptId: ACTIVE_CONCEPT_ID,
+        concept: currentConcept.concept,
+        promptType: current.prompt
+      },
+      studentState: projectedStudentState,
+      conceptConfig
+    })
+    const motesartReply = engineDecision.shouldUseMotesart
+      ? buildMotesartVoiceResponse({ engineDecision, conceptConfig, studentState: projectedStudentState })
+      : evaluation.motesartReply
+
+    if (engineDecision.shouldUseMotesart) {
+      motesartStudentState.recordStudentSignal({
+        isCorrect: acceptedAsCorrect,
+        studentMessage: heard,
+        teachingMode: engineDecision.teachingMode,
+        confusionDetected: evaluation.reason === 'question_or_confusion' || engineDecision.teachingMode === 'SIMPLIFY',
+        masteryDetected: engineDecision.teachingMode === 'CELEBRATE_PROGRESS'
+      })
+    }
+
+    if (import.meta.env.DEV) {
+      console.log('[MotesartEngine]', {
+        motesart_engine_used: engineDecision.shouldUseMotesart,
+        teachingMode: engineDecision.teachingMode,
+        speechMode: engineDecision.speechMode,
+        bloomLevel: engineDecision.bloomLevel,
+        zpdLevel: engineDecision.zpdLevel,
+        concept: engineDecision.concept
+      })
+    }
 
     console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Eval:', evaluation.reason, evaluation.correct)
 
     if (evaluation.reason === 'question_or_confusion') {
-      setCoaching({ message: evaluation.motesartReply, speaking: false, tags: ['Explain'] })
+      setCoaching({ message: motesartReply, speaking: false, tags: ['Explain'] })
       return
     }
 
-    if (evaluation.correct || current.prompt === 'ready_check') {
+    if (acceptedAsCorrect) {
       setStudentEmotion('happy')
       setAwaitingResponse(false)
 
       if (current.prompt === 'call_response') {
-        const affirmText = evaluation.motesartReply || 'Yes!'
+        const affirmText = motesartReply || 'Yes!'
         setCoaching({ message: affirmText, speaking: true, tags: ['Affirm'] })
         try {
           // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
@@ -872,14 +934,14 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setStudentEmotion('neutral')
       setRetryMode(true)
       setPromptMode(false)
-      setCoaching({ message: evaluation.motesartReply, speaking: false, tags: ['Partial'] })
+      setCoaching({ message: motesartReply, speaking: false, tags: ['Partial'] })
     } else {
       setStudentEmotion('confused')
       setRetryMode(true)
       setPromptMode(false)
-      setCoaching({ message: evaluation.motesartReply || 'Almost! Try again. I am listening.', speaking: false, tags: ['Retry'] })
+      setCoaching({ message: motesartReply || 'Almost! Try again. I am listening.', speaking: false, tags: ['Retry'] })
     }
-  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching])
+  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept.concept, currentPhase, lessonId, motesartStudentState])
   handleStudentInputRef.current = handleStudentInput
 
   const startLesson = React.useCallback(async () => {
