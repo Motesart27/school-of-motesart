@@ -20,6 +20,15 @@ function fallbackQuestionDetection(userMessage) {
 
 const DPM_DEFAULT = { drive: 50, passion: 50, motivation: 50, overall: 50 }
 
+export const TAMI_DERIVED_SCORE_KEYS = {
+  MOTIVATION_RISK: 'motivationRiskScore',
+  ERROR_RISK: 'errorRiskScore',
+  HINT_LOAD: 'hintLoadScore',
+  STRUGGLE_LOAD: 'struggleLoadScore',
+  ENGAGEMENT_RISK: 'engagementRiskScore',
+  INTERVENTION_RISK: 'interventionRiskScore'
+}
+
 function toNumber(value, fallback = 0) {
   const next = Number(value)
   return Number.isFinite(next) ? next : fallback
@@ -55,6 +64,33 @@ export function computeDpmSnapshot(dpm = {}, outcomeHistory = []) {
     passion,
     motivation,
     overall: Math.round((drive + passion + motivation) / 3)
+  }
+}
+
+export function computeDerivedScores({
+  dpm,
+  hintCount = 0,
+  errorCount = 0,
+  wrongStreak = 0,
+  strugglingCount = 0,
+  engagementTrend = 'engaged'
+} = {}) {
+  const motivationRiskScore = clampPercent(100 - Math.min(dpm?.motivation ?? 50, dpm?.overall ?? 50), 50)
+  const errorRiskScore = clampPercent(Math.max(errorCount * 20, wrongStreak * 35), 0)
+  const hintLoadScore = clampPercent(hintCount * 35, 0)
+  const struggleLoadScore = clampPercent(strugglingCount * 50, 0)
+  const engagementRiskScore = engagementTrend === 'disengaging' ? 85 : engagementTrend === 'slowing' ? 55 : 0
+  const interventionRiskScore = Math.round(
+    (motivationRiskScore + errorRiskScore + hintLoadScore + struggleLoadScore + engagementRiskScore) / 5
+  )
+
+  return {
+    [TAMI_DERIVED_SCORE_KEYS.MOTIVATION_RISK]: motivationRiskScore,
+    [TAMI_DERIVED_SCORE_KEYS.ERROR_RISK]: errorRiskScore,
+    [TAMI_DERIVED_SCORE_KEYS.HINT_LOAD]: hintLoadScore,
+    [TAMI_DERIVED_SCORE_KEYS.STRUGGLE_LOAD]: struggleLoadScore,
+    [TAMI_DERIVED_SCORE_KEYS.ENGAGEMENT_RISK]: engagementRiskScore,
+    [TAMI_DERIVED_SCORE_KEYS.INTERVENTION_RISK]: interventionRiskScore
   }
 }
 
@@ -103,6 +139,21 @@ export function normalizeTamiSignals(input = {}) {
   else if (role === 'parent' || /child|my child|how did/i.test(message)) contextType = TAMI_CONTEXTS.FAMILY_UPDATE
   else if (role === 'teacher' || role === 'admin' || operationalQuestion) contextType = TAMI_CONTEXTS.SCHOOL_OPERATIONS
   else if (inLesson) contextType = TAMI_CONTEXTS.STUDENT_SUPPORT
+  const normalizedHintCount = toNumber(hintCount, 0)
+  const normalizedErrorCount = toNumber(errorCount, 0)
+  const normalizedWrongStreak = toNumber(stateSnapshot?.performance?.wrongStreak ?? input.wrongStreak, 0)
+  const normalizedStrugglingCount = Array.isArray(stateSnapshot?.performance?.strugglingConcepts)
+    ? stateSnapshot.performance.strugglingConcepts.length
+    : toNumber(input.strugglingCount, 0)
+  const engagementTrend = memorySnapshot?.engagement?.trend || stateSnapshot?.engagement?.trend || 'engaged'
+  const derivedScores = computeDerivedScores({
+    dpm,
+    hintCount: normalizedHintCount,
+    errorCount: normalizedErrorCount,
+    wrongStreak: normalizedWrongStreak,
+    strugglingCount: normalizedStrugglingCount,
+    engagementTrend
+  })
 
   return {
     userMessage,
@@ -117,12 +168,11 @@ export function normalizeTamiSignals(input = {}) {
     operationalQuestion,
     wyl,
     dpm,
-    hintCount: toNumber(hintCount, 0),
-    errorCount: toNumber(errorCount, 0),
-    wrongStreak: toNumber(stateSnapshot?.performance?.wrongStreak ?? input.wrongStreak, 0),
-    strugglingCount: Array.isArray(stateSnapshot?.performance?.strugglingConcepts)
-      ? stateSnapshot.performance.strugglingConcepts.length
-      : toNumber(input.strugglingCount, 0),
-    engagementTrend: memorySnapshot?.engagement?.trend || stateSnapshot?.engagement?.trend || 'engaged'
+    derivedScores,
+    hintCount: normalizedHintCount,
+    errorCount: normalizedErrorCount,
+    wrongStreak: normalizedWrongStreak,
+    strugglingCount: normalizedStrugglingCount,
+    engagementTrend
   }
 }

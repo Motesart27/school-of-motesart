@@ -27,9 +27,10 @@ export function runTamiDecisionEngine(signals = {}) {
     }
   }
 
-  const lowMotivation = signals.dpm?.motivation <= 35 || signals.dpm?.overall <= 35
-  const highErrors = signals.errorCount >= 3 || signals.wrongStreak >= 2 || signals.strugglingCount >= 1
-  const highHints = signals.hintCount >= 2 || signals.memorySnapshot?.engagement?.confusionCount >= 2
+  const scores = signals.derivedScores || {}
+  const lowMotivation = scores.motivationRiskScore >= 65 || signals.dpm?.motivation <= 35 || signals.dpm?.overall <= 35
+  const highErrors = scores.errorRiskScore >= 60 || scores.struggleLoadScore >= 50 || signals.errorCount >= 3 || signals.wrongStreak >= 2 || signals.strugglingCount >= 1
+  const highHints = scores.hintLoadScore >= 70 || signals.hintCount >= 2 || signals.memorySnapshot?.engagement?.confusionCount >= 2
 
   if (lowMotivation && highErrors && highHints) {
     return {
