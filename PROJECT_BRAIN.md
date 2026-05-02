@@ -615,3 +615,10 @@ Body:            DM Sans, regular
 - useTamiQuestions.js now checks T.A.M.i operational/homework/progress/intervention requests before falling back to existing lesson question handling.
 - Existing Claude escalation, timing behavior, lesson_engine files, WYL signal weighting, DPM formula, and Motesart lesson routing remain intact.
 - Music concept questions inside lessons continue to route away from T.A.M.i and remain Motesart-owned.
+
+### T.A.M.i Derived Score Compatibility Patch
+
+- Added Phase 2 contract aliases: confusionScore, masteryRiskScore, engagementRiskScore
+- Preserved expanded derived score names from prior patch
+- No routing changes
+- No Motesart changes

@@ -26,7 +26,9 @@ export const TAMI_DERIVED_SCORE_KEYS = {
   HINT_LOAD: 'hintLoadScore',
   STRUGGLE_LOAD: 'struggleLoadScore',
   ENGAGEMENT_RISK: 'engagementRiskScore',
-  INTERVENTION_RISK: 'interventionRiskScore'
+  INTERVENTION_RISK: 'interventionRiskScore',
+  CONFUSION: 'confusionScore',
+  MASTERY_RISK: 'masteryRiskScore'
 }
 
 function toNumber(value, fallback = 0) {
@@ -73,6 +75,9 @@ export function computeDerivedScores({
   errorCount = 0,
   wrongStreak = 0,
   strugglingCount = 0,
+  confusionSignalCount = 0,
+  streakLength = 0,
+  errorRate = null,
   engagementTrend = 'engaged'
 } = {}) {
   const motivationRiskScore = clampPercent(100 - Math.min(dpm?.motivation ?? 50, dpm?.overall ?? 50), 50)
@@ -83,6 +88,13 @@ export function computeDerivedScores({
   const interventionRiskScore = Math.round(
     (motivationRiskScore + errorRiskScore + hintLoadScore + struggleLoadScore + engagementRiskScore) / 5
   )
+  const hasRawContractValues = Number.isFinite(Number(errorRate))
+  const confusionScore = hasRawContractValues
+    ? clampPercent((Number(errorRate) * 40) + (hintCount * 10) + (confusionSignalCount * 5), 0)
+    : struggleLoadScore
+  const masteryRiskScore = hasRawContractValues
+    ? clampPercent((streakLength < 2 ? 30 : 0) + (Number(errorRate) > 0.4 ? 40 : 0) + (hintCount > 3 ? 20 : 0), 0)
+    : interventionRiskScore
 
   return {
     [TAMI_DERIVED_SCORE_KEYS.MOTIVATION_RISK]: motivationRiskScore,
@@ -90,7 +102,9 @@ export function computeDerivedScores({
     [TAMI_DERIVED_SCORE_KEYS.HINT_LOAD]: hintLoadScore,
     [TAMI_DERIVED_SCORE_KEYS.STRUGGLE_LOAD]: struggleLoadScore,
     [TAMI_DERIVED_SCORE_KEYS.ENGAGEMENT_RISK]: engagementRiskScore,
-    [TAMI_DERIVED_SCORE_KEYS.INTERVENTION_RISK]: interventionRiskScore
+    [TAMI_DERIVED_SCORE_KEYS.INTERVENTION_RISK]: interventionRiskScore,
+    [TAMI_DERIVED_SCORE_KEYS.CONFUSION]: confusionScore,
+    [TAMI_DERIVED_SCORE_KEYS.MASTERY_RISK]: masteryRiskScore
   }
 }
 
@@ -146,12 +160,23 @@ export function normalizeTamiSignals(input = {}) {
     ? stateSnapshot.performance.strugglingConcepts.length
     : toNumber(input.strugglingCount, 0)
   const engagementTrend = memorySnapshot?.engagement?.trend || stateSnapshot?.engagement?.trend || 'engaged'
+  const totalCorrect = toNumber(stateSnapshot?.performance?.totalCorrect ?? input.totalCorrect, 0)
+  const totalAttempts = toNumber(
+    stateSnapshot?.performance?.totalAttempts ?? input.totalAttempts,
+    totalCorrect + normalizedErrorCount
+  )
+  const errorRate = totalAttempts > 0 ? normalizedErrorCount / totalAttempts : null
+  const streakLength = toNumber(stateSnapshot?.performance?.correctStreak ?? input.streakLength, 0)
+  const confusionSignalCount = toNumber(memorySnapshot?.engagement?.confusionCount ?? input.confusionSignalCount, 0)
   const derivedScores = computeDerivedScores({
     dpm,
     hintCount: normalizedHintCount,
     errorCount: normalizedErrorCount,
     wrongStreak: normalizedWrongStreak,
     strugglingCount: normalizedStrugglingCount,
+    confusionSignalCount,
+    streakLength,
+    errorRate,
     engagementTrend
   })
 
