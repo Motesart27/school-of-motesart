@@ -623,6 +623,22 @@ Body:            DM Sans, regular
 - No routing changes
 - No Motesart changes
 
+### T.A.M.i Phase 1 — Locked Baselines
+
+| Constant | SHA | Purpose |
+|---|---|---|
+| `MOTESART_ENGINE_BASELINE` | `23fb225578a09579c46ed0731cd13e6433c30430` | Motesart engine at Phase 1 baseline — must not regress |
+| `TAMI_INTELLIGENCE_PHASE_1_BASELINE` | `51eaab4a2fa00584a335eb6e171b3a65bc50e5e9` | T.A.M.i intake + decision engine complete — Phase 1 foundation locked |
+| `TAMI_PHASE_1_CONTRACT_BASELINE` | `a403d22a5f1f737b9f632a48afab7ff716aa14b0` | Derived score contract extended — confusionScore, masteryRiskScore, engagementRiskScore |
+
+**Phase 2 pre-conditions (all must be PASS before Phase 2 starts):**
+- [ ] `normalizeTamiSignals()` exports `derivedScores` object
+- [ ] `computeDerivedScores()` returns all 8 named keys including `confusionScore`, `masteryRiskScore`, `engagementRiskScore`
+- [ ] `useTamiQuestions.js` checks `intelligenceResult.decision.action` before calling lesson handler
+- [ ] `DELEGATE_TO_MOTESART` action correctly bypasses T.A.M.i and routes to Motesart lesson handler
+- [ ] Motesart engine files untouched — zero diff vs `MOTESART_ENGINE_BASELINE`
+- [ ] Full build passes — `npm run build` exits 0, no errors
+
 ### T.A.M.i Phase 2 — Live Data + Dashboard Intelligence
 
 Date: 2026-05-02
@@ -653,3 +669,16 @@ Phase 3 pre-conditions (NOT this session):
   Parent notification system
   Live lesson session writes into practice log
   Student progress timeline view
+
+## T.A.M.i Phase 2 — Pre-Build Checklist
+
+> Verify all items PASS before writing any Phase 2 code.
+
+- [ ] `git log --oneline -1` on main matches `TAMI_PHASE_1_CONTRACT_BASELINE` (`a403d22`) or later
+- [ ] `normalizeTamiSignals()` in `tamiSignalIntakeEngine.js` returns `derivedScores` object
+- [ ] `computeDerivedScores()` returns all 8 keys: `motivationRiskScore`, `errorRiskScore`, `hintLoadScore`, `struggleLoadScore`, `engagementRiskScore`, `interventionRiskScore`, `confusionScore`, `masteryRiskScore`
+- [ ] `useTamiQuestions.js` lines 87-89 check `intelligenceResult.decision.action` before delegating to lesson handler
+- [ ] Motesart engine (`motesartThinkingEngine.js`, `motesartVoicePersona.js`) unchanged vs `MOTESART_ENGINE_BASELINE` (`23fb225`)
+- [ ] `npm run build` exits 0 with no errors (pre-existing non-blocking warnings acceptable)
+- [ ] T.A.M.i action `DELEGATE_TO_MOTESART` routes cleanly to Motesart lesson handler — T.A.M.i silent
+- [ ] All 9 Phase 1 verification steps pass against current main branch
