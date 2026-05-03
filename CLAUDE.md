@@ -5,6 +5,7 @@
 - T.A.M.i = platform OS/decision engine. Never call it coach or teacher.
 - Motesart = default student Ambassador. Delivers instruction. Never thinks.
 - T.A.M.i is the OS. Motesart is the voice.
+- Mya = OS-level voice assistant. Separate system, separate repo. Not SOM-internal. SOM work from Mya enters through MASTER_TASKS delegation only (business=SOM, assigned_agent=SOM Executive).
 - "Mozart" in any message = "Motesart" (speech-to-text artifact)
 
 ## STACK
@@ -29,14 +30,12 @@
 6. No invented field names, routes, or API contracts — mark as TO VERIFY if unsure
 7. No silent dependency changes — call out new packages explicitly
 
-## CURRENT STATE (April 27, 2026)
-- Voice loop: WORKING in bundle index-ByohIFMv.js
-- Active path: Theory Phase (NOT old T.A.M.i visual engine)
-- Dynamic concept routing: WORKING — ?concept=half-step / whole-step / scale-degree
-- Key files modified this session: WYLPracticeLive.jsx, PracticeConceptView.jsx, conceptViewConfig.js
-- Last commits: 904e868 (cockpit concept name), fedd806 (concept routing), 6a01ea3 (CLAUDE.md + handoff)
-- PENDING: Add VITE_MOTESART_CLAUDE_KEY to Netlify env vars for parseIntent AI fallback
-- PENDING: Live test voice loop end-to-end with mic on real device
+## CURRENT STATE (May 3, 2026)
+- T.A.M.i Phase 2 COMPLETE — live data adapter, student roster hook, dashboard intelligence (baseline: 89dd2ba)
+- Motesart teaching engine LOCKED — zero drift from baseline 23fb225 (verified May 3, 2026)
+- Phase 3 pre-conditions NOT started: teacher intervention log, parent notifications, live session writes, progress timeline
+- PENDING: VITE_MOTESART_CLAUDE_KEY for parseIntent AI fallback — add to Netlify env vars, status unverified
+- PENDING: End-to-end voice loop test on real device — status unverified
 
 ## AIRTABLE (read-only computed fields — NEVER write via API)
 - Users table: "Student / User Name", "User Email", "Password Hash", "Role" (capitalized)

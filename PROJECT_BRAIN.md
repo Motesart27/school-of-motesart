@@ -149,10 +149,11 @@ School environment and standalone environment share the same dashboard shell but
 - **Framework:** React 18.3.1 (Vite 5.4.2, ESM)
 - **Routing:** react-router-dom 6.22.0
 - **Styling:** Tailwind CSS 3.4.1 + custom CSS per dashboard
-- **TTS Proxy:** Express.js (server.js) — proxies ElevenLabs API calls
-- **Build:** Vite → static assets served by Express
-- **Deployed on:** Railway (motesart-frontend-production.up.railway.app)
-- **Repo:** github.com/Motesart27/Motesart-frontend (PUBLIC)
+- **TTS Proxy:** Express.js (server.js) → Railway (protective-flow-production.up.railway.app)
+- **Build:** Vite → static assets → Netlify CDN
+- **Deployed on:** Netlify (site: 68b307a9-ef37-4298-9e72-805381200e1c)
+- **Repo:** github.com/Motesart27/school-of-motesart (this repo)
+- ⚠️ `motesart-frontend-production.up.railway.app` is a SEPARATE repo (Motesart OS dashboard). Do NOT verify SOM deploys there.
 
 ### Backend
 - **Framework:** FastAPI (Python) with Pydantic models
@@ -168,17 +169,19 @@ School environment and standalone environment share the same dashboard shell but
   - Motesart Coach Voice: Mark (ID: `UgBBYS2sOqTuMpoF3BR0`)
 - **Anthropic Claude API** — Powers TAMi conversational AI
 - **Airtable** — Primary database for all platform data
-- **Railway** — Hosting for both frontend and backend (auto-deploys from GitHub main branch)
+- **Netlify** — SOM frontend hosting (school-of-motesart repo, auto-deploys from main)
+- **Railway** — Backend + TTS proxy hosting (Deployable-python-codebase-som repo, auto-deploys from main)
 
-### Environment Variables (Railway)
+### Environment Variables
 | Variable | Service | Purpose |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Backend | Claude API access |
-| `AIRTABLE_API_KEY` | Backend | Airtable data access |
+| `AIRTABLE_PAT` | Backend | Airtable data access — canonical going forward |
+| `AIRTABLE_API_KEY` | Backend | Legacy/transition alias — removal is tracked work, not yet confirmed removed |
 | `AIRTABLE_BASE_ID` | Backend | SOM database identifier |
-| `ELEVENLABS_API_KEY` | Frontend | TTS API access |
-| `ELEVENLABS_TAMI_VOICE_ID` | Frontend | TAMi voice (Juniper) |
-| `ELEVENLABS_VOICE_ID` | Frontend | Motesart Coach voice (Mark) |
+| `ELEVENLABS_API_KEY` | Frontend/TTS proxy | TTS API access |
+| `ELEVENLABS_TAMI_VOICE_ID` | Frontend/TTS proxy | TAMi voice (Juniper) |
+| `ELEVENLABS_VOICE_ID` | Frontend/TTS proxy | Motesart Coach voice (Mark) |
 | `PORT` | Frontend | Express server port (3000) |
 | `VITE_API_URL` | Frontend | Backend URL for API calls |
 
@@ -662,7 +665,7 @@ Data confirmed:
   ParentDashboard was hardcoded — TamiParentSummary now pulls live data via auth context
   AdminDashboard was static — TamiAdminBrief now uses live roster from hook
 
-Phase 2 baseline commit: reported in completion
+Phase 2 baseline commit: 89dd2ba — SHIPPED May 2, 2026
 
 Phase 3 pre-conditions (NOT this session):
   Teacher intervention log — teacher marks action taken on a flagged student
@@ -670,9 +673,9 @@ Phase 3 pre-conditions (NOT this session):
   Live lesson session writes into practice log
   Student progress timeline view
 
-## T.A.M.i Phase 2 — Pre-Build Checklist
+## T.A.M.i Phase 2 — Pre-Build Checklist (ARCHIVED — Phase 2 shipped 89dd2ba)
 
-> Verify all items PASS before writing any Phase 2 code.
+> Phase 2 shipped May 2, 2026. These conditions were verified before Phase 2 started. Kept for audit trail only.
 
 - [ ] `git log --oneline -1` on main matches `TAMI_PHASE_1_CONTRACT_BASELINE` (`a403d22`) or later
 - [ ] `normalizeTamiSignals()` in `tamiSignalIntakeEngine.js` returns `derivedScores` object
@@ -682,3 +685,37 @@ Phase 3 pre-conditions (NOT this session):
 - [ ] `npm run build` exits 0 with no errors (pre-existing non-blocking warnings acceptable)
 - [ ] T.A.M.i action `DELEGATE_TO_MOTESART` routes cleanly to Motesart lesson handler — T.A.M.i silent
 - [ ] All 9 Phase 1 verification steps pass against current main branch
+
+---
+
+## Mya / SOM / T.A.M.i Role Boundary
+
+- Mya does not operate inside school-of-motesart. No SOM frontend source imports or references Mya.
+- Mya delegates SOM work through MASTER_TASKS: `business=SOM`, `assigned_agent=SOM Executive`.
+- SOM Executive exists in backend at `/api/executives/som/run`. It reads SOM-tagged tasks and processes them.
+- T.A.M.i is SOM-internal educational intelligence. It has no coupling to Mya OS.
+- Motesart is the current direct lesson delivery voice. Not Mya. Not T.A.M.i.
+- This isolation is intentional. Do not add Mya imports or references to this repo.
+
+## Cross-Brain Sync
+
+This brain owns:
+SOM frontend, T.A.M.i intelligence layer, Motesart teaching engine, Netlify deploys, lesson UI, mobile/audio proof gates.
+
+Sister brain:
+Deployable-python-codebase-som/PROJECT_BRAIN.md
+
+This SHA at last sync:
+0eafdd3d6231f89d91c3ad2183fd70a634da53cd (May 3, 2026)
+
+Sister SHA at last sync:
+fd4b8aaf50a853b5197d533140563b39126d0eff (May 3, 2026)
+
+Drift check:
+Run `git rev-parse HEAD` in both repos. If either SHA differs from the sync SHAs above, update needed.
+
+## Cross-System Cycle Status (pointers — detail lives in sister brain)
+
+- Cycle #2 audit observability: PARKED — blocked on exact Airtable field names for table tblDEyL8fzGGVvs2t. No SOM frontend action required.
+- Cycle #3 VAD: DEPLOYED_NOT_SHIPPED — frontend change deployed, awaiting MOBILE_PASS at 390×844 and 430×932.
+- Cycle #3A spoken response truncation: CLOSED/PASS — detail in Deployable-python-codebase-som/PROJECT_BRAIN.md.
