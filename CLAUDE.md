@@ -45,3 +45,33 @@
 After every session, update PROJECT_BRAIN_HANDOFF.md:
 - Date, what was built, files modified, commit hashes, result, next steps
 Then: git add PROJECT_BRAIN_HANDOFF.md CLAUDE.md && git commit -m "docs: session handoff [date]" && git push
+
+---
+
+## Constitutional Rules (cross-repo, locked)
+
+IDENTITY — never conflate:
+- T.A.M.i = SOM educational intelligence. Never a coach. Never named to students.
+- Motesart = lesson delivery voice. Does not route or decide.
+- Mya = OS-level executive dispatcher across all businesses. Not SOM-specific.
+- SOM Executive = operational worker for SOM-tagged MASTER_TASKS.
+
+DELEGATION PATTERN (locked):
+- Mya never carries domain expertise.
+- Mya tags tasks: business=<domain> + assigned_agent=<Executive>.
+- Executives carry domain expertise. Extend the executive layer, not Mya.
+
+DEPLOY TARGETS (repo-specific):
+- school-of-motesart → Netlify. Never verify SOM changes on Railway.
+- Deployable-python-codebase-som → Railway.
+
+BRAIN ARCHITECTURE:
+- Constitutional layers state rules. Changelog layers state state.
+- State lives in PROJECT_BRAIN.md. Rules live here.
+- Cross-brain drift: git rev-parse HEAD in both repos vs Cross-Brain
+  Sync SHAs in PROJECT_BRAIN.
+
+AIRTABLE:
+- AIRTABLE_PAT is canonical going forward. AIRTABLE_API_KEY is
+  legacy/transition — migration tracked, not assumed complete.
+- Field names are case-sensitive. Never guess. Verify from source.
