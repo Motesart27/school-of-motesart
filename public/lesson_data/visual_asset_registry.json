@@ -1,0 +1,191 @@
+{
+  "version": "1.0.0",
+  "lesson": "L01_c_major_scale",
+  "assets": {
+    "numbered_keyboard": {
+      "type": "svg_overlay",
+      "description": "Piano keyboard with letter labels on white keys",
+      "fallback": "text_description"
+    },
+    "keyboard_middle_c": {
+      "type": "svg_overlay",
+      "description": "Piano keyboard highlighting middle C with pulsing indicator",
+      "fallback": "text_description"
+    },
+    "keyboard_middle_c_arrow": {
+      "type": "svg_overlay",
+      "description": "Piano keyboard with arrow pointing to middle C",
+      "fallback": "text_description"
+    },
+    "finger_map_numbered": {
+      "type": "svg_overlay",
+      "description": "Hand diagram with fingers numbered 1-5",
+      "fallback": "text_description"
+    },
+    "finger_map_ghost_overlay": {
+      "type": "svg_overlay",
+      "description": "Transparent hand overlay showing finger positions on keys",
+      "fallback": "text_description"
+    },
+    "half_step_demo": {
+      "type": "svg_overlay",
+      "description": "Two adjacent keys highlighted showing half step distance",
+      "fallback": "text_description"
+    },
+    "half_step_animated_arrows": {
+      "type": "svg_animated",
+      "description": "Animated arrows showing half step movement between keys",
+      "fallback": "text_description"
+    },
+    "whole_step_demo": {
+      "type": "svg_overlay",
+      "description": "Two keys with one skipped between showing whole step distance",
+      "fallback": "text_description"
+    },
+    "halfwhole_side_by_side": {
+      "type": "svg_overlay",
+      "description": "Side by side comparison of half step and whole step",
+      "fallback": "text_description"
+    },
+    "keyboard_ef_highlight": {
+      "type": "svg_overlay",
+      "description": "Keyboard with E and F keys highlighted",
+      "fallback": "text_description"
+    },
+    "keyboard_ef_no_gap": {
+      "type": "svg_overlay",
+      "description": "Keyboard showing E-F with no black key between them",
+      "fallback": "text_description"
+    },
+    "keyboard_cd_highlight": {
+      "type": "svg_overlay",
+      "description": "Keyboard with C and D keys highlighted",
+      "fallback": "text_description"
+    },
+    "keyboard_cd_skip_arc": {
+      "type": "svg_animated",
+      "description": "Arc showing the skip over black key from C to D",
+      "fallback": "text_description"
+    },
+    "major_scale_code": {
+      "type": "svg_overlay",
+      "description": "Visual display of W-W-H-W-W-W-H pattern",
+      "fallback": "text_description"
+    },
+    "major_scale_code_animated": {
+      "type": "svg_animated",
+      "description": "Animated reveal of the major scale pattern",
+      "fallback": "text_description"
+    },
+    "cmajor_ascending_walkthrough": {
+      "type": "interactive",
+      "description": "Step-by-step C major scale walkthrough with key highlights",
+      "fallback": "text_description"
+    },
+    "cmajor_ascending_animated_arrows": {
+      "type": "svg_animated",
+      "description": "Animated arrows walking up the C major scale",
+      "fallback": "text_description"
+    },
+    "pattern_fill_blank": {
+      "type": "interactive",
+      "description": "Pattern quiz with blank slots to fill in W or H",
+      "fallback": "text_description"
+    },
+    "pattern_two_groups": {
+      "type": "svg_overlay",
+      "description": "Pattern shown in two bracketed groups",
+      "fallback": "text_description"
+    },
+    "cmajor_ascending_demo": {
+      "type": "interactive",
+      "description": "Full ascending C major scale demo with key lighting",
+      "fallback": "text_description"
+    },
+    "finger_map_with_keyboard": {
+      "type": "interactive",
+      "description": "Combined finger map and keyboard showing fingering 1-2-3-1-2-3-4-5",
+      "fallback": "text_description"
+    },
+    "finger_map_slowmo": {
+      "type": "svg_animated",
+      "description": "Slow motion finger movement animation",
+      "fallback": "text_description"
+    },
+    "cmajor_descending_demo": {
+      "type": "interactive",
+      "description": "Descending C major scale demo",
+      "fallback": "text_description"
+    },
+    "keyboard_interactive_ascending": {
+      "type": "interactive",
+      "description": "Interactive keyboard for student to play ascending scale",
+      "fallback": "text_description"
+    },
+    "keyboard_halfstep_highlight": {
+      "type": "svg_overlay",
+      "description": "Keyboard highlighting E-F and B-C half steps in amber",
+      "fallback": "text_description"
+    },
+    "keyboard_interactive_with_pattern": {
+      "type": "interactive",
+      "description": "Interactive keyboard with W/H pattern sync overlay",
+      "fallback": "text_description"
+    },
+    "keyboard_blank": {
+      "type": "svg_overlay",
+      "description": "Plain keyboard with no highlights for diagnostic",
+      "fallback": "text_description"
+    },
+    "pattern_blank_slots": {
+      "type": "interactive",
+      "description": "Seven blank slots for student to fill in pattern",
+      "fallback": "text_description"
+    },
+    "cmajor_note_by_note": {
+      "type": "interactive",
+      "description": "Note-by-note walkthrough with large labels",
+      "fallback": "text_description"
+    },
+    "cmajor_large_labels": {
+      "type": "svg_overlay",
+      "description": "Large letter labels on C major scale keys",
+      "fallback": "text_description"
+    },
+    "halfwhole_comparison_split": {
+      "type": "svg_overlay",
+      "description": "Split-screen comparison of half and whole steps",
+      "fallback": "text_description"
+    },
+    "pattern_two_groups_bracketed": {
+      "type": "svg_overlay",
+      "description": "Pattern with brackets showing Group 1 (W-W-H) and Group 2 (W-W-W-H)",
+      "fallback": "text_description"
+    },
+    "keyboard_interactive_full": {
+      "type": "interactive",
+      "description": "Full interactive keyboard for ascending and descending practice",
+      "fallback": "text_description"
+    },
+    "lesson_summary_card": {
+      "type": "svg_overlay",
+      "description": "Summary card with checkmarks for completed concepts",
+      "fallback": "text_description"
+    },
+    "next_lesson_teaser": {
+      "type": "svg_overlay",
+      "description": "Preview card for next lesson",
+      "fallback": "text_description"
+    },
+    "session_complete_badge": {
+      "type": "svg_overlay",
+      "description": "Completion badge for finishing the lesson",
+      "fallback": "text_description"
+    },
+    "piano_icon_pulse": {
+      "type": "svg_animated",
+      "description": "Pulsing piano icon for WYL visual learners",
+      "fallback": "text_description"
+    }
+  }
+}

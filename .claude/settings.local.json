@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -q 'git push'; then echo 'FRONTEND PUSH DETECTED — Railway deploy takes ~2-3 min. Run /verify-deploy after deploy completes to confirm.'; fi",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}

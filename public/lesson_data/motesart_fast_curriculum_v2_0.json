@@ -1,0 +1,145 @@
+{
+  "_meta": {
+    "version": "2.0",
+    "description": "Motesart Fast Curriculum — 6 phases, student-facing sequence with Concept_State schema",
+    "last_updated": "2026-03-23"
+  },
+  "concept_state_schema": {
+    "concept_id": "string — normalized T_ ID",
+    "ownership_state": "enum: introduced | practicing | accurate_with_support | accurate_without_support | owned",
+    "confidence": "number 0.0–1.0 — perception-derived blended confidence",
+    "attempts": "integer — total attempts across all sessions",
+    "correct_streak": "integer — current consecutive correct",
+    "last_session_date": "ISO date string",
+    "feel_mode_a_passed": "boolean — with visual support gate (85%)",
+    "feel_mode_b_passed": "boolean — without support gate (85%)",
+    "feel_mode_c_passed": "boolean — transfer/new context gate (80%)",
+    "evidence_summary": {
+      "description": "Aggregated perception evidence for teacher visibility",
+      "schema": {
+        "total_packets": "integer",
+        "positive_tags": "string[] — tags from perception_tags.json that were positive",
+        "negative_tags": "string[] — tags flagged as concerns",
+        "trend": "enum: improving | stable | declining",
+        "trend_delta": "number — confidence change over last N sessions",
+        "last_aggregation": "ISO date string",
+        "session_count": "integer — number of sessions contributing"
+      }
+    },
+    "mistake_history": "object — keyed by mistake_tag, value is count",
+    "response_time_avg_ms": "number — rolling average response time"
+  },
+  "phases": [
+    {
+      "phase_id": "PHASE_1_FOUNDATIONS",
+      "phase_number": 1,
+      "label": "Foundations",
+      "description": "Half steps, whole steps, keyboard geography, finger identity",
+      "grade_band": "K-2",
+      "prerequisite_phase": null,
+      "concepts": [
+        "T_HALF_STEP",
+        "T_WHOLE_STEP",
+        "T_KEYBOARD_LAYOUT",
+        "T_FINGER_NUMBERING",
+        "T_OCTAVE_RECOGNITION"
+      ],
+      "pilot_concepts": [
+        "T_HALF_STEP",
+        "T_WHOLE_STEP"
+      ],
+      "unlock_condition": "none"
+    },
+    {
+      "phase_id": "PHASE_2_PATTERNS",
+      "phase_number": 2,
+      "label": "Patterns",
+      "description": "Scale structure, major scale construction, scale degree names",
+      "grade_band": "1-3",
+      "prerequisite_phase": "PHASE_1_FOUNDATIONS",
+      "concepts": [
+        "T_MAJOR_SCALE_PATTERN",
+        "T_SCALE_DEGREES_MAJOR",
+        "T_C_MAJOR_SCALE"
+      ],
+      "pilot_concepts": [
+        "T_MAJOR_SCALE_PATTERN",
+        "T_SCALE_DEGREES_MAJOR"
+      ],
+      "unlock_condition": "T_HALF_STEP.owned AND T_WHOLE_STEP.owned"
+    },
+    {
+      "phase_id": "PHASE_3_INTERVALS",
+      "phase_number": 3,
+      "label": "Intervals",
+      "description": "Major 3rd, interval recognition, melodic context",
+      "grade_band": "2-4",
+      "prerequisite_phase": "PHASE_2_PATTERNS",
+      "concepts": [
+        "T_MAJOR_3RD",
+        "T_INTERVAL_RECOGNITION",
+        "T_MELODIC_INTERVALS_CONTEXT",
+        "T_SAME_DIFFERENT",
+        "T_STEP_SKIP"
+      ],
+      "pilot_concepts": [
+        "T_MAJOR_3RD"
+      ],
+      "unlock_condition": "T_MAJOR_SCALE_PATTERN.owned AND T_SCALE_DEGREES_MAJOR.owned"
+    },
+    {
+      "phase_id": "PHASE_4_KEYS",
+      "phase_number": 4,
+      "label": "Keys & Signatures",
+      "description": "Multiple major keys, key signatures, transposition",
+      "grade_band": "2-5",
+      "prerequisite_phase": "PHASE_2_PATTERNS",
+      "concepts": [
+        "T_G_MAJOR_SCALE",
+        "T_F_MAJOR_SCALE",
+        "T_D_MAJOR_SCALE",
+        "T_A_MINOR_SCALE",
+        "T_KEY_SIGNATURE_READING",
+        "T_SHARP_FLAT_NAMES"
+      ],
+      "pilot_concepts": [],
+      "unlock_condition": "PHASE_2_PATTERNS complete"
+    },
+    {
+      "phase_id": "PHASE_5_HARMONY",
+      "phase_number": 5,
+      "label": "Harmony & Chords",
+      "description": "Triads, chord quality, harmonic function",
+      "grade_band": "3-8",
+      "prerequisite_phase": "PHASE_3_INTERVALS",
+      "concepts": [
+        "T_CHORD_TRIAD_STRUCTURE",
+        "T_CHORD_QUALITY",
+        "T_HARMONY_BASIC"
+      ],
+      "pilot_concepts": [],
+      "unlock_condition": "PHASE_3_INTERVALS complete"
+    },
+    {
+      "phase_id": "PHASE_6_NOTATION",
+      "phase_number": 6,
+      "label": "Notation & Literacy",
+      "description": "Staff reading, clefs, note/rest values, dynamics, tempo, repeats",
+      "grade_band": "2-8",
+      "prerequisite_phase": "PHASE_2_PATTERNS",
+      "concepts": [
+        "T_STAFF_LINE_SPACE_READING",
+        "T_TREBLE_CLEF_NOTES",
+        "T_BASS_CLEF_NOTES",
+        "T_TIME_SIGNATURE_BASICS",
+        "T_NOTE_VALUE_DURATION",
+        "T_REST_VALUE_DURATION",
+        "T_DYNAMIC_MARKINGS",
+        "T_TEMPO_MARKINGS",
+        "T_REPEAT_NAVIGATION"
+      ],
+      "pilot_concepts": [],
+      "unlock_condition": "PHASE_2_PATTERNS complete"
+    }
+  ]
+}

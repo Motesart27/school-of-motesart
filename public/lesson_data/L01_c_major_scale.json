@@ -1,0 +1,2388 @@
+{
+  "id": "L01_M25",
+  "phase": "wrapup",
+  "concepts": [
+    {
+      "id": "C_KEYBOARD",
+      "name": "Piano Keyboard Layout",
+      "startConfidence": 50
+    },
+    {
+      "id": "C_HALFWHOLE",
+      "name": "Half Steps & Whole Steps",
+      "startConfidence": 50
+    },
+    {
+      "id": "C_MAJSCALE",
+      "name": "Major Scale Pattern",
+      "startConfidence": 50
+    },
+    {
+      "id": "C_CMAJOR",
+      "name": "C Major Scale (Specific)",
+      "startConfidence": 50
+    },
+    {
+      "id": "C_FINGERS",
+      "name": "Finger Numbering",
+      "startConfidence": 50
+    },
+    {
+      "id": "C_OCTAVE",
+      "name": "Octave Concept",
+      "startConfidence": 50
+    }
+  ],
+  "dialogue": "You did it! In this lesson, you learned the notes of the piano, how half steps and whole steps work, the major scale pattern â Whole, Whole, Half, Whole, Whole, Whole, Half â and you played the entire C Major scale. Thatâs a huge deal for your first lesson!",
+  "lessonId": "L01",
+  "title": "The C Major Scale",
+  "level": "beginner_1",
+  "instrument": "piano",
+  "version": "1.0.0",
+  "duration": {
+    "min": 12,
+    "max": 18,
+    "unit": "minutes"
+  },
+  "totalMoments": 27,
+  "lessonGoals": {
+    "C_MAJSCALE": {
+      "min": 70,
+      "label": "Can recall the W-W-H-W-W-W-H pattern"
+    },
+    "C_HALFWHOLE": {
+      "min": 70,
+      "label": "Can identify half steps and whole steps"
+    },
+    "C_CMAJOR": {
+      "min": 65,
+      "label": "Can play C Major ascending"
+    },
+    "C_FINGERS": {
+      "min": 60,
+      "label": "Knows finger numbering 1-5"
+    }
+  },
+  "onGoalNotMet": {
+    "action": "assign_practice",
+    "fallback": "repeat_key_moments",
+    "momentIds": [
+      "L01_M10",
+      "L01_M11",
+      "L01_M16"
+    ]
+  },
+  "practiceAssignment": {
+    "exercise": "play_c_major_ascending",
+    "tempo": 80,
+    "repetitions": 5,
+    "bonusExercise": "play_c_major_ascending_descending",
+    "bonusTempo": 60,
+    "bonusRepetitions": 3,
+    "dailyGoal": "5 minutes"
+  },
+  "difficulty": {
+    "beginner": {
+      "pacing": "slow",
+      "visualHints": true,
+      "patternOverlay": true,
+      "autoAdvanceDelay": 4,
+      "wrongNoteThreshold": 3
+    },
+    "intermediate": {
+      "pacing": "normal",
+      "visualHints": true,
+      "patternOverlay": false,
+      "autoAdvanceDelay": 2,
+      "wrongNoteThreshold": 2
+    },
+    "advanced": {
+      "pacing": "fast",
+      "visualHints": false,
+      "patternOverlay": false,
+      "autoAdvanceDelay": 1,
+      "wrongNoteThreshold": 1
+    }
+  },
+  "moments": [
+    {
+      "id": "L01_M01",
+      "phase": "greeting",
+      "concepts": [],
+      "dialogue": "Hey there! Welcome to your very first lesson at the School of Motes-Art. Iâm Motes-Art, your music coach, and today weâre going to learn something really cool â the C Major Scale. Itâs the foundation of everything in music. You ready?",
+      "visual": null,
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "affirmative",
+        "timeout": 15
+      },
+      "correctResponse": {
+        "match": [
+          "yes",
+          "ready",
+          "let's go",
+          "yeah",
+          "yep",
+          "sure",
+          "ok",
+          "okay"
+        ],
+        "type": "any_affirmative"
+      },
+      "branches": {
+        "correct": "L01_M02",
+        "timeout": "L01_M01_REPROMPT"
+      },
+      "signals": {
+        "track": [
+          "response_time"
+        ],
+        "comprehension": false
+      },
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "response_time"
+        ]
+      },
+      "accessibility": {
+        "colorBlindSafe": true,
+        "audioCue": true
+      },
+      "cameraMode": {
+        "enabled": false
+      }
+    },
+    {
+      "id": "L01_M01_REPROMPT",
+      "phase": "greeting",
+      "concepts": [],
+      "isBranch": true,
+      "dialogue": "No worries â take your time. Whenever youâre ready, just say âreadyâ or âletâs goâ and weâll get started.",
+      "visual": null,
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "affirmative",
+        "timeout": 20
+      },
+      "correctResponse": {
+        "match": [
+          "yes",
+          "ready",
+          "let's go",
+          "yeah",
+          "ok"
+        ],
+        "type": "any_affirmative"
+      },
+      "branches": {
+        "correct": "L01_M02",
+        "timeout": "L01_M02"
+      },
+      "signals": {
+        "track": [
+          "response_time"
+        ]
+      },
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "response_time"
+        ]
+      }
+    },
+    {
+      "id": "L01_M02",
+      "phase": "confirm",
+      "concepts": [
+        "C_KEYBOARD"
+      ],
+      "dialogue": "Awesome! Before we jump in â do you have your keyboard or piano in front of you? If you do, go ahead and place your hands on the keys. If not, no worries, you can follow along and weâll still make it work.",
+      "visual": {
+        "asset": null,
+        "wylOverride": {
+          "visual": {
+            "asset": "piano_icon_pulse",
+            "intensity": 1
+          },
+          "kinesthetic": {
+            "asset": null,
+            "addDialogue": "Make sure your wrists are relaxed and your fingers are slightly curved."
+          },
+          "auditory": {
+            "asset": null,
+            "intensity": 0
+          },
+          "readwrite": {
+            "asset": null,
+            "intensity": 0
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "any",
+        "timeout": 15,
+        "setsFlag": "hasInstrument"
+      },
+      "correctResponse": {
+        "match": "any",
+        "type": "any_response"
+      },
+      "branches": {
+        "any": "L01_M06"
+      },
+      "signals": {
+        "track": [
+          "response_time"
+        ]
+      },
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "response_time",
+          "has_instrument_flag"
+        ]
+      }
+    },
+    {
+      "id": "L01_M06",
+      "phase": "teach_lower",
+      "concepts": [
+        "C_HALFWHOLE"
+      ],
+      "dialogue": "Now I need to teach you the secret code behind every scale in music. Itâs all about half steps and whole steps. A half step is the distance from one key to the very next key â no skipping. If you go from a white key to the black key right next to it? Thatâs a half step. From one black key to the white key right next to it? Also a half step. Itâs the smallest step you can take on a piano.",
+      "visual": {
+        "asset": "half_step_demo",
+        "mode": "demozoom",
+        "intensity": 3,
+        "wylOverride": {
+          "visual": {
+            "asset": "half_step_animated_arrows",
+            "intensity": 3
+          },
+          "kinesthetic": {
+            "addDialogue": "Try playing two keys right next to each other."
+          },
+          "auditory": {
+            "addDialogue": "Listen to how close they sound â almost like theyâre bumping into each other."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "E4",
+          "F4"
+        ],
+        "toneDelay": "after_explanation"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M07",
+        "replay": "L01_M06"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ],
+        "comprehension": false
+      },
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "replay"
+        ]
+      },
+      "accessibility": {
+        "colorBlindSafe": true,
+        "shapeCue": "gap_bridge_narrow",
+        "audioCue": true
+      }
+    },
+    {
+      "id": "L01_M07",
+      "phase": "teach_lower",
+      "concepts": [
+        "C_HALFWHOLE"
+      ],
+      "dialogue": "Now, a whole step is just two half steps put together. You skip one key. So if you start on C and go up a whole step, you skip over the black key and land on D. That skip? Thatâs a whole step. Think of it like this: half step is a tiny step, whole step is a regular step.",
+      "visual": {
+        "asset": "whole_step_demo",
+        "mode": "demozoom",
+        "intensity": 3,
+        "wylOverride": {
+          "visual": {
+            "asset": "halfwhole_side_by_side",
+            "intensity": 3
+          },
+          "kinesthetic": {
+            "addDialogue": "Try it â press C, skip a key, press D."
+          },
+          "readwrite": {
+            "addDialogue": "Half = 1 key apart. Whole = 2 keys apart."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4",
+          "D4"
+        ],
+        "comparison": [
+          "E4",
+          "F4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M03",
+        "replay": "L01_M07"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ],
+        "comprehension": false
+      },
+      "confidenceImpact": {
+        "C_HALFWHOLE": {
+          "teach": 5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay"
+        ]
+      },
+      "accessibility": {
+        "colorBlindSafe": true,
+        "shapeCue": "gap_bridge_wide",
+        "audioCue": true
+      }
+    },
+    {
+      "id": "L01_M03",
+      "phase": "teach_lower",
+      "concepts": [
+        "C_KEYBOARD"
+      ],
+      "dialogue": "Letâs start with the basics. Look at the piano â you see white keys and black keys, right? The white keys are named after the first seven letters of the alphabet: A, B, C, D, E, F, G. And then it repeats. Thatâs it â just seven letter names for all of music.",
+      "visual": {
+        "asset": "numbered_keyboard",
+        "mode": "guided_overlay",
+        "intensity": 2,
+        "wylOverride": {
+          "visual": {
+            "intensity": 3,
+            "mode": "demozoom"
+          },
+          "auditory": {
+            "intensity": 1
+          },
+          "kinesthetic": {
+            "intensity": 2,
+            "addDialogue": "Try pressing each white key as I say the name."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "A3",
+          "B3",
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M04",
+        "replay": "L01_M03"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ],
+        "comprehension": false
+      },
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "replay"
+        ]
+      },
+      "accessibility": {
+        "colorBlindSafe": true,
+        "shapeCue": "letter_labels",
+        "audioCue": true
+      }
+    },
+    {
+      "id": "L01_M04",
+      "phase": "teach_lower",
+      "concepts": [
+        "C_KEYBOARD",
+        "C_FINGERS"
+      ],
+      "dialogue": "Now, hereâs something important â finding middle C. See those groups of two black keys? Find a group of two black keys near the middle of your keyboard. The white key just to the left of those two black keys â thatâs C. Thatâs where everything starts. Go ahead and press it if you can.",
+      "visual": {
+        "asset": "keyboard_middle_c",
+        "mode": "demozoom",
+        "intensity": 3
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 2,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "midi_or_verbal",
+        "trigger": "C4_or_affirmative",
+        "timeout": 20
+      },
+      "correctResponse": {
+        "midi": {
+          "note": "C4",
+          "feedback": "Thatâs it! You found middle C."
+        },
+        "verbal": {
+          "match": [
+            "okay",
+            "got it",
+            "found it",
+            "yes"
+          ],
+          "feedback": "Great, you found it."
+        }
+      },
+      "wrongResponse": {
+        "midi": {
+          "feedback": "Close â look for the group of two black keys. C is the white key just to the left of them.",
+          "visualHint": "keyboard_middle_c_arrow"
+        },
+        "verbal": null
+      },
+      "branches": {
+        "correct": "L01_M05",
+        "wrong": "L01_M04_HINT",
+        "timeout": "L01_M05"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "replay",
+          "midi_input"
+        ]
+      },
+      "confidenceImpact": {
+        "C_KEYBOARD": {
+          "correct": 5,
+          "wrong": -3
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "midi_input",
+          "accuracy"
+        ]
+      },
+      "accessibility": {
+        "colorBlindSafe": true,
+        "shapeCue": "pulsing_ring",
+        "audioCue": true
+      }
+    },
+    {
+      "id": "L01_M04_HINT",
+      "phase": "teach_lower",
+      "concepts": [
+        "C_KEYBOARD"
+      ],
+      "isBranch": true,
+      "dialogue": "Look at the black keys â they come in groups of two and three. Find a group of two near the middle. The white key directly to the left of that group is C. Try again!",
+      "visual": {
+        "asset": "keyboard_middle_c_arrow",
+        "mode": "demozoom",
+        "intensity": 3
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 2,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "midi_or_verbal",
+        "trigger": "C4_or_affirmative",
+        "timeout": 15
+      },
+      "branches": {
+        "correct": "L01_M05",
+        "wrong": "L01_M05",
+        "timeout": "L01_M05"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension"
+        ]
+      },
+      "confidenceImpact": {
+        "C_KEYBOARD": {
+          "correct": 5,
+          "wrong": 0
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "midi_input"
+        ]
+      }
+    },
+    {
+      "id": "L01_M05",
+      "phase": "teach_lower",
+      "concepts": [
+        "C_FINGERS"
+      ],
+      "dialogue": "Great. Now letâs talk about your fingers. In piano, we number our fingers one through five. Your thumb is one, your pointer finger is two, middle finger is three, ring finger is four, and your pinky is five. Right hand, place your thumb â finger one â on that middle C.",
+      "visual": {
+        "asset": "finger_map_numbered",
+        "mode": "demozoom",
+        "intensity": 3,
+        "wylOverride": {
+          "visual": {
+            "asset": "finger_map_ghost_overlay",
+            "intensity": 3
+          },
+          "kinesthetic": {
+            "addDialogue": "Wiggle each finger as I count â one, two, three, four, five."
+          },
+          "readwrite": {
+            "addDialogue": "Remember: thumb is always one, pinky is always five."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "midi_or_verbal",
+        "trigger": "C4_or_affirmative",
+        "timeout": 15
+      },
+      "correctResponse": {
+        "midi": {
+          "note": "C4",
+          "feedback": "Perfect â thumb on C, youâre set."
+        },
+        "verbal": {
+          "match": "any_affirmative",
+          "feedback": "Good, letâs keep going."
+        }
+      },
+      "branches": {
+        "correct": "L01_M08",
+        "timeout": "L01_M08"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension"
+        ]
+      },
+      "confidenceImpact": {
+        "C_FINGERS": {
+          "correct": 5,
+          "wrong": 0
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time"
+        ]
+      },
+      "cameraMode": {
+        "enabled": true,
+        "overlay": "hand_position_guide",
+        "note": "Future: AI hand position analysis"
+      }
+    },
+    {
+      "id": "L01_M08",
+      "phase": "call_response",
+      "concepts": [
+        "C_HALFWHOLE"
+      ],
+      "dialogue": "Quick check â if I start on E and go to the very next key, which is F, is that a half step or a whole step?",
+      "visual": {
+        "asset": "keyboard_ef_highlight",
+        "mode": "guided_overlay",
+        "intensity": 2
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "E4",
+          "F4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 15,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "half_or_whole"
+      },
+      "correctResponse": {
+        "match": [
+          "half step",
+          "half",
+          "a half step",
+          "half steps"
+        ],
+        "feedback": "Thatâs right! E to F is a half step â thereâs no black key between them."
+      },
+      "wrongResponse": {
+        "match": [
+          "whole step",
+          "whole",
+          "a whole step"
+        ],
+        "feedback": "Not quite â look closely. E and F are right next to each other, no key in between. That makes it a half step. Remember: half step means the very next key.",
+        "visualHint": "keyboard_ef_no_gap"
+      },
+      "branches": {
+        "correct": "L01_M09",
+        "wrong": "L01_M09",
+        "wrongTwice": "L01_M06",
+        "timeout": "L01_M08_HINT"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "replay",
+          "accuracy"
+        ],
+        "comprehension": true
+      },
+      "confidenceImpact": {
+        "C_HALFWHOLE": {
+          "correct": 10,
+          "wrong": -5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy",
+          "attempt_count"
+        ]
+      }
+    },
+    {
+      "id": "L01_M08_HINT",
+      "phase": "call_response",
+      "concepts": [
+        "C_HALFWHOLE"
+      ],
+      "isBranch": true,
+      "dialogue": "Hereâs a hint â is there any key between E and F? Look at the keyboard. If thereâs nothing between them, theyâre as close as two keys can be.",
+      "visual": {
+        "asset": "keyboard_ef_no_gap",
+        "mode": "demozoom",
+        "intensity": 3
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 10,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "half_or_whole"
+      },
+      "branches": {
+        "correct": "L01_M09",
+        "wrong": "L01_M09",
+        "timeout": "L01_M09"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension"
+        ]
+      },
+      "confidenceImpact": {
+        "C_HALFWHOLE": {
+          "correct": 5,
+          "wrong": -3
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy",
+          "needed_hint"
+        ]
+      }
+    },
+    {
+      "id": "L01_M09",
+      "phase": "call_response",
+      "concepts": [
+        "C_HALFWHOLE"
+      ],
+      "dialogue": "Nice. Now what about C to D? I skip over that black key â is that a half step or a whole step?",
+      "visual": {
+        "asset": "keyboard_cd_highlight",
+        "mode": "guided_overlay",
+        "intensity": 2
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4",
+          "D4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 15,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "half_or_whole"
+      },
+      "correctResponse": {
+        "match": [
+          "whole step",
+          "whole",
+          "a whole step"
+        ],
+        "feedback": "Exactly! We skipped a key, so thatâs a whole step. Youâre getting it."
+      },
+      "wrongResponse": {
+        "match": [
+          "half step",
+          "half"
+        ],
+        "feedback": "Close, but remember â we skipped over that black key between C and D. Skipping a key means itâs a whole step.",
+        "visualHint": "keyboard_cd_skip_arc"
+      },
+      "branches": {
+        "correct": "L01_M10",
+        "wrong": "L01_M10",
+        "wrongTwice": "L01_M07",
+        "timeout": "L01_M10"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "accuracy"
+        ],
+        "comprehension": true
+      },
+      "confidenceImpact": {
+        "C_HALFWHOLE": {
+          "correct": 10,
+          "wrong": -5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy"
+        ]
+      }
+    },
+    {
+      "id": "L01_M10",
+      "phase": "teach_full",
+      "concepts": [
+        "C_MAJSCALE"
+      ],
+      "dialogue": "Okay, now hereâs the magic. Every major scale in music follows the exact same pattern of whole steps and half steps. Itâs like a secret code. Ready? The pattern is: Whole, Whole, Half, Whole, Whole, Whole, Half. Let me say that one more time â Whole, Whole, Half... Whole, Whole, Whole, Half. That pattern builds every single major scale.",
+      "visual": {
+        "asset": "major_scale_code",
+        "mode": "demozoom",
+        "intensity": 3,
+        "wylOverride": {
+          "visual": {
+            "asset": "major_scale_code_animated",
+            "intensity": 3,
+            "persist": true
+          },
+          "readwrite": {
+            "addDialogue": "Two groups: three and four. W-W-H then W-W-W-H."
+          },
+          "auditory": {
+            "addDialogue": "Listen to the rhythm: whole whole HALF â whole whole whole HALF."
+          },
+          "kinesthetic": {
+            "addDialogue": "Tap your knee for whole, snap for half. Ready? Tap, tap, snap. Tap, tap, tap, snap."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 4,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M11",
+        "replay": "L01_M10"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ],
+        "comprehension": false,
+        "replayWeight": "high"
+      },
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "replay"
+        ]
+      }
+    },
+    {
+      "id": "L01_M11",
+      "phase": "teach_full",
+      "concepts": [
+        "C_MAJSCALE",
+        "C_HALFWHOLE",
+        "C_CMAJOR"
+      ],
+      "dialogue": "And hereâs why C Major is the best one to start with â it uses only white keys! Watch: start on C. Whole step to D. Whole step to E. Half step to F â see how E and F are right next to each other, no black key? Then: whole step to G. Whole step to A. Whole step to B. Half step back to C. And weâre home.",
+      "visual": {
+        "asset": "cmajor_ascending_walkthrough",
+        "mode": "interactive",
+        "intensity": 4,
+        "wylOverride": {
+          "visual": {
+            "asset": "cmajor_ascending_animated_arrows",
+            "intensity": 4
+          },
+          "kinesthetic": {
+            "pacing": "slow",
+            "addDialogue": "Play each key as I name it."
+          },
+          "auditory": {
+            "addSuffix": true,
+            "suffix": "Now listen to the whole scale as one smooth phrase."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ],
+        "toneSync": "with_speech"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 4,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M12",
+        "replay": "L01_M11"
+      },
+      "signals": {
+        "track": [
+          "replay",
+          "midi_input"
+        ],
+        "comprehension": false,
+        "replayWeight": "high"
+      },
+      "confidenceImpact": {
+        "C_MAJSCALE": {
+          "teach": 10
+        },
+        "C_CMAJOR": {
+          "teach": 5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay",
+          "midi_input"
+        ]
+      }
+    },
+    {
+      "id": "L01_M12",
+      "phase": "call_response",
+      "concepts": [
+        "C_MAJSCALE"
+      ],
+      "dialogue": "Let me see if you caught the pattern. The major scale goes: Whole, Whole... then what comes next?",
+      "visual": {
+        "asset": "pattern_fill_blank",
+        "mode": "guided_overlay",
+        "intensity": 2,
+        "params": {
+          "revealed": [
+            "W",
+            "W"
+          ],
+          "blank": 5
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 15,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "half_step_answer"
+      },
+      "correctResponse": {
+        "match": [
+          "half",
+          "half step",
+          "a half step",
+          "a half"
+        ],
+        "feedback": "Yes! Whole, Whole, Half â and then Whole, Whole, Whole, Half. Youâve got the code!"
+      },
+      "wrongResponse": {
+        "match": [
+          "whole",
+          "whole step"
+        ],
+        "feedback": "Good try â but remember, the pattern has two groups. The first group is: Whole, Whole, Half. That half step is the surprise! Itâs what makes it sound like a scale and not just random notes."
+      },
+      "microGame": {
+        "trigger": "on_correct",
+        "type": "pattern_build",
+        "duration": 30,
+        "difficulty": "adaptive",
+        "description": "Student fills in remaining pattern slots by tapping or speaking W/H"
+      },
+      "branches": {
+        "correct": "L01_M13",
+        "wrong": "L01_M12_REVIEW",
+        "wrongTwice": "L01_M10",
+        "timeout": "L01_M12_HINT"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "accuracy"
+        ],
+        "comprehension": true
+      },
+      "confidenceImpact": {
+        "C_MAJSCALE": {
+          "correct": 15,
+          "wrong": -10
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy",
+          "attempt_count"
+        ]
+      }
+    },
+    {
+      "id": "L01_M12_REVIEW",
+      "phase": "call_response",
+      "concepts": [
+        "C_MAJSCALE"
+      ],
+      "isBranch": true,
+      "dialogue": "Think of it in two groups. Group one has three: Whole, Whole, Half. Now try again â Whole, Whole, then what?",
+      "visual": {
+        "asset": "pattern_two_groups",
+        "mode": "guided_overlay",
+        "intensity": 2
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 15,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "half_step_answer"
+      },
+      "branches": {
+        "correct": "L01_M13",
+        "wrong": "L01_M10",
+        "timeout": "L01_M13"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension"
+        ]
+      },
+      "confidenceImpact": {
+        "C_MAJSCALE": {
+          "correct": 10,
+          "wrong": -5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy",
+          "needed_review"
+        ]
+      }
+    },
+    {
+      "id": "L01_M12_HINT",
+      "phase": "call_response",
+      "concepts": [
+        "C_MAJSCALE"
+      ],
+      "isBranch": true,
+      "dialogue": "Hereâs a clue â itâs the shorter one. A half step. Whole, Whole... Half! Thatâs the first group of the pattern.",
+      "visual": {
+        "asset": "pattern_fill_blank",
+        "mode": "guided_overlay",
+        "intensity": 2,
+        "params": {
+          "revealed": [
+            "W",
+            "W",
+            "H"
+          ],
+          "blank": 4
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 2,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M13"
+      },
+      "signals": {
+        "track": [
+          "needed_hint"
+        ]
+      },
+      "confidenceImpact": {
+        "C_MAJSCALE": {
+          "teach": 3
+        }
+      },
+      "telemetry": {
+        "track": [
+          "needed_hint"
+        ]
+      }
+    },
+    {
+      "id": "L01_M13",
+      "phase": "demonstrate",
+      "concepts": [
+        "C_CMAJOR",
+        "C_OCTAVE"
+      ],
+      "dialogue": "Let me play it for you. Listen carefully and watch the keys light up. Hereâs the C Major scale going up...",
+      "visual": {
+        "asset": "cmajor_ascending_demo",
+        "mode": "interactive",
+        "intensity": 4,
+        "wylOverride": {
+          "visual": {
+            "asset": "cmajor_ascending_demo",
+            "intensity": 4,
+            "extraDuration": 5
+          },
+          "kinesthetic": {
+            "tempo": 90,
+            "addDialogue": "Try to follow along."
+          },
+          "auditory": {
+            "addSuffix": true,
+            "suffix": "Now listen to it one more time with the note names."
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ],
+        "tempo": 120,
+        "toneSync": "sequential"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M14",
+        "replay": "L01_M13"
+      },
+      "signals": {
+        "track": [
+          "replay",
+          "midi_input"
+        ]
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "teach": 5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay",
+          "midi_input"
+        ]
+      }
+    },
+    {
+      "id": "L01_M14",
+      "phase": "demonstrate",
+      "concepts": [
+        "C_CMAJOR",
+        "C_FINGERS"
+      ],
+      "dialogue": "Now let me show you something cool about the fingering. You start with finger one â your thumb â on C. Then two on D, three on E. Now hereâs the trick: your thumb crosses under to play F. Then two on G, three on A, four on B, and five â your pinky â lands on the high C. Thumb cross is the secret move!",
+      "visual": {
+        "asset": "finger_map_with_keyboard",
+        "mode": "interactive",
+        "intensity": 4,
+        "animation": "thumb_cross",
+        "wylOverride": {
+          "visual": {
+            "asset": "finger_map_slowmo",
+            "intensity": 4
+          },
+          "kinesthetic": {
+            "addDialogue": "Try it now â 1, 2, 3, cross under, 1, 2, 3, 4, 5."
+          },
+          "readwrite": {
+            "addOverlay": "Fingering: 1-2-3-1-2-3-4-5"
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ],
+        "toneSync": "with_finger_mention"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 4,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M15",
+        "replay": "L01_M14"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ]
+      },
+      "confidenceImpact": {
+        "C_FINGERS": {
+          "teach": 5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay"
+        ]
+      },
+      "cameraMode": {
+        "enabled": true,
+        "overlay": "hand_position_guide",
+        "analyzeThumbCross": true
+      }
+    },
+    {
+      "id": "L01_M15",
+      "phase": "demonstrate",
+      "concepts": [
+        "C_CMAJOR"
+      ],
+      "dialogue": "And coming back down? Just reverse it. C, B, A, G, F, E, D, C. Same notes, same pattern, just backwards. Listen to how it sounds going down...",
+      "visual": {
+        "asset": "cmajor_descending_demo",
+        "mode": "demozoom",
+        "intensity": 3
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C5",
+          "B4",
+          "A4",
+          "G4",
+          "F4",
+          "E4",
+          "D4",
+          "C4"
+        ],
+        "tempo": 120,
+        "toneSync": "sequential"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M16",
+        "replay": "L01_M15"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ]
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "teach": 5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay"
+        ]
+      }
+    },
+    {
+      "id": "L01_M16",
+      "phase": "practice",
+      "concepts": [
+        "C_CMAJOR",
+        "C_OCTAVE"
+      ],
+      "dialogue": "Your turn! Start on middle C with your thumb â finger one â and play the scale going up. Take your time. Iâll be right here if you need help.",
+      "visual": {
+        "asset": "keyboard_interactive_ascending",
+        "mode": "interactive",
+        "intensity": 4,
+        "params": {
+          "targetNotes": [
+            "C4",
+            "D4",
+            "E4",
+            "F4",
+            "G4",
+            "A4",
+            "B4",
+            "C5"
+          ],
+          "guideDots": true,
+          "patternOverlay": true,
+          "realtimeFeedback": true
+        }
+      },
+      "sound": {
+        "mode": "voice",
+        "thenSilent": true
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 60,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "midi_sequence",
+        "notes": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ],
+        "tolerance": "in_order"
+      },
+      "correctResponse": {
+        "allCorrect": {
+          "feedback": "Beautiful! That was the C Major scale. How did that feel?"
+        },
+        "partialCorrect": {
+          "feedback": "Good effort! You got most of it. Letâs see where you got tripped up."
+        }
+      },
+      "wrongNoteHandling": {
+        "attempt1": {
+          "visual": "red_flash",
+          "feedback": "Try the next key over."
+        },
+        "attempt2": {
+          "visual": "target_pulse_bright",
+          "feedback": null,
+          "showNoteName": true
+        },
+        "attempt3": {
+          "visual": "play_correct_note",
+          "feedback": "That one is {noteName}."
+        }
+      },
+      "branches": {
+        "perfect": "L01_M17",
+        "passed": "L01_M17",
+        "failed": "L01_M16_RETRY",
+        "timeout": "L01_M17"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "midi_input",
+          "accuracy"
+        ],
+        "comprehension": true
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "perfect": 15,
+          "passed": 5,
+          "failed": -5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "midi_input",
+          "accuracy",
+          "note_by_note_timing",
+          "error_positions"
+        ]
+      }
+    },
+    {
+      "id": "L01_M16_RETRY",
+      "phase": "practice",
+      "concepts": [
+        "C_CMAJOR"
+      ],
+      "isBranch": true,
+      "dialogue": "No worries â letâs try again, slower this time. Start on C. Iâll light up each target note for you.",
+      "visual": {
+        "asset": "keyboard_interactive_ascending",
+        "mode": "interactive",
+        "intensity": 4,
+        "params": {
+          "targetNotes": [
+            "C4",
+            "D4",
+            "E4",
+            "F4",
+            "G4",
+            "A4",
+            "B4",
+            "C5"
+          ],
+          "guideDots": true,
+          "patternOverlay": true,
+          "realtimeFeedback": true,
+          "showNoteNames": true
+        }
+      },
+      "sound": {
+        "mode": "voice",
+        "thenSilent": true
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 60
+      },
+      "expectedAction": {
+        "type": "midi_sequence",
+        "notes": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ]
+      },
+      "branches": {
+        "perfect": "L01_M17",
+        "passed": "L01_M17",
+        "failed": "L01_M17",
+        "timeout": "L01_M17"
+      },
+      "signals": {
+        "track": [
+          "midi_input",
+          "accuracy"
+        ]
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "perfect": 10,
+          "passed": 5,
+          "failed": 0
+        }
+      },
+      "telemetry": {
+        "track": [
+          "midi_input",
+          "accuracy",
+          "retry_attempt"
+        ]
+      }
+    },
+    {
+      "id": "L01_M17",
+      "phase": "call_response",
+      "concepts": [
+        "C_HALFWHOLE",
+        "C_CMAJOR"
+      ],
+      "dialogue": "That was great. Now, while you were playing â did you notice where it felt like the notes were really close together? Those two spots where thereâs no black key between the white keys?",
+      "visual": {
+        "asset": "keyboard_halfstep_highlight",
+        "mode": "guided_overlay",
+        "intensity": 2,
+        "params": {
+          "highlight": [
+            [
+              "E4",
+              "F4"
+            ],
+            [
+              "B4",
+              "C5"
+            ]
+          ],
+          "color": "amber"
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 15,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "identify_half_steps"
+      },
+      "correctResponse": {
+        "match": [
+          "e and f",
+          "e to f",
+          "b and c",
+          "b to c",
+          "e f",
+          "b c"
+        ],
+        "feedback": "Exactly! E to F and B to C â those are your two half steps in C Major. Everything else is a whole step."
+      },
+      "wrongResponse": {
+        "feedback": "No worries. Look at the keyboard â find two white keys with no black key between them. Those are your half steps. E to F is one, B to C is the other."
+      },
+      "branches": {
+        "correct": "L01_M18",
+        "wrong": "L01_M18",
+        "timeout": "L01_M18"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "accuracy"
+        ],
+        "comprehension": true
+      },
+      "confidenceImpact": {
+        "C_HALFWHOLE": {
+          "correct": 10,
+          "wrong": -5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy"
+        ]
+      }
+    },
+    {
+      "id": "L01_M18",
+      "phase": "practice",
+      "concepts": [
+        "C_CMAJOR",
+        "C_MAJSCALE"
+      ],
+      "dialogue": "Letâs do it one more time. Play the C Major scale going up, and this time, try to say the pattern out loud as you play â âwhole, whole, half, whole, whole, whole, half.â Ready? Go!",
+      "visual": {
+        "asset": "keyboard_interactive_with_pattern",
+        "mode": "interactive",
+        "intensity": 4,
+        "params": {
+          "targetNotes": [
+            "C4",
+            "D4",
+            "E4",
+            "F4",
+            "G4",
+            "A4",
+            "B4",
+            "C5"
+          ],
+          "patternSync": true,
+          "guideDots": true
+        }
+      },
+      "sound": {
+        "mode": "voice",
+        "thenSilent": true
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 60,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "midi_sequence",
+        "notes": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ]
+      },
+      "correctResponse": {
+        "allCorrect": {
+          "feedback": "Youâre making this look easy! Thatâs the whole C Major scale with the pattern."
+        }
+      },
+      "microGame": {
+        "trigger": "after_completion",
+        "type": "pattern_memory",
+        "duration": 20,
+        "difficulty": "adaptive",
+        "description": "Flash each stepâs W/H label, student must repeat sequence from memory"
+      },
+      "branches": {
+        "perfect": "L01_M19",
+        "passed": "L01_M19",
+        "failed": "L01_M16_RETRY"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "midi_input",
+          "accuracy"
+        ],
+        "comprehension": true
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "perfect": 10,
+          "passed": 5,
+          "failed": -3
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "midi_input",
+          "accuracy",
+          "improvement_vs_M16"
+        ]
+      }
+    },
+    {
+      "id": "L01_M19",
+      "phase": "diagnostic",
+      "concepts": [
+        "C_CMAJOR"
+      ],
+      "dialogue": "Alright, letâs see what you remember! Can you tell me all the notes in the C Major scale, from C to the next C?",
+      "visual": {
+        "asset": "keyboard_blank",
+        "mode": "none",
+        "intensity": 0
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 20,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "note_sequence"
+      },
+      "correctResponse": {
+        "match": [
+          "c d e f g a b c"
+        ],
+        "fuzzyMatch": true,
+        "feedback": "Perfect! C, D, E, F, G, A, B, C. You nailed it."
+      },
+      "wrongResponse": {
+        "feedback": "Almost! Let me help â C, D, E, F, G, A, B, C. The musical alphabet starting on C."
+      },
+      "branches": {
+        "correct": "L01_M20",
+        "wrong": "L01_M21",
+        "timeout": "L01_M20"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "accuracy"
+        ],
+        "comprehension": true,
+        "diagnosticWeight": "high"
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "correct": 15,
+          "wrong": -10
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy",
+          "diagnostic_result"
+        ]
+      },
+      "recalibrate": {
+        "trigger": true,
+        "concept": "C_CMAJOR"
+      }
+    },
+    {
+      "id": "L01_M20",
+      "phase": "diagnostic",
+      "concepts": [
+        "C_MAJSCALE"
+      ],
+      "dialogue": "One more â whatâs the pattern for building a major scale? The whole steps and half steps?",
+      "visual": {
+        "asset": "pattern_blank_slots",
+        "mode": "micro_card",
+        "intensity": 1,
+        "params": {
+          "slots": 7,
+          "revealed": 0
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 20,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "verbal",
+        "trigger": "pattern_sequence"
+      },
+      "correctResponse": {
+        "match": [
+          "whole whole half whole whole whole half",
+          "w w h w w w h"
+        ],
+        "fuzzyMatch": true,
+        "feedback": "Thatâs the code! You can build any major scale with that pattern."
+      },
+      "wrongResponse": {
+        "feedback": "Let me help you remember: Whole, Whole, Half â pause â Whole, Whole, Whole, Half. Two groups!"
+      },
+      "branches": {
+        "correct": "L01_M24",
+        "wrong": "L01_M23",
+        "timeout": "L01_M23"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "accuracy"
+        ],
+        "comprehension": true,
+        "diagnosticWeight": "high"
+      },
+      "confidenceImpact": {
+        "C_MAJSCALE": {
+          "correct": 15,
+          "wrong": -10
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "accuracy",
+          "diagnostic_result"
+        ]
+      },
+      "recalibrate": {
+        "trigger": true,
+        "concept": "C_MAJSCALE"
+      }
+    },
+    {
+      "id": "L01_M21",
+      "phase": "explain",
+      "concepts": [
+        "C_CMAJOR"
+      ],
+      "conditional": {
+        "trigger": "confidence",
+        "concept": "C_CMAJOR",
+        "below": 60
+      },
+      "dialogue": "No worries at all â letâs go through the notes one more time. Think of it as the alphabet, but starting on C: C, D, E, F, G, A, B, and back to C. Just seven different notes, then it repeats. Letâs say them together â C... D... E... F... G... A... B... C!",
+      "visual": {
+        "asset": "cmajor_note_by_note",
+        "mode": "interactive",
+        "intensity": 4,
+        "wylOverride": {
+          "visual": {
+            "asset": "cmajor_large_labels",
+            "intensity": 4
+          },
+          "auditory": {
+            "addDialogue": "Listen to each note sing its name."
+          },
+          "kinesthetic": {
+            "addDialogue": "Play each note after me."
+          },
+          "readwrite": {
+            "addOverlay": "C â D â E â F â G â A â B â C"
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5"
+        ],
+        "toneSync": "with_letter"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M20",
+        "replay": "L01_M21"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ],
+        "comprehension": false
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "recovery": 10
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay",
+          "explain_triggered"
+        ]
+      }
+    },
+    {
+      "id": "L01_M22",
+      "phase": "explain",
+      "concepts": [
+        "C_HALFWHOLE"
+      ],
+      "conditional": {
+        "trigger": "confidence",
+        "concept": "C_HALFWHOLE",
+        "below": 60
+      },
+      "dialogue": "Letâs make sure weâve got half steps and whole steps locked in. Hereâs the easiest way to remember: look at the piano. If two keys are right next to each other with nothing in between â thatâs a half step. If thereâs a key you skip over in between â thatâs a whole step. Simple as that.",
+      "visual": {
+        "asset": "halfwhole_comparison_split",
+        "mode": "demozoom",
+        "intensity": 3
+      },
+      "sound": {
+        "mode": "voice+tone",
+        "tones": [
+          "E4",
+          "F4",
+          "C4",
+          "D4"
+        ]
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M20"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ]
+      },
+      "confidenceImpact": {
+        "C_HALFWHOLE": {
+          "recovery": 10
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay",
+          "explain_triggered"
+        ]
+      },
+      "accessibility": {
+        "colorBlindSafe": true,
+        "shapeCue": "gap_comparison",
+        "audioCue": true
+      }
+    },
+    {
+      "id": "L01_M23",
+      "phase": "explain",
+      "concepts": [
+        "C_MAJSCALE"
+      ],
+      "conditional": {
+        "trigger": "confidence",
+        "concept": "C_MAJSCALE",
+        "below": 60
+      },
+      "dialogue": "The pattern â letâs try a trick to remember it. Think of it as two groups. Group one: Whole, Whole, Half. Group two: Whole, Whole, Whole, Half. Three in the first group, four in the second. Say it with me â group one: Whole, Whole, Half. Group two: Whole, Whole, Whole, Half.",
+      "visual": {
+        "asset": "pattern_two_groups_bracketed",
+        "mode": "demozoom",
+        "intensity": 3,
+        "wylOverride": {
+          "auditory": {
+            "addDialogue": "Letâs chant it: whole whole HALF â whole whole whole HALF!"
+          },
+          "kinesthetic": {
+            "addDialogue": "Clap for whole, snap for half. Ready?"
+          },
+          "readwrite": {
+            "addOverlay": "Group 1: W-W-H (3 steps) | Group 2: W-W-W-H (4 steps)"
+          }
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "microGame": {
+        "trigger": "after_listen",
+        "type": "pattern_chant",
+        "duration": 15,
+        "difficulty": "easy",
+        "description": "Student repeats the pattern verbally, speech recognition checks"
+      },
+      "branches": {
+        "autoAdvance": "L01_M24"
+      },
+      "signals": {
+        "track": [
+          "replay"
+        ]
+      },
+      "confidenceImpact": {
+        "C_MAJSCALE": {
+          "recovery": 10
+        }
+      },
+      "telemetry": {
+        "track": [
+          "replay",
+          "explain_triggered"
+        ]
+      }
+    },
+    {
+      "id": "L01_M24",
+      "phase": "practice",
+      "concepts": [
+        "C_CMAJOR"
+      ],
+      "dialogue": "Last round â letâs play the full C Major scale, up and back down. C all the way up to the high C, then come back down to where you started. Show me what youâve learned!",
+      "visual": {
+        "asset": "keyboard_interactive_full",
+        "mode": "interactive",
+        "intensity": 4,
+        "params": {
+          "targetNotes": [
+            "C4",
+            "D4",
+            "E4",
+            "F4",
+            "G4",
+            "A4",
+            "B4",
+            "C5",
+            "B4",
+            "A4",
+            "G4",
+            "F4",
+            "E4",
+            "D4",
+            "C4"
+          ],
+          "guideDots": true,
+          "progressBar": true,
+          "realtimeFeedback": true
+        }
+      },
+      "sound": {
+        "mode": "voice",
+        "thenSilent": true
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 0,
+        "studentResponseWindow": 90,
+        "replayDelay": 1.5
+      },
+      "expectedAction": {
+        "type": "midi_sequence",
+        "notes": [
+          "C4",
+          "D4",
+          "E4",
+          "F4",
+          "G4",
+          "A4",
+          "B4",
+          "C5",
+          "B4",
+          "A4",
+          "G4",
+          "F4",
+          "E4",
+          "D4",
+          "C4"
+        ],
+        "tolerance": "in_order"
+      },
+      "correctResponse": {
+        "perfect": {
+          "feedback": "Yes! That was incredible. You just played the C Major scale up AND down. Thatâs a real musician move.",
+          "celebration": true
+        },
+        "ascending_only": {
+          "feedback": "The way up was perfect! Coming back down takes a little more practice, but youâre almost there."
+        },
+        "partial": {
+          "feedback": "Youâre getting there! That was a solid effort."
+        }
+      },
+      "branches": {
+        "perfect": "L01_M25",
+        "passed": "L01_M25",
+        "failed": "L01_M24_ENCOURAGE"
+      },
+      "signals": {
+        "track": [
+          "response_time",
+          "comprehension",
+          "midi_input",
+          "accuracy"
+        ],
+        "comprehension": true,
+        "diagnosticWeight": "final"
+      },
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "perfect": 20,
+          "passed": 10,
+          "failed": -5
+        }
+      },
+      "telemetry": {
+        "track": [
+          "response_time",
+          "midi_input",
+          "accuracy",
+          "note_by_note_timing",
+          "ascending_vs_descending_accuracy",
+          "total_duration"
+        ]
+      },
+      "recalibrate": {
+        "trigger": true,
+        "concept": "C_CMAJOR",
+        "final": true
+      }
+    },
+    {
+      "id": "L01_M24_ENCOURAGE",
+      "phase": "practice",
+      "concepts": [
+        "C_CMAJOR"
+      ],
+      "isBranch": true,
+      "dialogue": "Thatâs okay! Going up and down is the hardest part. You know the notes, you know the pattern â the rest is just practice. Youâre doing great for your first lesson.",
+      "visual": null,
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 2,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M25"
+      },
+      "signals": {},
+      "confidenceImpact": {
+        "C_CMAJOR": {
+          "recovery": 3
+        }
+      },
+      "telemetry": {
+        "track": [
+          "encouragement_triggered"
+        ]
+      }
+    },
+    {
+      "id": "L01_M25",
+      "phase": "wrapup",
+      "concepts": [],
+      "dialogue": "You did it! In this lesson, you learned the notes of the piano, how half steps and whole steps work, the major scale pattern â Whole, Whole, Half, Whole, Whole, Whole, Half â and you played the entire C Major scale. Thatâs a huge deal for your first lesson!",
+      "visual": {
+        "asset": "lesson_summary_card",
+        "mode": "guided_overlay",
+        "intensity": 2,
+        "params": {
+          "checkmarks": [
+            "Piano Keys",
+            "Half & Whole Steps",
+            "Major Scale Pattern",
+            "C Major Scale",
+            "Finger Numbering"
+          ],
+          "celebration": "confetti"
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M26"
+      },
+      "signals": {},
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "session_confidence_snapshot"
+        ]
+      }
+    },
+    {
+      "id": "L01_M26",
+      "phase": "wrapup",
+      "concepts": [],
+      "dialogue": "Next time, weâre going to use what you learned today to start building more scales and chords. The C Major scale is the key that unlocks everything else. So keep practicing it â even five minutes a day makes a difference.",
+      "visual": {
+        "asset": "next_lesson_teaser",
+        "mode": "micro_card",
+        "intensity": 1,
+        "params": {
+          "nextLesson": "L02",
+          "practiceGoal": "C Major 5 min/day"
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 2,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "L01_M27"
+      },
+      "signals": {},
+      "confidenceImpact": {},
+      "telemetry": {}
+    },
+    {
+      "id": "L01_M27",
+      "phase": "wrapup",
+      "concepts": [],
+      "dialogue": "Iâm proud of you. You showed up, you learned something new, and that takes real effort. Iâll see you next time. Keep making music!",
+      "visual": {
+        "asset": "session_complete_badge",
+        "mode": "none",
+        "intensity": 0,
+        "params": {
+          "redirect": "/session-summary",
+          "redirectDelay": 5
+        }
+      },
+      "sound": {
+        "mode": "voice"
+      },
+      "timing": {
+        "speech": "auto",
+        "pauseAfter": 3,
+        "replayDelay": 0
+      },
+      "expectedAction": {
+        "type": "listen",
+        "autoAdvance": true
+      },
+      "branches": {
+        "autoAdvance": "END"
+      },
+      "signals": {},
+      "confidenceImpact": {},
+      "telemetry": {
+        "track": [
+          "session_complete",
+          "total_duration",
+          "moments_completed"
+        ]
+      },
+      "sessionEnd": {
+        "saveToAirtable": true,
+        "data": [
+          "session_duration",
+          "dpm_scores",
+          "confidence_snapshot",
+          "wyl_profile_updates",
+          "moments_completed",
+          "total_errors_by_concept",
+          "replay_count",
+          "micro_game_results"
+        ],
+        "redirect": "/session-summary"
+      }
+    }
+  ]
+}

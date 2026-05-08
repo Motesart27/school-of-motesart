@@ -1,0 +1,99 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "description": "Motesart Number System Source — core axioms for the SOM music education model",
+    "last_updated": "2026-03-23"
+  },
+  "axioms": [
+    {
+      "axiom_id": "AX_01",
+      "name": "Sound Before Symbol",
+      "description": "Students experience and feel musical concepts through sound before any notation or theory is introduced",
+      "implication": "Feel Mode gates require audio interaction before visual/symbolic assessment"
+    },
+    {
+      "axiom_id": "AX_02",
+      "name": "Pattern Recognition First",
+      "description": "The brain naturally seeks patterns — half/whole step patterns precede scale names",
+      "implication": "PHASE_1 and PHASE_2 build pattern vocabulary before PHASE_4 key signatures"
+    },
+    {
+      "axiom_id": "AX_03",
+      "name": "Relative Before Absolute",
+      "description": "Intervals and relationships between notes matter more than note names initially",
+      "implication": "T_HALF_STEP and T_WHOLE_STEP precede T_C_MAJOR_SCALE in the sequence"
+    },
+    {
+      "axiom_id": "AX_04",
+      "name": "Mastery Over Coverage",
+      "description": "Deep ownership of fewer concepts beats shallow exposure to many",
+      "implication": "5 pilot concepts get full perception modeling before expanding"
+    },
+    {
+      "axiom_id": "AX_05",
+      "name": "Evidence-Based Progression",
+      "description": "Students advance only when perception data confirms genuine understanding",
+      "implication": "Feel Mode gates A/B/C must be passed with required confidence thresholds"
+    },
+    {
+      "axiom_id": "AX_06",
+      "name": "Teacher Visibility",
+      "description": "Teachers must see real-time evidence of student concept health to intervene effectively",
+      "implication": "evidence_summary and concept health dashboards exist for every tracked concept"
+    }
+  ],
+  "number_system_rules": {
+    "scale_degree_naming": {
+      "1": "Tonic (Do)",
+      "2": "Supertonic (Re)",
+      "3": "Mediant (Mi)",
+      "4": "Subdominant (Fa)",
+      "5": "Dominant (Sol)",
+      "6": "Submediant (La)",
+      "7": "Leading Tone (Ti)"
+    },
+    "interval_quality_rules": {
+      "half_step": {
+        "semitones": 1,
+        "aliases": [
+          "minor 2nd",
+          "m2"
+        ]
+      },
+      "whole_step": {
+        "semitones": 2,
+        "aliases": [
+          "major 2nd",
+          "M2"
+        ]
+      },
+      "major_3rd": {
+        "semitones": 4,
+        "aliases": [
+          "M3"
+        ]
+      },
+      "perfect_5th": {
+        "semitones": 7,
+        "aliases": [
+          "P5"
+        ]
+      },
+      "octave": {
+        "semitones": 12,
+        "aliases": [
+          "P8"
+        ]
+      }
+    },
+    "major_scale_formula": [
+      "W",
+      "W",
+      "H",
+      "W",
+      "W",
+      "W",
+      "H"
+    ]
+  }
+}
