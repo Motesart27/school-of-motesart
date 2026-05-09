@@ -1,5 +1,5 @@
 # PROJECT BRAIN — School of Motesart (SOM)
-> **Last Updated:** 2026-03-11
+> **Last Updated:** 2026-05-09
 > **Stable Version:** v2.1.0
 > **Status:** Production — Live on Railway
 > **Owner:** Denarius Motes (@Motesart27)
@@ -687,6 +687,59 @@ Phase 3 pre-conditions (NOT this session):
 - [ ] All 9 Phase 1 verification steps pass against current main branch
 
 ---
+
+## Mya Calendar Tier 1 — Live-Proven Complete
+
+Date: 2026-05-08/09
+Final commit: b29fa78
+Previous Tier 1 commit: df511c7
+
+Status:
+- LIVE-PROVEN COMPLETE
+
+What shipped:
+- Structured calendar read endpoint:
+  - GET /api/mya/calendar/events
+  - Supports both days and days_ahead
+  - Default: 7 days
+- Conflict gate before calendar writes
+- Fail-closed behavior when calendar availability cannot be verified
+- Suggested open slots fallback
+- Voice/dispatch path blocks conflicting writes and offers options
+- Credential leakage checked clean
+
+Important production verification:
+- Railway production confirmed hotfix behavior live
+- GET /api/mya/calendar/events?days=10: PASS
+- Conflict test against existing event: PASS
+- Suggested slots returned: PASS, count 3
+- Duplicate event was not created
+- Credential leakage: NO
+
+Critical bug fixed:
+- Commit b29fa78 fixed _suggest_open_slots_sync.
+- Previous bug: end_search was calculated from now instead of start_search.
+- This caused future-dated conflicts beyond days_ahead to return [] suggested slots.
+- Fix:
+  end_search = start_search + timedelta(days=days_ahead + 1)
+
+Standing rule:
+- Mya calendar writes must never fail open.
+- If availability is clear: schedule.
+- If conflict exists: block and suggest options.
+- If availability cannot be verified: block and ask Denarius for confirmation.
+- Never silently double-book.
+
+Known cleanup:
+- Test event still exists manually in Google Calendar:
+  - TIER1-VERIFY-TEST DELETE ME
+  - May 15, 2026, 3:00–4:00 PM ET
+  - Event ID: l9gebk21f4gn15erqn0marvr28
+
+Next eligible build:
+- Mya Calendar Tier 2A — Day Intelligence Endpoint
+- Do not build payment calendar yet.
+- Do not build Tier 3 until FinanceMind Executive lane is proven live.
 
 ## Mya / SOM / T.A.M.i Role Boundary
 
