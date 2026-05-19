@@ -906,6 +906,19 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
     console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Eval:', evaluation.reason, evaluation.correct)
 
+    try {
+      tamiStackRef.current?.intelligence?.processEvaluation({
+        isCorrect: acceptedAsCorrect,
+        isWrong: !acceptedAsCorrect && evaluation.reason !== 'question_or_confusion',
+        isTimeout: false,
+        concept: ACTIVE_CONCEPT_ID || 'unknown',
+        responseTimeMs: 0
+      })
+      if (import.meta.env.DEV) {
+        console.log('[TAMi Wire] processEvaluation fired — isCorrect:', acceptedAsCorrect, ', concept:', ACTIVE_CONCEPT_ID)
+      }
+    } catch(e) { /* never crash the lesson */ }
+
     if (evaluation.reason === 'question_or_confusion') {
       setCoaching({ message: motesartReply, speaking: false, tags: ['Explain'] })
       return
@@ -930,6 +943,10 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setRetryMode(false)
       setPromptMode(false)
       advanceTeaching(step + 1)
+      try {
+        tamiStackRef.current?.intelligence?.processConfidenceUpdate({ concept: ACTIVE_CONCEPT_ID, delta: +10 })
+        if (import.meta.env.DEV) console.log('[TAMi Wire] processConfidenceUpdate fired — concept:', ACTIVE_CONCEPT_ID, ', delta: +10')
+      } catch(e) { /* never crash the lesson */ }
     } else if (evaluation.reason === 'partial') {
       setStudentEmotion('neutral')
       setRetryMode(true)
@@ -940,6 +957,10 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setRetryMode(true)
       setPromptMode(false)
       setCoaching({ message: motesartReply || 'Almost! Try again. I am listening.', speaking: false, tags: ['Retry'] })
+      try {
+        tamiStackRef.current?.intelligence?.processConfidenceUpdate({ concept: ACTIVE_CONCEPT_ID, delta: -15 })
+        if (import.meta.env.DEV) console.log('[TAMi Wire] processConfidenceUpdate fired — concept:', ACTIVE_CONCEPT_ID, ', delta: -15')
+      } catch(e) { /* never crash the lesson */ }
     }
   }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept.concept, currentPhase, lessonId, motesartStudentState])
   handleStudentInputRef.current = handleStudentInput
@@ -1111,6 +1132,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         lessonId, studentId: studentId || 'default_student',
         studentProfile: studentProfile || {},
         wylProfile: wylProfile || { visual:30, auditory:25, readwrite:20, kinesthetic:25 },
+        dpmScores: motesartStudentState.dpmSignals || { drive:50, passion:50, motivation:50, overall:50 },
         ambassadorPrompt: 'You are Motesart, a warm piano teacher.',
         lessonData: { concepts: [
           { id:'C_KEYBOARD', startConfidence:50 }, { id:'C_HALFWHOLE', startConfidence:50 },

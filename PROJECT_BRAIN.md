@@ -772,3 +772,34 @@ Run `git rev-parse HEAD` in both repos. If either SHA differs from the sync SHAs
 - Cycle #2 audit observability: PARKED — blocked on exact Airtable field names for table tblDEyL8fzGGVvs2t. No SOM frontend action required.
 - Cycle #3 VAD: DEPLOYED_NOT_SHIPPED — frontend change deployed, awaiting MOBILE_PASS at 390×844 and 430×932.
 - Cycle #3A spoken response truncation: CLOSED/PASS — detail in Deployable-python-codebase-som/PROJECT_BRAIN.md.
+
+---
+
+## T.A.M.i Lesson Engine Wire — Phase 1A
+
+Date: 2026-05-19
+Baseline entering this work: TAMI_PHASE_2_BASELINE = 89dd2ba78f46d384a8208a2913528d30667fe3d1
+
+Problem found via live browser audit:
+- evaluateStudentResponse() never connected to T.A.M.i intelligence layer
+- DPM scores never passed to engine init (tami.bridge.connect received no dpmScores)
+- struggle/engagement/milestone detectors defined but unreachable from student answer path
+
+Fix: 3 surgical additions to WYLPracticeLive.jsx only — no rewrites
+- processEvaluation() called after every student answer (line 910)
+- processConfidenceUpdate() called after correct (+10) and wrong (-15) resolution (lines 947, 961)
+- dpmScores passed into tami.bridge.connect() from motesartStudentState.dpmSignals (line 1135)
+- All T.A.M.i calls wrapped in try/catch — lesson can never crash from intelligence layer
+- Dev-only [TAMi Wire] telemetry logs added for all 3 call sites
+
+Result: T.A.M.i intelligence layer now receives student signals on every answer
+- struggle_detected: fires when wrongStreak >= 2 or concept confidence <= 30
+- milestone_reached: fires when correctStreak >= streakLength or mastery threshold crossed
+- engagement_drop: still timer-driven via processResponseDelay (unchanged)
+
+Note: tamiStackRef.current is null during Theory Phase (initLesson() defined but not called
+in current Theory Phase mode). Optional chaining (?.) makes all additions safe no-ops
+when the engine is not instantiated.
+
+Next: Verify struggle/milestone/engagement fire correctly under real student use once
+Theory Phase transitions to full engine mode.
