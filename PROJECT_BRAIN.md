@@ -803,3 +803,45 @@ when the engine is not instantiated.
 
 Next: Verify struggle/milestone/engagement fire correctly under real student use once
 Theory Phase transitions to full engine mode.
+
+Commit SHA: TAMI_PHASE_1A_WIRE_BASELINE = 915345a84ec6f3c46e5f4e10e1de07770f95b02d
+
+What this enables:
+- T.A.M.i intelligence layer now receives every student answer signal
+- _detectStruggle fires at wrongStreak >= 2
+- _detectMilestone fires at correctStreak >= streakLength
+- _detectEngagementDrop fires on excessive replays or response delay
+- Confidence updates adjust concept scoring in real time
+- DPM drives engagement context at session start
+
+Strategic doctrine (permanent, locked):
+  "Most competitors correct notes. SOM corrects the learner."
+
+All locked baselines:
+  MOTESART_ENGINE_BASELINE           = 23fb225578a09579c46ed0731cd13e6433c30430
+  TAMI_INTELLIGENCE_PHASE_1_BASELINE = 51eaab4a2fa00584a335eb6e171b3a65bc50e5e9
+  TAMI_PHASE_1_CONTRACT_BASELINE     = a403d22a5f1f737b9f632a48afab7ff716aa14b0
+  TAMI_PHASE_2_BASELINE              = 89dd2ba78f46d384a8208a2913528d30667fe3d1
+  TAMI_PHASE_1A_WIRE_BASELINE        = 915345a84ec6f3c46e5f4e10e1de07770f95b02d
+
+Open verification (required before Phase 1B):
+  [ ] Live wrong-answer test: submit 2 wrong answers in real student session
+      Expected: T.A.M.i coaching panel reacts — _detectStruggle fires
+  [ ] Live correct-streak test: submit 4 correct answers
+      Expected: _detectMilestone fires, encouragement triggers
+  [ ] Confirm tami.bridge emits to setCoaching or equivalent UI state
+  [ ] Confirm DPM values from real student record reach bridge.connect()
+
+Proposed new agent (not yet built):
+  SOM Market Intelligence Agent
+  Mission: weekly research brief on AI music education, adaptive learning,
+  gamification, computer vision posture correction, competitor movement
+  Output feeds: PROJECT_BRAIN.md, SOM roadmap decisions, T.A.M.i curriculum strategy
+
+Next build sequence (not this session):
+  Phase 1B-1: Live verification — real student wrong-answer test
+  Phase 1B-2: T.A.M.i event persistence — store signals to Airtable
+  Phase 1B-3: WYL trigger layer — stagnation → teaching style change
+  Phase 1B-4: DPM trigger layer — engagement drop → game/reward/encouragement
+  Phase 1B-5: Posture/form research spec — define camera detection requirements
+  Phase 1B-6: T.A.M.i Ambassador model — teacher/coach persona structure
