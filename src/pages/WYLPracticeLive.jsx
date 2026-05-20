@@ -1,3 +1,4 @@
+// motesart-personality-v2-tts-fixed
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api.js'
@@ -20,6 +21,11 @@ const INTENT_SYSTEM_PROMPT = [
   'EMOTIONS: confident, neutral, hesitant, frustrated, curious, disengaged',
   'CORRECTNESS: true, false, partial, or null. Be generous with beginners.'
 ].join(' ')
+
+const MOTESART_PERSONALITY_VERSION = 'motesart-personality-v2-tts-fixed'
+if (typeof window !== 'undefined') {
+  window.__MOTESART_PERSONALITY_VERSION = MOTESART_PERSONALITY_VERSION
+}
 
 async function parseIntent(transcript, context) {
   if (!transcript || transcript.trim().length === 0) {
@@ -133,6 +139,11 @@ function stopListening() {
 
 function evaluateStudentResponse(text, expected, promptType, conceptName) {
   const normalized = text.toLowerCase().trim()
+  const core = normalized
+    .replace(/[^\w\s]/g, ' ')
+    .replace(/\b(okay|ok|lets|let's|work|on|the|a|an|please|uh|um|yeah|yes|i|think|it|is|are)\b/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
   const isQuestion = normalized.endsWith('?') || /^(what|how|why|can you|could you|do you|is it|are they)/.test(normalized)
   const isConfused = /(i don|don't know|not sure|idk|confused|huh|what do you mean)/.test(normalized)
 
@@ -145,7 +156,13 @@ function evaluateStudentResponse(text, expected, promptType, conceptName) {
     }
   }
 
-  const keywordMatch = expected.some(e => normalized.includes(e.toLowerCase()))
+  const expectedPhrases = expected.map(e => e.toLowerCase().trim()).filter(Boolean)
+  const exactExpectedMatch = expectedPhrases.some(e => core === e)
+  const wholeWordExpectedMatch = expectedPhrases
+    .filter(e => e.includes(' '))
+    .some(e => new RegExp(`\\b${e.replace(/\s+/g, '\\s+')}\\b`).test(core))
+  const halfStepConceptMatch = /\bhalf\s+step\b/.test(core) ||
+    (/\bhalf\b/.test(core) && /\bstep\b/.test(core) && !/\b\d+\s+steps?\b/.test(core))
   const naturalPatterns = [
     /\b3\s*and\s*4\b/, /three\s*and\s*four/, /\be\s*(and|to)\s*f\b/,
     /next\s*to\s*each\s*other/, /neighbor/, /half\s*step/,
@@ -153,13 +170,14 @@ function evaluateStudentResponse(text, expected, promptType, conceptName) {
     /smallest\s*(distance|interval|move)/, /one\s*semitone/,
   ]
   const naturalMatch = naturalPatterns.some(p => p.test(normalized))
+  const keywordMatch = exactExpectedMatch || wholeWordExpectedMatch || halfStepConceptMatch
 
   if (keywordMatch || naturalMatch) {
     return { correct: true, confidence: keywordMatch ? 0.95 : 0.85, reason: 'matched', motesartReply: 'Yes!' }
   }
 
   const partialWords = ['step', 'note', 'key', 'close', 'small', 'near', 'short', 'distance']
-  const partialMatch = partialWords.some(w => normalized.includes(w))
+  const partialMatch = partialWords.some(w => new RegExp(`\\b${w}\\b`).test(core))
 
   if (partialMatch) {
     return {
@@ -913,7 +931,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     const heard = transcript.toLowerCase().trim()
     const expected = current.expect
     const evaluation = evaluateStudentResponse(heard, expected, current.prompt, 'The Half Step')
-    const acceptedAsCorrect = evaluation.correct || current.prompt === 'ready_check'
+    const readyCheckAccepted = current.prompt === 'ready_check' &&
+      /^(yes|yeah|yep|sure|ready|ok|okay|lets go|let's go|yea)$/.test(heard)
+    const acceptedAsCorrect = evaluation.correct || readyCheckAccepted
     const projectedStudentState = {
       ...motesartStudentState,
       correctStreak: acceptedAsCorrect ? (motesartStudentState.correctStreak || 0) + 1 : 0,
