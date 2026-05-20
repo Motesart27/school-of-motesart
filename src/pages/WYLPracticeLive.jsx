@@ -290,6 +290,23 @@ if (typeof document !== 'undefined') {
 const sanitizeTTS = (text) => text.replace(/Motesart/g, 'Moatzart')
 
 const CONCEPT_CONFIG_MAP = {
+  'major-scale-pattern': {
+    concept: 'Major Scale Pattern',
+    description: 'The Motesart pattern — how notes move inside every major scale.',
+    conceptId: 'T_MAJOR_SCALE_PATTERN',
+    steps: [
+      {
+        type: 'speak',
+        text: "Before we name steps, learn the pattern. In the major scale: 1 skip 1, 2 skip 1, 3 and 4 together, 4 skip 1, 5 skip 1, 6 skip 1, 7 and 8 together. The skips are whole steps. The together spots — 3 and 4, and 7 and 8 — those are the half steps."
+      },
+      {
+        type: 'listen',
+        expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
+        prompt: 'full_pattern'
+      }
+    ],
+    nextConcept: 'half-step'
+  },
   'half-step': {
     concept: 'Half Step',
     description: 'The smallest distance in music — from one key to the very next key.',
@@ -406,22 +423,6 @@ const CONCEPT_CONFIG_MAP = {
       { type: 'speak', text: "Right. Key 8. Both are C — that pair is an octave. What two keys on this keyboard form an octave?" },
       { type: 'listen', expect: ['1 and 8', '1 8', 'one and eight', 'one eight', 'keys 1 and 8', 'key 1 key 8'], prompt: 'full_pattern' },
       { type: 'speak', text: "Correct. Keys 1 and 8. Same note name, one octave apart. That relationship repeats across the entire piano in both directions." },
-    ]
-  },
-  'major-scale-pattern': {
-    concept: 'Major Scale Pattern',
-    description: 'The Whole-Whole-Half formula that builds every major scale.',
-    conceptId: 'T_MAJOR_SCALE_PATTERN',
-    steps: [
-      { type: 'speak', text: "Every major scale follows the same pattern: Whole, Whole, Half, Whole, Whole, Whole, Half. Seven steps. Same order every time. This is what makes a scale sound major." },
-      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
-      { type: 'speak', text: "C major: start on C. Whole step to D. Whole step to E. Half step to F. Say those first three steps." },
-      { type: 'listen', expect: ['whole whole half', 'whole, whole, half', 'w w h', 'whole step whole step half step', 'whole whole half step'], prompt: 'call_response' },
-      { type: 'speak', text: "Good. Whole, Whole, Half. Continue: Whole to G. Whole to A. Whole to B. Half back to C. What is the step that follows three wholes in a row?" },
-      { type: 'listen', expect: ['half', 'half step', 'have', 'h'], prompt: 'full_pattern' },
-      { type: 'speak', text: "Correct. Half. The full pattern: Whole, Whole, Half, Whole, Whole, Whole, Half. Say the complete pattern." },
-      { type: 'listen', expect: ['whole', 'half', 'w w h w w w h', 'whole whole half whole whole whole half'], prompt: 'full_pattern' },
-      { type: 'speak', text: "That is the key. Same pattern works for all 12 major keys — different starting note, same sequence every time." },
     ]
   },
   'c-major-scale': {
@@ -754,7 +755,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   // Concept routing — read ?concept= from URL, stable for session lifetime
   const currentConcept = React.useMemo(() => {
     try {
-      const slug = new URLSearchParams(window.location.search).get('concept') || 'half-step'
+      const slug = new URLSearchParams(window.location.search).get('concept') || 'major-scale-pattern'
       return CONCEPT_CONFIG_MAP[slug] || null
     } catch { return null }
   }, [])
@@ -856,6 +857,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const advanceTeaching = React.useCallback(async (step) => {
     if (step >= THEORY_STEPS.length) {
       setCoaching({ message: 'Lesson complete! You learned the major scale pattern.', speaking: false, tags: ['Complete'] })
+      if (currentConcept?.nextConcept) {
+        setTimeout(() => { window.location.href = '/practice-live?concept=' + currentConcept.nextConcept }, 2000)
+      }
       setLessonComplete({ engagement: { attentionScore: 100 } })
       return
     }
