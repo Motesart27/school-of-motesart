@@ -174,6 +174,63 @@ function evaluateStudentResponse(text, expected, promptType, conceptName) {
   }
 }
 
+function pickRandom(items) {
+  return items[Math.floor(Math.random() * items.length)]
+}
+
+function getDominantWYLMode(wylProfile, activeWYLProfile) {
+  const explicitMode = activeWYLProfile?.dominantMode || activeWYLProfile?.dominant || wylProfile?.dominantMode || wylProfile?.dominant
+  if (explicitMode) return explicitMode
+
+  const modes = ['visual', 'auditory', 'kinesthetic', 'readwrite']
+  return modes.reduce((best, mode) => (
+    Number(wylProfile?.[mode] || 0) > Number(wylProfile?.[best] || 0) ? mode : best
+  ), 'visual')
+}
+
+function buildWrongAnswerResponse(conceptKey, ageBand, wylDominant) {
+  const conceptConfig = CONCEPT_VIEW_CONFIG[conceptKey]
+  const baseGuide = conceptConfig?.speechTexts?.guide ||
+    'Look at the keys carefully. Find the pattern.'
+
+  const agePrefix = {
+    child: ['Hmm, not quite!', 'Ooh, almost!', "Nice try, let's look again -"],
+    teen: ['Not even close - kidding, you were close.', "Oof. Let's back up a sec.", 'Almost! But not almost enough -'],
+    adult: ['Not this time.', "Nope - but here's the fix:", "Close, but let's lock this in:"],
+    senior: ['Not quite - let me show you:', "Let's revisit this:", "Close - here's what to look for:"]
+  }[ageBand] || ["Let's try that again -"]
+
+  const wylSuffix = {
+    visual: 'Keep your eyes on the keyboard - the pattern is right there in front of you. You have got this.',
+    auditory: 'Listen for the distance - half steps have the tightest sound. You have got this.',
+    kinesthetic: 'Put your finger on E. Now move it one key to the right. That landing spot is F. That gap is your half step. You have got this.',
+    readwrite: 'Rule: half step = adjacent keys. Zero keys between them. Say it back. You have got this.'
+  }[wylDominant] || 'Look at the keys and find the pattern. You have got this.'
+
+  const prefix = pickRandom(agePrefix)
+
+  return `${prefix} ${baseGuide} ${wylSuffix}`
+}
+
+function buildCorrectAnswerResponse() {
+  const responses = [
+    "Yes! You knew it. E and F - neighbors. That's a half step.",
+    "There it is. No key between them. That's all a half step ever is.",
+    'See? You had it. E and F, right next to each other.',
+    "That's it. Half step locked."
+  ]
+  return pickRandom(responses)
+}
+
+function buildPartialAnswerResponse() {
+  const responses = [
+    "You're in the neighborhood. Get more specific.",
+    'Warm - but not warm enough. Say the exact keys.',
+    "That's in the right zip code. Try again with the exact pair."
+  ]
+  return pickRandom(responses)
+}
+
 let _silenceTimer = null
 function resetSilenceTimer(onSilence, delay) {
   clearTimeout(_silenceTimer)
@@ -832,6 +889,10 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     }
   }, [THEORY_STEPS])
 
+  const speakMotesart = React.useCallback(async (text) => {
+    await api.speakText(sanitizeTTS(text), 'coach')
+  }, [])
+
   const handleStudentInput = React.useCallback(async (transcript) => {
     if (!transcript || transcript.trim().length < 1) return
     // Gate: ignore noise/empty input
@@ -928,15 +989,16 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setStudentEmotion('happy')
       setAwaitingResponse(false)
 
-      if (current.prompt === 'call_response') {
-        const affirmText = motesartReply || 'Yes!'
+      if (current.prompt !== 'ready_check') {
+        const affirmText = buildCorrectAnswerResponse()
         setCoaching({ message: affirmText, speaking: true, tags: ['Affirm'] })
         try {
           // ── api.speakText routes to Railway via VITE_RAILWAY_URL ──
-          await api.speakText(sanitizeTTS(affirmText), 'coach')
+          await speakMotesart(affirmText)
         } catch(e) {
           console.warn('[WYLPracticeLive] Affirm TTS failed:', e.message)
         }
+        setCoaching(prev => ({ ...prev, speaking: false }))
       }
       // Natural pause before advancing after correct answer
       await new Promise(r => setTimeout(r, 800))
@@ -951,18 +1013,38 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       setStudentEmotion('neutral')
       setRetryMode(true)
       setPromptMode(false)
-      setCoaching({ message: motesartReply, speaking: false, tags: ['Partial'] })
+      const partialResponse = buildPartialAnswerResponse()
+      setCoaching({ message: partialResponse, speaking: true, tags: ['Partial'] })
+      try {
+        await speakMotesart(partialResponse)
+      } catch (err) {
+        console.error('[Motesart] partial-answer TTS failed silently', err)
+      }
+      setCoaching(prev => ({ ...prev, speaking: false }))
     } else {
       setStudentEmotion('confused')
       setRetryMode(true)
       setPromptMode(false)
       setCoaching({ message: motesartReply || 'Almost! Try again. I am listening.', speaking: false, tags: ['Retry'] })
       try {
+        const activeWYLProfile = {
+          dominantMode: tamiStackRef.current?.profileManager?.getReinforcementMode?.()
+        }
+        const ageBand = studentProfile?.ageBand || studentProfile?.age_band || 'teen'
+        const wylDominant = getDominantWYLMode(wylProfile, activeWYLProfile) || 'visual'
+        const wrongResponse = buildWrongAnswerResponse(ACTIVE_CONCEPT_ID, ageBand, wylDominant)
+        setCoaching({ message: wrongResponse, speaking: true, tags: ['Retry'] })
+        await speakMotesart(wrongResponse)
+        setCoaching(prev => ({ ...prev, speaking: false }))
+      } catch (err) {
+        console.error('[Motesart] wrong-answer TTS failed silently', err)
+      }
+      try {
         tamiStackRef.current?.intelligence?.processConfidenceUpdate({ concept: ACTIVE_CONCEPT_ID, delta: -15 })
         if (import.meta.env.DEV) console.log('[TAMi Wire] processConfidenceUpdate fired — concept:', ACTIVE_CONCEPT_ID, ', delta: -15')
       } catch(e) { /* never crash the lesson */ }
     }
-  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept.concept, currentPhase, lessonId, motesartStudentState])
+  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, speakMotesart, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept.concept, currentPhase, lessonId, motesartStudentState, studentProfile?.ageBand, studentProfile?.age_band, wylProfile])
   handleStudentInputRef.current = handleStudentInput
 
   const startLesson = React.useCallback(async () => {
