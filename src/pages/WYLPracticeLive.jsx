@@ -443,7 +443,8 @@ const CONCEPT_CONFIG_MAP = {
   }
 }
 
-const AVATAR_SRC = '/motesart-avatar.png'
+const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
+const DEFAULT_SOM_LOGO = '/SOM_logo.png'
 const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
 const css = `
@@ -650,6 +651,11 @@ function TopBar({ timer, objective, onPause, onEnd, paused }) {
   return (
     <div className="wyl-bar">
       <div className="wyl-bar__left">
+        <img
+          src={DEFAULT_SOM_LOGO}
+          alt="SOM"
+          style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+        />
         <span className="wyl-bar__brand">School of Motesart</span>
         <div className="wyl-bar__sep" />
         <span className="wyl-bar__objective">{objective}</span>
@@ -663,7 +669,7 @@ function TopBar({ timer, objective, onPause, onEnd, paused }) {
   )
 }
 
-function MotesartCard({ coaching, onToggleChat, chatOpen, onStudentQuestion }) {
+function MotesartCard({ coaching, onToggleChat, chatOpen, onStudentQuestion, avatarSrc = DEFAULT_MOTESART_AVATAR }) {
   const isSpeaking = coaching?.speaking
   const [chatInput, setChatInput] = useState('')
 
@@ -684,7 +690,16 @@ function MotesartCard({ coaching, onToggleChat, chatOpen, onStudentQuestion }) {
       <div className="mc__main" onClick={onToggleChat}>
         <div className="mc__av-wrap">
           <div className="mc__live-ring" />
-          <div className="mc__av"><img src={AVATAR_SRC} alt="Motesart" /></div>
+          <div className="mc__av">
+            <img
+              src={avatarSrc || DEFAULT_MOTESART_AVATAR}
+              alt="Motesart"
+              onError={(e) => {
+                if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
+                e.currentTarget.src = DEFAULT_MOTESART_AVATAR
+              }}
+            />
+          </div>
         </div>
         <div className="mc__info">
           <div className="mc__name">Motesart</div>
@@ -837,6 +852,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     wylSignals: wylProfile,
     dpmSignals: conceptState
   })
+  const motesartAvatar = studentProfile?.coachAvatar ||
+    studentProfile?.avatar ||
+    DEFAULT_MOTESART_AVATAR
   const teachingStepRef = React.useRef(0)
   const handleStudentInputRef = React.useRef(null)
   const practiceViewRef = React.useRef('cockpit')
@@ -1479,7 +1497,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
         <TopBar timer={fmtTime(timer)} objective={objective} paused={paused} onPause={handlePause} onEnd={handleEnd} />
         <VisualOverlay visual={currentVisual} activeTones={activeTones} />
-        <MotesartCard coaching={coaching} chatOpen={chatOpen} onToggleChat={() => setChatOpen(!chatOpen)} onStudentQuestion={handleStudentQuestion} />
+        <MotesartCard coaching={coaching} chatOpen={chatOpen} onToggleChat={() => setChatOpen(!chatOpen)} onStudentQuestion={handleStudentQuestion} avatarSrc={motesartAvatar} />
         <CelebrationOverlay type={celebration} />
         <TelemetryPanel engineRef={engineRef} tamiStackRef={tamiStackRef} questionHistory={questionHistory} visible={showTelemetry} />
 

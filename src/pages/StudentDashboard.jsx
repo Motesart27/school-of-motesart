@@ -34,6 +34,9 @@ const NAV_ROUTES = {
   'Settings': '/settings',
 }
 
+const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
+const DEFAULT_SOM_LOGO = '/SOM_logo.png'
+
 export default function StudentDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -44,6 +47,11 @@ export default function StudentDashboard() {
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'S'
+  const motesartAvatar = user?.coachAvatar ||
+    user?.coach_avatar ||
+    user?.avatar ||
+    user?.avatarUrl ||
+    DEFAULT_MOTESART_AVATAR
 
   // Inject Google Fonts
   useEffect(() => {
@@ -74,7 +82,7 @@ export default function StudentDashboard() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', padding: isCollapsed ? '12px 0' : '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', opacity: isCollapsed ? 0 : 1, width: isCollapsed ? 0 : 'auto', transition: 'opacity 0.2s ease, width 0.2s ease' }}>
             <div style={{ width: 22, height: 22, borderRadius: '50%', overflow: 'hidden', border: '1.5px solid rgba(255,255,255,0.15)', flexShrink: 0 }}>
-              <img src="/Motesart Avatar 1.PNG" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }} />
+              <img src={DEFAULT_SOM_LOGO} alt="School of Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
             </div>
             <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 13, fontWeight: 700, color: '#14b8a6', whiteSpace: 'nowrap' }}>School of Motesart</span>
           </div>
@@ -239,9 +247,9 @@ export default function StudentDashboard() {
         {/* Dashboard Content */}
         <div style={{ padding: '20px 24px', maxWidth: 920, margin: '0 auto' }}>
           {mode === 'academic' ? (
-            <HomeDashboard navigate={navigate} userName={userName} />
+            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} />
           ) : (
-            <GameView navigate={navigate} />
+            <GameView navigate={navigate} motesartAvatar={motesartAvatar} />
           )}
         </div>
 
@@ -316,7 +324,7 @@ export default function StudentDashboard() {
 }
 
 /* ===== HOME DASHBOARD (Academic Mode) ===== */
-function HomeDashboard({ navigate, userName }) {
+function HomeDashboard({ navigate, userName, motesartAvatar }) {
   const [dpmVisible, setDpmVisible] = useState(false)
   const dpmRef = useRef(null)
 
@@ -413,7 +421,10 @@ function HomeDashboard({ navigate, userName }) {
         }}
       >
         <div style={{ width: 48, height: 48, minWidth: 48, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(249,115,22,.4)', flexShrink: 0 }}>
-          <img src="/Motesart Avatar 1.PNG" alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
+            if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
+            e.currentTarget.src = DEFAULT_MOTESART_AVATAR
+          }} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10, textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', letterSpacing: 1 }}>My Coach</div>
@@ -536,7 +547,10 @@ function HomeDashboard({ navigate, userName }) {
             <div>
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(249,115,22,.3)' }}>
-                  <img src="/Motesart Avatar 1.PNG" alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
+                    if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
+                    e.currentTarget.src = DEFAULT_MOTESART_AVATAR
+                  }} />
                 </div>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Great job on your scales this week!</div>
@@ -574,7 +588,7 @@ function HomeDashboard({ navigate, userName }) {
 }
 
 /* ===== GAME VIEW ===== */
-function GameView({ navigate }) {
+function GameView({ navigate, motesartAvatar }) {
   return (
     <>
       {/* Games Dashboard Promo Card */}
@@ -646,7 +660,10 @@ function GameView({ navigate }) {
         <Card title="Game Leaderboard">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, background: 'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border: '1px solid rgba(147,51,234,0.3)', borderRadius: 8 }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(168,85,247,0.4)' }}>
-              <img src="/Motesart Avatar 1.PNG" alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
+                if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
+                e.currentTarget.src = DEFAULT_MOTESART_AVATAR
+              }} />
             </div>
             <span style={{ flex: 1, fontSize: 12, color: '#a855f7', fontWeight: 700 }}>Motesart Mo (You)</span>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#22c55e' }}>0</span>
