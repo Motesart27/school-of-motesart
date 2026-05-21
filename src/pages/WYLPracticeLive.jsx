@@ -306,7 +306,43 @@ const CONCEPT_CONFIG_MAP = {
       {
         type: 'speak',
         stage: 'teach',
-        text: "Before we name steps, learn the pattern. In the major scale: 1 skip 1, 2 skip 1, 3 and 4 together, 4 skip 1, 5 skip 1, 6 skip 1, 7 and 8 together. Say it with me: the together spots are 3 and 4, and 7 and 8."
+        text: 'Hey. Welcome to the School of Motesart. I am Motesart. I do not teach notes. I reveal patterns. Today, we start with the pattern hiding inside every major scale.'
+      },
+      {
+        type: 'listen',
+        stage: 'ready',
+        expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'let us go', 'yea'],
+        prompt: 'ready_check',
+        prompt_display: 'Say ready when you are set.',
+        text: 'Ready to find the pattern?'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'A major scale does not wander around the piano hoping for the best. It moves with a map: sometimes it skips a key, and sometimes two numbers sit right next to each other.'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'Here is the Motesart pattern: 1 skip 1, 2 skip 1, 3 and 4 together, 4 skip 1, 5 skip 1, 6 skip 1, 7 and 8 together. The together spots are the secret: 3 and 4, and 7 and 8.'
+      },
+      {
+        type: 'listen',
+        stage: 'call_response',
+        expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
+        prompt: 'full_pattern',
+        prompt_display: 'Say it back: 3 and 4, and 7 and 8.',
+        text: 'Say the together spots back to me.'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'Yes. Those two spots are close on purpose. Later we call that a half step. Fancy name, tiny move. The piano is dramatic about many things, but not this one.'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'Before the quiz, lock the map in your head: skip, skip, together, skip, skip, skip, together. The together spots are 3 and 4, and 7 and 8.'
       },
       {
         type: 'listen',
@@ -328,10 +364,11 @@ const CONCEPT_CONFIG_MAP = {
         type: 'listen',
         stage: 'quiz',
         quizEnd: true,
-        expect: ['skip', 'there is a skip', 'six skip one', '6 skip 1', 'skip one'],
+        expect: ['2', 'two', 'two spots', '2 spots', 'two together spots', '3 and 4 and 7 and 8'],
         prompt: 'full_pattern',
         prompt_display: 'Q3 of 3 — Say a number: how many together spots?',
-        text: 'Between 6 and 7 in the scale, is there a skip or are they together?'
+        text: 'How many together spots are in the major scale pattern?',
+        quizFailStep: 6
       },
       {
         type: 'live_practice',
@@ -343,13 +380,15 @@ const CONCEPT_CONFIG_MAP = {
         text: 'Describe part of the major scale pattern you just played.'
       },
       {
-        type: 'listen',
+        type: 'prove_it',
         stage: 'prove',
         expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
         prompt: 'full_pattern',
         prompt_display: 'Final question — no hints. Name both together spots.',
         text: 'Prove it: where are the two together spots in a major scale?',
-        lockedText: 'Major scale pattern locked. Skips and together spots are officially not sneaking past you anymore.'
+        lockedText: 'The pattern is yours. You just learned what most piano students never get explained. We are moving forward.',
+        proveFailStep: 7,
+        nextConcept: 'half-step'
       }
     ],
     nextConcept: 'half-step'
@@ -938,7 +977,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       // Natural pause before advancing
       await new Promise(r => setTimeout(r, 400))
       advanceTeaching(step + 1)
-    } else if (current.type === 'listen' || current.type === 'live_practice') {
+    } else if (current.type === 'listen' || current.type === 'live_practice' || current.type === 'prove_it') {
       setAwaitingResponse(true)
       setRetryMode(false)
       setPromptMode(false)
@@ -979,7 +1018,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     setLastTranscript(transcript)
     const step = teachingStepRef.current
     const current = THEORY_STEPS[step]
-    if (!current || (current.type !== 'listen' && current.type !== 'live_practice')) return
+    if (!current || (current.type !== 'listen' && current.type !== 'live_practice' && current.type !== 'prove_it')) return
 
     if (responseTimeout) clearTimeout(responseTimeout)
 
@@ -1085,7 +1124,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     }
 
     const firstQuizStep = THEORY_STEPS.findIndex(s => s.stage === 'quiz')
-    const returnToQuiz = firstQuizStep >= 0 ? firstQuizStep : step
+    const returnToQuiz = current.proveFailStep ?? (firstQuizStep >= 0 ? firstQuizStep : step)
     const reviewAndAdvance = async (message, targetStep) => {
       setAwaitingResponse(false)
       setCoaching({ message, speaking: true, tags: ['Review'] })
@@ -1105,7 +1144,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         if (quizCorrectRef.current >= 2) {
           advanceTeaching(step + 1)
         } else {
-          await reviewAndAdvance(QUIZ_REVIEW_TEXT, 0)
+          await reviewAndAdvance(QUIZ_REVIEW_TEXT, current.quizFailStep ?? 0)
         }
       } else {
         advanceTeaching(step + 1)
@@ -1149,7 +1188,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         return
       }
 
-      if (current.stage === 'prove') {
+      if (current.type === 'prove_it' || current.stage === 'prove') {
         const lockedText = current.lockedText || `${currentConcept.concept} locked.`
         setCoaching({ message: lockedText, speaking: true, tags: ['Complete'] })
         try {
@@ -1225,7 +1264,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       } catch(e) { /* never crash the lesson */ }
       if (current.stage === 'quiz') {
         await finishQuizAttempt()
-      } else if (current.stage === 'prove') {
+      } else if (current.type === 'prove_it' || current.stage === 'prove') {
         quizCorrectRef.current = 0
         await reviewAndAdvance(PROVE_REVIEW_TEXT, returnToQuiz)
       }
