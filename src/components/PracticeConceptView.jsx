@@ -346,6 +346,15 @@ function KeyArrow({ from, to }) {
 }
 
 // ── Piano keyboard ──
+function getKeyHighlightColor(keyIndex, highlightedKeys) {
+  if (highlightedKeys.length === 4) {
+    const sortedKeys = [...highlightedKeys].sort((a, b) => a - b)
+    if (keyIndex === sortedKeys[0] || keyIndex === sortedKeys[1]) return '#7c3aed'
+    if (keyIndex === sortedKeys[2] || keyIndex === sortedKeys[3]) return '#f97316'
+  }
+  return '#e84b8a'
+}
+
 function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
   const kW = 100 / 8
   return (
@@ -354,8 +363,9 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
         {Array.from({ length: 8 }).map((_, i) => {
           const isFocus = highlightedKeys.includes(i)
           const isHome  = showHomeKey && i === homeKeyIndex
-          const bg   = isFocus ? '#d4f5e0' : isHome ? '#fde8c8' : '#f8f8f8'
-          const bdrB = isFocus ? '4px solid #90d4a8' : isHome ? '4px solid #e8c890' : '4px solid #c8c8c8'
+          const highlightColor = getKeyHighlightColor(i, highlightedKeys)
+          const bg   = isFocus ? highlightColor : isHome ? '#fde8c8' : '#f8f8f8'
+          const bdrB = isFocus ? `4px solid ${highlightColor}` : isHome ? '4px solid #e8c890' : '4px solid #c8c8c8'
           return (
             <div key={i} style={{
               flex: 1, background: bg, borderRadius: '0 0 9px 9px',
@@ -365,13 +375,12 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
               <span style={{
                 position: 'absolute', bottom: 22, left: 0, right: 0,
                 textAlign: 'center', display: 'block', fontSize: 16, fontWeight: 900, lineHeight: 1,
-                color: isFocus ? '#059669' : isHome ? '#b7791f' : '#555',
-                animation: isFocus ? 'numGlow 1.6s ease-in-out infinite' : 'none',
+                color: isFocus ? '#fff' : isHome ? '#b7791f' : '#555',
               }}>{i + 1}</span>
               <span style={{
                 position: 'absolute', bottom: 7, left: 0, right: 0,
                 textAlign: 'center', display: 'block', fontSize: 11, fontWeight: 700,
-                color: isFocus ? '#047857' : isHome ? '#975a16' : '#999',
+                color: isFocus ? '#fff' : isHome ? '#975a16' : '#999',
               }}>{WHITE_KEY_NAMES[i]}</span>
             </div>
           )

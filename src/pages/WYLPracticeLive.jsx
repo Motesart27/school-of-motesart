@@ -437,7 +437,7 @@ const CONCEPT_CONFIG_MAP = {
       { type: 'listen', stage: 'quiz', expect: ['e and f', 'e f', '3 and 4', 'three and four'], prompt: 'full_pattern', text: 'Give me one half-step pair around keys 3 and 4.' },
       { type: 'listen', stage: 'quiz', quizEnd: true, expect: ['b and c', 'b c', '7 and 8', 'seven and eight'], prompt: 'full_pattern', text: 'Give me the other natural half-step pair in C major.' },
       { type: 'live_practice', stage: 'practice', practiceTarget: PRACTICE_TARGET, expect: ['e and f', 'b and c', 'e f', 'b c', '3 and 4', '7 and 8', 'half step', 'touching', 'next to each other'], prompt: 'full_pattern', text: 'Play or point to a half step, then tell me what you played.' },
-      { type: 'listen', stage: 'prove', expect: ['half step', 'e and f', 'b and c', 'next to each other', 'touching', 'nothing in between', 'no key between'], prompt: 'full_pattern', text: 'Prove it: how do you know two notes are a half step apart?', lockedText: "Half step locked. Tiny distance, big musician brain. You've got this." },
+      { type: 'listen', stage: 'prove', expect: ['half step', 'e and f', 'b and c', 'next to each other', 'touching', 'nothing in between', 'no key between'], prompt: 'full_pattern', text: 'Prove it: how do you know two notes are a half step apart?', lockedText: "Half step locked. Tiny distance, big musician brain. You got this." },
     ]
   },
   'whole-step': {
