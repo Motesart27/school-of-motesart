@@ -289,6 +289,14 @@ if (typeof document !== 'undefined') {
 // Display text stays "Motesart" — spoken text uses phonetic "Moatzart"
 const sanitizeTTS = (text) => text.replace(/Motesart/g, 'Moatzart')
 
+const QUIZ_REVIEW_TEXT = "Let's go over that one more time."
+const PROVE_REVIEW_TEXT = "Close. Let's make sure this one is locked in."
+const PRACTICE_TARGET = 2
+
+function buildPracticePrompt(current, practiceCorrect) {
+  return `Practice ${practiceCorrect + 1} of ${current.practiceTarget || PRACTICE_TARGET}: ${current.text}`
+}
+
 const CONCEPT_CONFIG_MAP = {
   'major-scale-pattern': {
     concept: 'Major Scale Pattern',
@@ -297,12 +305,46 @@ const CONCEPT_CONFIG_MAP = {
     steps: [
       {
         type: 'speak',
-        text: "Before we name steps, learn the pattern. In the major scale: 1 skip 1, 2 skip 1, 3 and 4 together, 4 skip 1, 5 skip 1, 6 skip 1, 7 and 8 together. The skips are whole steps. The together spots — 3 and 4, and 7 and 8 — those are the half steps."
+        stage: 'teach',
+        text: "Before we name steps, learn the pattern. In the major scale: 1 skip 1, 2 skip 1, 3 and 4 together, 4 skip 1, 5 skip 1, 6 skip 1, 7 and 8 together. Say it with me: the together spots are 3 and 4, and 7 and 8."
       },
       {
         type: 'listen',
+        stage: 'quiz',
         expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
-        prompt: 'full_pattern'
+        prompt: 'full_pattern',
+        text: 'In the major scale pattern, which numbers are together with no skip?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        expect: ['skip', 'there is a skip', 'one skip one', '1 skip 1', 'yes', 'yes skip', 'skip one'],
+        prompt: 'full_pattern',
+        text: 'Between 1 and 2 in the scale, is there a skip or are they together?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: true,
+        expect: ['skip', 'there is a skip', 'six skip one', '6 skip 1', 'skip one'],
+        prompt: 'full_pattern',
+        text: 'Between 6 and 7 in the scale, is there a skip or are they together?'
+      },
+      {
+        type: 'live_practice',
+        stage: 'practice',
+        practiceTarget: PRACTICE_TARGET,
+        expect: ['skip', 'together', 'skip skip together', 'one skip one', '1 skip 1'],
+        prompt: 'full_pattern',
+        text: 'Describe part of the major scale pattern you just played.'
+      },
+      {
+        type: 'listen',
+        stage: 'prove',
+        expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
+        prompt: 'full_pattern',
+        text: 'Prove it: where are the two together spots in a major scale?',
+        lockedText: 'Major scale pattern locked. Skips and together spots are officially not sneaking past you anymore.'
       }
     ],
     nextConcept: 'half-step'
@@ -312,31 +354,12 @@ const CONCEPT_CONFIG_MAP = {
     description: 'The smallest distance in music — from one key to the very next key.',
     conceptId: 'T_HALF_STEP',
     steps: [
-      { type: 'speak', text: "Alright. Let's start with something small — because in music, small is where everything begins. We're working on the half step." },
-      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'yea'], prompt: 'ready_check' },
-      { type: 'speak', text: "Awesome! A Half Step is the smallest distance in music. It is the distance from one key to the very next key with nothing in between. Like from E to F, or B to C. Say it back to me: Half Step." },
-      { type: 'listen', expect: ['half', 'half step', 'have'], prompt: 'call_response' },
-      { type: 'speak', text: "Perfect! Look at the piano — keys 3 and 4 are E and F. There is no black key between them, so E to F is a Half Step. Now here is the big secret: the Whole Half pattern unlocks all 12 major scales. Say it with me: Whole, Whole, Half, Whole, Whole, Whole, Half." },
-      { type: 'listen', expect: ['whole', 'half'], prompt: 'pattern_repeat' },
-      { type: 'speak', text: "Let us do call and response. I say it, you echo it. Ready?" },
-      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok'], prompt: 'ready_check' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Half." },
-      { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Half." },
-      { type: 'listen', expect: ['half', 'have'], prompt: 'call_response' },
-      { type: 'speak', text: "You did it! That pattern works for EVERY major scale. C major, G major, D major, all 12 of them. What is the pattern one more time?" },
-      { type: 'listen', expect: ['whole', 'half'], prompt: 'full_pattern' },
-      { type: 'speak', text: "Excellent work! You now know the Half Step and the master pattern that unlocks all 12 major scales. Great job today!" },
+      { type: 'speak', stage: 'teach', text: "A half step is the smallest distance in music. It is the distance from one key to the very next key with nothing in between. E to F is a half step. B to C is a half step. Tiny move, huge deal." },
+      { type: 'listen', stage: 'quiz', expect: ['half step', 'smallest distance', 'very next key', 'next key', 'nothing in between'], prompt: 'full_pattern', text: 'What is a half step?' },
+      { type: 'listen', stage: 'quiz', expect: ['e and f', 'e f', '3 and 4', 'three and four'], prompt: 'full_pattern', text: 'Give me one half-step pair around keys 3 and 4.' },
+      { type: 'listen', stage: 'quiz', quizEnd: true, expect: ['b and c', 'b c', '7 and 8', 'seven and eight'], prompt: 'full_pattern', text: 'Give me the other natural half-step pair in C major.' },
+      { type: 'live_practice', stage: 'practice', practiceTarget: PRACTICE_TARGET, expect: ['e and f', 'b and c', 'e f', 'b c', '3 and 4', '7 and 8', 'half step', 'touching', 'next to each other'], prompt: 'full_pattern', text: 'Play or point to a half step, then tell me what you played.' },
+      { type: 'listen', stage: 'prove', expect: ['half step', 'e and f', 'b and c', 'next to each other', 'touching', 'nothing in between', 'no key between'], prompt: 'full_pattern', text: 'Prove it: how do you know two notes are a half step apart?', lockedText: "Half step locked. Tiny distance, big musician brain. You've got this." },
     ]
   },
   'whole-step': {
@@ -344,19 +367,12 @@ const CONCEPT_CONFIG_MAP = {
     description: 'A step that skips one key — twice the size of a half step.',
     conceptId: 'T_WHOLE_STEP',
     steps: [
-      { type: 'speak', text: "Good. You know the half step. Now let's go one further. The whole step skips a key — twice the distance. Let's find it." },
-      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay'], prompt: 'ready_check' },
-      { type: 'speak', text: "Great! A Whole Step is twice as big as a Half Step. Instead of going to the very next key, you skip one and go to the key after that. From C to D — there is a black key in between, so that is a Whole Step. Say it back: Whole Step." },
-      { type: 'listen', expect: ['whole', 'whole step'], prompt: 'call_response' },
-      { type: 'speak', text: "Nice! Look at keys 1 and 3 on the piano. That is C and E — one key between them. A Whole Step. Now let us do call and response. I say it, you echo it. Ready?" },
-      { type: 'listen', expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok'], prompt: 'ready_check' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Whole." },
-      { type: 'listen', expect: ['whole'], prompt: 'call_response' },
-      { type: 'speak', text: "Now tell me in your own words — what is a Whole Step?" },
-      { type: 'listen', expect: ['whole', 'skip', 'two', 'twice', 'jump', 'over', 'between', 'black key'], prompt: 'full_pattern' },
-      { type: 'speak', text: "Fantastic! A Whole Step skips one key. You now know both the Half Step and the Whole Step — the two building blocks of every scale in music. Amazing work today!" },
+      { type: 'speak', stage: 'teach', text: "A whole step skips one key. Instead of going to the very next key, you hop over one and land on the key after that. C to D is a whole step. D to E is a whole step. It is a half step with a little more travel budget." },
+      { type: 'listen', stage: 'quiz', expect: ['skip one', 'skips one key', 'one key between', 'whole step'], prompt: 'full_pattern', text: 'What does a whole step do?' },
+      { type: 'listen', stage: 'quiz', expect: ['c and d', 'c d', 'd and e', 'd e'], prompt: 'full_pattern', text: 'Name one whole-step pair in C major.' },
+      { type: 'listen', stage: 'quiz', quizEnd: true, expect: ['one key between', 'skipped one key', 'skip one', 'black key between'], prompt: 'full_pattern', text: 'How many keys are between the two notes in a whole step?' },
+      { type: 'live_practice', stage: 'practice', practiceTarget: PRACTICE_TARGET, expect: ['c and d', 'skip one', 'whole step', 'd and e', 'f and g', 'skipped one key', 'one key between'], prompt: 'full_pattern', text: 'Play or point to a whole step, then tell me what you played.' },
+      { type: 'listen', stage: 'prove', expect: ['whole step', 'skip one', 'one key between', 'c and d', 'd and e', 'f and g', 'skipped one key'], prompt: 'full_pattern', text: 'Prove it: how do you know two notes are a whole step apart?', lockedText: 'Whole step locked. You skipped one key on purpose, which is much better than skipping practice.' },
     ]
   },
   'scale-degree': {
@@ -831,6 +847,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [studentEmotion, setStudentEmotion] = React.useState('neutral')
   const [teachingStep, setTeachingStep] = React.useState(0)
   const [awaitingResponse, setAwaitingResponse] = React.useState(false)
+  const [practiceCorrect, setPracticeCorrect] = React.useState(0)
   const [responseTimeout, setResponseTimeout] = React.useState(null)
   const [conceptState, setConceptState] = useState(() => getState(currentConcept.conceptId) || {})
   const [sessionCorrect, setSessionCorrect] = useState(0)
@@ -858,6 +875,8 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const teachingStepRef = React.useRef(0)
   const handleStudentInputRef = React.useRef(null)
   const practiceViewRef = React.useRef('cockpit')
+  const quizCorrectRef = React.useRef(0)
+  const practiceCorrectRef = React.useRef(0)
   React.useEffect(() => { practiceViewRef.current = practiceView }, [practiceView])
 
   const showDebug = React.useMemo(() => {
@@ -874,7 +893,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
   const advanceTeaching = React.useCallback(async (step) => {
     if (step >= THEORY_STEPS.length) {
-      setCoaching({ message: 'Lesson complete! You learned the major scale pattern.', speaking: false, tags: ['Complete'] })
+      setCoaching({ message: `Lesson complete! You learned ${currentConcept.concept}.`, speaking: false, tags: ['Complete'] })
       if (currentConcept?.nextConcept) {
         setTimeout(() => { window.location.href = '/practice-live?concept=' + currentConcept.nextConcept }, 2000)
       }
@@ -884,6 +903,12 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     teachingStepRef.current = step
     setTeachingStep(step)
     const current = THEORY_STEPS[step]
+
+    if (current.stage === 'teach') {
+      quizCorrectRef.current = 0
+      practiceCorrectRef.current = 0
+      setPracticeCorrect(0)
+    }
 
     if (current.type === 'speak') {
       setAwaitingResponse(false)
@@ -908,12 +933,15 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       // Natural pause before advancing
       await new Promise(r => setTimeout(r, 400))
       advanceTeaching(step + 1)
-    } else if (current.type === 'listen') {
+    } else if (current.type === 'listen' || current.type === 'live_practice') {
       setAwaitingResponse(true)
       setRetryMode(false)
       setPromptMode(false)
       setTheoryIsSpeaking(false)
-      setCoaching({ message: 'Your turn! I am listening...', speaking: false, tags: ['Listening'] })
+      const promptText = current.type === 'live_practice'
+        ? buildPracticePrompt(current, practiceCorrectRef.current)
+        : current.text || 'Your turn! I am listening...'
+      setCoaching({ message: promptText, speaking: false, tags: [current.type === 'live_practice' ? 'Practice' : 'Listening'] })
       // Restart WYL mic only when NOT in concept view (concept view uses PCV's own mic)
       if (micAllowed && practiceViewRef.current !== 'concept') {
         setTimeout(() => {
@@ -927,7 +955,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       }, 15000)
       setResponseTimeout(timeout)
     }
-  }, [THEORY_STEPS])
+  }, [THEORY_STEPS, currentConcept])
 
   const speakMotesart = React.useCallback(async (text) => {
     await api.speakText(sanitizeTTS(text), 'coach')
@@ -946,13 +974,13 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     setLastTranscript(transcript)
     const step = teachingStepRef.current
     const current = THEORY_STEPS[step]
-    if (!current || current.type !== 'listen') return
+    if (!current || (current.type !== 'listen' && current.type !== 'live_practice')) return
 
     if (responseTimeout) clearTimeout(responseTimeout)
 
     const heard = transcript.toLowerCase().trim()
     const expected = current.expect
-    const evaluation = evaluateStudentResponse(heard, expected, current.prompt, 'The Half Step')
+    const evaluation = evaluateStudentResponse(heard, expected, current.prompt, currentConcept.concept)
     const readyCheckAccepted = current.prompt === 'ready_check' &&
       /^(yes|yeah|yep|sure|ready|ok|okay|lets go|let's go|yea)$/.test(heard)
     const acceptedAsCorrect = evaluation.correct || readyCheckAccepted
@@ -1027,9 +1055,86 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       return
     }
 
+    const firstQuizStep = THEORY_STEPS.findIndex(s => s.stage === 'quiz')
+    const returnToQuiz = firstQuizStep >= 0 ? firstQuizStep : step
+    const reviewAndAdvance = async (message, targetStep) => {
+      setAwaitingResponse(false)
+      setCoaching({ message, speaking: true, tags: ['Review'] })
+      try {
+        await speakMotesart(message)
+      } catch (err) {
+        console.warn('[WYLPracticeLive] Review TTS failed:', err.message)
+      }
+      setCoaching(prev => ({ ...prev, speaking: false }))
+      await new Promise(r => setTimeout(r, 500))
+      advanceTeaching(targetStep)
+    }
+    const finishQuizAttempt = async () => {
+      setAwaitingResponse(false)
+      await new Promise(r => setTimeout(r, 800))
+      if (current.quizEnd) {
+        if (quizCorrectRef.current >= 2) {
+          advanceTeaching(step + 1)
+        } else {
+          await reviewAndAdvance(QUIZ_REVIEW_TEXT, 0)
+        }
+      } else {
+        advanceTeaching(step + 1)
+      }
+    }
+
     if (acceptedAsCorrect) {
       setStudentEmotion('happy')
       setAwaitingResponse(false)
+
+      if (current.stage === 'quiz') {
+        quizCorrectRef.current += 1
+      }
+
+      if (current.type === 'live_practice') {
+        const nextPracticeCorrect = practiceCorrectRef.current + 1
+        practiceCorrectRef.current = nextPracticeCorrect
+        setPracticeCorrect(nextPracticeCorrect)
+        const target = current.practiceTarget || PRACTICE_TARGET
+        const affirmText = nextPracticeCorrect >= target
+          ? 'Practice locked. Onward.'
+          : `Yes. Practice ${nextPracticeCorrect} of ${target}. Give me one more.`
+        setCoaching({ message: affirmText, speaking: true, tags: ['Affirm'] })
+        try {
+          await speakMotesart(affirmText)
+        } catch(e) {
+          console.warn('[WYLPracticeLive] Affirm TTS failed:', e.message)
+        }
+        setCoaching(prev => ({ ...prev, speaking: false }))
+        if (nextPracticeCorrect >= target) {
+          await new Promise(r => setTimeout(r, 600))
+          setRetryMode(false)
+          setPromptMode(false)
+          advanceTeaching(step + 1)
+        } else {
+          setAwaitingResponse(true)
+          setRetryMode(false)
+          setPromptMode(false)
+          setCoaching({ message: buildPracticePrompt(current, nextPracticeCorrect), speaking: false, tags: ['Practice'] })
+        }
+        return
+      }
+
+      if (current.stage === 'prove') {
+        const lockedText = current.lockedText || `${currentConcept.concept} locked.`
+        setCoaching({ message: lockedText, speaking: true, tags: ['Complete'] })
+        try {
+          await speakMotesart(lockedText)
+        } catch(e) {
+          console.warn('[WYLPracticeLive] Prove-it TTS failed:', e.message)
+        }
+        setCoaching(prev => ({ ...prev, speaking: false }))
+        await new Promise(r => setTimeout(r, 800))
+        setRetryMode(false)
+        setPromptMode(false)
+        advanceTeaching(step + 1)
+        return
+      }
 
       if (current.prompt !== 'ready_check') {
         const affirmText = buildCorrectAnswerResponse()
@@ -1043,10 +1148,14 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         setCoaching(prev => ({ ...prev, speaking: false }))
       }
       // Natural pause before advancing after correct answer
-      await new Promise(r => setTimeout(r, 800))
       setRetryMode(false)
       setPromptMode(false)
-      advanceTeaching(step + 1)
+      if (current.stage === 'quiz') {
+        await finishQuizAttempt()
+      } else {
+        await new Promise(r => setTimeout(r, 800))
+        advanceTeaching(step + 1)
+      }
       try {
         tamiStackRef.current?.intelligence?.processConfidenceUpdate({ concept: ACTIVE_CONCEPT_ID, delta: +10 })
         if (import.meta.env.DEV) console.log('[TAMi Wire] processConfidenceUpdate fired — concept:', ACTIVE_CONCEPT_ID, ', delta: +10')
@@ -1085,6 +1194,12 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         tamiStackRef.current?.intelligence?.processConfidenceUpdate({ concept: ACTIVE_CONCEPT_ID, delta: -15 })
         if (import.meta.env.DEV) console.log('[TAMi Wire] processConfidenceUpdate fired — concept:', ACTIVE_CONCEPT_ID, ', delta: -15')
       } catch(e) { /* never crash the lesson */ }
+      if (current.stage === 'quiz') {
+        await finishQuizAttempt()
+      } else if (current.stage === 'prove') {
+        quizCorrectRef.current = 0
+        await reviewAndAdvance(PROVE_REVIEW_TEXT, returnToQuiz)
+      }
     }
   }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, speakMotesart, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept.concept, currentPhase, lessonId, motesartStudentState, studentProfile?.ageBand, studentProfile?.age_band, wylProfile])
   handleStudentInputRef.current = handleStudentInput
@@ -1399,7 +1514,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     <>
       <PracticeConceptView
         conceptName={coaching.concept || currentConcept.concept}
-        conceptDesc="The closest distance between two notes"
+        conceptDesc={currentConcept.description}
         phase={currentPhase}
         speechText={coaching.message || ''}
         highlightedKeys={conceptConfig.highlightedKeys}
@@ -1412,6 +1527,9 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         retryMode={retryMode}
         promptMode={promptMode}
         isSpeaking={theoryIsSpeaking}
+        turnLabel={THEORY_STEPS[teachingStep]?.type === 'live_practice'
+          ? `Practice ${Math.min(practiceCorrect + 1, THEORY_STEPS[teachingStep]?.practiceTarget || PRACTICE_TARGET)} of ${THEORY_STEPS[teachingStep]?.practiceTarget || PRACTICE_TARGET}`
+          : ''}
         onStudentResponse={handleStudentInput}
         onStudentTextChange={() => {}}
         onReplay={() => {

@@ -562,6 +562,7 @@ export default function PracticeConceptView({
   studentTurn      = false,
   retryMode        = false,
   promptMode       = false,
+  turnLabel        = '',
   autoSpeak        = true,
   onAnswer,
   onReplay,
@@ -711,14 +712,21 @@ export default function PracticeConceptView({
             />
             <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', padding:'14px 20px 16px' }}>
               {studentTurn ? (
-                <textarea
-                  className="pcv-speech-text"
-                  style={{ background:'none', border:'none', resize:'none', width:'100%', color:'rgba(255,255,255,0.85)', fontFamily:'DM Sans,-apple-system,sans-serif', fontSize:15, lineHeight:1.65, outline:'none', minHeight:52, display:'block' }}
-                  placeholder="Say your answer — or type here and press Submit..."
-                  value={studentText}
-                  onChange={e => setStudentText(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && studentText.trim()) { e.preventDefault(); setStudentText(''); onStudentResponse?.(studentText.trim()) } }}
-                />
+                <>
+                  {turnLabel && (
+                    <div style={{ marginBottom:8, fontSize:12, fontWeight:800, color:'#34d399', letterSpacing:'0.03em' }}>
+                      {turnLabel}
+                    </div>
+                  )}
+                  <textarea
+                    className="pcv-speech-text"
+                    style={{ background:'none', border:'none', resize:'none', width:'100%', color:'rgba(255,255,255,0.85)', fontFamily:'DM Sans,-apple-system,sans-serif', fontSize:15, lineHeight:1.65, outline:'none', minHeight:52, display:'block' }}
+                    placeholder="Say your answer — or type here and press Submit..."
+                    value={studentText}
+                    onChange={e => setStudentText(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && studentText.trim()) { e.preventDefault(); setStudentText(''); onStudentResponse?.(studentText.trim()) } }}
+                  />
+                </>
               ) : (
                 <div className="pcv-speech-text">
                   {displayedWords.length > 0 ? displayedWords.join(' ') : speechText}
