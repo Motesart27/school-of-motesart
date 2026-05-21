@@ -306,12 +306,28 @@ const CONCEPT_CONFIG_MAP = {
       {
         type: 'speak',
         stage: 'intro',
-        text: "Welcome to the School of Motesart. I am looking forward to teaching — and learning how you best learn. No pressure today, we are starting with one simple pattern: the major scale pattern. Once you understand this pattern, we will be able to build from there. Let's begin."
+        text: 'Welcome to the School of Motesart. I am looking forward to teaching — and learning how you best learn. No pressure today, we are starting with one simple pattern: the major scale pattern. Once you understand this pattern, we will be able to build from there. Are you ready to start?'
+      },
+      {
+        type: 'listen',
+        stage: 'ready',
+        expect: [
+          'yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go',
+          'yea', 'i am', 'im ready', 'go', 'let us go', 'let go'
+        ],
+        prompt: 'ready_check',
+        prompt_display: 'Say yes or ready to begin.',
+        text: 'Are you ready to start?'
       },
       {
         type: 'speak',
         stage: 'teach',
-        text: 'Here is the pattern. Listen first. 1 skip 1. 2 skip 1. 3 and 4 together. 4 skip 1. 5 skip 1. 6 skip 1. 7 and 8 together.'
+        text: 'Good. Here is the pattern. Listen first. 1 skip 1. 2 skip 1. 3 and 4 together. 4 skip 1. 5 skip 1. 6 skip 1. 7 and 8 together.'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'Now say it back to me. Ready? Say the whole pattern. 1 skip 1, 2 skip 1, 3 and 4 together...'
       },
       {
         type: 'listen',
@@ -319,58 +335,26 @@ const CONCEPT_CONFIG_MAP = {
         expect: [
           '1 skip 1 2 skip 1 3 and 4 together 4 skip 1 5 skip 1 6 skip 1 7 and 8 together',
           'one skip one two skip one three and four together',
-          '1 skip 2 skip 3 4 together 5 skip 6 skip 7 8 together',
           'skip skip together skip skip skip together',
           '3 and 4 together 7 and 8 together',
-          '1 2 3 4 5 6 7 8',
           'skip together',
-          'one two three four five six seven eight'
-        ],
-        prompt: 'call_response',
-        prompt_display: 'Now say the whole pattern back to me.',
-        text: 'Now say the whole pattern back to me. 1 skip 1, 2 skip 1, 3 and 4 together...'
-      },
-      {
-        type: 'speak',
-        stage: 'teach',
-        text: 'Good. Now here is the important part. Most of the pattern skips. But two places do not skip. 3 and 4 are together. 7 and 8 are together. That means there is no note between them. They sit right next to each other.'
-      },
-      {
-        type: 'listen',
-        stage: 'call_response',
-        expect: [
-          '3 and 4', '7 and 8', 'three and four', 'seven and eight',
-          '3 4 7 8', '3 and 4 7 and 8', '3 and 4, 7 and 8',
-          'three and four, seven and eight', 'three four seven eight'
-        ],
-        prompt: 'call_response',
-        prompt_display: 'Which number pairs do not have a note between them?',
-        text: 'Which number pairs do not have a note between them?'
-      },
-      {
-        type: 'speak',
-        stage: 'teach',
-        text: 'Exactly. 3 and 4, and 7 and 8. Those are the close spots in the major scale pattern. Later we will call those half steps. But for now, just remember: most numbers skip. 3 and 4 stay together. 7 and 8 stay together.'
-      },
-      {
-        type: 'speak',
-        stage: 'teach',
-        text: 'Now I have a few questions for you. Take your time. There is no rush.'
-      },
-      {
-        type: 'listen',
-        stage: 'quiz',
-        quizEnd: false,
-        expect: [
-          '1 skip 1 2 skip 1 3 and 4 together 4 skip 1 5 skip 1 6 skip 1 7 and 8 together',
-          'skip skip together skip skip skip together',
-          '3 and 4 together 7 and 8 together',
-          'one skip one', '1 skip 1 2 skip 1', 'skip and together',
+          '1 2 3 4 5 6 7 8',
+          'one two three four five six seven eight',
           '3 and 4 7 and 8'
         ],
-        prompt: 'full_pattern',
-        prompt_display: 'Q1 of 3 — Say the whole major scale pattern.',
-        text: 'Say the whole major scale pattern for me.'
+        prompt: 'call_response',
+        prompt_display: 'Say the whole pattern — 1 skip 1, 2 skip 1, 3 and 4 together...',
+        text: 'Say the whole pattern — 1 skip 1, 2 skip 1, 3 and 4 together...'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'Good. Now here is the important part. Most of the pattern skips. But two places do not skip. 3 and 4 are together. 7 and 8 are together. No note between them. They sit right next to each other.'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'I am going to ask you which pairs are together. Take your time.'
       },
       {
         type: 'listen',
@@ -382,8 +366,20 @@ const CONCEPT_CONFIG_MAP = {
           '34 78', 'three four seven eight', '3 and 4, 7 and 8'
         ],
         prompt: 'full_pattern',
-        prompt_display: 'Q2 of 3 — Which number pairs are TOGETHER?',
-        text: 'Which number pairs are together — with no note between them?'
+        prompt_display: 'Q1 of 3 — Which number pairs are TOGETHER?',
+        text: 'Which number pairs are TOGETHER — with no note between them?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: false,
+        expect: [
+          'skip', 'a skip', 'there is a skip', 'one skip one', '1 skip 1',
+          'skip one', 'whole step', 'whole', 'yes skip', 'yes a skip'
+        ],
+        prompt: 'full_pattern',
+        prompt_display: 'Q2 of 3 — Between 1 and 2: skip or together?',
+        text: 'Between 1 and 2 in the pattern — is there a skip, or are they together?'
       },
       {
         type: 'listen',
@@ -395,7 +391,7 @@ const CONCEPT_CONFIG_MAP = {
         ],
         prompt: 'full_pattern',
         prompt_display: 'Q3 of 3 — Between 3 and 4: skip or together?',
-        text: 'Between 3 and 4 — do we skip or stay together?',
+        text: 'Between 3 and 4 — do we skip, or stay together?',
         quizFailStep: 6
       },
       {
@@ -408,7 +404,7 @@ const CONCEPT_CONFIG_MAP = {
           'skip and together', 'two together'
         ],
         prompt_display: 'Practice — say the pattern or name the together spots.',
-        text: 'Say the pattern out loud, or just name the together spots. Your choice.'
+        text: 'Say the pattern out loud, or just name the together spots.'
       },
       {
         type: 'prove_it',
