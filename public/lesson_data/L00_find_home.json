@@ -1,0 +1,515 @@
+{
+  "_meta": {
+    "gate": 0,
+    "gate_name": "Find Home",
+    "concept_id": "find_home",
+    "traditional_concept": "T_TONIC_RECOGNITION",
+    "lesson_file": "L00_find_home",
+    "curriculum_path": "C Major Scale Mastery Path",
+    "phase": "Gate 0 of 8",
+    "version": "1.0",
+    "ratified": "2026-05-21",
+    "constitution_ref": "docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md",
+    "doctrine_ref": "SOM_MASTERY_INTELLIGENCE_ENGINE_DOCTRINE.md",
+    "prerequisites": []
+  },
+  "translation_layer": {
+    "student_language": "Home, 1, family, where the music lives",
+    "teacher_language": "Tonic recognition, scale degree 1, key center",
+    "system_language": "T_TONIC_RECOGNITION, find_home, C_MAJOR_HOME_OWNED"
+  },
+  "narrative_intensity": {
+    "child": {
+      "story_hook": "Every song has a home. Home is where the music lives — where the family starts. It's the note that everything wants to come back to. In C major, C is home. C is 1.",
+      "tone": "Warm, playful, story-first. Use holding-hands and family language freely.",
+      "character_labels_allowed": false,
+      "family_language": true
+    },
+    "teen": {
+      "story_hook": "Every key has a home note — the one the music lands on and wants to return to. We call it home, or 1. In C major, C is home.",
+      "tone": "Direct, peer-level. Skip the holding-hands language. Keep skip/together/home vocabulary.",
+      "character_labels_allowed": false,
+      "family_language": false
+    },
+    "adult": {
+      "story_hook": "Every key has a tonal center — the note the music gravitates toward. We call it home, or 1. In C major, C is home. You'll hear it as the note that feels settled.",
+      "tone": "Efficient, no story scaffolding. Music-world name offered as parenthetical. Same concept, same proof.",
+      "character_labels_allowed": false,
+      "family_language": false
+    }
+  },
+  "gate_steps": {
+    "step_1_story_hook": {
+      "step": 1,
+      "name": "Story Hook",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "listen",
+      "child": "Every song has a home. Home is where the music lives. Home is where the family starts. In C major, C is home. That is number 1.",
+      "teen": "Every key has a home note — the one the music wants to land on. In C major, C is home. We call it 1.",
+      "adult": "Every key has a tonal center — the note the music settles on. In C major, C is home. Call it home, or 1.",
+      "visual": "C highlighted on the keyboard as home base. The number 1 appears above it. All other notes are dim.",
+      "audio": "play C4 three times — once alone, once after a short ascending run, once after a descending run. Each time it lands, Motesart says: 'There. That's home.'"
+    },
+    "step_2_hear_it": {
+      "step": 2,
+      "name": "Hear It",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "listen_and_feel",
+      "description": "Student hears the concept before they see any symbols or terminology. Audio plays. No labels on screen yet.",
+      "motesart_intro": "Listen to this. (plays ascending C major scale) Did you hear where it wanted to land at the end? That last note — that's home. That's 1.",
+      "audio_sequence": [
+        {
+          "event": "play_scale",
+          "notes": [
+            "C4",
+            "D4",
+            "E4",
+            "F4",
+            "G4",
+            "A4",
+            "B4",
+            "C5"
+          ],
+          "tempo_ms": 350
+        },
+        {
+          "event": "pause",
+          "ms": 800
+        },
+        {
+          "event": "motesart_says",
+          "text": "Hear how it settles there? That last note is home."
+        },
+        {
+          "event": "pause",
+          "ms": 500
+        },
+        {
+          "event": "play_single",
+          "note": "C5"
+        },
+        {
+          "event": "motesart_says",
+          "text": "That is 1. That is home."
+        }
+      ],
+      "visual": "Scale notes light up one at a time as they play. C5 at the end glows brighter and stays lit. No W/H labels. No letter names yet — only the number 1 over the final note."
+    },
+    "step_3_say_it": {
+      "step": 3,
+      "name": "Say It",
+      "motesart_speaks": true,
+      "speak_or_text": true,
+      "student_action": "answer_call_response",
+      "description": "Call and response. Motesart speaks a partial phrase. Student completes it. Both voice and text input accepted.",
+      "rounds": [
+        {
+          "motesart_prompt": "The number 1 is called...",
+          "acceptable_answers": [
+            "home",
+            "1",
+            "one",
+            "the home note"
+          ],
+          "motesart_correct": "Yes. 1 is home.",
+          "motesart_wrong": "That's what we're learning. 1 is home — say it back."
+        },
+        {
+          "motesart_prompt": "In C major, the home note is...",
+          "acceptable_answers": [
+            "C",
+            "C major",
+            "the note C",
+            "C4",
+            "C5"
+          ],
+          "motesart_correct": "C. That's home in C major.",
+          "motesart_wrong": "In C major, home is C. Say it back — the home note is..."
+        },
+        {
+          "motesart_prompt": "Home is where the music wants to...",
+          "acceptable_answers": [
+            "land",
+            "go",
+            "come back",
+            "return",
+            "settle",
+            "come back to",
+            "land on"
+          ],
+          "motesart_correct": "Land. Come back to. Exactly.",
+          "motesart_wrong": "Think about how it felt at the end of the scale. The music wants to come back home."
+        }
+      ]
+    },
+    "step_4_feel_check": {
+      "step": 4,
+      "name": "Feel Check",
+      "motesart_speaks": true,
+      "speak_or_text": true,
+      "student_action": "feel_and_respond",
+      "internal_only": true,
+      "description": "Audiation test. Student hears two options and chooses which one feels like home. This is NOT a graded quiz. It calibrates confidence_score internally. Student never sees Feel Check results or percentages.",
+      "student_facing_intro": "Close your eyes. I'll play two notes. After each one, just say which one felt more like home — first or second. Don't think about it. Just feel it.",
+      "rounds": [
+        {
+          "round_id": "FC_01",
+          "play_A": [
+            "C4",
+            "D4",
+            "E4",
+            "C4"
+          ],
+          "play_B": [
+            "C4",
+            "D4",
+            "E4",
+            "G4"
+          ],
+          "correct_answer": "A",
+          "feel_check_concept": "home_resolution"
+        },
+        {
+          "round_id": "FC_02",
+          "play_A": [
+            "G4",
+            "A4",
+            "B4",
+            "C5"
+          ],
+          "play_B": [
+            "G4",
+            "A4",
+            "B4",
+            "D5"
+          ],
+          "correct_answer": "A",
+          "feel_check_concept": "home_landing"
+        }
+      ],
+      "data_captured": {
+        "response_time_ms": "captured per round",
+        "accuracy": "captured per round",
+        "audiation_signal": "< 2000ms = audiating, >= 2000ms = calculating",
+        "surfaces_to_student": false,
+        "surfaces_to_teacher": true,
+        "surfaces_to_system": true
+      },
+      "student_never_sees": [
+        "percentage",
+        "score",
+        "Feel Check",
+        "audiation",
+        "confidence"
+      ]
+    },
+    "step_5_name_it": {
+      "step": 5,
+      "name": "Name It",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "listen",
+      "description": "Music-world name is revealed only after the student has heard, felt, and said the concept. Per Article IV of the Constitution — earned-name doctrine.",
+      "motesart_reveal": "You already know what home is. Now here's the music-world name for it. Musicians call 1 the tonic — or the root. Same idea. Just the technical name. You can use either. Home. Tonic. Both are right.",
+      "child_version": "You already know home. Here's what musicians call it — the tonic. Same thing. You just know it as home.",
+      "teen_version": "The music-world name for home is tonic, or root. Same concept. Both words work.",
+      "adult_version": "Music-world name: tonic, or root. You know it as 1 or home. All three mean the same thing.",
+      "visual": "The word 'Home' on screen. An arrow appears. 'Tonic' fades in beside it. Both words stay visible.",
+      "locked_terms": {
+        "motesart_word": "Home",
+        "music_world_name": "Tonic",
+        "system_id": "T_TONIC_RECOGNITION",
+        "reveal_trigger": "after step_3 and step_4 both completed"
+      }
+    },
+    "step_6_quiz_it": {
+      "step": 6,
+      "name": "Quiz It",
+      "motesart_speaks": false,
+      "speak_or_text": true,
+      "student_action": "answer_questions",
+      "description": "Short retrieval questions. Motesart is absent during quiz questions per Article XII. A small indicator reads: 'Test mode — answer on your own.' Motesart reappears with feedback after each answer.",
+      "passing_threshold": 0.85,
+      "attempts_before_intervention": 2,
+      "questions": [
+        {
+          "question_id": "G0_Q1",
+          "type": "recall_spoken_or_typed",
+          "prompt": "What number is home?",
+          "acceptable_answers": [
+            "1",
+            "one",
+            "the number 1"
+          ],
+          "motesart_correct": "1. That's home.",
+          "motesart_wrong": "Home is always 1. The first note. The tonic. Try again."
+        },
+        {
+          "question_id": "G0_Q2",
+          "type": "multiple_choice",
+          "prompt": "In C major, which note is home?",
+          "options": [
+            "C",
+            "D",
+            "E",
+            "G"
+          ],
+          "correct": "C",
+          "motesart_correct": "C is home in C major. That's where the family lives.",
+          "motesart_wrong": "In C major, home is C. That's the first note — number 1."
+        },
+        {
+          "question_id": "G0_Q3",
+          "type": "multiple_choice",
+          "prompt": "Home is where the music wants to...",
+          "options": [
+            "speed up",
+            "come back to",
+            "get louder",
+            "stop completely"
+          ],
+          "correct": "come back to",
+          "motesart_correct": "Come back to. The music always wants to come home.",
+          "motesart_wrong": "Think about how the scale felt when it landed at the end. The music came back home."
+        },
+        {
+          "question_id": "G0_Q4",
+          "type": "recall_spoken_or_typed",
+          "prompt": "What is the music-world name for home?",
+          "acceptable_answers": [
+            "tonic",
+            "root",
+            "the tonic",
+            "tonic or root"
+          ],
+          "motesart_correct": "Tonic. Or root. Both work. You earned that name.",
+          "motesart_wrong": "The music-world name for home is tonic. Or root. Say it back."
+        },
+        {
+          "question_id": "G0_Q5",
+          "type": "multiple_choice",
+          "prompt": "If I told you the home note of a song is G, what number is G?",
+          "options": [
+            "1",
+            "5",
+            "4",
+            "3"
+          ],
+          "correct": "1",
+          "motesart_correct": "G would be 1. Home is always 1, no matter which note it is.",
+          "motesart_wrong": "Home is always 1. It doesn't matter which note it is. If G is home, G is 1."
+        }
+      ]
+    },
+    "step_7_explain_it": {
+      "step": 7,
+      "name": "Explain It",
+      "is_ownership_gate": true,
+      "motesart_speaks": false,
+      "speak_or_text": true,
+      "student_action": "ownership_explanation",
+      "description": "Ownership gate. Student explains the concept in their own words. Both voice and text accepted. Motesart absent during the answer. Returns with feedback. Per Article XV — ownership_status = owned required for mastery.",
+      "prompt": "In your own words — what does home mean in music, and why does it matter?",
+      "acceptable_signals": [
+        "where the music lands",
+        "where it comes back",
+        "the first note",
+        "number 1",
+        "where it settles",
+        "the note that feels done",
+        "tonic",
+        "the family starts there",
+        "home base"
+      ],
+      "motesart_correct": "That is ownership. You are not just repeating it — you understand it.",
+      "motesart_wrong": "Try to say it in your own words. What does home mean to you in music? Why does that note matter?"
+    }
+  },
+  "wyl_interventions": {
+    "description": "WYL fires AFTER a mistake is detected — not from a student label, from the specific failure. Four modes serve the same concept in different ways. Per Constitution Article VI and UDL doctrine.",
+    "gate": "G0_find_home",
+    "interventions": {
+      "visual": {
+        "trigger": "WRONG_HOME_NOTE or HOME_DEFINITION_MISSED",
+        "child": "Show C keyboard with a glowing home icon over C. Arrows from other notes pointing back to C. Caption: 'All roads lead home.'",
+        "teen": "Keyboard diagram with C highlighted. Short caption: 'C is 1. That's home in C major.'",
+        "adult": "Keyboard diagram. C labeled as '1 / Tonic / Home.' Brief.",
+        "interaction": "Student taps each note and hears Motesart say 'skip' or 'not home' until they land on C and hear 'Home.'"
+      },
+      "auditory": {
+        "trigger": "FEEL_CHECK_LOW or HOME_IDENTIFICATION_MISSED",
+        "child": "Motesart plays three short phrases. First two land away from home. Third lands on C. 'Did you hear the difference? The last one settled. That's home.'",
+        "teen": "Play two endings — one resolves to C, one ends on G. 'Which one settled? Which one felt done?'",
+        "adult": "Play V-I resolution (G → C). 'Hear it pull to C? That settling feeling — that's the tonic.'",
+        "interaction": "Student selects 'first' or 'second' after each pair."
+      },
+      "kinesthetic": {
+        "trigger": "CALL_RESPONSE_MISSED after two attempts",
+        "child": "Tap home button rhythm game. Motesart plays a melody. Student taps BIG when they hear it land home. 'Every time it feels done — tap!'",
+        "teen": "Same tap game, no BIG/SMALL language. 'Tap when you hear home.'",
+        "adult": "Same tap game, no scaffolding. Student taps when V-I resolution occurs.",
+        "interaction": "3 rounds, each ending on C. Student taps when they feel home."
+      },
+      "readwrite": {
+        "trigger": "EXPLANATION_UNCLEAR or OWNERSHIP_GATE_RETRY",
+        "child": "Fill in: '1 is called ___. In C major, the home note is ___. Home is where the music wants to ___.'",
+        "teen": "Fill in: '1 is called home, or the ___. The home note of C major is ___.'",
+        "adult": "Fill in: 'The tonic of C major is ___. The tonic is scale degree number ___.'",
+        "interaction": "Fill-in or multiple-choice form."
+      }
+    }
+  },
+  "mistake_detection": {
+    "categories": [
+      {
+        "code": "WRONG_HOME_NOTE",
+        "description": "Student identifies a note other than C as home in C major",
+        "trigger": "answer to G0_Q2 is not C",
+        "severity": "high",
+        "next_action": "trigger WYL visual — keyboard with C highlighted as home"
+      },
+      {
+        "code": "HOME_DEFINITION_MISSED",
+        "description": "Student defines home as a technique or dynamic rather than a tonal center",
+        "trigger": "answer to G0_Q3 includes 'louder', 'faster', 'stop', 'accent'",
+        "severity": "medium",
+        "next_action": "trigger WYL auditory — hear C as the settling note"
+      },
+      {
+        "code": "HOME_IDENTIFICATION_MISSED",
+        "description": "Student cannot identify which note is 1 in a new context",
+        "trigger": "wrong answer to G0_Q5",
+        "severity": "medium",
+        "next_action": "re-teach: home is always 1, regardless of which note"
+      },
+      {
+        "code": "TECHNICAL_NAME_CONFUSION",
+        "description": "Student confuses tonic with dominant, root with bass note, or other technical terms",
+        "trigger": "G0_Q4 answer is 'dominant', 'chord', 'bass', 'key', 'scale'",
+        "severity": "low",
+        "next_action": "Motesart: 'The music-world name for home is tonic. Same idea as home. Not the chord name — just the note name.'"
+      },
+      {
+        "code": "MEMORIZED_WITHOUT_UNDERSTANDING",
+        "description": "Student passes G0_Q1-Q5 but cannot explain home in own words at G0_Q7",
+        "trigger": "is_ownership_gate passes quiz but ownership explanation fails",
+        "severity": "critical",
+        "next_action": "flag as execution_only — ownership gate not passed — require retry or teacher review"
+      }
+    ]
+  },
+  "mastery_rule": {
+    "execution_required": true,
+    "ownership_required": true,
+    "execution_definition": "Student answers G0_Q1 through G0_Q5 with score >= 0.85",
+    "ownership_definition": "Student explains home in own words with at least one acceptable signal present",
+    "cannot_advance_without_ownership": true,
+    "teacher_override_available": true,
+    "feel_check_blocks_advancement": false,
+    "confidence_tiers": {
+      "not_ready": {
+        "range": [
+          0,
+          39
+        ],
+        "motesart_response": "Let's back up. We need more time here before we move on."
+      },
+      "developing": {
+        "range": [
+          40,
+          69
+        ],
+        "motesart_response": "You're getting there. Let's try that again."
+      },
+      "almost_owned": {
+        "range": [
+          70,
+          84
+        ],
+        "motesart_response": "You almost had it. One more pass and it'll stick."
+      },
+      "owned": {
+        "range": [
+          85,
+          94
+        ],
+        "motesart_response": "Yes. You had it."
+      },
+      "mastered": {
+        "range": [
+          95,
+          100
+        ],
+        "motesart_response": "That is locked. You know where home is."
+      }
+    },
+    "repeat_without_help_required": true,
+    "repeat_session_gap_days": 2
+  },
+  "homework_game": {
+    "variant": "find_home",
+    "engine": "FindTheNote",
+    "level_locked": 1,
+    "octaves": 1,
+    "notes_per_round": 1,
+    "scale": "C_major",
+    "ask_for": "the_home_note",
+    "prompt": "Where is home?",
+    "success_threshold": 0.85,
+    "spaced_repetition": true,
+    "description": "Student hears C major scale, then hears one note. They tap which key is home (1). Level 1 only — one note, one octave, C major only.",
+    "game_sessions_table": "TO VERIFY — Game_Sessions in Airtable via Railway backend"
+  },
+  "evidence_logging": {
+    "table": "SOM_Mastery_Ledger",
+    "base": "appTN4wNd5Kgbqdwl",
+    "status": "TO VERIFY — table and field names must be confirmed against live Airtable before any write",
+    "fields_to_write": {
+      "student_email": "from session",
+      "concept": "Find Home",
+      "lesson_id": "L00_find_home",
+      "gate": 0,
+      "evidence_type": "self_practice | teacher_observed | zoom_class",
+      "mistake_category": "from mistake_detection.categories[].code",
+      "mistake_detail": "free text from session",
+      "feel_check_response_time_ms": "internal only — never shown to student",
+      "feel_check_accuracy": "internal only — never shown to student",
+      "confidence_score": "0-100 internal — mapped to tier language for student",
+      "gate_reached": "exposure | understanding | execution | ownership | mastery",
+      "execution_passed": "boolean",
+      "ownership_passed": "boolean",
+      "timestamp": "auto",
+      "session_id": "wyl session id or zoom meeting id"
+    },
+    "evidence_weights": {
+      "teacher_observed": 1.0,
+      "zoom_class": 0.85,
+      "self_practice": 0.7
+    }
+  },
+  "next_gate": {
+    "unlocks": "L01_skip_and_together",
+    "gate": 1,
+    "gate_name": "Skip and Together",
+    "condition": "execution_passed AND ownership_passed AND confidence_score >= 85",
+    "lesson_file": "L01_skip_and_together"
+  },
+  "motesart_constitution_compliance": {
+    "article_II_protected_language": true,
+    "article_III_translation_layer": true,
+    "article_IV_earned_name_doctrine": true,
+    "article_V_family_vocabulary_limit": true,
+    "article_VI_story_earned_by_sound": true,
+    "article_VII_character_labels_with_audiation_prereq": true,
+    "article_VIII_feel_check_internal_only": true,
+    "article_IX_narrative_intensity_all_three_bands": true,
+    "article_X_single_concept_per_gate": true,
+    "article_XI_speak_or_text_every_input": true,
+    "article_XII_motesart_present_except_quiz": true,
+    "article_XIII_no_percentages_to_student": true,
+    "article_XIV_homework_game_declared": true,
+    "article_XV_pattern_mind_preserved": "N/A — this is Gate 0"
+  }
+}
