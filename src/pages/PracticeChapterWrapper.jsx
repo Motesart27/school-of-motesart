@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { getState } from '../lesson_engine/concept_state_store.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 import MetronomeControl from '../components/MetronomeControl.jsx'
@@ -21,6 +21,9 @@ import HalfStepFindIt from './HalfStepFindIt.jsx'
 import HalfStepPlayIt from './HalfStepPlayIt.jsx'
 import HalfStepMoveIt from './HalfStepMoveIt.jsx'
 import HalfStepOwnIt from './HalfStepOwnIt.jsx'
+
+// SOM Mastery Intelligence Engine — Gate 0
+import MajorScalePatternGate from '../components/gate0/MajorScalePatternGate.jsx'
 
 /**
  * PracticeChapterWrapper
@@ -54,6 +57,26 @@ export default function PracticeChapterWrapper() {
   const [chapter, setChapter] = useState('find_it')
   const [loading, setLoading] = useState(true)
   const [locked, setLocked] = useState(null)
+
+  const navigate = useNavigate()
+
+  // SOM Mastery Intelligence Engine — Gate 0
+  // Bypasses the legacy chapter/API loading system entirely.
+  if (conceptId === 'C_MAJOR_GATE_0') {
+    return <MajorScalePatternGate onGatePassed={(result) => {
+      try {
+        sessionStorage.setItem('gate0_result', JSON.stringify({
+          gateId: 'C_MAJOR_GATE_0',
+          concept: 'major_scale_pattern',
+          completedAt: new Date().toISOString(),
+          ...result,
+        }))
+      } catch (e) {
+        // sessionStorage unavailable — safe to continue
+      }
+      navigate('/student')
+    }} />
+  }
 
   useEffect(() => {
     let cancelled = false
