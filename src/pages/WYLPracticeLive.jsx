@@ -305,88 +305,122 @@ const CONCEPT_CONFIG_MAP = {
     steps: [
       {
         type: 'speak',
-        stage: 'teach',
-        text: 'Hey. Welcome to the School of Motesart. I am Motesart. I do not teach notes. I reveal patterns. Today, we start with the pattern hiding inside every major scale.'
-      },
-      {
-        type: 'listen',
-        stage: 'ready',
-        expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'let us go', 'yea'],
-        prompt: 'ready_check',
-        prompt_display: 'Say ready when you are set.',
-        text: 'Ready to find the pattern?'
+        stage: 'intro',
+        text: "Welcome to the School of Motesart. I am looking forward to teaching you — and learning how you learn. No pressure today. We are starting with one simple pattern: the major scale pattern. Once you understand this pattern, a lot of music starts making more sense. We are going to take our time, say it together, and lock it in. Let's start."
       },
       {
         type: 'speak',
         stage: 'teach',
-        text: 'A major scale does not wander around the piano hoping for the best. It moves with a map: sometimes it skips a key, and sometimes two numbers sit right next to each other.'
-      },
-      {
-        type: 'speak',
-        stage: 'teach',
-        text: 'Here is the Motesart pattern: 1 skip 1, 2 skip 1, 3 and 4 together, 4 skip 1, 5 skip 1, 6 skip 1, 7 and 8 together. The together spots are the secret: 3 and 4, and 7 and 8.'
+        text: 'Here is the pattern. Listen first. 1 skip 1. 2 skip 1. 3 and 4 together. 4 skip 1. 5 skip 1. 6 skip 1. 7 and 8 together.'
       },
       {
         type: 'listen',
         stage: 'call_response',
-        expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
-        prompt: 'full_pattern',
-        prompt_display: 'Say it back: 3 and 4, and 7 and 8.',
-        text: 'Say the together spots back to me.'
+        expect: [
+          '1 skip 1 2 skip 1 3 and 4 together 4 skip 1 5 skip 1 6 skip 1 7 and 8 together',
+          'one skip one two skip one three and four together',
+          '1 skip 2 skip 3 4 together 5 skip 6 skip 7 8 together',
+          'skip skip together skip skip skip together',
+          '3 and 4 together 7 and 8 together',
+          '1 2 3 4 5 6 7 8',
+          'skip together',
+          'one two three four five six seven eight'
+        ],
+        prompt: 'call_response',
+        prompt_display: 'Now say the whole pattern back to me.',
+        text: 'Now say the whole pattern back to me. 1 skip 1, 2 skip 1, 3 and 4 together...'
       },
       {
         type: 'speak',
         stage: 'teach',
-        text: 'Yes. Those two spots are close on purpose. Later we call that a half step. Fancy name, tiny move. The piano is dramatic about many things, but not this one.'
+        text: 'Good. Now here is the important part. Most of the pattern skips. But two places do not skip. 3 and 4 are together. 7 and 8 are together. That means there is no note between them. They sit right next to each other.'
+      },
+      {
+        type: 'listen',
+        stage: 'call_response',
+        expect: [
+          '3 and 4', '7 and 8', 'three and four', 'seven and eight',
+          '3 4 7 8', '3 and 4 7 and 8', '3 and 4, 7 and 8',
+          'three and four, seven and eight', 'three four seven eight'
+        ],
+        prompt: 'call_response',
+        prompt_display: 'Which number pairs do not have a note between them?',
+        text: 'Which number pairs do not have a note between them?'
       },
       {
         type: 'speak',
         stage: 'teach',
-        text: 'Before the quiz, lock the map in your head: skip, skip, together, skip, skip, skip, together. The together spots are 3 and 4, and 7 and 8.'
+        text: 'Exactly. 3 and 4, and 7 and 8. Those are the close spots in the major scale pattern. Later we will call those half steps. But for now, just remember: most numbers skip. 3 and 4 stay together. 7 and 8 stay together.'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: 'Now I have a few questions for you. Take your time. There is no rush.'
       },
       {
         type: 'listen',
         stage: 'quiz',
-        expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
+        quizEnd: false,
+        expect: [
+          '1 skip 1 2 skip 1 3 and 4 together 4 skip 1 5 skip 1 6 skip 1 7 and 8 together',
+          'skip skip together skip skip skip together',
+          '3 and 4 together 7 and 8 together',
+          'one skip one', '1 skip 1 2 skip 1', 'skip and together',
+          '3 and 4 7 and 8'
+        ],
         prompt: 'full_pattern',
-        prompt_display: 'Q1 of 3 — Say the number pairs that are TOGETHER.',
-        text: 'In the major scale pattern, which numbers are together with no skip?'
+        prompt_display: 'Q1 of 3 — Say the whole major scale pattern.',
+        text: 'Say the whole major scale pattern for me.'
       },
       {
         type: 'listen',
         stage: 'quiz',
-        expect: ['skip', 'there is a skip', 'one skip one', '1 skip 1', 'yes', 'yes skip', 'skip one'],
+        quizEnd: false,
+        expect: [
+          '3 and 4', '7 and 8', 'three and four', 'seven and eight',
+          '3 4 7 8', '3 and 4 and 7 and 8', 'three and four and seven and eight',
+          '34 78', 'three four seven eight', '3 and 4, 7 and 8'
+        ],
         prompt: 'full_pattern',
-        prompt_display: 'Q2 of 3 — Say: skip or together.',
-        text: 'Between 1 and 2 in the scale, is there a skip or are they together?'
+        prompt_display: 'Q2 of 3 — Which number pairs are TOGETHER?',
+        text: 'Which number pairs are together — with no note between them?'
       },
       {
         type: 'listen',
         stage: 'quiz',
         quizEnd: true,
-        expect: ['2', 'two', 'two spots', '2 spots', 'two together spots', '3 and 4 and 7 and 8'],
+        expect: [
+          'together', 'they are together', 'no skip', 'no note between',
+          'together no skip', 'no key between', 'nothing between', 'close'
+        ],
         prompt: 'full_pattern',
-        prompt_display: 'Q3 of 3 — Say a number: how many together spots?',
-        text: 'How many together spots are in the major scale pattern?',
+        prompt_display: 'Q3 of 3 — Between 3 and 4: skip or together?',
+        text: 'Between 3 and 4 — do we skip or stay together?',
         quizFailStep: 6
       },
       {
         type: 'live_practice',
         stage: 'practice',
-        practiceTarget: PRACTICE_TARGET,
-        expect: ['skip', 'together', 'skip skip together', 'one skip one', '1 skip 1'],
-        prompt: 'full_pattern',
-        prompt_display: 'Practice 1 of 2 — Say the pattern or name the together spots.',
-        text: 'Describe part of the major scale pattern you just played.'
+        practiceTarget: 2,
+        expect: [
+          'skip', 'together', 'skip skip together', 'one skip one',
+          '1 skip 1', '3 and 4', '7 and 8', 'together spots',
+          'skip and together', 'two together'
+        ],
+        prompt_display: 'Practice — say the pattern or name the together spots.',
+        text: 'Say the pattern out loud, or just name the together spots. Your choice.'
       },
       {
         type: 'prove_it',
-        stage: 'prove',
-        expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
-        prompt: 'full_pattern',
-        prompt_display: 'Final question — no hints. Name both together spots.',
-        text: 'Prove it: where are the two together spots in a major scale?',
-        lockedText: 'The pattern is yours. You just learned what most piano students never get explained. We are moving forward.',
+        stage: 'prove_it',
+        expect: [
+          '3 and 4', '7 and 8', 'three and four and seven and eight',
+          '3 and 4 7 and 8', '3 4 7 8', '3 and 4, 7 and 8',
+          'three and four, seven and eight'
+        ],
+        prompt_display: 'Final question — no hints.',
+        text: 'Last one. No hints. Name both together spots in the major scale pattern.',
+        lockedText: 'That is locked in. 3 and 4, and 7 and 8 — the foundation of every major scale. You are ready for the next step.',
         proveFailStep: 7,
         nextConcept: 'half-step'
       }
