@@ -346,13 +346,10 @@ function KeyArrow({ from, to }) {
 }
 
 // ── Piano keyboard ──
-function getKeyHighlightColor(keyIndex, highlightedKeys) {
-  if (highlightedKeys.length === 4) {
-    const sortedKeys = [...highlightedKeys].sort((a, b) => a - b)
-    if (keyIndex === sortedKeys[0] || keyIndex === sortedKeys[1]) return '#7c3aed'
-    if (keyIndex === sortedKeys[2] || keyIndex === sortedKeys[3]) return '#f97316'
-  }
-  return '#e84b8a'
+function getKeyHighlightColor(keyIndex) {
+  if (keyIndex === 2 || keyIndex === 3) return '#7c3aed'
+  if (keyIndex === 6 || keyIndex === 7) return '#f97316'
+  return 'rgba(255, 255, 255, 0.85)'
 }
 
 function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
@@ -363,8 +360,8 @@ function Piano({ highlightedKeys, homeKeyIndex, showHomeKey }) {
         {Array.from({ length: 8 }).map((_, i) => {
           const isFocus = highlightedKeys.includes(i)
           const isHome  = showHomeKey && i === homeKeyIndex
-          const highlightColor = getKeyHighlightColor(i, highlightedKeys)
-          const bg   = isFocus ? highlightColor : isHome ? '#fde8c8' : '#f8f8f8'
+          const highlightColor = getKeyHighlightColor(i)
+          const bg   = isFocus ? highlightColor : isHome ? '#fde8c8' : 'rgba(255, 255, 255, 0.14)'
           const bdrB = isFocus ? `4px solid ${highlightColor}` : isHome ? '4px solid #e8c890' : '4px solid #c8c8c8'
           return (
             <div key={i} style={{

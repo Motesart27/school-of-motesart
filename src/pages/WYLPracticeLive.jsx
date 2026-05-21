@@ -306,7 +306,7 @@ const CONCEPT_CONFIG_MAP = {
       {
         type: 'speak',
         stage: 'intro',
-        text: 'Welcome to the School of Motesart. I am looking forward to teaching — and learning how you best learn. No pressure today, we are starting with one simple pattern: the major scale pattern. Once you understand this pattern, we will be able to build from there. Are you ready?'
+        text: "Welcome to the School of Motesart. I am looking forward to teaching — and learning how you best learn. No pressure today, we are starting with one simple pattern: the major scale pattern. Once you understand this pattern, we will be able to build from there. Let's begin."
       },
       {
         type: 'speak',
