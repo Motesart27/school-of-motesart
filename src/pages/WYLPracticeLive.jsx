@@ -313,6 +313,7 @@ const CONCEPT_CONFIG_MAP = {
         stage: 'quiz',
         expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
         prompt: 'full_pattern',
+        prompt_display: 'Q1 of 3 — Say the number pairs that are TOGETHER.',
         text: 'In the major scale pattern, which numbers are together with no skip?'
       },
       {
@@ -320,6 +321,7 @@ const CONCEPT_CONFIG_MAP = {
         stage: 'quiz',
         expect: ['skip', 'there is a skip', 'one skip one', '1 skip 1', 'yes', 'yes skip', 'skip one'],
         prompt: 'full_pattern',
+        prompt_display: 'Q2 of 3 — Say: skip or together.',
         text: 'Between 1 and 2 in the scale, is there a skip or are they together?'
       },
       {
@@ -328,6 +330,7 @@ const CONCEPT_CONFIG_MAP = {
         quizEnd: true,
         expect: ['skip', 'there is a skip', 'six skip one', '6 skip 1', 'skip one'],
         prompt: 'full_pattern',
+        prompt_display: 'Q3 of 3 — Say a number: how many together spots?',
         text: 'Between 6 and 7 in the scale, is there a skip or are they together?'
       },
       {
@@ -336,6 +339,7 @@ const CONCEPT_CONFIG_MAP = {
         practiceTarget: PRACTICE_TARGET,
         expect: ['skip', 'together', 'skip skip together', 'one skip one', '1 skip 1'],
         prompt: 'full_pattern',
+        prompt_display: 'Practice 1 of 2 — Say the pattern or name the together spots.',
         text: 'Describe part of the major scale pattern you just played.'
       },
       {
@@ -343,6 +347,7 @@ const CONCEPT_CONFIG_MAP = {
         stage: 'prove',
         expect: ['3 and 4', '7 and 8', '3 and 4 and 7 and 8', '3 4 7 8', 'three and four', 'seven and eight', 'three and four and seven and eight', '34 78', 'three four seven eight'],
         prompt: 'full_pattern',
+        prompt_display: 'Final question — no hints. Name both together spots.',
         text: 'Prove it: where are the two together spots in a major scale?',
         lockedText: 'Major scale pattern locked. Skips and together spots are officially not sneaking past you anymore.'
       }
@@ -1551,6 +1556,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         retryMode={retryMode}
         promptMode={promptMode}
         isSpeaking={theoryIsSpeaking}
+        promptDisplay={THEORY_STEPS[teachingStep]?.prompt_display || ''}
         turnLabel={THEORY_STEPS[teachingStep]?.type === 'live_practice'
           ? `Practice ${Math.min(practiceCorrect + 1, THEORY_STEPS[teachingStep]?.practiceTarget || PRACTICE_TARGET)} of ${THEORY_STEPS[teachingStep]?.practiceTarget || PRACTICE_TARGET}`
           : ''}

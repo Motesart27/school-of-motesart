@@ -562,6 +562,7 @@ export default function PracticeConceptView({
   studentTurn      = false,
   retryMode        = false,
   promptMode       = false,
+  promptDisplay    = '',
   turnLabel        = '',
   autoSpeak        = true,
   onAnswer,
@@ -713,6 +714,21 @@ export default function PracticeConceptView({
             <div style={{ borderTop:'1px solid rgba(255,255,255,0.08)', padding:'14px 20px 16px' }}>
               {studentTurn ? (
                 <>
+                  {promptDisplay && (
+                    <div style={{
+                      marginBottom:8,
+                      padding:'8px 10px',
+                      borderRadius:9,
+                      background:'rgba(52,211,153,0.1)',
+                      border:'1px solid rgba(52,211,153,0.24)',
+                      color:'#a7f3d0',
+                      fontSize:13,
+                      fontWeight:800,
+                      lineHeight:1.35,
+                    }}>
+                      {promptDisplay}
+                    </div>
+                  )}
                   {turnLabel && (
                     <div style={{ marginBottom:8, fontSize:12, fontWeight:800, color:'#34d399', letterSpacing:'0.03em' }}>
                       {turnLabel}
