@@ -1055,9 +1055,38 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     const heard = transcript.toLowerCase().trim()
     const expected = current.expect
     const evaluation = evaluateStudentResponse(heard, expected, current.prompt, currentConcept.concept)
-    const readyCheckAccepted = current.prompt === 'ready_check' &&
-      /^(yes|yeah|yep|sure|ready|ok|okay|lets go|let's go|yea)$/.test(heard)
+    const readyCheckAccepted = current.prompt === 'ready_check' && (
+      expected?.some(e => e.toLowerCase().trim() === heard) ||
+      /^(yes|yeah|yep|sure|ready|ok|okay|lets go|let's go|yea|i am|i'm ready|im ready|go|let us go|let go)$/.test(heard)
+    )
     const acceptedAsCorrect = evaluation.correct || readyCheckAccepted
+
+    if (current.stage === 'ready' && evaluation.reason !== 'question_or_confusion') {
+      if (readyCheckAccepted) {
+        console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Eval:', 'ready_acknowledged', true)
+        setStudentEmotion('happy')
+        setAwaitingResponse(false)
+        setRetryMode(false)
+        setPromptMode(false)
+        await new Promise(r => setTimeout(r, 300))
+        advanceTeaching(step + 1)
+      } else {
+        console.log('[Motesart] Heard:', heard, '| Expected:', expected, '| Eval:', 'ready_prompt', false)
+        setStudentEmotion('neutral')
+        setRetryMode(true)
+        setPromptMode(false)
+        const readyPrompt = 'Say yes or ready when you are ready to begin.'
+        setCoaching({ message: readyPrompt, speaking: true, tags: ['Ready'] })
+        try {
+          await speakMotesart(readyPrompt)
+        } catch (err) {
+          console.error('[Motesart] ready-check prompt TTS failed silently', err)
+        }
+        setCoaching(prev => ({ ...prev, speaking: false }))
+      }
+      return
+    }
+
     const projectedStudentState = {
       ...motesartStudentState,
       correctStreak: acceptedAsCorrect ? (motesartStudentState.correctStreak || 0) + 1 : 0,
