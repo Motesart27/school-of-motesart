@@ -1051,7 +1051,31 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     } catch(e) { /* never crash the lesson */ }
 
     if (evaluation.reason === 'question_or_confusion') {
-      setCoaching({ message: motesartReply, speaking: false, tags: ['Explain'] })
+      const currentStep = THEORY_STEPS[step]
+      const conceptKey = currentConcept?.conceptId || ''
+      let helpResponse = ''
+
+      if (currentStep?.type === 'prove_it' || currentStep?.stage === 'prove') {
+        helpResponse = 'Take your best shot — no hints this time. Just say what you know.'
+      } else if (currentStep?.type === 'live_practice') {
+        helpResponse = 'Tell me what you played. Just describe the two keys out loud.'
+      } else if (currentStep?.type === 'listen' && conceptKey === 'T_MAJOR_SCALE_PATTERN') {
+        helpResponse = "I hear you — not sure what to say. Just say the number pairs that stay together — like 3 and 4, or 7 and 8. That's it."
+      } else if (currentStep?.type === 'listen' && conceptKey === 'T_HALF_STEP') {
+        helpResponse = 'Just say the two key numbers or names that make a half step. Like E and F, or 3 and 4.'
+      } else if (currentStep?.type === 'listen' && conceptKey === 'T_WHOLE_STEP') {
+        helpResponse = 'Just say how many keys a whole step skips, or give me an example — like C to D.'
+      } else {
+        helpResponse = "Good question. Stay with me — just say your answer out loud. It doesn't have to be perfect."
+      }
+
+      setCoaching({ message: helpResponse, speaking: true, tags: ['Explain'] })
+      try {
+        await speakMotesart(helpResponse)
+      } catch (err) {
+        console.error('[Motesart] confusion response TTS failed silently', err)
+      }
+      setCoaching(prev => ({ ...prev, speaking: false }))
       return
     }
 
