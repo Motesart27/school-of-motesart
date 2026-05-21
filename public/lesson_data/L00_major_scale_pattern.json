@@ -1,0 +1,291 @@
+{
+  "concept_id": "major_scale_pattern",
+  "gate": 0,
+  "gate_name": "Pattern Mind",
+  "lesson_file": "L00_major_scale_pattern",
+  "phase": "Visual",
+  "curriculum_path": "C Major Scale Mastery Path",
+  "version": "1.0.0",
+  "ratified": "2026-05-21",
+
+  "prerequisites": [],
+
+  "teach": {
+    "motesart_intro": "Before you touch a single key, you need to know the pattern. Every major scale — no matter what key — follows the same rule.",
+    "core_concept": "The major scale pattern is: Whole - Whole - Half - Whole - Whole - Whole - Half",
+    "motesart_shorthand": "Think of it this way: there is no note between 3 and 4, and no note between 7 and 8. Every other number has a note between it.",
+    "key_facts": [
+      "The major scale has 8 notes, numbered 1 through 8.",
+      "The distance between most notes is a Whole step — one note exists between them.",
+      "The distance between 3 and 4 is a Half step — no note exists between them.",
+      "The distance between 7 and 8 is a Half step — no note exists between them.",
+      "This pattern is the same in every major key. The numbers always work the same way."
+    ],
+    "motesart_language": {
+      "pattern_spoken": "Whole, Whole, Half, Whole, Whole, Whole, Half",
+      "half_step_rule": "No note between 3 and 4. No note between 7 and 8.",
+      "whole_step_rule": "Every other pair has one note between them."
+    },
+    "video_asset": null,
+    "visual_aid": "W-W-H-W-W-W-H step diagram"
+  },
+
+  "proof": {
+    "description": "Student must demonstrate recall, not just exposure. All questions must be answered correctly to pass Gate 0.",
+    "passing_threshold": 0.85,
+    "attempts_before_intervention": 2,
+    "questions": [
+      {
+        "question_id": "G0_Q1",
+        "type": "recall_spoken_or_typed",
+        "prompt": "Say the major scale pattern from the beginning.",
+        "acceptable_answers": [
+          "whole whole half whole whole whole half",
+          "w w h w w w h",
+          "wwhwwwh"
+        ],
+        "motesart_correct": "That's it. Whole, Whole, Half, Whole, Whole, Whole, Half. Lock that in.",
+        "motesart_wrong": "Not quite. Remember — most steps are Whole, but 3 to 4 and 7 to 8 are Half. Try again."
+      },
+      {
+        "question_id": "G0_Q2",
+        "type": "multiple_choice",
+        "prompt": "Between which two numbers is there NO note?",
+        "options": ["1 and 2", "2 and 3", "3 and 4", "4 and 5"],
+        "correct": "3 and 4",
+        "motesart_correct": "Yes. 3 to 4 — no note between them. That is a half step.",
+        "motesart_wrong": "Oof. Let's back up. Where does the pattern get tight? 3 and 4 — no note between them."
+      },
+      {
+        "question_id": "G0_Q3",
+        "type": "multiple_choice",
+        "prompt": "Where is the second half step in the major scale?",
+        "options": ["5 and 6", "6 and 7", "7 and 8", "8 and 9"],
+        "correct": "7 and 8",
+        "motesart_correct": "Locked. 7 to 8 — that's the second tight spot.",
+        "motesart_wrong": "Not even close — kidding, you were close. It's 7 to 8. No note between them."
+      },
+      {
+        "question_id": "G0_Q4",
+        "type": "multiple_choice",
+        "prompt": "Between 1 and 2 — is that a whole step or half step?",
+        "options": ["Whole step", "Half step"],
+        "correct": "Whole step",
+        "motesart_correct": "Correct. There is a note between 1 and 2. Whole step.",
+        "motesart_wrong": "1 to 2 has a note between them — that makes it a Whole step. Half steps have nothing in between."
+      },
+      {
+        "question_id": "G0_Q5",
+        "type": "sequence_build",
+        "prompt": "Fill in the missing steps: W - W - ? - W - W - W - ?",
+        "correct_sequence": ["H", "H"],
+        "motesart_correct": "Yes. H and H. The half steps sit at 3-4 and 7-8. Every time.",
+        "motesart_wrong": "Those are the two tight spots. Both should be H — for Half step."
+      },
+      {
+        "question_id": "G0_Q6",
+        "type": "recall_spoken_or_typed",
+        "prompt": "Now say the pattern backward.",
+        "acceptable_answers": [
+          "half whole whole whole half whole whole",
+          "h w w w h w w",
+          "hwwwhww"
+        ],
+        "motesart_correct": "You had it. Even backward you know where the half steps live.",
+        "motesart_wrong": "Backward it starts with a Half — because going down, 8 to 7 is a half step. Try again from 8."
+      },
+      {
+        "question_id": "G0_Q7",
+        "type": "ownership_explain",
+        "prompt": "In your own words — why does the major scale have half steps at 3-4 and 7-8?",
+        "acceptable_signals": [
+          "no note between them",
+          "closest together",
+          "no black key between",
+          "naturally close",
+          "that is the pattern"
+        ],
+        "motesart_correct": "That is ownership. You are not just remembering it — you understand it.",
+        "motesart_wrong": "Try to explain it in your own words. Why is 3 to 4 a half step? What makes it different from 1 to 2?"
+      }
+    ]
+  },
+
+  "mistake_detection": {
+    "categories": [
+      {
+        "code": "WRONG_HALF_STEP_LOCATION",
+        "description": "Student places half steps at wrong positions",
+        "trigger": "answers 1-2, 2-3, 4-5, 5-6, or 6-7 as the half step",
+        "severity": "high",
+        "next_action": "re-teach half step definition, then re-quiz G0_Q2 and G0_Q3"
+      },
+      {
+        "code": "REVERSAL_CONFUSION",
+        "description": "Student reverses whole and half step definitions",
+        "trigger": "calls half step the larger distance",
+        "severity": "high",
+        "next_action": "trigger WYL auditory intervention — play W vs H example"
+      },
+      {
+        "code": "INCOMPLETE_PATTERN",
+        "description": "Student states partial pattern only",
+        "trigger": "omits second half step or stops at H W W W",
+        "severity": "medium",
+        "next_action": "trigger visual intervention — show full W-W-H-W-W-W-H map"
+      },
+      {
+        "code": "LETTER_SYSTEM_BLEED",
+        "description": "Student refers to C-D-E-F rather than 1-2-3-4",
+        "trigger": "uses letter names instead of Motesart numbers in any answer",
+        "severity": "high",
+        "next_action": "Motesart reminds: 'We use numbers, not letters. In this system, F is 4 — not F.'",
+        "som_specific": true
+      },
+      {
+        "code": "MEMORIZED_WITHOUT_UNDERSTANDING",
+        "description": "Student recites pattern but fails ownership question G0_Q7",
+        "trigger": "passes Q1-Q6 but cannot explain why in own words",
+        "severity": "critical",
+        "next_action": "flag as execution_only — ownership gate not passed — require G0_Q7 retry or teacher review"
+      }
+    ]
+  },
+
+  "wyl_interventions": {
+    "description": "WYL triggers AFTER a mistake is detected. Not from student label. From the specific failure.",
+    "gate": "G0_pattern",
+    "interventions": {
+      "visual": {
+        "trigger": "WRONG_HALF_STEP_LOCATION or INCOMPLETE_PATTERN",
+        "content": "Display W-W-H-W-W-W-H step diagram with color coding. Whole steps = wide bar. Half steps = narrow bar highlighted teal. Numbers 1-8 labeled below each step.",
+        "video_asset": null,
+        "interaction": "Student taps each step to hear the label spoken by Motesart."
+      },
+      "auditory": {
+        "trigger": "REVERSAL_CONFUSION",
+        "content": "Play two audio examples back to back: (1) whole step interval, (2) half step interval. Motesart says: 'Hear the difference? The half step is tight — almost no space. The whole step has room.' Then re-quiz.",
+        "video_asset": null,
+        "interaction": "Student selects which sound they just heard."
+      },
+      "kinesthetic": {
+        "trigger": "INCOMPLETE_PATTERN after two attempts",
+        "content": "Student taps on-screen buttons labeled BIG and SMALL for each step of the scale in order. BIG = whole step, SMALL = half step. Motesart confirms each tap.",
+        "video_asset": null,
+        "interaction": "Tap sequence: BIG-BIG-SMALL-BIG-BIG-BIG-SMALL. Motesart confirms each."
+      },
+      "readwrite": {
+        "trigger": "INCOMPLETE_PATTERN or WRONG_HALF_STEP_LOCATION",
+        "content": "Student fills in blanks: W - W - ? - W - W - W - ?. Then writes or selects: 'The half steps in the major scale are between ___ and ___, and between ___ and ___.'",
+        "video_asset": null,
+        "interaction": "Fill-in or multiple-choice form."
+      }
+    }
+  },
+
+  "mastery_rule": {
+    "execution_required": true,
+    "ownership_required": true,
+    "execution_definition": "Student answers G0_Q1 through G0_Q6 with score >= 0.85",
+    "ownership_definition": "Student passes G0_Q7 — explains the pattern in own words, not recited",
+    "ownership_question": "In your own words — why does the major scale have half steps at 3-4 and 7-8?",
+    "cannot_advance_without_ownership": true,
+    "teacher_override_available": true,
+    "confidence_tiers": {
+      "not_ready": { "range": [0, 39], "motesart_response": "Let's back up. We need more time here before we move on." },
+      "developing": { "range": [40, 69], "motesart_response": "You are getting there. Let's try that again." },
+      "almost_owned": { "range": [70, 84], "motesart_response": "You almost had it. One more pass and it will stick." },
+      "owned": { "range": [85, 94], "motesart_response": "Yes. You had it." },
+      "mastered": { "range": [95, 100], "motesart_response": "That is locked. You know where the half steps live." }
+    },
+    "repeat_without_help_required": true,
+    "repeat_session_gap_days": 2
+  },
+
+  "homework_reinforcement": {
+    "description": "Five Find-A-Note variant games that reinforce Gate 0 through retrieval practice.",
+    "spaced_repetition": true,
+    "games": [
+      {
+        "game_id": "find_the_half_step",
+        "prompt": "Which two numbers have no note between them?",
+        "type": "multiple_choice",
+        "correct": ["3 and 4", "7 and 8"],
+        "reinforces": "G0_Q2, G0_Q3"
+      },
+      {
+        "game_id": "find_the_pattern",
+        "prompt": "Fill in the major scale pattern: W - W - ? - W - W - W - ?",
+        "type": "fill_in",
+        "correct_sequence": ["H", "H"],
+        "reinforces": "G0_Q1, G0_Q5"
+      },
+      {
+        "game_id": "whole_or_half",
+        "prompt": "Between numbers 2 and 3 — whole step or half step?",
+        "type": "binary_choice",
+        "correct": "whole step",
+        "reinforces": "G0_Q4"
+      },
+      {
+        "game_id": "pattern_backward",
+        "prompt": "Say the pattern going down from 8.",
+        "type": "recall",
+        "correct": "H W W W H W W",
+        "reinforces": "G0_Q6"
+      },
+      {
+        "game_id": "explain_why",
+        "prompt": "Why is 3 to 4 a half step and not a whole step?",
+        "type": "ownership_open",
+        "acceptable_signals": ["no note between them", "closest together", "naturally close", "that is the pattern"],
+        "reinforces": "G0_Q7"
+      }
+    ]
+  },
+
+  "evidence_logging": {
+    "table": "SOM_Mastery_Ledger",
+    "base": "appTN4wNd5Kgbqdwl",
+    "status": "TO VERIFY — table and field names must be confirmed against live Airtable before any write",
+    "fields_to_write": {
+      "student_email": "from session",
+      "concept": "Major Scale Pattern",
+      "lesson_id": "L00_major_scale_pattern",
+      "gate": 0,
+      "evidence_type": "self_practice | teacher_observed | zoom_class",
+      "mistake_category": "from mistake_detection.categories[].code",
+      "mistake_detail": "free text from session",
+      "next_drill": "derived from mistake_detection next_action",
+      "confidence_score": "0-100 from mastery_rule tiers",
+      "gate_reached": "exposure | understanding | execution | ownership | mastery",
+      "execution_passed": "boolean",
+      "ownership_passed": "boolean",
+      "timestamp": "auto",
+      "session_id": "wyl session id or zoom meeting id"
+    },
+    "evidence_weights": {
+      "teacher_observed": 1.0,
+      "zoom_class": 0.85,
+      "self_practice": 0.7
+    }
+  },
+
+  "next_gate": {
+    "unlocks": "L01_c_major_number_map",
+    "gate": 1,
+    "gate_name": "Sound Recognition",
+    "condition": "execution_passed AND ownership_passed AND confidence_score >= 85"
+  },
+
+  "mot_constitution_notes": {
+    "numbers_before_letters": true,
+    "ear_before_notation": true,
+    "pattern_before_terminology": true,
+    "ownership_before_mastery": true,
+    "letter_system_bleed_detection": true,
+    "teacher_override_available": true,
+    "confidence_score_internal_only": true,
+    "motesart_never_speaks_percentage": true
+  }
+}
