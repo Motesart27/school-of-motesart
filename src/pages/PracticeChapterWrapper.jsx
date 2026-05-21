@@ -24,6 +24,7 @@ import HalfStepOwnIt from './HalfStepOwnIt.jsx'
 
 // SOM Mastery Intelligence Engine — Gate 0
 import MajorScalePatternGate from '../components/gate0/MajorScalePatternGate.jsx'
+import FindHomeGate from '../components/gate0/FindHomeGate.jsx'
 
 /**
  * PracticeChapterWrapper
@@ -74,6 +75,20 @@ export default function PracticeChapterWrapper() {
       } catch (e) {
         // sessionStorage unavailable — safe to continue
       }
+      navigate('/student')
+    }} />
+  }
+
+  if (conceptId === 'C_MAJOR_GATE_FIND_HOME') {
+    return <FindHomeGate onGatePassed={(result) => {
+      try {
+        sessionStorage.setItem('gate0_find_home_result', JSON.stringify({
+          gateId: 'C_MAJOR_GATE_FIND_HOME',
+          concept: 'find_home',
+          completedAt: new Date().toISOString(),
+          ...result,
+        }))
+      } catch (e) {}
       navigate('/student')
     }} />
   }
