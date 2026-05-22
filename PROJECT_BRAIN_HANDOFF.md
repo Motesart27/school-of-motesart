@@ -1,147 +1,144 @@
 # SOM PROJECT BRAIN — HANDOFF
-Last Updated: May 21, 2026 | Bundle: index-BWDhKcE_.js
+Last Updated: May 22, 2026 | Bundle: index-BWDhKcE_.js
 
 ---
 
-## LAST 3 COMMITS
+## Current State
 
-| SHA | Message |
+Gate 0 Find Home is deployed, but not shipped to students yet.
+
+**Gate 0 status:** DEPLOYED_NOT_SHIPPED
+
+Mobile verification is still the ship gate. Verify on iPhone-sized viewports before sending real students through the flow.
+
+---
+
+## Latest Bundle
+
+`index-BWDhKcE_.js`
+
+Production site:
+`https://school-of-motesart.netlify.app`
+
+---
+
+## Last 3 Commits
+
+| SHA | Summary |
 |---|---|
-| 6c4c896 | feat(gate0): wire Find Home homework to GamePage Academic mode |
-| 2e07881 | fix(loader): update schema validation to support Find Home v2 JSON structure |
-| c9c2a5a | feat(gate0): build Find Home UI (FindHomeGate.jsx) |
+| `6c4c896` | homework wire |
+| `2e07881` | loader fix |
+| `c9c2a5a` | Find Home UI |
 
 ---
 
-## GATE 0 — FIND HOME
-
-**Status: DEPLOYED_NOT_SHIPPED**
-Mobile verification pending before shipping to real students.
+## Gate 0 — Find Home
 
 | Item | Value |
 |---|---|
-| Route | /practice/C_MAJOR_GATE_FIND_HOME |
-| Component | src/components/gate0/FindHomeGate.jsx |
-| Lesson JSON | public/lesson_data/L00_find_home.json |
-| Homework URL | /game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1 |
-| Bundle | index-BWDhKcE_.js |
-| Gate runner | lessonDataLoader.js (supports v1 and v2 schema) |
+| Status | DEPLOYED_NOT_SHIPPED |
+| Route | `/practice/C_MAJOR_GATE_FIND_HOME` |
+| Component | `src/components/gate0/FindHomeGate.jsx` |
+| Lesson JSON | `public/lesson_data/L00_find_home.json` |
+| Homework URL | `/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1` |
+| Latest bundle | `index-BWDhKcE_.js` |
 
-### Architecture Law (Locked)
+The Step 8 Homework button now routes to GamePage Academic mode:
 
-> Gate teaches. GamePage reinforces. GamePage logs.
+`/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1`
 
-- Gate component (FindHomeGate.jsx): teaches, quizzes, collects ownership proof
-- GamePage in Academic mode: spaced retrieval homework after gate is passed
-- GamePage logs game sessions to Game_Sessions table via Railway backend
-- Gate never logs game sessions. GamePage never teaches.
+When `assignment_id` is present, GamePage treats the session as homework and locks the mode toggle to Academic.
 
 ---
 
-## GATE ARCHITECTURE
+## Architecture Law
 
-| Gate | Name | Status | Lesson File |
+**Gate teaches. GamePage reinforces. GamePage logs.**
+
+This is locked.
+
+- Gate components teach the concept, run the proof loop, and collect ownership evidence.
+- GamePage reinforces concepts through game or academic practice.
+- GamePage logs practice/homework sessions.
+- Gate components do not duplicate GamePage keyboard/game logic.
+- GamePage does not become the teaching gate.
+
+---
+
+## Gate Map
+
+| Gate | Name | Status | Notes |
 |---|---|---|---|
-| Gate 0 | Find Home | DEPLOYED_NOT_SHIPPED | L00_find_home.json |
-| Gate 1 | Skip & Together | Not started | L01_skip_and_together.json (to draft) |
-| Gate 2 | The Family Pattern | RECLASSIFIED from old C_MAJOR_GATE_0 | L00_major_scale_pattern.json (language update pending) |
-| Gate 3 | Numbers in C | Not started | |
-| Gate 4 | Feel the Pattern | Not started | |
-| Gate 5 | Say It Back | Not started | |
-| Gate 6 | Finger Path | Not started | |
-| Gate 7 | Play It | Not started | |
-| Gate 8 | Homework Reinforcement | Not started | |
+| Gate 0 | Find Home | DEPLOYED_NOT_SHIPPED | Mobile verification pending |
+| Gate 1 | Skip & Together | NEXT | Draft JSON next |
+| Gate 2 | Pattern Mind | Preserved / reclassified | Existing `/practice/C_MAJOR_GATE_0`; do not delete |
 
-### Gate 2 (Pattern Mind — Reclassified)
-- Route: /practice/C_MAJOR_GATE_0 (stays live, do not delete)
-- Component: MajorScalePatternGate.jsx (preserved per Constitution Article XV)
-- Status: DEPLOYED_NOT_SHIPPED — language update pending (skip/together must lead before W-W-H)
-- DO NOT direct first-time students here until Gates 0 and 1 are in front of it
+Pattern Mind remains live at:
+
+`/practice/C_MAJOR_GATE_0`
+
+Do not route first-time beginners directly into Pattern Mind until Find Home and Gate 1 are in front of it.
 
 ---
 
-## WHAT'S NEXT (Ordered)
+## Next
 
-1. **Mobile verification** — iPhone 390x844 and 430x932
-   - Test /practice/C_MAJOR_GATE_FIND_HOME full flow on both viewports
-   - Test /game?mode=academic&concept=find_home homework flow
-   - If both pass → Gate 0 ships
-2. **Gate 1 JSON draft** — L01_skip_and_together.json
-   - Same 9-step gate template as L00_find_home.json
-   - Constitution audit before building any UI
-3. **Gate 1 UI** — SkipAndTogetherGate.jsx
-4. **Gate 2 language re-thread** — skip/together language leads, W-W-H revealed as music-world name
-5. **SOM_Mastery_Ledger verification** — TO VERIFY field names in Airtable before any evidence write
-6. **VITE_MOTESART_CLAUDE_KEY** — add to Netlify env vars (enables parseIntent AI fallback)
+1. Mobile verification on iPhone `390x844`.
+2. Mobile verification on iPhone `430x932`.
+3. Confirm `/practice/C_MAJOR_GATE_FIND_HOME` completes cleanly on mobile.
+4. Confirm Step 8 launches:
+   `/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1`
+5. Confirm GamePage Academic mode toggle is disabled when `assignment_id` is present.
+6. Confirm `/practice/C_MAJOR_GATE_0` still loads Pattern Mind.
+7. If mobile passes, mark Gate 0 as shipped.
+8. Draft Gate 1 JSON.
 
 ---
 
-## WHAT'S WORKING
+## Protected Direction
 
-- Voice loop wired and deployed (Theory Phase)
-  - Mic: continuous=false, micRunningRef lock, no abort loop
-  - Smart evaluator: natural language patterns, question/confusion handling
-  - Transcript appears in speech bubble area
-- Begin Session → startLesson() → advanceTeaching() chain confirmed
-- Dynamic concept routing via ?concept= URL param
-  - /practice-live?concept=half-step → Half Step ✅
-  - /practice-live?concept=whole-step → Whole Step ✅
-  - /practice-live?concept=scale-degree → Scale Degrees ✅
-- Phase 1B verified: Audio works, TTS hits protective-flow, wrong answer does NOT advance
-- Motesart personality locked: funny/sarcastic/genuine coaching energy
-- Evaluator tightened: loose partial matches rejected
-- lessonDataLoader.js: supports v1 schema (root concept_id) and v2 schema (_meta.concept_id)
+Do not add Airtable writes inside Gate 0 until table/field names are verified.
+
+Do not build Gate 1 UI before the Gate 1 JSON is drafted and reviewed against:
+
+- `docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md`
+- `docs/MOTESART_VOICE_BIBLE.md`
+- the current Find Home gate structure
+
+Do not modify GamePage casually. GamePage is the reinforcement engine and logging surface.
 
 ---
 
-## DOCTRINE DOCUMENTS (all in repo)
+## Documents To Read Before Next Build
 
-| File | Purpose |
-|---|---|
-| motesart_constitution.md | Build process, protected files, approval discipline |
-| docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md | Student language, gate order, teaching voice (v1.1 ratified May 21, 2026) |
-| docs/MOTESART_VOICE_BIBLE.md | School-safe culturally responsive voice |
-| docs/SOM_ADAPTIVE_MUSIC_INTELLIGENCE_STRATEGY.md | Adaptive strategy |
-
----
-
-## BASELINES
-
-| Baseline | SHA |
-|---|---|
-| MOTESART_ENGINE | 23fb225 |
-| TAMI_P1 | 51eaab4 |
-| TAMI_CONTRACT | a403d22 |
-| TAMI_P2 | 89dd2ba |
-| TAMI_P1A_WIRE | 915345a |
-| MOTESART_PERSONALITY | 05ae905 |
-| EVALUATOR_TIGHTEN | e94db09 |
-| LANGUAGE_CONSTITUTION | 38fda2a |
+- `docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md`
+- `docs/MOTESART_VOICE_BIBLE.md`
+- `public/lesson_data/L00_find_home.json`
+- `src/components/gate0/FindHomeGate.jsx`
+- `src/pages/GamePage.jsx`
 
 ---
 
-## PROTECTED FILES
+## Airtable / Logging Notes
 
-- Registration.jsx, auth.py — login/auth flow, never touch
-- GamePage.jsx — game engine, protected
-- All working dashboards
-- MajorScalePatternGate.jsx — PRESERVED (Constitution Article XV), reclassified as Gate 2
-- L00_major_scale_pattern.json — PRESERVED, language update pending
+Gate 0 currently stores completion locally through session storage handoff and routes to `/student`.
 
----
+Homework practice routes into GamePage Academic mode. GamePage is responsible for homework/session logging.
 
-## TO VERIFY
+Airtable verification is still required before any new evidence writes:
 
-- SOM_Mastery_Ledger table in Airtable (appTN4wNd5Kgbqdwl): does it exist? field names?
-- Game_Sessions table: confirm field names match L00_find_home.json evidence_logging schema
-- VITE_MOTESART_CLAUDE_KEY in Netlify env vars
-- End-to-end mic test on iPhone 390x844 and 430x932 (mobile ship gate for Gate 0)
+- `SOM_Mastery_Ledger`
+- `Game_Sessions`
+
+Do not assume field names.
 
 ---
 
-## AIRTABLE
+## Current Ship Gate
 
-- Base ID: appTN4wNd5Kgbqdwl
-- PAT: AIRTABLE_PAT (Railway env var — verify not truncated)
-- Gate evidence target: SOM_Mastery_Ledger (TO VERIFY)
-- Homework log target: Game_Sessions (TO VERIFY field names)
+Gate 0 cannot be considered shipped until mobile verification passes on:
+
+- iPhone `390x844`
+- iPhone `430x932`
+
+After that, proceed to Gate 1 JSON draft.
