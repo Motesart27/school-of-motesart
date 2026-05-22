@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { loadLesson } from './lessonDataLoader.js'
 
 // ─── Design tokens (SOM locked) ──────────────────────────────────────────────
@@ -265,6 +266,7 @@ function Feedback({ feedback }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function FindHomeGate({ onGatePassed, ageBand = 'child' }) {
+  const navigate = useNavigate()
   const [lesson, setLesson]         = useState(null)
   const [loadError, setLoadError]   = useState(null)
   const [step, setStep]             = useState(1)      // 1-7
@@ -873,11 +875,19 @@ export default function FindHomeGate({ onGatePassed, ageBand = 'child' }) {
               </div>
             </div>
 
-            <button onClick={() => goStep(9)} style={{
+            <button onClick={() => navigate('/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1')} style={{
               width: '100%', padding: '15px 0', background: T.teal, border: 'none', borderRadius: 14,
               color: '#fff', fontFamily: T.display, fontWeight: 800, fontSize: 16, cursor: 'pointer',
+              marginBottom: 10,
             }}>
-              See your results →
+              Practice now — Find Home →
+            </button>
+            <button onClick={() => goStep(9)} style={{
+              width: '100%', padding: '11px 0', background: 'none',
+              border: `1px solid ${T.border}`, borderRadius: 14,
+              color: T.muted, fontFamily: T.font, fontSize: 13, cursor: 'pointer',
+            }}>
+              Skip for now
             </button>
           </div>
         )}
