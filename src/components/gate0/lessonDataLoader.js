@@ -17,8 +17,13 @@ export async function loadLesson(lessonId) {
 
   const data = await resp.json()
 
-  // Validate required top-level keys
-  const required = ['concept_id', 'gate', 'teach', 'proof', 'mistake_detection', 'wyl_interventions', 'mastery_rule']
+  // Schema validation — supports v1 (root concept_id) and v2 (_meta.concept_id)
+  const hasMeta = '_meta' in data && 'concept_id' in data._meta
+  const hasRoot = 'concept_id' in data
+  if (!hasMeta && !hasRoot) {
+    throw new Error(`Lesson ${lessonId} missing concept_id in _meta or root`)
+  }
+  const required = ['mastery_rule', 'wyl_interventions', 'mistake_detection']
   for (const key of required) {
     if (!(key in data)) throw new Error(`Lesson ${lessonId} missing required key: ${key}`)
   }
