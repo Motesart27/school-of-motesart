@@ -1,0 +1,628 @@
+{
+  "_meta": {
+    "gate": 1,
+    "gate_name": "Skip and Together",
+    "concept_id": "skip_and_together",
+    "traditional_concept": "T_SKIP_TOGETHER",
+    "lesson_file": "L01_skip_and_together",
+    "curriculum_path": "C Major Scale Mastery Path",
+    "phase": "Gate 1 of 8",
+    "version": "1.0",
+    "ratified": "2026-05-22",
+    "constitution_ref": "docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md",
+    "doctrine_ref": "SOM_MASTERY_INTELLIGENCE_ENGINE_DOCTRINE.md",
+    "prerequisites": [
+      "L00_find_home"
+    ]
+  },
+  "streams": {
+    "ear": {
+      "active": true,
+      "engine": "FindTheNote",
+      "variant": "find_together",
+      "level_locked": 1,
+      "evidence_source": "GamePage",
+      "homework_route": "/game?mode=academic&concept=find_together&assignment_id=gate1_find_together&level=1",
+      "status": "PLANNED_NOT_WIRED",
+      "measures": [
+        "together_recognition",
+        "skip_recognition",
+        "interval_hearing",
+        "response_speed"
+      ]
+    },
+    "timing": {
+      "active": true,
+      "engine": "RhythmRacer",
+      "variant": "skip_together_pulse",
+      "level_locked": 1,
+      "status": "PLANNED_NOT_WIRED",
+      "homework_route": "/rhythm-racer?concept=skip_together&assignment_id=gate1_timing&level=1",
+      "measures": [
+        "steady_pulse",
+        "beat_alignment"
+      ]
+    },
+    "knowledge": {
+      "active": true,
+      "engine": "GateProofLoop",
+      "concept": "T_SKIP_TOGETHER",
+      "status": "PLANNED_NOT_BUILT",
+      "homework_route": "/practice/C_MAJOR_GATE_SKIP_TOGETHER",
+      "measures": [
+        "recall",
+        "quiz_accuracy",
+        "ownership_explanation",
+        "music_world_name_recognition",
+        "feel_check_audiation"
+      ]
+    },
+    "body": {
+      "active": false,
+      "engine": "LivePractice",
+      "variant": null,
+      "status": "FUTURE_GATE",
+      "measures": []
+    },
+    "converter": {
+      "active": false,
+      "engine": "MotesartConverter",
+      "variant": null,
+      "status": "FUTURE_PRACTICE_GENERATOR",
+      "measures": []
+    }
+  },
+  "translation_layer": {
+    "student_language": "Skip, together, holding hands, 3 and 4, 7 and 8",
+    "teacher_language": "Whole step and half step recognition inside the major scale pattern",
+    "system_language": "T_SKIP_TOGETHER, T_WHOLE_STEP, T_HALF_STEP, C_MAJOR_SKIP_TOGETHER_OWNED"
+  },
+  "narrative_intensity": {
+    "child": {
+      "story_hook": "Some numbers skip over a neighbor. Some numbers hold hands. In the C family, 3 and 4 hold hands. 7 and 8 hold hands.",
+      "tone": "Warm, concrete, and playful. Use holding hands language freely.",
+      "character_labels_allowed": false,
+      "family_language": true
+    },
+    "teen": {
+      "story_hook": "The pattern has two moves: skip and together. Most numbers skip. 3 and 4 are together. 7 and 8 are together.",
+      "tone": "Direct, clear, peer-level. No baby language. Holding hands can appear as the protected Motesart term.",
+      "character_labels_allowed": false,
+      "family_language": false
+    },
+    "adult": {
+      "story_hook": "The major scale pattern is built from two distances. First learn them as skip and together. The music-world names come after you own the sound.",
+      "tone": "Efficient and precise. Motesart words first, technical vocabulary earned later.",
+      "character_labels_allowed": false,
+      "family_language": false
+    }
+  },
+  "teach": {
+    "motesart_intro": {
+      "child": "You already found home. Now we learn how the family moves. Some numbers skip. Some numbers are together. Together means they are holding hands.",
+      "teen": "You found home. Now we map the moves. Skip means there is a note between. Together means no note between.",
+      "adult": "Home is locked. Now we define the two distances in the pattern: skip and together. Use the relationship first; the technical names come after ownership."
+    },
+    "core_concept": "Skip means there is a note between. Together means they are right next to each other — no note between them.",
+    "motesart_shorthand": "3 and 4 are together. 7 and 8 are together. They are holding hands. Every other pair has a note between them — that is a skip.",
+    "key_facts": [
+      "3 and 4 are together.",
+      "7 and 8 are together.",
+      "Together means no note between.",
+      "Skip means there is a note between.",
+      "Every other pair in the major scale pattern is a skip."
+    ],
+    "motesart_language": {
+      "skip_definition": "Skip means there is one note between the two numbers.",
+      "together_definition": "Together means the two numbers are right next to each other with no note between.",
+      "half_step_pair_1": "3 and 4 are together.",
+      "half_step_pair_2": "7 and 8 are together."
+    },
+    "video_asset": null,
+    "visual_aid": "skip vs together diagram — wide gap vs no gap"
+  },
+  "gate_steps": {
+    "step_1_story_hook": {
+      "step": 1,
+      "name": "Story Hook",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "listen",
+      "child": "Every family has ways it moves. Some numbers skip over a neighbor. Some numbers stay together and hold hands. In this gate, we find both.",
+      "teen": "The pattern has two moves: skip and together. Once you see those two moves, the whole scale starts making sense.",
+      "adult": "This gate separates the two distances in the major scale pattern. We will call them skip and together first.",
+      "visual": "Eight numbered scale positions appear. 3 and 4 glow together. 7 and 8 glow together. The other pairs show a small space.",
+      "audio": "play adjacent pairs for together and spaced pairs for skip"
+    },
+    "step_2_hear_it": {
+      "step": 2,
+      "name": "Hear It",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "listen_and_feel",
+      "description": "Student hears skip and together before technical names are introduced.",
+      "motesart_intro": "Listen first. This one has space — that is skip. This one is right next door — that is together. 3 and 4 are together. 7 and 8 are together.",
+      "audio_sequence": [
+        {
+          "event": "play_pair",
+          "label": "skip",
+          "notes": [
+            "C4",
+            "D4"
+          ]
+        },
+        {
+          "event": "pause",
+          "ms": 500
+        },
+        {
+          "event": "play_pair",
+          "label": "together",
+          "notes": [
+            "E4",
+            "F4"
+          ]
+        },
+        {
+          "event": "pause",
+          "ms": 500
+        },
+        {
+          "event": "play_pair",
+          "label": "together",
+          "notes": [
+            "B4",
+            "C5"
+          ]
+        }
+      ],
+      "visual": "Number pairs light up as the audio plays. 3-4 and 7-8 show no gap."
+    },
+    "step_3_say_it": {
+      "step": 3,
+      "name": "Say It",
+      "motesart_speaks": true,
+      "speak_or_text": true,
+      "student_action": "answer_call_response",
+      "description": "Call and response. Motesart words only.",
+      "rounds": [
+        {
+          "motesart_prompt": "When there is a note between, we call it...",
+          "acceptable_answers": [
+            "skip",
+            "a skip"
+          ],
+          "motesart_correct": "Skip. Space in the middle.",
+          "motesart_wrong": "That move is a skip. Say it back: skip."
+        },
+        {
+          "motesart_prompt": "When two numbers are right next to each other, we call it...",
+          "acceptable_answers": [
+            "together",
+            "holding hands",
+            "they are together"
+          ],
+          "motesart_correct": "Together. No space between them.",
+          "motesart_wrong": "That move is together. No note between."
+        },
+        {
+          "motesart_prompt": "The together pairs are...",
+          "acceptable_answers": [
+            "3 and 4",
+            "7 and 8",
+            "3 and 4 and 7 and 8",
+            "three and four and seven and eight"
+          ],
+          "motesart_correct": "Yes. 3 and 4, and 7 and 8.",
+          "motesart_wrong": "The together pairs are 3 and 4, and 7 and 8. Say those back."
+        }
+      ]
+    },
+    "step_4_feel_check": {
+      "step": 4,
+      "name": "Feel Check",
+      "motesart_speaks": true,
+      "speak_or_text": true,
+      "student_action": "feel_and_respond",
+      "internal_only": true,
+      "description": "Audiation test. Student hears pairs and identifies which feels together. This is internal evidence, never a student-facing score.",
+      "student_facing_intro": "Close your eyes. I will play two pairs. Tell me which pair felt closer — first or second.",
+      "rounds": [
+        {
+          "round_id": "FC_01",
+          "play_A": [
+            "C4",
+            "D4"
+          ],
+          "play_B": [
+            "E4",
+            "F4"
+          ],
+          "correct_answer": "B",
+          "feel_check_concept": "together_recognition"
+        },
+        {
+          "round_id": "FC_02",
+          "play_A": [
+            "B4",
+            "C5"
+          ],
+          "play_B": [
+            "G4",
+            "A4"
+          ],
+          "correct_answer": "A",
+          "feel_check_concept": "together_recognition"
+        }
+      ],
+      "data_captured": {
+        "response_time_ms": "captured per round",
+        "accuracy": "captured per round",
+        "audiation_signal": "< 2000ms = audiating, >= 2000ms = calculating",
+        "surfaces_to_student": false,
+        "surfaces_to_teacher": true,
+        "surfaces_to_system": true
+      },
+      "student_never_sees": [
+        "percentage",
+        "score",
+        "Feel Check",
+        "audiation",
+        "confidence"
+      ]
+    },
+    "step_5_name_it": {
+      "step": 5,
+      "name": "Name It",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "listen",
+      "description": "Music-world names are revealed only after the student hears, says, and feels skip/together.",
+      "motesart_reveal": "You already know skip and together. Now here are the music-world names. The music-world name for skip is whole step. The music-world name for together is half step. You already know the music. Now you know what musicians call it.",
+      "child_version": "You know skip. Musicians call that a whole step. You know together. Musicians call that a half step.",
+      "teen_version": "Music-world names: skip is whole step. Together is half step. Same moves, official names.",
+      "adult_version": "Music-world names: skip equals whole step. Together equals half step. Same relationship, technical vocabulary.",
+      "visual": "Skip → Whole step. Together → Half step. 3-4 and 7-8 remain highlighted as together pairs.",
+      "locked_terms": {
+        "motesart_word_1": "Skip",
+        "music_world_name_1": "Whole step",
+        "motesart_word_2": "Together",
+        "music_world_name_2": "Half step",
+        "system_id": "T_SKIP_TOGETHER",
+        "reveal_trigger": "after step_3 and step_4 both completed"
+      }
+    },
+    "step_6_quiz_it": {
+      "step": 6,
+      "name": "Quiz It",
+      "motesart_speaks": false,
+      "speak_or_text": true,
+      "student_action": "answer_questions",
+      "description": "Execution questions. Motesart is absent during quiz questions per Article XII. Feedback uses Motesart words first.",
+      "passing_threshold": 0.85,
+      "attempts_before_intervention": 2,
+      "questions_source": "proof.execution_questions"
+    },
+    "step_7_explain_it": {
+      "step": 7,
+      "name": "Explain It",
+      "is_ownership_gate": true,
+      "motesart_speaks": false,
+      "speak_or_text": true,
+      "student_action": "ownership_explanation",
+      "description": "Ownership gate. Student explains skip and together in their own words.",
+      "question_source": "proof.ownership_question"
+    },
+    "step_8_homework": {
+      "step": 8,
+      "name": "Homework",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "launch_homework_game",
+      "description": "Launch FindTheNote Academic mode for find_together when wired.",
+      "homework_route": "/game?mode=academic&concept=find_together&assignment_id=gate1_find_together&level=1"
+    },
+    "step_9_evidence_complete": {
+      "step": 9,
+      "name": "Evidence Complete",
+      "motesart_speaks": true,
+      "speak_or_text": false,
+      "student_action": "complete_gate",
+      "description": "Internal gate evidence summary. Student sees tier language, not percentages.",
+      "complete_message": "Skip and together are locked. Now the family pattern can make sense."
+    }
+  },
+  "proof": {
+    "execution_questions": [
+      {
+        "question_id": "G1_Q1",
+        "type": "multiple_choice",
+        "prompt": "Which number pairs are together?",
+        "options": [
+          "1 and 2, 2 and 3",
+          "3 and 4, 7 and 8",
+          "4 and 5, 5 and 6",
+          "2 and 3, 6 and 7"
+        ],
+        "correct": "3 and 4, 7 and 8",
+        "motesart_correct": "Yes. 3 and 4, and 7 and 8 are together.",
+        "motesart_wrong": "Close — get specific. The together pairs are 3 and 4, and 7 and 8."
+      },
+      {
+        "question_id": "G1_Q2",
+        "type": "binary_choice",
+        "prompt": "Between 3 and 4, do we skip or stay together?",
+        "options": [
+          "skip",
+          "together"
+        ],
+        "correct": "together",
+        "motesart_correct": "Together. No note between them.",
+        "motesart_wrong": "3 and 4 are together. They are holding hands."
+      },
+      {
+        "question_id": "G1_Q3",
+        "type": "binary_choice",
+        "prompt": "Between 1 and 2, do we skip or stay together?",
+        "options": [
+          "skip",
+          "together"
+        ],
+        "correct": "skip",
+        "motesart_correct": "Skip. There is a note between.",
+        "motesart_wrong": "Between 1 and 2, there is space. That is skip."
+      },
+      {
+        "question_id": "G1_Q4",
+        "type": "sequence_build",
+        "prompt": "Build the pattern using skip and together.",
+        "correct_sequence": [
+          "skip",
+          "skip",
+          "together",
+          "skip",
+          "skip",
+          "skip",
+          "together"
+        ],
+        "acceptable_answers": [
+          "skip skip together skip skip skip together",
+          "skip, skip, together, skip, skip, skip, together"
+        ],
+        "motesart_correct": "That is the pattern. Skip, skip, together, skip, skip, skip, together.",
+        "motesart_wrong": "Take your time. The close spots are 3 and 4, and 7 and 8."
+      },
+      {
+        "question_id": "G1_Q5",
+        "type": "recall_spoken_or_typed",
+        "prompt": "What is the music-world name for together?",
+        "acceptable_answers": [
+          "half step",
+          "a half step",
+          "halfstep"
+        ],
+        "motesart_correct": "Half step. You already knew it as together.",
+        "motesart_wrong": "The music-world name for together is half step."
+      },
+      {
+        "question_id": "G1_Q6",
+        "type": "recall_spoken_or_typed",
+        "prompt": "What is the music-world name for skip?",
+        "acceptable_answers": [
+          "whole step",
+          "a whole step",
+          "wholestep"
+        ],
+        "motesart_correct": "Whole step. Same move as skip.",
+        "motesart_wrong": "The music-world name for skip is whole step."
+      }
+    ],
+    "ownership_question": {
+      "question_id": "G1_Q7",
+      "type": "ownership_explain",
+      "is_ownership_gate": true,
+      "prompt": "In your own words — what is the difference between a skip and together?",
+      "acceptable_signals": [
+        "skip has a note between",
+        "together has no note between",
+        "right next to each other",
+        "holding hands",
+        "3 and 4",
+        "7 and 8",
+        "whole step",
+        "half step",
+        "space between",
+        "no space between"
+      ],
+      "motesart_correct": "That is ownership. You can explain the difference, not just repeat the words.",
+      "motesart_wrong": "You've got the idea. Now make it exact: skip has space, together has no space."
+    }
+  },
+  "wyl_interventions": {
+    "description": "WYL fires after mistake detection, from mistake codes rather than fixed student labels.",
+    "gate": "G1_skip_and_together",
+    "interventions": {
+      "visual": {
+        "trigger": "WRONG_TOGETHER_LOCATION or LETTER_SYSTEM_BLEED",
+        "child": "Show numbers 1 through 8. Put a small bridge over 3 and 4, and 7 and 8. Caption: 'These are holding hands.'",
+        "teen": "Show the numbered pattern only. 3-4 and 7-8 are highlighted as together. All other pairs show a gap.",
+        "adult": "Show interval map by number position: together at 3-4 and 7-8, skip everywhere else.",
+        "interaction": "Student taps the together pairs on the number map."
+      },
+      "auditory": {
+        "trigger": "REVERSAL_CONFUSION or WRONG_TOGETHER_LOCATION",
+        "child": "Play a skip, then a together pair. Motesart says: 'Hear the space? Now hear the close one?'",
+        "teen": "Play two pairs and ask which one sounds closer. Repeat until together is recognized.",
+        "adult": "Play whole-step and half-step pairs without naming them first. Student identifies skip or together by sound.",
+        "interaction": "Student answers skip or together after each pair."
+      },
+      "kinesthetic": {
+        "trigger": "INCOMPLETE_UNDERSTANDING or REVERSAL_CONFUSION",
+        "child": "Student moves a finger from 3 to 4 without lifting far, then from 1 to 2 with a skip space shown.",
+        "teen": "Student traces the pattern: skip, skip, together, skip, skip, skip, together.",
+        "adult": "Student maps finger movement across the numbered pattern and labels the two close moves.",
+        "interaction": "Student performs or describes the motion for 3-4 and 7-8."
+      },
+      "readwrite": {
+        "trigger": "INCOMPLETE_UNDERSTANDING or MEMORIZED_WITHOUT_UNDERSTANDING",
+        "child": "Fill in: 'Skip means there is a __ between. Together means no __ between.'",
+        "teen": "Write the rule: skip = space between; together = no space between. Then name the together pairs.",
+        "adult": "Define skip and together in one sentence each, then translate them to whole step and half step.",
+        "interaction": "Student completes rule statements and identifies 3-4 and 7-8."
+      }
+    }
+  },
+  "mistake_detection": {
+    "categories": [
+      {
+        "code": "WRONG_TOGETHER_LOCATION",
+        "description": "Student places together pairs at wrong positions",
+        "trigger": "G1_Q1 or G1_Q2 answer misses 3-4 or 7-8",
+        "severity": "high",
+        "next_action": "trigger WYL visual — numbered map with 3-4 and 7-8 highlighted"
+      },
+      {
+        "code": "REVERSAL_CONFUSION",
+        "description": "Student reverses skip and together definitions",
+        "trigger": "student says skip means no note between or together means a note between",
+        "severity": "high",
+        "next_action": "trigger WYL auditory or kinesthetic — compare space vs no space"
+      },
+      {
+        "code": "LETTER_SYSTEM_BLEED",
+        "description": "Student uses letter names C D E F instead of numbers",
+        "trigger": "answer relies only on letter names without identifying number positions",
+        "severity": "medium",
+        "next_action": "redirect to numbers first: 3 and 4, 7 and 8"
+      },
+      {
+        "code": "INCOMPLETE_UNDERSTANDING",
+        "description": "Student can recite but cannot explain the relationship",
+        "trigger": "G1_Q4 passes but ownership explanation is vague or missing one definition",
+        "severity": "medium",
+        "next_action": "trigger WYL readwrite — define skip and together separately"
+      },
+      {
+        "code": "MEMORIZED_WITHOUT_UNDERSTANDING",
+        "description": "Student passes Q1-Q6 but fails ownership",
+        "trigger": "execution questions pass but G1_Q7 ownership explanation fails",
+        "severity": "critical",
+        "next_action": "flag as execution_only — ownership gate not passed — require retry or teacher review"
+      }
+    ]
+  },
+  "mastery_rule": {
+    "execution_required": true,
+    "ownership_required": true,
+    "execution_definition": "Student answers G1_Q1 through G1_Q6 with score >= 0.85",
+    "ownership_definition": "Student explains skip and together in own words with at least one acceptable signal for each concept",
+    "cannot_advance_without_ownership": true,
+    "teacher_override_available": true,
+    "feel_check_blocks_advancement": false,
+    "passing_threshold": 0.85,
+    "confidence_tiers": {
+      "not_ready": {
+        "range": [
+          0,
+          39
+        ],
+        "motesart_response": "Let's back up. We need more time here before we move on."
+      },
+      "developing": {
+        "range": [
+          40,
+          69
+        ],
+        "motesart_response": "You're getting there. Let's try that again."
+      },
+      "almost_owned": {
+        "range": [
+          70,
+          84
+        ],
+        "motesart_response": "You almost had it. One more pass and it'll stick."
+      },
+      "owned": {
+        "range": [
+          85,
+          94
+        ],
+        "motesart_response": "Yes. You had it."
+      },
+      "mastered": {
+        "range": [
+          95,
+          100
+        ],
+        "motesart_response": "That is locked. You know skip and together."
+      }
+    },
+    "repeat_without_help_required": true,
+    "repeat_session_gap_days": 2
+  },
+  "homework_game": {
+    "engine": "FindTheNote",
+    "variant": "find_together",
+    "level_locked": 1,
+    "octaves": 1,
+    "notes_per_round": 2,
+    "scale": "C_major",
+    "ask_for": "the_together_pair",
+    "prompt": "Is this a skip or together?",
+    "success_threshold": 0.85,
+    "spaced_repetition": true,
+    "description": "Student hears two notes played together. They identify whether the pair is a skip or together. Level 1, one octave, C major.",
+    "game_sessions_table": "TO VERIFY — Game_Sessions in Airtable via Railway backend"
+  },
+  "evidence_logging": {
+    "table": "SOM_Mastery_Ledger",
+    "base": "appTN4wNd5Kgbqdwl",
+    "status": "TO VERIFY — table and field names must be confirmed before any write",
+    "fields_to_write": {
+      "student_email": "from session",
+      "concept": "Skip and Together",
+      "lesson_id": "L01_skip_and_together",
+      "gate": 1,
+      "evidence_type": "self_practice | teacher_observed | zoom_class",
+      "mistake_category": "from mistake_detection.categories[].code",
+      "mistake_detail": "free text from session",
+      "feel_check_response_time_ms": "internal only — never shown to student",
+      "feel_check_accuracy": "internal only — never shown to student",
+      "confidence_score": "0-100 internal — mapped to tier language for student",
+      "gate_reached": "exposure | understanding | execution | ownership | mastery",
+      "execution_passed": "boolean",
+      "ownership_passed": "boolean",
+      "timestamp": "auto",
+      "session_id": "wyl session id or zoom meeting id"
+    },
+    "evidence_weights": {
+      "teacher_observed": 1.0,
+      "zoom_class": 0.85,
+      "self_practice": 0.7
+    }
+  },
+  "next_gate": {
+    "unlocks": "L02_family_pattern",
+    "gate": 2,
+    "gate_name": "The Family Pattern",
+    "condition": "execution_passed AND ownership_passed AND confidence_score >= 85",
+    "lesson_file": "L02_family_pattern"
+  },
+  "motesart_constitution_compliance": {
+    "article_I_foundational_principle": true,
+    "article_II_protected_language": true,
+    "article_III_translation_layer": true,
+    "article_IV_earned_name_doctrine": true,
+    "article_V_family_vocabulary_limit": true,
+    "article_VI_story_earned_by_sound": true,
+    "article_VII_character_labels_with_audiation_prereq": true,
+    "article_VIII_feel_check_internal_only": true,
+    "article_IX_narrative_intensity_all_three_bands": true,
+    "article_X_single_concept_per_gate": true,
+    "article_XI_speak_or_text_every_input": true,
+    "article_XII_motesart_present_except_quiz": true,
+    "article_XIII_no_percentages_to_student": true,
+    "article_XIV_homework_game_declared": true,
+    "article_XV_pattern_mind_preserved": "Pattern Mind (Gate 2) is preserved — this gate builds on top of it"
+  }
+}

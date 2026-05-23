@@ -7,11 +7,73 @@
     "lesson_file": "L00_find_home",
     "curriculum_path": "C Major Scale Mastery Path",
     "phase": "Gate 0 of 8",
-    "version": "1.0",
+    "version": "1.1",
+    "streams_added": "2026-05-22",
+    "schema_note": "streams block added v1.1 — turns lesson node into brain node",
     "ratified": "2026-05-21",
     "constitution_ref": "docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md",
     "doctrine_ref": "SOM_MASTERY_INTELLIGENCE_ENGINE_DOCTRINE.md",
     "prerequisites": []
+  },
+  "streams": {
+    "ear": {
+      "active": true,
+      "engine": "FindTheNote",
+      "variant": "find_home",
+      "level_locked": 1,
+      "evidence_source": "GamePage",
+      "homework_route": "/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1",
+      "status": "LIVE",
+      "measures": [
+        "home_recognition",
+        "pitch_recognition",
+        "response_speed",
+        "replay_efficiency"
+      ]
+    },
+    "timing": {
+      "active": true,
+      "engine": "RhythmRacer",
+      "variant": "pulse_home",
+      "level_locked": 1,
+      "status": "PLANNED_NOT_WIRED",
+      "homework_route": "/rhythm-racer?concept=find_home&assignment_id=gate0_timing&level=1",
+      "measures": [
+        "steady_pulse",
+        "beat_alignment",
+        "timing_consistency"
+      ]
+    },
+    "knowledge": {
+      "active": true,
+      "engine": "GateProofLoop",
+      "concept": "T_TONIC_RECOGNITION",
+      "status": "LIVE",
+      "homework_route": "/practice/C_MAJOR_GATE_FIND_HOME",
+      "measures": [
+        "recall",
+        "quiz_accuracy",
+        "ownership_explanation",
+        "music_world_name_recognition",
+        "feel_check_audiation"
+      ]
+    },
+    "body": {
+      "active": false,
+      "engine": "LivePractice",
+      "variant": null,
+      "status": "FUTURE_GATE",
+      "notes": "Unlocks after Gate 7 — Play It",
+      "measures": []
+    },
+    "converter": {
+      "active": false,
+      "engine": "MotesartConverter",
+      "variant": null,
+      "status": "FUTURE_PRACTICE_GENERATOR",
+      "notes": "Fires when student brings a real song — converts to number system",
+      "measures": []
+    }
   },
   "translation_layer": {
     "student_language": "Home, 1, family, where the music lives",
