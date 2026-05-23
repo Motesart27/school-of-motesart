@@ -301,7 +301,110 @@
       "description": "Execution questions. Motesart is absent during quiz questions per Article XII. Feedback uses Motesart words first.",
       "passing_threshold": 0.85,
       "attempts_before_intervention": 2,
-      "questions_source": "proof.execution_questions"
+      "questions": [
+        {
+          "question_id": "G1_Q1",
+          "type": "multiple_choice",
+          "prompt": "Which number pairs are together?",
+          "options": [
+            "1 and 2, 2 and 3",
+            "3 and 4, 7 and 8",
+            "4 and 5, 5 and 6",
+            "2 and 3, 6 and 7"
+          ],
+          "correct": "3 and 4, 7 and 8",
+          "motesart_correct": "Yes. 3 and 4, and 7 and 8 are together.",
+          "motesart_wrong": "Close — get specific. The together pairs are 3 and 4, and 7 and 8."
+        },
+        {
+          "question_id": "G1_Q2",
+          "type": "binary_choice",
+          "prompt": "Between 3 and 4, do we skip or stay together?",
+          "options": [
+            "skip",
+            "together"
+          ],
+          "correct": "together",
+          "motesart_correct": "Together. No note between them.",
+          "motesart_wrong": "3 and 4 are together. They are holding hands."
+        },
+        {
+          "question_id": "G1_Q3",
+          "type": "binary_choice",
+          "prompt": "Between 1 and 2, do we skip or stay together?",
+          "options": [
+            "skip",
+            "together"
+          ],
+          "correct": "skip",
+          "motesart_correct": "Skip. There is a note between.",
+          "motesart_wrong": "Between 1 and 2, there is space. That is skip."
+        },
+        {
+          "question_id": "G1_Q4",
+          "type": "sequence_build",
+          "prompt": "Build the pattern using skip and together.",
+          "correct_sequence": [
+            "skip",
+            "skip",
+            "together",
+            "skip",
+            "skip",
+            "skip",
+            "together"
+          ],
+          "acceptable_answers": [
+            "skip skip together skip skip skip together",
+            "skip, skip, together, skip, skip, skip, together"
+          ],
+          "motesart_correct": "That is the pattern. Skip, skip, together, skip, skip, skip, together.",
+          "motesart_wrong": "Take your time. The close spots are 3 and 4, and 7 and 8."
+        },
+        {
+          "question_id": "G1_Q5",
+          "type": "recall_spoken_or_typed",
+          "prompt": "What is the music-world name for together?",
+          "acceptable_answers": [
+            "half step",
+            "a half step",
+            "halfstep"
+          ],
+          "motesart_correct": "Half step. You already knew it as together.",
+          "motesart_wrong": "The music-world name for together is half step."
+        },
+        {
+          "question_id": "G1_Q6",
+          "type": "recall_spoken_or_typed",
+          "prompt": "What is the music-world name for skip?",
+          "acceptable_answers": [
+            "whole step",
+            "a whole step",
+            "wholestep"
+          ],
+          "motesart_correct": "Whole step. Same move as skip.",
+          "motesart_wrong": "The music-world name for skip is whole step."
+        },
+        {
+          "question_id": "G1_Q7",
+          "type": "ownership_explain",
+          "is_ownership_gate": true,
+          "prompt": "In your own words — what is the difference between a skip and together?",
+          "acceptable_signals": [
+            "skip has a note between",
+            "together has no note between",
+            "right next to each other",
+            "holding hands",
+            "3 and 4",
+            "7 and 8",
+            "whole step",
+            "half step",
+            "space between",
+            "no space between"
+          ],
+          "motesart_correct": "That is ownership. You can explain the difference, not just repeat the words.",
+          "motesart_wrong": "You've got the idea. Now make it exact: skip has space, together has no space."
+        }
+      ]
     },
     "step_7_explain_it": {
       "step": 7,
@@ -332,112 +435,7 @@
       "complete_message": "Skip and together are locked. Now the family pattern can make sense."
     }
   },
-  "proof": {
-    "execution_questions": [
-      {
-        "question_id": "G1_Q1",
-        "type": "multiple_choice",
-        "prompt": "Which number pairs are together?",
-        "options": [
-          "1 and 2, 2 and 3",
-          "3 and 4, 7 and 8",
-          "4 and 5, 5 and 6",
-          "2 and 3, 6 and 7"
-        ],
-        "correct": "3 and 4, 7 and 8",
-        "motesart_correct": "Yes. 3 and 4, and 7 and 8 are together.",
-        "motesart_wrong": "Close — get specific. The together pairs are 3 and 4, and 7 and 8."
-      },
-      {
-        "question_id": "G1_Q2",
-        "type": "binary_choice",
-        "prompt": "Between 3 and 4, do we skip or stay together?",
-        "options": [
-          "skip",
-          "together"
-        ],
-        "correct": "together",
-        "motesart_correct": "Together. No note between them.",
-        "motesart_wrong": "3 and 4 are together. They are holding hands."
-      },
-      {
-        "question_id": "G1_Q3",
-        "type": "binary_choice",
-        "prompt": "Between 1 and 2, do we skip or stay together?",
-        "options": [
-          "skip",
-          "together"
-        ],
-        "correct": "skip",
-        "motesart_correct": "Skip. There is a note between.",
-        "motesart_wrong": "Between 1 and 2, there is space. That is skip."
-      },
-      {
-        "question_id": "G1_Q4",
-        "type": "sequence_build",
-        "prompt": "Build the pattern using skip and together.",
-        "correct_sequence": [
-          "skip",
-          "skip",
-          "together",
-          "skip",
-          "skip",
-          "skip",
-          "together"
-        ],
-        "acceptable_answers": [
-          "skip skip together skip skip skip together",
-          "skip, skip, together, skip, skip, skip, together"
-        ],
-        "motesart_correct": "That is the pattern. Skip, skip, together, skip, skip, skip, together.",
-        "motesart_wrong": "Take your time. The close spots are 3 and 4, and 7 and 8."
-      },
-      {
-        "question_id": "G1_Q5",
-        "type": "recall_spoken_or_typed",
-        "prompt": "What is the music-world name for together?",
-        "acceptable_answers": [
-          "half step",
-          "a half step",
-          "halfstep"
-        ],
-        "motesart_correct": "Half step. You already knew it as together.",
-        "motesart_wrong": "The music-world name for together is half step."
-      },
-      {
-        "question_id": "G1_Q6",
-        "type": "recall_spoken_or_typed",
-        "prompt": "What is the music-world name for skip?",
-        "acceptable_answers": [
-          "whole step",
-          "a whole step",
-          "wholestep"
-        ],
-        "motesart_correct": "Whole step. Same move as skip.",
-        "motesart_wrong": "The music-world name for skip is whole step."
-      }
-    ],
-    "ownership_question": {
-      "question_id": "G1_Q7",
-      "type": "ownership_explain",
-      "is_ownership_gate": true,
-      "prompt": "In your own words — what is the difference between a skip and together?",
-      "acceptable_signals": [
-        "skip has a note between",
-        "together has no note between",
-        "right next to each other",
-        "holding hands",
-        "3 and 4",
-        "7 and 8",
-        "whole step",
-        "half step",
-        "space between",
-        "no space between"
-      ],
-      "motesart_correct": "That is ownership. You can explain the difference, not just repeat the words.",
-      "motesart_wrong": "You've got the idea. Now make it exact: skip has space, together has no space."
-    }
-  },
+  "proof": {},
   "wyl_interventions": {
     "description": "WYL fires after mistake detection, from mistake codes rather than fixed student labels.",
     "gate": "G1_skip_and_together",
