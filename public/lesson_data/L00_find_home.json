@@ -82,19 +82,19 @@
   },
   "narrative_intensity": {
     "child": {
-      "story_hook": "Every song has a home. Home is where the music lives — where the family starts. It's the note that everything wants to come back to. In C major, C is home. C is 1.",
+      "story_hook": "Every song has a home. Home is where the music lives — where the family starts. It's the note that everything wants to come back to. Home is 1. In C major, 1 lives on C.",
       "tone": "Warm, playful, story-first. Use holding-hands and family language freely.",
       "character_labels_allowed": false,
       "family_language": true
     },
     "teen": {
-      "story_hook": "Every key has a home note — the one the music lands on and wants to return to. We call it home, or 1. In C major, C is home.",
+      "story_hook": "Every key has a home note — the one the music lands on and wants to return to. Home is 1. In C major, 1 lives on C.",
       "tone": "Direct, peer-level. Skip the holding-hands language. Keep skip/together/home vocabulary.",
       "character_labels_allowed": false,
       "family_language": false
     },
     "adult": {
-      "story_hook": "Every key has a tonal center — the note the music gravitates toward. We call it home, or 1. In C major, C is home. You'll hear it as the note that feels settled.",
+      "story_hook": "Every key has a tonal center — the note the music gravitates toward. Home is 1. In C major, 1 lives on C. You'll hear it as the note that feels settled.",
       "tone": "Efficient, no story scaffolding. Music-world name offered as parenthetical. Same concept, same proof.",
       "character_labels_allowed": false,
       "family_language": false
@@ -107,9 +107,9 @@
       "motesart_speaks": true,
       "speak_or_text": false,
       "student_action": "listen",
-      "child": "Every song has a home. Home is where the music lives. Home is where the family starts. In C major, C is home. That is number 1.",
-      "teen": "Every key has a home note — the one the music wants to land on. In C major, C is home. We call it 1.",
-      "adult": "Every key has a tonal center — the note the music settles on. In C major, C is home. Call it home, or 1.",
+      "child": "Every song has a home. Home is where the music lives. Home is where the family starts. Home is 1. In C major, 1 lives on C.",
+      "teen": "Every key has a home note — the one the music wants to land on. Home is 1. In C major, 1 lives on C.",
+      "adult": "Every key has a tonal center — the note the music settles on. Home is 1. In C major, 1 lives on C. Call it home, or 1.",
       "visual": "C highlighted on the keyboard as home base. The number 1 appears above it. All other notes are dim.",
       "audio": "play C4 three times — once alone, once after a short ascending run, once after a descending run. Each time it lands, Motesart says: 'There. That's home.'"
     },
@@ -179,7 +179,7 @@
           "motesart_wrong": "That's what we're learning. 1 is home — say it back."
         },
         {
-          "motesart_prompt": "In C major, the home note is...",
+          "motesart_prompt": "Home is 1. In C major, 1 lives on...",
           "acceptable_answers": [
             "C",
             "C major",
@@ -187,8 +187,8 @@
             "C4",
             "C5"
           ],
-          "motesart_correct": "C. That's home in C major.",
-          "motesart_wrong": "In C major, home is C. Say it back — the home note is..."
+          "motesart_correct": "C. That's where 1 lives in C major.",
+          "motesart_wrong": "Home is 1. In C major, 1 lives on C. Say it back — 1 lives on..."
         },
         {
           "motesart_prompt": "Home is where the music wants to...",
@@ -319,8 +319,8 @@
             "G"
           ],
           "correct": "C",
-          "motesart_correct": "C is home in C major. That's where the family lives.",
-          "motesart_wrong": "In C major, home is C. That's the first note — number 1."
+          "motesart_correct": "C. In C major, 1 lives on C. That's where the family lives.",
+          "motesart_wrong": "Home is 1. In C major, 1 lives on C. That's the first note."
         },
         {
           "question_id": "G0_Q3",
@@ -396,7 +396,7 @@
       "visual": {
         "trigger": "WRONG_HOME_NOTE or HOME_DEFINITION_MISSED",
         "child": "Show C keyboard with a glowing home icon over C. Arrows from other notes pointing back to C. Caption: 'All roads lead home.'",
-        "teen": "Keyboard diagram with C highlighted. Short caption: 'C is 1. That's home in C major.'",
+        "teen": "Keyboard diagram with C highlighted. Short caption: '1 is home. In C major, 1 lives on C.'",
         "adult": "Keyboard diagram. C labeled as '1 / Tonic / Home.' Brief.",
         "interaction": "Student taps each note and hears Motesart say 'skip' or 'not home' until they land on C and hear 'Home.'"
       },

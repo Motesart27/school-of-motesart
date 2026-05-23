@@ -123,15 +123,15 @@ export const CONCEPT_VIEW_CONFIG = {
   T_FIND_HOME: {
     highlightedKeys: [0, 7],
     homeKeyIndex: 0,
-    answerOptions: ["C is home", "D is home", "E is home", "G is home"],
-    correctAnswer: "C is home",
+    answerOptions: ["1 lives on C", "1 lives on D", "1 lives on E", "1 lives on G"],
+    correctAnswer: "1 lives on C",
     bpm: 88,
     bloomLevel: "remember",
     zpdLevel: "guided",
     speechTexts: {
-      teach: "Every song has a home. Home is 1. In C major, C is home — the note everything wants to come back to.",
+      teach: "Every song has a home. Home is 1. In C major, 1 lives on C — the note everything wants to come back to.",
       guide: "Point to home. Which key is number 1 in C major?",
-      confirm: "Say it. What number is home, and which note is it in C major?",
+      confirm: "Say it. What number is home, and where does 1 live in C major?",
       release: "No hints. Find home. Play 1."
     }
   },
