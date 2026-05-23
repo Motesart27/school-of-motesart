@@ -25,6 +25,8 @@ import HalfStepOwnIt from './HalfStepOwnIt.jsx'
 // SOM Mastery Intelligence Engine — Gate 0
 import MajorScalePatternGate from '../components/gate0/MajorScalePatternGate.jsx'
 import FindHomeGate from '../components/gate0/FindHomeGate.jsx'
+// Gate 1 — Skip & Together
+import SkipAndTogetherGate from '../components/gate0/SkipAndTogetherGate.jsx'
 
 /**
  * PracticeChapterWrapper
@@ -85,6 +87,21 @@ export default function PracticeChapterWrapper() {
         sessionStorage.setItem('gate0_find_home_result', JSON.stringify({
           gateId: 'C_MAJOR_GATE_FIND_HOME',
           concept: 'find_home',
+          completedAt: new Date().toISOString(),
+          ...result,
+        }))
+      } catch (e) {}
+      navigate('/student')
+    }} />
+  }
+
+  // Gate 1 — Skip & Together
+  if (conceptId === 'C_MAJOR_GATE_SKIP_TOGETHER') {
+    return <SkipAndTogetherGate onGatePassed={(result) => {
+      try {
+        sessionStorage.setItem('gate1_skip_together_result', JSON.stringify({
+          gateId: 'C_MAJOR_GATE_SKIP_TOGETHER',
+          concept: 'skip_and_together',
           completedAt: new Date().toISOString(),
           ...result,
         }))
