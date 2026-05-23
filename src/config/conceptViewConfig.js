@@ -119,5 +119,35 @@ export const CONCEPT_VIEW_CONFIG = {
       confirm: "Say the scale degrees in order before you play.",
       release: "No hints. Name the scale from memory."
     }
+  },
+  T_FIND_HOME: {
+    highlightedKeys: [0, 7],
+    homeKeyIndex: 0,
+    answerOptions: ["C is home", "D is home", "E is home", "G is home"],
+    correctAnswer: "C is home",
+    bpm: 88,
+    bloomLevel: "remember",
+    zpdLevel: "guided",
+    speechTexts: {
+      teach: "Every song has a home. Home is 1. In C major, C is home — the note everything wants to come back to.",
+      guide: "Point to home. Which key is number 1 in C major?",
+      confirm: "Say it. What number is home, and which note is it in C major?",
+      release: "No hints. Find home. Play 1."
+    }
+  },
+  T_SKIP_AND_TOGETHER: {
+    highlightedKeys: [2, 3, 6, 7],
+    homeKeyIndex: 0,
+    answerOptions: ["3 & 4", "1 & 2", "5 & 6", "4 & 5"],
+    correctAnswer: "3 & 4",
+    bpm: 88,
+    bloomLevel: "understand",
+    zpdLevel: "guided",
+    speechTexts: {
+      teach: "Some notes skip — there is a note between them. Some notes are together — they hold hands with nothing between. 3 and 4 are together. 7 and 8 are together.",
+      guide: "Which two keys are together — right next to each other with no note between?",
+      confirm: "Name both together pairs. No skipping — which ones hold hands?",
+      release: "No hints. Name the together spots."
+    }
   }
 }

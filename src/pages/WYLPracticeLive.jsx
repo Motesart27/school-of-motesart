@@ -530,6 +530,185 @@ const CONCEPT_CONFIG_MAP = {
       { type: 'listen', expect: ['7', 'seven', 'degree 7', 'seventh', 'seven degree'], prompt: 'full_pattern' },
       { type: 'speak', text: "Right. B is the 7th degree. C major gives you every scale degree in its clearest form — no accidentals, no distractions. You now know this scale by name, by note, and by number." },
     ]
+  },
+  'find-home': {
+    concept: 'Find Home',
+    description: 'Every song has a home. Home is 1. In C major, C is home.',
+    conceptId: 'T_FIND_HOME',
+    steps: [
+      {
+        type: 'speak',
+        stage: 'intro',
+        text: "Every song has a home. Home is where the music wants to land. In C major, C is home — that is number 1. Everything else in the family connects back to home. I am going to help you find it, hear it, and own it. Ready?"
+      },
+      {
+        type: 'listen',
+        stage: 'ready',
+        expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'go', 'i am', 'im ready'],
+        prompt: 'ready_check',
+        prompt_display: 'Say yes or ready to begin.',
+        text: 'Are you ready to find home?'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: "Good. Here is the idea. Every key on this keyboard has a number. C is 1. D is 2. E is 3. F is 4. G is 5. A is 6. B is 7. And then C again — that is 8. Same note as 1, just higher. Home is always 1. Home is always where the music wants to come back."
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: "Listen to this. I am going to play the scale — and watch what happens at the end. It lands on C. On home. On 1. That feeling of landing — that is what home sounds like."
+      },
+      {
+        type: 'listen',
+        stage: 'call_response',
+        expect: ['home', 'one', '1', 'c', 'c is home', 'c is one', 'the first note', 'key 1', 'number 1', 'first key'],
+        prompt: 'call_response',
+        prompt_display: 'What number is home?',
+        text: 'What number is home?'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: "Exactly. Home is 1. And in C major, 1 is C. The music-world name for home is the tonic — but you already know it as 1. Same idea. Just the technical name."
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: false,
+        expect: ['c', 'c is home', 'c major', 'the note c', 'key 1', 'number 1', 'first key', 'c is one', 'key c'],
+        prompt: 'full_pattern',
+        prompt_display: 'Q1 — In C major, which note is home?',
+        text: 'In C major, which note is home — which one is number 1?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: false,
+        expect: ['come back', 'land', 'settle', 'return', 'wants to land', 'the music lands', 'feels done', 'feels finished', 'feels settled', 'feels resolved'],
+        prompt: 'full_pattern',
+        prompt_display: 'Q2 — What does home feel like?',
+        text: 'What does home feel like — what does the music want to do when it gets there?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: true,
+        expect: ['tonic', 'the tonic', 'root', 'the root', 'key center', 'scale degree one', 'degree one', 'number one'],
+        prompt: 'full_pattern',
+        prompt_display: 'Q3 — What is the music-world name for home?',
+        text: 'Here is a bonus. What do musicians call home? What is the technical name for number 1?'
+      },
+      {
+        type: 'live_practice',
+        stage: 'practice',
+        practiceTarget: 2,
+        expect: ['home', '1', 'c', 'number one', 'key one', 'the first note', 'c is home', 'one is home'],
+        prompt_display: 'Practice — play key 1 and tell me what you played.',
+        text: 'Play home. Play key 1. Then tell me what you played and what number it is.'
+      },
+      {
+        type: 'prove_it',
+        stage: 'prove_it',
+        expect: ['home is 1', 'home is c', 'one is home', 'c is home', '1 is home', 'home is always 1', 'home is where the music', 'the music comes back', 'tonic', 'the tonic', 'number 1'],
+        prompt_display: 'Final — no hints. What is home and why does it matter?',
+        text: 'No hints. In your own words — what is home in music, and why does it matter?',
+        lockedText: 'Home is locked. You know where 1 lives, you can hear it land, and you can explain it. That is ownership. Next: skip and together.',
+        proveFailStep: 6,
+        nextConcept: 'skip-and-together'
+      }
+    ],
+    nextConcept: 'skip-and-together'
+  },
+  'skip-and-together': {
+    concept: 'Skip & Together',
+    description: 'Some notes skip — space between them. Some notes hold hands — they are together.',
+    conceptId: 'T_SKIP_AND_TOGETHER',
+    steps: [
+      {
+        type: 'speak',
+        stage: 'intro',
+        text: "You found home. Now we look at how the family moves. Some notes skip — there is a note between them. Some notes are together — they hold hands, no note between. This is how the major scale is built. Ready to feel the difference?"
+      },
+      {
+        type: 'listen',
+        stage: 'ready',
+        expect: ['yes', 'yeah', 'ready', 'yep', 'sure', 'ok', 'okay', 'lets go', 'go', 'i am', 'im ready'],
+        prompt: 'ready_check',
+        prompt_display: 'Say yes or ready.',
+        text: 'Ready to learn skip and together?'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: "Here is the difference. A skip means there is a note between them — you hop over one. Like 1 to 2. There is a black key between them. That is a skip. Now 3 to 4 — E and F. No black key between them. They sit right next to each other. That is together. They are holding hands."
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: "In the major scale pattern, most moves are skips. But two pairs are together — they hold hands. 3 and 4 are together. 7 and 8 are together. Those are the only two places where there is no note between them."
+      },
+      {
+        type: 'listen',
+        stage: 'call_response',
+        expect: ['skip', 'together', '3 and 4', '7 and 8', 'three and four', 'seven and eight', 'skip and together', 'holding hands', 'no note between'],
+        prompt: 'call_response',
+        prompt_display: 'Say it back — what are the two types of moves?',
+        text: 'Say it back — what are the two types of moves in the scale?'
+      },
+      {
+        type: 'speak',
+        stage: 'teach',
+        text: "The music-world name for skip is whole step. The music-world name for together is half step. Same thing you already know — just the technical name. You earned it."
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: false,
+        expect: ['3 and 4', '7 and 8', 'three and four', 'seven and eight', '3 4 7 8', 'three four seven eight'],
+        prompt: 'full_pattern',
+        prompt_display: 'Q1 — Which two pairs are together?',
+        text: 'Which two number pairs are together — holding hands with no note between them?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: false,
+        expect: ['skip', 'a skip', 'there is a skip', 'whole step', 'there is a note between', 'note between', 'hop over'],
+        prompt: 'full_pattern',
+        prompt_display: 'Q2 — Between 1 and 2: skip or together?',
+        text: 'Between 1 and 2 — is there a skip or are they together?'
+      },
+      {
+        type: 'listen',
+        stage: 'quiz',
+        quizEnd: true,
+        expect: ['half step', 'together', 'half', 'whole step', 'skip', 'the music world name', 'technical name'],
+        prompt: 'full_pattern',
+        prompt_display: 'Q3 — What is the music-world name for together?',
+        text: 'What is the music-world name for together?',
+        quizFailStep: 5
+      },
+      {
+        type: 'live_practice',
+        stage: 'practice',
+        practiceTarget: 2,
+        expect: ['3 and 4', '7 and 8', 'together', 'skip', 'half step', 'whole step', 'holding hands', 'no note between', 'e and f', 'b and c'],
+        prompt_display: 'Practice — point to a together pair and name it.',
+        text: 'Point to a together pair on the keyboard and tell me what you found.'
+      },
+      {
+        type: 'prove_it',
+        stage: 'prove_it',
+        expect: ['3 and 4', '7 and 8', 'together', 'no note between', 'holding hands', 'half step', 'e and f', 'b and c', 'skip is whole step', 'together is half step'],
+        prompt_display: 'Final — no hints. Name both together pairs.',
+        text: 'No hints. Name both together pairs in the major scale. Then tell me what the music-world calls them.',
+        lockedText: 'Skip and together — locked. 3 and 4, 7 and 8. Whole step, half step. You earned those names. Now the pattern makes sense.',
+        proveFailStep: 5,
+        nextConcept: 'major-scale-pattern'
+      }
+    ],
+    nextConcept: 'major-scale-pattern'
   }
 }
 
