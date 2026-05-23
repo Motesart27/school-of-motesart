@@ -1,164 +1,103 @@
 # SOM PROJECT BRAIN — HANDOFF
-Last Updated: May 23, 2026 | Bundle: index-DTATOCQr.js
+Last Updated: May 23, 2026 | Bundle: index-DfXy9PFK.js
 
----
+## TWO-LANE ARCHITECTURE (LOCKED)
 
-## Current State
+### Lane 1 — Gate UI (proof / mastery / ownership)
+- /practice/C_MAJOR_GATE_FIND_HOME → FindHomeGate.jsx → L00_find_home.json
+- /practice/C_MAJOR_GATE_SKIP_TOGETHER → SkipAndTogetherGate.jsx → L01_skip_and_together.json
+- /practice/C_MAJOR_GATE_0 → MajorScalePatternGate.jsx (Gate 2, preserved)
+- Purpose: 9-step proof loop, ownership gate, sessionStorage completion, homework launch
 
-Status: DEPLOYED_NOT_SHIPPED
+### Lane 2 — Practice Live Cockpit (conversational teaching)
+- /practice-live?concept=find-home → T_FIND_HOME (cfa6321)
+- /practice-live?concept=skip-and-together → T_SKIP_AND_TOGETHER (cfa6321)
+- /practice-live?concept=half-step → T_HALF_STEP (existing)
+- /practice-live?concept=whole-step → T_WHOLE_STEP (existing)
+- Purpose: live Motesart AI conversation, voice, visual cockpit, real-time coaching
+- Motesart answers lesson questions and redirects off-topic back to lesson warmly
 
-Gate 0 Find Home and Gate 1 Skip & Together are deployed, but not shipped to students yet. Mobile verification is still pending.
+### Lane 3 — GamePage (homework reinforcement)
+- /game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1
+- /game?mode=academic&concept=find_together&assignment_id=gate1_find_together&level=1
+- Purpose: Find the Note ear training, Academic mode locked by assignment_id
 
-All three gate routes are present in the production bundle and were confirmed by Codex after deploy.
+## LAST 5 COMMITS
+- cfa6321: feat(practice-live): add Find Home and Skip Together concept scripts
+- 2dcee33: docs: session handoff — Gate 1 Skip & Together live, curriculum brain nodes
+- ef53c61: feat(gate1): add Skip and Together gate UI
+- 21a13d5: fix(curriculum): normalize L01 proof questions to gate_steps schema
+- 9622e97: feat(curriculum): add streams schema to lesson brain — L00 v1.1, L01
 
----
+## CURRICULUM BRAIN NODES
+- L00_find_home.json v1.1 — 32/32 audit, streams: ear LIVE, timing PLANNED
+- L01_skip_and_together.json v1.0 — 42/42 audit, streams: ear PLANNED, timing PLANNED
+- L00_major_scale_pattern.json — Gate 2, preserved, language update pending
 
-## Latest Bundle
+## CURRENT STATUS
+- Gate 0 Find Home: DEPLOYED_NOT_SHIPPED (mobile verification pending)
+- Gate 1 Skip & Together: DEPLOYED_NOT_SHIPPED (mobile verification pending)
+- Practice Live find-home: LIVE (cfa6321)
+- Practice Live skip-and-together: LIVE (cfa6321)
+- Pattern Mind Gate 2: PRESERVED at /practice/C_MAJOR_GATE_0
 
-`index-DTATOCQr.js`
+## WHAT'S NEEDED NEXT (Ordered)
+1. Mobile verification — iPhone 390x844 and 430x932
+   - /practice/C_MAJOR_GATE_FIND_HOME
+   - /practice/C_MAJOR_GATE_SKIP_TOGETHER
+   - /practice-live?concept=find-home (logged in as Jordan Rivers test student)
+2. Verify find_together concept recognized in GamePage Academic mode
+3. Gate 2 re-thread — Pattern Mind language update (skip/together leads, W-W-H as music-world name)
+4. Wire Rhythm Racer as second homework engine (timing streams PLANNED_NOT_WIRED)
+5. Verify SOM_Mastery_Ledger Airtable table before any evidence writes
+6. Add VITE_MOTESART_CLAUDE_KEY to Netlify env vars
 
-Production site:
-`https://school-of-motesart.netlify.app`
+## SOM BRAIN FORMULA (locked)
+- Motesart language → trains memory
+- Find the Note → trains ear
+- Rhythm Racer → trains timing
+- Gate quizzes → trains understanding
+- Live practice → trains muscle memory
+- Motesart Converter → turns real songs into number-system practice
+- T.A.M.i → reads all streams, routes forward, tracks perfect reps
 
-Deploy containing Gate 1 UI:
-`6a119b2c3d353478d9813088`
+## ARCHITECTURE LAWS (locked)
+- Gate teaches. GamePage reinforces. GamePage logs.
+- JSON is the lesson. React is only the renderer.
+- Do NOT delete FindHomeGate.jsx or SkipAndTogetherGate.jsx
+- Do NOT replace Gate UI with Practice Live
+- Gate UI = proof. Practice Live = teaching. Both are needed.
+- Constitution v1.1 governs all student-facing language
 
----
+## PROTECTED FILES
+- Registration.jsx, auth.py, GamePage.jsx
+- MajorScalePatternGate.jsx — preserved as Gate 2 (Article XV)
+- FindHomeGate.jsx — Gate Lane 1, do not delete
+- SkipAndTogetherGate.jsx — Gate Lane 1, do not delete
+- WYLPracticeLive.jsx — Practice Live cockpit, surgical edits only
+- lessonDataLoader.js — supports v1+v2 schemas
+- L00_find_home.json, L01_skip_and_together.json — audited, do not modify without amendment
 
-## Live Gate Routes
+## BASELINES
+- Bundle: index-DfXy9PFK.js
+- AIRTABLE_BASE_ID: appTN4wNd5Kgbqdwl
+- MOTESART_ENGINE: 23fb225
+- MOTESART_PERSONALITY: 05ae905
+- Test student: jordan.rivers.som.test4@gmail.com / TestStudent27!
+- SOM backend: https://deployable-python-codebase-som-production.up.railway.app
+- TTS backend: https://protective-flow-production.up.railway.app
+- Netlify site ID: 68b307a9-ef37-4298-9e72-805381200e1c
 
-| Gate | Name | Route | Status |
-|---|---|---|---|
-| Gate 0 | Find Home | `/practice/C_MAJOR_GATE_FIND_HOME` | Live, not regressed |
-| Gate 1 | Skip & Together | `/practice/C_MAJOR_GATE_SKIP_TOGETHER` | Live, commit `ef53c61` |
-| Gate 2 | Pattern Mind | `/practice/C_MAJOR_GATE_0` | Preserved, not regressed |
+## DOCTRINE DOCUMENTS (all in repo)
+- motesart_constitution.md — build process, protected files, approval discipline
+- docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md — student language, gate order, teaching voice
+- docs/MOTESART_VOICE_BIBLE.md — school-safe culturally responsive voice
+- docs/SOM_ADAPTIVE_MUSIC_INTELLIGENCE_STRATEGY.md — adaptive strategy
 
-Codex verified all three routes resolve to the deployed bundle `index-DTATOCQr.js`.
-
----
-
-## Curriculum Brain Nodes
-
-Both lesson JSON files have been audited and committed with the streams schema.
-
-| Lesson | Gate | Status |
-|---|---|---|
-| `public/lesson_data/L00_find_home.json` | Gate 0 | v1.1, streams schema committed |
-| `public/lesson_data/L01_skip_and_together.json` | Gate 1 | streams schema committed, renderer schema normalized |
-
-L01 proof questions are normalized to the renderer-compatible schema:
-
-`gate_steps.step_6_quiz_it.questions[]`
-
-This matches L00 and the gate renderer pattern.
-
----
-
-## Architecture Law
-
-Gate teaches. GamePage reinforces. GamePage logs.
-
-This is locked.
-
-- Gate components teach, quiz, and collect ownership proof.
-- GamePage reinforces through Academic/Game modes.
-- GamePage owns practice and homework logging.
-- Gate components do not duplicate GamePage keyboard/game systems.
-- GamePage does not become the teaching gate.
-
----
-
-## SOM Brain Formula
-
-Locked model: 5 training areas, 5 engines.
-
-| Training Area | Engine | Role |
-|---|---|---|
-| Ear | FindTheNote | Pitch, home, skip/together recognition |
-| Timing | RhythmRacer | Pulse, beat alignment, timing consistency |
-| Knowledge | GateProofLoop | Teaching, quiz, ownership explanation |
-| Body | LivePractice | Physical playing and transfer |
-| Converter | MotesartConverter | Real-song conversion into the number system |
-
-The streams schema turns each lesson node into a brain node by declaring which engines are live, planned, or future.
-
----
-
-## Current Gate Status
-
-### Gate 0 — Find Home
-
-- Route: `/practice/C_MAJOR_GATE_FIND_HOME`
-- Component: `src/components/gate0/FindHomeGate.jsx`
-- Lesson JSON: `public/lesson_data/L00_find_home.json`
-- Homework route: `/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1`
-- Status: DEPLOYED_NOT_SHIPPED
-
-### Gate 1 — Skip & Together
-
-- Route: `/practice/C_MAJOR_GATE_SKIP_TOGETHER`
-- Component: `src/components/gate0/SkipAndTogetherGate.jsx`
-- Lesson JSON: `public/lesson_data/L01_skip_and_together.json`
-- Commit: `ef53c61`
-- Status: DEPLOYED_NOT_SHIPPED
-
-### Gate 2 — Pattern Mind
-
-- Route: `/practice/C_MAJOR_GATE_0`
-- Component: `src/components/gate0/MajorScalePatternGate.jsx`
-- Status: Preserved and not regressed
-- Direction: re-thread later so skip/together language leads before W-W-H terminology.
-
----
-
-## Next
-
-1. Mobile verification.
-   - iPhone `390x844`
-   - iPhone `430x932`
-   - Verify Gate 0, Gate 1, and Gate 2 routes load cleanly.
-   - Verify gate completion behavior on mobile.
-2. Wire `find_together` in GamePage.
-   - Target assignment route: `/game?mode=academic&concept=find_together&assignment_id=gate1_find_together&level=1`
-   - Keep GamePage as reinforcement/logging engine only.
-3. Gate 2 re-thread.
-   - Preserve existing Pattern Mind work.
-   - Reorder language so skip/together comes before W-W-H.
-
----
-
-## Protected Direction
-
-Do not add Airtable writes until table and field names are verified.
-
-Do not edit auth, registration, dashboards, or unrelated route files.
-
-Do not rebuild Gate 2 from scratch. Preserve it and re-thread the language only when that pass begins.
-
-Do not deploy data-only curriculum changes unless a UI/runtime change requires it.
-
----
-
-## Documents To Read Before Next Build
-
-- `docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md`
-- `docs/MOTESART_VOICE_BIBLE.md`
-- `public/lesson_data/L00_find_home.json`
-- `public/lesson_data/L01_skip_and_together.json`
-- `src/components/gate0/FindHomeGate.jsx`
-- `src/components/gate0/SkipAndTogetherGate.jsx`
-- `src/pages/PracticeChapterWrapper.jsx`
-- `src/pages/GamePage.jsx`
-
----
-
-## Current Ship Gate
-
-The current product state is DEPLOYED_NOT_SHIPPED.
-
-Ship only after mobile verification passes on:
-
-- iPhone `390x844`
-- iPhone `430x932`
-
-After mobile verification, proceed to GamePage `find_together` wiring, then Gate 2 re-thread.
+## SESSION START PROTOCOL (next session)
+1. Read PROJECT_BRAIN_HANDOFF.md (this file)
+2. Read docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md
+3. Read motesart_constitution.md
+4. Never claim a tool is unavailable without checking
+5. Visual approval before any code
+6. One feature per session
