@@ -1,0 +1,51 @@
+{
+  "id": "L_rhythm_racer_mvp",
+  "title": "Rhythm Racer MVP",
+  "status": "DEPLOYED_NOT_SHIPPED",
+  "mode": "practice_pad",
+  "teacher": "Motesart",
+  "meter": "4/4",
+  "tempo_bpm": 70,
+  "input_mode": "ONE_PAD",
+  "route_contract": "/rhythm-racer?concept=<concept_id>&assignment_id=<id>&level=<1-4>",
+  "levels": [
+    {
+      "level": 1,
+      "name": "Whole Note",
+      "concept_id": "R_PULSE_WHOLE",
+      "pattern": "TAP -- -- --"
+    },
+    {
+      "level": 2,
+      "name": "Half Notes",
+      "concept_id": "R_PULSE_HALF",
+      "pattern": "TAP -- TAP --"
+    },
+    {
+      "level": 3,
+      "name": "Quarter Notes",
+      "concept_id": "R_PULSE_QUARTER",
+      "pattern": "TAP TAP TAP TAP"
+    },
+    {
+      "level": 4,
+      "name": "Quarter Rest",
+      "concept_id": "R_REST_QUARTER",
+      "pattern": "TAP TAP REST TAP",
+      "rotations": [
+        "TAP REST REST TAP",
+        "REST TAP TAP REST",
+        "TAP REST TAP REST"
+      ]
+    }
+  ],
+  "session_write": {
+    "primary": "POST /practice-log/sessions",
+    "secondary": "Game_Sessions Airtable via Railway",
+    "secondary_status": "PLANNED_NOT_WIRED"
+  },
+  "mobile_gate": {
+    "required_viewports": ["390x844", "430x932"],
+    "status": "PENDING"
+  }
+}
