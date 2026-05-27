@@ -845,3 +845,45 @@ Next build sequence (not this session):
   Phase 1B-4: DPM trigger layer — engagement drop → game/reward/encouragement
   Phase 1B-5: Posture/form research spec — define camera detection requirements
   Phase 1B-6: T.A.M.i Ambassador model — teacher/coach persona structure
+
+## May 27, 2026 — Rhythm Racer MVP shipped
+
+**What:** Full Rhythm Racer MVP build and deploy session
+
+**Files created:**
+- src/pages/RhythmRacer.jsx
+- src/data/rhythmRacerLevels.js
+- public/lesson_data/L_rhythm_racer_mvp.json
+- public/avatars/motesart_avatar_1.png
+
+**Files edited:**
+- src/App.jsx — added /rhythm-racer route + import (one surgical change)
+
+**Result:**
+- Build passed: npm run build, bundle index-D3E2vpFR.js
+- Netlify deployed: ce80adf — Published 5:59 PM today
+- Route /rhythm-racer: HTTP 200, authenticated
+- Mobile gate CLOSED: iPhone 390×844 ✅ · 430×932 ✅
+- Status: SHIPPED
+
+**Key decisions locked this session:**
+- No hit zone band or label — car is the timing target
+- One practice pad (ONE_PAD), future modes stubbed not exposed
+- Motesart is the only teacher voice — no T.A.M.i labels in game
+- Pedagogy order: whole → half → quarter → rest (longest duration first)
+- Age-aware coaching bank keyed by (trigger, age_group)
+- Route pattern: /rhythm-racer?concept=<id>&assignment_id=<id>&level=<1-4>
+- Session write: POST /practice-log/sessions confirmed working
+- Game_Sessions Airtable write: PLANNED_NOT_WIRED (stubbed gracefully)
+
+**Rollback:** git revert ce80adf (five files, App.jsx reverts to 5a8d276 route set)
+
+**Next session — Beginner Piano Level 1 OS:**
+- Rhythm Racer is now available for Gate wiring
+- Resume BEGINNER_PIANO_LEVEL_1_OS_VERIFICATION_REPORT.md
+- All 8 gates now have their required games:
+  Gates 1, 2, 7, 8 → Find the Note (already wired)
+  Gates 4, 5, 6    → Rhythm Racer (now available)
+  Gate 3           → manual completion
+- Wire the gates in the next dedicated session
+- Deferred: car visual redesign (racing car silhouette), On Fire trail animation
