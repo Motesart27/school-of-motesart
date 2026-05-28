@@ -17,6 +17,7 @@ const GOOD_MS = 150
 const LATE_EARLY_MS = 250
 const CAR_X = 80
 const TRAVEL_BEATS = 4
+const CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
 const emptyCounts = () => ({
   perfect: 0,
@@ -58,6 +59,72 @@ function getTapAccuracy(result) {
   if (result === 'good') return 90
   if (result === 'early' || result === 'late') return 70
   return 0
+}
+
+function getIntroCopy(level, ageGroup) {
+  const copy = {
+    1: {
+      child: "Okay, here's the deal. You see the note on the staff? When it slides to the car, tap the pad. Just once. Hold it — feel the whole measure. Count with me: 1, 2, 3, 4. Tap on 1.",
+      teen: 'One note. Whole measure. Tap when it hits the car, hold through the beat. Count-in starts you off.',
+      adult: 'Whole note in 4/4 at 70 BPM. Tap on beat 1, sustain through beat 4. Count-in precedes each attempt.',
+    },
+    2: {
+      child: 'This time you tap twice — once on beat 1, once on beat 3. Feel the measure split in half. Count with me: 1, 2, TAP, 4. Wait for it.',
+      teen: 'Two taps. Beat 1 and beat 3. Feel the split.',
+      adult: 'Half notes. Tap beats 1 and 3. 4/4 at 70 BPM.',
+    },
+    3: {
+      child: "Every beat gets a tap. 1, 2, 3, 4 — all of them. Steady. Don't rush.",
+      teen: 'Four taps. Every beat. Lock it in.',
+      adult: 'Quarter note pulse. Tap every beat. 70 BPM.',
+    },
+    4: {
+      child: "Watch out — beat 3 is quiet. TAP, TAP, silence, TAP. Silence counts. Don't tap on beat 3.",
+      teen: 'Beat 3 is a rest. Silence counts too.',
+      adult: 'Quarter rest on beat 3. TAP TAP REST TAP.',
+    },
+  }
+  return copy[level]?.[ageGroup] || copy[level]?.child || copy[1].child
+}
+
+function getHowToSteps(level) {
+  if (level === 1) {
+    return [
+      'Watch the note slide toward the car on the staff',
+      'Tap when the note reaches the car',
+      'Hold the feel — one tap covers the whole measure',
+      'Get 5 stages right to level up',
+    ]
+  }
+  if (level === 2) {
+    return [
+      'Watch the half notes slide toward the car',
+      'Tap on beat 1 and beat 3',
+      'Let beats 2 and 4 stay open',
+      'Get 5 stages right to level up',
+    ]
+  }
+  if (level === 3) {
+    return [
+      'Watch each quarter note move across the staff',
+      'Tap every beat: 1, 2, 3, 4',
+      'Keep the taps even instead of rushing',
+      'Get 5 stages right to level up',
+    ]
+  }
+  return [
+    'Watch the notes and the red rest symbol',
+    'Tap beat 1, tap beat 2, stay quiet on beat 3, tap beat 4',
+    'Do not tap when the rest reaches the car',
+    'Get 5 stages right to level up',
+  ]
+}
+
+function getMotesartQuestionContext(level) {
+  if (level === 1) return 'whole notes and steady pulse'
+  if (level === 2) return 'half notes and splitting the measure'
+  if (level === 3) return 'quarter notes and steady beat'
+  return 'quarter rests and counting silence'
 }
 
 function classifyOffset(offsetMs) {
@@ -184,11 +251,19 @@ export default function RhythmRacer() {
   const [flash, setFlash] = useState(null)
   const [padActive, setPadActive] = useState(false)
   const [metronomeOn, setMetronomeOn] = useState(false)
+  const [showIntro, setShowIntro] = useState(() => (searchParams.get('mode') || 'game') === 'academic')
+  const [showInfo, setShowInfo] = useState(false)
+  const [qaInput, setQaInput] = useState('')
+  const [qaMessages, setQaMessages] = useState([])
+  const [qaLoading, setQaLoading] = useState(false)
+  const [qaError, setQaError] = useState('')
   const [written, setWritten] = useState(false)
   const [writeStatus, setWriteStatus] = useState('idle')
 
   const sessionStartRef = useRef(Date.now())
   const audioCtxRef = useRef(null)
+  const metronomeIntervalRef = useRef(null)
+  const resumeMetronomeRef = useRef(false)
   const tamiStackRef = useRef(null)
   const rafRef = useRef(null)
   const timersRef = useRef([])
@@ -228,8 +303,6 @@ export default function RhythmRacer() {
     rafRef.current = null
   }, [])
 
-  useEffect(() => () => clearTimers(), [clearTimers])
-
   const playMetronomeClick = useCallback(() => {
     try {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext
@@ -248,6 +321,26 @@ export default function RhythmRacer() {
       osc.stop(ctx.currentTime + 0.022)
     } catch (e) {}
   }, [])
+
+  const stopMetronomeInterval = useCallback(() => {
+    if (metronomeIntervalRef.current) {
+      clearInterval(metronomeIntervalRef.current)
+      metronomeIntervalRef.current = null
+    }
+  }, [])
+
+  const startMetronomeInterval = useCallback(() => {
+    stopMetronomeInterval()
+    playMetronomeClick()
+    metronomeIntervalRef.current = window.setInterval(() => {
+      playMetronomeClick()
+    }, RHYTHM_BEAT_MS)
+  }, [playMetronomeClick, stopMetronomeInterval])
+
+  useEffect(() => () => {
+    clearTimers()
+    stopMetronomeInterval()
+  }, [clearTimers, stopMetronomeInterval])
 
   const getTamiStack = useCallback(() => {
     try {
@@ -388,6 +481,7 @@ export default function RhythmRacer() {
 
   const resetLevelRun = useCallback((targetLevel) => {
     clearTimers()
+    stopMetronomeInterval()
     const nextLevel = clamp(targetLevel, 1, 4)
     setLevel(nextLevel)
     setCorrectStages(0)
@@ -408,7 +502,7 @@ export default function RhythmRacer() {
     setCompletion(null)
     setPhase('ready')
     setCoachLine(getCoaching('PRE_GAME', ageGroup, getLevel(nextLevel).key))
-  }, [ageGroup, clearTimers])
+  }, [ageGroup, clearTimers, stopMetronomeInterval])
 
   const targetTimeForBeat = useCallback((beatIndex) => {
     if (attemptStartRef.current == null) return null
@@ -453,6 +547,7 @@ export default function RhythmRacer() {
 
   const finishAttempt = useCallback(() => {
     if (phaseRef.current !== 'playing') return
+    stopMetronomeInterval()
 
     beatsRef.current.forEach((beat, index) => {
       if (beat.kind === 'tap' && !scoredRef.current[index]) {
@@ -502,7 +597,7 @@ export default function RhythmRacer() {
     if (nextFailed >= 2) {
       showLevelComplete(correctStages)
     }
-  }, [correctStages, failedStages, recordResult, setCoach, showLevelComplete, stageAttempt])
+  }, [correctStages, failedStages, recordResult, setCoach, showLevelComplete, stageAttempt, stopMetronomeInterval])
 
   const tickGameplay = useCallback(() => {
     const now = performance.now()
@@ -521,7 +616,6 @@ export default function RhythmRacer() {
         const metroBeat = Math.floor((now - attemptStartRef.current) / RHYTHM_BEAT_MS)
         if (metroBeat >= 0 && metroBeat < RHYTHM_BEATS_PER_ATTEMPT && metroBeat !== lastMetroBeatRef.current) {
           lastMetroBeatRef.current = metroBeat
-          playMetronomeClick()
         }
       }
 
@@ -533,7 +627,7 @@ export default function RhythmRacer() {
     }
 
     rafRef.current = requestAnimationFrame(tickGameplay)
-  }, [finishAttempt, metronomeOn, playMetronomeClick, recordResult, targetTimeForBeat])
+  }, [finishAttempt, metronomeOn, recordResult, targetTimeForBeat])
 
   const beginAttempt = useCallback(() => {
     clearTimers()
@@ -548,11 +642,14 @@ export default function RhythmRacer() {
     setPhase('count-in')
     lastMetroBeatRef.current = -1
     setCoachLine(getCoaching('PRE_GAME', ageGroup, levelConfig.key))
+    if (metronomeOn && !showInfo) {
+      startMetronomeInterval()
+    }
 
     for (let i = 1; i <= 4; i += 1) {
       timersRef.current.push(window.setTimeout(() => {
         setCountBeat(i)
-        playMetronomeClick()
+        if (!metronomeOn) playMetronomeClick()
       }, (i - 1) * RHYTHM_BEAT_MS))
     }
 
@@ -564,7 +661,7 @@ export default function RhythmRacer() {
       setPhase('playing')
       rafRef.current = requestAnimationFrame(tickGameplay)
     }, RHYTHM_BEAT_MS * 4))
-  }, [ageGroup, clearTimers, levelConfig.key, playMetronomeClick, tickGameplay])
+  }, [ageGroup, clearTimers, levelConfig.key, metronomeOn, playMetronomeClick, showInfo, startMetronomeInterval, tickGameplay])
 
   const writePracticeSession = useCallback(async () => {
     if (written) return
@@ -601,10 +698,11 @@ export default function RhythmRacer() {
 
   const endSession = useCallback(async () => {
     clearTimers()
+    stopMetronomeInterval()
     setPhase('done')
     await writePracticeSession()
     navigate('/session-summary')
-  }, [clearTimers, navigate, writePracticeSession])
+  }, [clearTimers, navigate, stopMetronomeInterval, writePracticeSession])
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -632,14 +730,89 @@ export default function RhythmRacer() {
     const next = new URLSearchParams(searchParams)
     next.set('mode', nextMode)
     setSearchParams(next, { replace: true })
+    if (nextMode !== 'academic') setShowIntro(false)
   }
 
   const toggleMetronome = () => {
     setMetronomeOn(prev => {
       const next = !prev
-      if (next) playMetronomeClick()
+      if (next) {
+        if ((phaseRef.current === 'count-in' || phaseRef.current === 'playing') && !showInfo) {
+          startMetronomeInterval()
+        } else {
+          playMetronomeClick()
+        }
+      } else {
+        stopMetronomeInterval()
+      }
       return next
     })
+  }
+
+  const openInfoPanel = () => {
+    if (metronomeIntervalRef.current) {
+      resumeMetronomeRef.current = true
+      stopMetronomeInterval()
+    } else {
+      resumeMetronomeRef.current = false
+    }
+    setShowInfo(true)
+  }
+
+  const closeInfoPanel = () => {
+    setShowInfo(false)
+    if (resumeMetronomeRef.current && metronomeOn && (phaseRef.current === 'count-in' || phaseRef.current === 'playing')) {
+      startMetronomeInterval()
+    }
+    resumeMetronomeRef.current = false
+  }
+
+  const askMotesart = async (overrideQuestion) => {
+    const question = (overrideQuestion || qaInput).trim()
+    if (!question || qaLoading) return
+    setQaInput('')
+    setQaError('')
+    const userMessage = { role: 'user', content: question }
+    const nextMessages = [...qaMessages, userMessage].slice(-6)
+    setQaMessages(nextMessages)
+    setQaLoading(true)
+    try {
+      const systemPrompt = `You are Motesart, a music teacher with a warm, direct, slightly sarcastic personality. You are teaching a student about: ${getMotesartQuestionContext(level)}.
+
+The student is playing Rhythm Racer, a rhythm game where notes travel across a music staff and the student taps a drum practice pad when the note reaches the hit zone.
+
+Current lesson: Level ${level} — ${levelConfig.name}
+Pattern: ${levelConfig.displayPattern}
+Time signature: 4/4
+Tempo: 70 BPM
+
+Answer the student's question in Motesart's voice. Age group: ${ageGroup}.
+
+If the student asks you to explain simpler, use shorter sentences and more physical analogies (clapping, stomping, counting out loud). For a child, use game language — "the car", "the note sliding in", "the pad". Never say "Incorrect" or "Great job". Never use music jargon without immediately explaining it. Keep answers under 4 sentences unless the student asks for more.`
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': window.__MOTESART_CLAUDE_KEY || '',
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: 300,
+          system: systemPrompt,
+          messages: nextMessages.map(msg => ({ role: msg.role, content: msg.content })),
+        }),
+      })
+      const data = await resp.json()
+      const text = data?.content?.[0]?.text || "I couldn't hear that cleanly. Ask me again, but slower. Wild concept, I know."
+      setQaMessages([...nextMessages, { role: 'assistant', content: text }].slice(-6))
+    } catch (err) {
+      console.warn('[RhythmRacer] Motesart Q&A failed:', err)
+      setQaError('Motesart could not answer right now. Try again in a minute.')
+    } finally {
+      setQaLoading(false)
+    }
   }
 
   const markerStyle = (marker) => {
@@ -677,6 +850,7 @@ export default function RhythmRacer() {
         .rr-back{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px;color:#cbd5e1;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer}
         .rr-title{text-align:center;min-width:0;display:flex;align-items:center;justify-content:center;gap:9px}
         .rr-title h1{font-size:18px;line-height:1;margin:0;color:#fff;font-weight:900;letter-spacing:0}
+        .rr-info-btn{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.12);background:#111827;color:#fff;font-size:14px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center}
         .rr-level-pill{display:inline-flex;align-items:center;border-radius:999px;background:#f97316;color:#fff;padding:4px 9px;font-size:11px;font-weight:900;box-shadow:0 0 16px rgba(249,115,22,.28)}
         .rr-nav-right{display:flex;align-items:center;justify-content:flex-end;gap:9px}
         .rr-streak-circle{width:38px;height:38px;border-radius:50%;background:#111827;border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900}
@@ -762,6 +936,26 @@ export default function RhythmRacer() {
         .rr-again{border:none;background:#14b8a6;color:#001f1b}
         .rr-dashboard{border:1px solid rgba(255,255,255,.1);background:#111827;color:#cbd5e1}
         .rr-confetti-piece{position:fixed;top:-14px;border-radius:3px;animation:rrConfettiFall linear forwards;pointer-events:none;z-index:50}
+        .rr-overlay{position:fixed;inset:0;background:rgba(2,6,23,.76);backdrop-filter:blur(6px);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px}
+        .rr-modal{width:min(100%,620px);max-height:88vh;overflow:auto;background:linear-gradient(135deg,#111827,#0f172a);border:1px solid rgba(20,184,166,.24);border-radius:18px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
+        .rr-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+        .rr-modal-title{font-size:18px;font-weight:900;color:#fff}
+        .rr-close{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:#0f172a;color:#fff;cursor:pointer;font-size:17px}
+        .rr-intro-coach{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+        .rr-intro-text{font-size:15px;line-height:1.65;color:#e5e7eb;font-weight:700}
+        .rr-play-intro{width:100%;border:none;border-radius:14px;padding:13px 16px;background:linear-gradient(135deg,#7c3aed,#d946ef);color:#fff;font-size:14px;font-weight:900;cursor:pointer}
+        .rr-howto{margin:0 0 14px 0;padding-left:22px;color:#cbd5e1;font-size:13px;line-height:1.7}
+        .rr-lives-rule{padding:11px 12px;border-radius:12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.22);color:#fbbf24;font-size:13px;font-weight:800;margin-bottom:16px}
+        .rr-qa-box{border-top:1px solid rgba(255,255,255,.08);padding-top:16px}
+        .rr-qa-title{font-size:14px;font-weight:900;color:#fff;margin-bottom:10px}
+        .rr-qa-row{display:flex;gap:8px;margin-bottom:12px}
+        .rr-qa-input{flex:1;min-width:0;background:#0f172a;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#fff;padding:10px 11px;font:inherit;font-size:13px;outline:none}
+        .rr-qa-send{border:none;border-radius:10px;background:#14b8a6;color:#06201d;font-size:13px;font-weight:900;padding:10px 13px;cursor:pointer}
+        .rr-qa-msg{margin-bottom:10px;padding:10px 12px;border-radius:12px;font-size:13px;line-height:1.55}
+        .rr-qa-msg.user{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.18);color:#dbeafe}
+        .rr-qa-msg.assistant{background:rgba(20,184,166,.07);border:1px solid rgba(20,184,166,.2);color:#d1fae5}
+        .rr-simpler{border:1px solid rgba(217,70,239,.3);background:rgba(217,70,239,.1);color:#f0abfc;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;cursor:pointer;margin-top:4px}
+        .rr-error{color:#fca5a5;font-size:12px;margin-top:6px}
         @keyframes rrConfettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
         @media (max-width:520px){
           .rr-shell{padding:10px 10px 14px;gap:10px}
@@ -787,6 +981,7 @@ export default function RhythmRacer() {
           </div>
           <div className="rr-title">
             <h1>Rhythm Racer</h1>
+            <button className="rr-info-btn" onClick={openInfoPanel} aria-label="How to play">i</button>
             <div className="rr-level-pill">Lv {level}</div>
           </div>
           <div className="rr-nav-right">
@@ -918,7 +1113,7 @@ export default function RhythmRacer() {
             <div className="rr-pattern-main">L{level} - {levelConfig.name}</div>
             <div className="rr-pattern-sub">{levelConfig.displayPattern} - stage {correctStages + 1}/5 - attempt {stageAttempt}/3</div>
           </div>
-          <button className="rr-primary" onClick={beginAttempt} disabled={phase === 'count-in' || phase === 'playing' || lives <= 0}>
+          <button className="rr-primary" onClick={beginAttempt} disabled={showIntro || phase === 'count-in' || phase === 'playing' || lives <= 0}>
             {phase === 'review' ? '▶ Next' : lives <= 0 ? 'No lives' : '▶ Play'}
           </button>
         </section>
@@ -961,6 +1156,64 @@ export default function RhythmRacer() {
           </>
         )}
       </div>
+      {showIntro && isAcademic && (
+        <div className="rr-overlay" role="dialog" aria-modal="true" aria-label="Motesart intro">
+          <div className="rr-modal">
+            <div className="rr-intro-coach">
+              <img className="rr-avatar" src="/avatars/motesart_avatar_1.png" alt="Motesart" />
+              <div>
+                <div className="rr-coach-label">Motesart</div>
+                <div className="rr-intro-text">{getIntroCopy(level, ageGroup)}</div>
+              </div>
+            </div>
+            <button className="rr-play-intro" onClick={() => setShowIntro(false)}>Got it! Let's Play</button>
+          </div>
+        </div>
+      )}
+      {showInfo && (
+        <div className="rr-overlay" role="dialog" aria-modal="true" aria-label="Rhythm Racer info">
+          <div className="rr-modal">
+            <div className="rr-modal-head">
+              <div className="rr-modal-title">How to Play</div>
+              <button className="rr-close" onClick={closeInfoPanel} aria-label="Close">×</button>
+            </div>
+            <ol className="rr-howto">
+              {getHowToSteps(level).map(step => <li key={step}>{step}</li>)}
+            </ol>
+            <div className="rr-lives-rule">3 lives. Miss a beat, lose a life. Perfect and Good taps keep your streak.</div>
+            <div className="rr-qa-box">
+              <div className="rr-qa-title">Ask Motesart anything</div>
+              <div className="rr-qa-row">
+                <input
+                  className="rr-qa-input"
+                  value={qaInput}
+                  onChange={event => setQaInput(event.target.value)}
+                  onKeyDown={event => {
+                    if (event.key === 'Enter') askMotesart()
+                  }}
+                  placeholder="What do you want to know?"
+                />
+                <button className="rr-qa-send" onClick={() => askMotesart()} disabled={qaLoading}>{qaLoading ? '...' : 'Send'}</button>
+              </div>
+              {qaMessages.map((message, index) => (
+                <div key={`${message.role}-${index}`} className={`rr-qa-msg ${message.role}`}>
+                  {message.role === 'assistant' ? (
+                    <>
+                      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+                        <img className="rr-avatar" style={{width:26,height:26}} src="/avatars/motesart_avatar_1.png" alt="Motesart" />
+                        <span className="rr-coach-label">Motesart</span>
+                      </div>
+                      <div>{message.content}</div>
+                      <button className="rr-simpler" onClick={() => askMotesart("Explain that in the simplest way possible, like I'm 6 years old.")}>Explain it simpler</button>
+                    </>
+                  ) : message.content}
+                </div>
+              ))}
+              {qaError && <div className="rr-error">{qaError}</div>}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
