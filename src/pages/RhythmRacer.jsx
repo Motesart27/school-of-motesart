@@ -39,6 +39,12 @@ function getSelfRating(accuracy) {
   return 1
 }
 
+function getAccuracyFromCounts(counts) {
+  const total = Object.values(counts).reduce((sum, val) => sum + val, 0)
+  if (!total) return 0
+  return Math.round(((counts.perfect + counts.good) / total) * 100)
+}
+
 function classifyOffset(offsetMs) {
   const abs = Math.abs(offsetMs)
   if (abs <= PERFECT_MS) return 'perfect'
@@ -99,6 +105,35 @@ function buildMarkers(beats, levelConfig) {
   return markers
 }
 
+function Confetti() {
+  const pieces = Array.from({ length: 54 }, (_, i) => ({
+    id: i,
+    left: (i * 17) % 100,
+    delay: (i % 9) * 0.08,
+    duration: 2.3 + (i % 5) * 0.18,
+    color: ['#fbbf24', '#14b8a6', '#22d3ee', '#a855f7', '#22c55e', '#f97316'][i % 6],
+    size: 7 + (i % 4),
+  }))
+  return (
+    <>
+      {pieces.map(piece => (
+        <div
+          key={piece.id}
+          className="rr-confetti-piece"
+          style={{
+            left: `${piece.left}%`,
+            animationDelay: `${piece.delay}s`,
+            animationDuration: `${piece.duration}s`,
+            background: piece.color,
+            width: piece.size,
+            height: piece.size,
+          }}
+        />
+      ))}
+    </>
+  )
+}
+
 export default function RhythmRacer() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -111,6 +146,7 @@ export default function RhythmRacer() {
 
   const [level, setLevel] = useState(requestedLevel)
   const levelConfig = useMemo(() => getLevel(level), [level])
+  const concept = searchParams.get('concept') || levelConfig.concept
   const [phase, setPhase] = useState('ready')
   const [countBeat, setCountBeat] = useState(0)
   const [nowMs, setNowMs] = useState(0)
@@ -123,6 +159,8 @@ export default function RhythmRacer() {
   const [maxStreak, setMaxStreak] = useState(0)
   const [onFire, setOnFire] = useState(false)
   const [counts, setCounts] = useState(emptyCounts)
+  const [levelCounts, setLevelCounts] = useState(emptyCounts)
+  const [completion, setCompletion] = useState(null)
   const [lastResult, setLastResult] = useState(null)
   const [coachLine, setCoachLine] = useState(() => getCoaching('PRE_GAME', ageGroup, getLevel(requestedLevel).key))
   const [flash, setFlash] = useState(null)
@@ -137,6 +175,7 @@ export default function RhythmRacer() {
   const beatsRef = useRef([])
   const scoredRef = useRef({})
   const countsRef = useRef(emptyCounts())
+  const levelCountsRef = useRef(emptyCounts())
   const streakRef = useRef(0)
   const maxStreakRef = useRef(0)
   const livesRef = useRef(3)
@@ -149,6 +188,7 @@ export default function RhythmRacer() {
   const totalJudged = Object.values(counts).reduce((sum, val) => sum + val, 0)
   const positive = counts.perfect + counts.good
   const accuracy = totalJudged ? Math.round((positive / totalJudged) * 100) : 0
+  const levelAccuracy = getAccuracyFromCounts(levelCounts)
   const carPulse = phase === 'count-in' || phase === 'playing'
 
   useEffect(() => { phaseRef.current = phase }, [phase])
@@ -180,7 +220,12 @@ export default function RhythmRacer() {
       ...countsRef.current,
       [result]: (countsRef.current[result] || 0) + 1,
     }
+    levelCountsRef.current = {
+      ...levelCountsRef.current,
+      [result]: (levelCountsRef.current[result] || 0) + 1,
+    }
     setCounts(countsRef.current)
+    setLevelCounts(levelCountsRef.current)
     setLastResult({ result, beatIndex, at: Date.now() })
     setCoach(feedbackKey(result))
 
@@ -208,6 +253,72 @@ export default function RhythmRacer() {
 
     window.setTimeout(() => setFlash(null), 220)
   }, [setCoach])
+
+  const writeAssignmentResult = useCallback((snapshot) => {
+    if (!assignmentId || !snapshot) return
+    try {
+      sessionStorage.setItem(`${assignmentId}_result`, JSON.stringify({
+        gateId: assignmentId,
+        concept,
+        completedAt: new Date().toISOString(),
+        executionScore: snapshot.accuracy,
+        ownershipPassed: snapshot.accuracy >= 80,
+        level: Number(snapshot.level),
+        stagesCompleted: snapshot.stagesCompleted,
+        livesRemaining: snapshot.lives,
+      }))
+    } catch (err) {
+      console.warn('[RhythmRacer] Session result writeback failed:', err)
+    }
+  }, [assignmentId, concept])
+
+  const showLevelComplete = useCallback((stagesCompleted) => {
+    const finalCounts = { ...levelCountsRef.current }
+    const finalAccuracy = getAccuracyFromCounts(finalCounts)
+    const snapshot = {
+      passed: finalAccuracy >= 80,
+      accuracy: finalAccuracy,
+      score: finalCounts.perfect * 200 + finalCounts.good * 100 + finalCounts.early * 25 + finalCounts.late * 25,
+      counts: finalCounts,
+      level,
+      levelName: levelConfig.name,
+      stagesCompleted,
+      lives: livesRef.current,
+      maxStreak: maxStreakRef.current,
+    }
+    setCompletion(snapshot)
+    setPhase('complete')
+    setAttemptStart(null)
+    attemptStartRef.current = null
+    setCoachLine(snapshot.passed
+      ? `Level ${level} is locked in. ${finalAccuracy}% accuracy — that's real rhythm control.`
+      : `You're close. ${finalAccuracy}% accuracy means this level needs one more focused run.`)
+    writeAssignmentResult(snapshot)
+  }, [level, levelConfig.name, writeAssignmentResult])
+
+  const resetLevelRun = useCallback((targetLevel) => {
+    clearTimers()
+    const nextLevel = clamp(targetLevel, 1, 4)
+    setLevel(nextLevel)
+    setCorrectStages(0)
+    setFailedStages(0)
+    setStageAttempt(1)
+    setLives(3)
+    livesRef.current = 3
+    setCounts(emptyCounts())
+    countsRef.current = emptyCounts()
+    setLevelCounts(emptyCounts())
+    levelCountsRef.current = emptyCounts()
+    setStreak(0)
+    streakRef.current = 0
+    setMaxStreak(0)
+    maxStreakRef.current = 0
+    setOnFire(false)
+    setLastResult(null)
+    setCompletion(null)
+    setPhase('ready')
+    setCoachLine(getCoaching('PRE_GAME', ageGroup, getLevel(nextLevel).key))
+  }, [ageGroup, clearTimers])
 
   const targetTimeForBeat = useCallback((beatIndex) => {
     if (attemptStartRef.current == null) return null
@@ -272,6 +383,7 @@ export default function RhythmRacer() {
 
     if (livesRef.current <= 0) {
       setCoach('MISS')
+      showLevelComplete(correctStages)
       return
     }
 
@@ -281,18 +393,7 @@ export default function RhythmRacer() {
       setStageAttempt(1)
       setCoach(nextCorrect >= 5 ? 'LEVEL_CLEAR' : 'STAGE_CLEAR')
       if (nextCorrect >= 5) {
-        const nextLevel = clamp(level + 1, 1, 4)
-        timersRef.current.push(window.setTimeout(() => {
-          setLevel(nextLevel)
-          setCorrectStages(0)
-          setFailedStages(0)
-          setStageAttempt(1)
-          setCounts(emptyCounts())
-          countsRef.current = emptyCounts()
-          setLastResult(null)
-          setCoachLine(getCoaching('PRE_GAME', ageGroup, getLevel(nextLevel).key))
-          setPhase('ready')
-        }, 2000))
+        showLevelComplete(nextCorrect)
       }
       return
     }
@@ -309,20 +410,9 @@ export default function RhythmRacer() {
     setCoach('MISS')
 
     if (nextFailed >= 2) {
-      const nextLevel = clamp(level - 1, 1, 4)
-      timersRef.current.push(window.setTimeout(() => {
-        setLevel(nextLevel)
-        setCorrectStages(0)
-        setFailedStages(0)
-        setStageAttempt(1)
-        setCounts(emptyCounts())
-        countsRef.current = emptyCounts()
-        setLastResult(null)
-        setCoachLine(getCoaching('PRE_GAME', ageGroup, getLevel(nextLevel).key))
-        setPhase('ready')
-      }, 1200))
+      showLevelComplete(correctStages)
     }
-  }, [ageGroup, correctStages, failedStages, level, recordResult, setCoach, stageAttempt])
+  }, [correctStages, failedStages, recordResult, setCoach, showLevelComplete, stageAttempt])
 
   const tickGameplay = useCallback(() => {
     const now = performance.now()
@@ -431,6 +521,11 @@ export default function RhythmRacer() {
     else navigate('/student')
   }
 
+  const goDashboard = () => {
+    if (completion) writeAssignmentResult(completion)
+    navigate('/student')
+  }
+
   const markerStyle = (marker) => {
     const target = attemptStart == null ? null : attemptStart + marker.beatIndex * RHYTHM_BEAT_MS
     const current = phase === 'playing' && target != null ? nowMs : attemptStart || nowMs
@@ -498,9 +593,28 @@ export default function RhythmRacer() {
         .rr-actions{display:flex;gap:8px}
         .rr-primary{flex:1;border:none;border-radius:12px;padding:13px 16px;background:#14b8a6;color:#001f1b;font-size:14px;font-weight:900;cursor:pointer}
         .rr-secondary{flex:1;border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:13px 16px;background:#111827;color:#cbd5e1;font-size:14px;font-weight:900;cursor:pointer}
+        .rr-complete{position:relative;background:linear-gradient(135deg,#111827,#0d1117);border:1px solid rgba(20,184,166,.22);border-radius:18px;padding:22px 18px;overflow:hidden;text-align:center}
+        .rr-complete.pass{border-color:rgba(34,211,238,.4);box-shadow:0 0 42px rgba(34,211,238,.12)}
+        .rr-complete.fail{border-color:rgba(245,158,11,.28)}
+        .rr-complete-kicker{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#14b8a6;font-weight:900;margin-bottom:8px}
+        .rr-complete h2{font-size:26px;line-height:1.05;margin:0;color:#fff;font-weight:900;letter-spacing:0}
+        .rr-complete-msg{max-width:560px;margin:10px auto 18px;color:#cbd5e1;font-size:14px;font-weight:700;line-height:1.5}
+        .rr-complete-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 auto 16px;max-width:720px}
+        .rr-complete-stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:11px 8px}
+        .rr-complete-stat strong{display:block;font-size:20px;color:#fff;line-height:1}
+        .rr-complete-stat span{display:block;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.05em;font-weight:900;margin-top:6px}
+        .rr-complete-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+        .rr-complete-actions button{min-width:150px;border-radius:12px;padding:12px 15px;font-size:13px;font-weight:900;cursor:pointer}
+        .rr-next{border:none;background:#22d3ee;color:#06232a}
+        .rr-again{border:none;background:#14b8a6;color:#001f1b}
+        .rr-dashboard{border:1px solid rgba(255,255,255,.1);background:#111827;color:#cbd5e1}
+        .rr-confetti-piece{position:fixed;top:-14px;border-radius:3px;animation:rrConfettiFall linear forwards;pointer-events:none;z-index:50}
+        @keyframes rrConfettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
         @media (max-width:520px){
           .rr-shell{padding:10px 10px 14px;gap:10px}
           .rr-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+          .rr-complete-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+          .rr-complete h2{font-size:22px}
           .rr-track{height:210px}
           .rr-title h1{font-size:16px}
           .rr-back,.rr-end{padding:7px 9px;font-size:11px}
@@ -530,11 +644,49 @@ export default function RhythmRacer() {
           </div>
         </section>
 
+        {completion ? (
+          <section className={`rr-complete ${completion.passed ? 'pass' : 'fail'}`}>
+            {completion.passed && <Confetti />}
+            <div className="rr-complete-kicker">Rhythm Racer Level {completion.level}</div>
+            <h2>{completion.passed ? 'Level Complete!' : 'Keep Practicing'}</h2>
+            <div className="rr-complete-msg">
+              {completion.passed
+                ? `Motesart says: ${completion.levelName} is locked in. You finished with ${completion.accuracy}% accuracy.`
+                : `Motesart says: ${completion.levelName} needs one more run. Aim for 80% accuracy before moving on.`}
+            </div>
+            <div className="rr-complete-grid">
+              {[
+                [completion.score, 'Score'],
+                [completion.accuracy + '%', 'Accuracy'],
+                [completion.maxStreak, 'Best streak'],
+                [completion.lives, 'Lives left'],
+                [completion.stagesCompleted + '/5', 'Stages'],
+                [completion.counts.perfect, 'Perfect'],
+                [completion.counts.good, 'Good'],
+                [completion.counts.miss, 'Miss'],
+                [completion.counts.restMistake, 'Rest mistakes'],
+              ].map(([value, label]) => (
+                <div key={label} className="rr-complete-stat">
+                  <strong>{value}</strong>
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+            <div className="rr-complete-actions">
+              {completion.passed && completion.level < 4 && (
+                <button className="rr-next" onClick={() => resetLevelRun(completion.level + 1)}>Next Level</button>
+              )}
+              <button className="rr-again" onClick={() => resetLevelRun(completion.level)}>Practice Again</button>
+              <button className="rr-dashboard" onClick={goDashboard}>Back to Dashboard</button>
+            </div>
+          </section>
+        ) : (
+          <>
         <section className="rr-stats">
           <div className="rr-stat"><span>Level</span><strong>{level}</strong></div>
           <div className="rr-stat"><span>Lives</span><strong>{lives}</strong></div>
           <div className="rr-stat"><span>Streak</span><strong>{streak}</strong></div>
-          <div className="rr-stat"><span>Accuracy</span><strong>{accuracy}%</strong></div>
+          <div className="rr-stat"><span>Accuracy</span><strong>{levelAccuracy}%</strong></div>
         </section>
 
         <div className="rr-count" aria-label="Count-in">
@@ -573,23 +725,7 @@ export default function RhythmRacer() {
           <button className="rr-primary" onClick={beginAttempt} disabled={phase === 'count-in' || phase === 'playing' || lives <= 0}>
             {phase === 'review' ? 'Next attempt' : lives <= 0 ? 'No lives left' : 'Start attempt'}
           </button>
-          <button className="rr-secondary" onClick={() => {
-            setLevel(requestedLevel)
-            setLives(3)
-            livesRef.current = 3
-            setCorrectStages(0)
-            setFailedStages(0)
-            setStageAttempt(1)
-            setCounts(emptyCounts())
-            countsRef.current = emptyCounts()
-            setStreak(0)
-            streakRef.current = 0
-            setMaxStreak(0)
-            maxStreakRef.current = 0
-            setLastResult(null)
-            setPhase('ready')
-            setCoachLine(getCoaching('PRE_GAME', ageGroup, getLevel(requestedLevel).key))
-          }}>
+          <button className="rr-secondary" onClick={() => resetLevelRun(requestedLevel)}>
             Reset
           </button>
         </div>
@@ -612,6 +748,8 @@ export default function RhythmRacer() {
           {assignmentId ? `Assignment tracking ready - ${formatSeconds(sessionSeconds)}` : `Free practice - ${formatSeconds(sessionSeconds)}`}
           {writeStatus === 'failed' ? ' - practice log save failed' : ''}
         </div>
+          </>
+        )}
       </div>
     </div>
   )
