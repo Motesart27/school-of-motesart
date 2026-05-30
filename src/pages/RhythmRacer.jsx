@@ -7,14 +7,14 @@ import {
   getPatternForAttempt,
   normalizeAgeGroup,
   RHYTHM_BEAT_MS,
-  RHYTHM_BEATS_PER_ATTEMPT,
   RHYTHM_BEATS_PER_MEASURE,
 } from '../data/rhythmRacerLevels.js'
 
 const PRACTICE_LOG_URL = 'https://deployable-python-codebase-som-production.up.railway.app/practice-log/sessions'
-const PERFECT_MS = 80
-const GOOD_MS = 150
-const LATE_EARLY_MS = 250
+const PERFECT_MS = 100
+const GOOD_MS = 180
+const LATE_EARLY_MS = 300
+const PHASE1_LEVEL = 1
 const CAR_X = 80
 const TRAVEL_BEATS = 4
 const CLAUDE_MODEL = 'claude-sonnet-4-20250514'
@@ -25,6 +25,7 @@ const emptyCounts = () => ({
   early: 0,
   late: 0,
   miss: 0,
+  extraTap: 0,
   restMistake: 0,
 })
 
@@ -137,7 +138,16 @@ function classifyOffset(offsetMs) {
 
 function feedbackKey(result) {
   if (result === 'restMistake') return 'REST_MISTAKE'
+  if (result === 'extraTap') return 'EXTRA_TAP'
   return String(result || 'miss').toUpperCase()
+}
+
+function getPhase1Feedback(result) {
+  if (result === 'perfect' || result === 'good') return 'Good. You waited and tapped on beat 1.'
+  if (result === 'early') return 'Almost. Let the beat come to you.'
+  if (result === 'late') return 'Good try. Tap right when it arrives.'
+  if (result === 'extraTap' || result === 'restMistake') return 'Hold the space. One tap is enough.'
+  return 'Watch it come in, then tap.'
 }
 
 function formatSeconds(seconds) {
@@ -150,7 +160,8 @@ function formatSeconds(seconds) {
 function buildAttemptBeats(levelConfig, stageAttempt) {
   const pattern = getPatternForAttempt(levelConfig, stageAttempt)
   const beats = []
-  for (let measure = 0; measure < 4; measure += 1) {
+  const measures = levelConfig.level === PHASE1_LEVEL ? 1 : 4
+  for (let measure = 0; measure < measures; measure += 1) {
     pattern.forEach((kind, beat) => {
       beats.push({
         id: `${measure}-${beat}`,
@@ -221,7 +232,7 @@ export default function RhythmRacer() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
 
-  const requestedLevel = clamp(Number(searchParams.get('level') || 1) || 1, 1, 4)
+  const requestedLevel = PHASE1_LEVEL
   const assignmentId = searchParams.get('assignment_id') || null
   const fromParam = searchParams.get('from')
   const ageGroup = normalizeAgeGroup(user?.age_group || user?.ageGroup)
@@ -278,6 +289,7 @@ export default function RhythmRacer() {
   const livesRef = useRef(3)
   const phaseRef = useRef('ready')
   const attemptStartRef = useRef(null)
+  const metronomeOnRef = useRef(false)
 
   const beats = useMemo(() => buildAttemptBeats(levelConfig, stageAttempt), [levelConfig, stageAttempt])
   const markers = useMemo(() => buildMarkers(beats, levelConfig), [beats, levelConfig])
@@ -291,6 +303,7 @@ export default function RhythmRacer() {
   useEffect(() => { phaseRef.current = phase }, [phase])
   useEffect(() => { livesRef.current = lives }, [lives])
   useEffect(() => { attemptStartRef.current = attemptStart }, [attemptStart])
+  useEffect(() => { metronomeOnRef.current = metronomeOn }, [metronomeOn])
   useEffect(() => {
     beatsRef.current = beats
     scoredRef.current = {}
@@ -319,6 +332,17 @@ export default function RhythmRacer() {
       gain.connect(ctx.destination)
       osc.start(ctx.currentTime)
       osc.stop(ctx.currentTime + 0.022)
+    } catch (e) {}
+  }, [])
+
+  const unlockAudio = useCallback(async () => {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext
+      if (!AudioContextClass) return
+      if (!audioCtxRef.current) audioCtxRef.current = new AudioContextClass()
+      if (audioCtxRef.current.state === 'suspended') {
+        await audioCtxRef.current.resume()
+      }
     } catch (e) {}
   }, [])
 
@@ -409,7 +433,7 @@ export default function RhythmRacer() {
     setCounts(countsRef.current)
     setLevelCounts(levelCountsRef.current)
     setLastResult({ result, beatIndex, at: Date.now() })
-    setCoach(feedbackKey(result))
+    setCoachLine(getPhase1Feedback(result))
     emitTamiResult(result, beatIndex, meta)
 
     if (result === 'perfect' || result === 'good') {
@@ -424,8 +448,8 @@ export default function RhythmRacer() {
       streakRef.current = 0
       setStreak(0)
       setOnFire(false)
-      setFlash(result === 'restMistake' ? 'rest' : 'miss')
-      if (result === 'miss' || result === 'restMistake') {
+      setFlash((result === 'restMistake' || result === 'extraTap') ? 'rest' : 'miss')
+      if (result === 'miss' || result === 'restMistake' || result === 'extraTap') {
         setLives(prev => {
           const next = Math.max(0, prev - 1)
           livesRef.current = next
@@ -482,6 +506,7 @@ export default function RhythmRacer() {
   const resetLevelRun = useCallback((targetLevel) => {
     clearTimers()
     stopMetronomeInterval()
+    metronomeOnRef.current = false
     const nextLevel = clamp(targetLevel, 1, 4)
     setLevel(nextLevel)
     setCorrectStages(0)
@@ -498,6 +523,7 @@ export default function RhythmRacer() {
     setMaxStreak(0)
     maxStreakRef.current = 0
     setOnFire(false)
+    setMetronomeOn(false)
     setLastResult(null)
     setCompletion(null)
     setPhase('ready')
@@ -513,27 +539,22 @@ export default function RhythmRacer() {
     if (phaseRef.current !== 'playing') return
     const start = attemptStartRef.current
     if (start == null) return
-    const relativeBeat = Math.floor((inputTime - start + RHYTHM_BEAT_MS / 2) / RHYTHM_BEAT_MS)
-    const beatIndex = clamp(relativeBeat, 0, beatsRef.current.length - 1)
+    const elapsed = inputTime - start
+    if (elapsed < 0) return
+    const beatIndex = clamp(Math.floor(elapsed / RHYTHM_BEAT_MS), 0, beatsRef.current.length - 1)
     const beat = beatsRef.current[beatIndex]
     if (!beat) return
 
-    const targetTime = targetTimeForBeat(beatIndex)
-    const offset = inputTime - targetTime
-
-    if (beat.kind === 'rest') {
-      if (Math.abs(offset) <= LATE_EARLY_MS) {
-        recordResult('restMistake', beatIndex, { offsetMs: offset, noteType: 'rest' })
-        return
-      }
-    }
-
-    if (beat.kind !== 'tap') {
-      recordResult('miss', beatIndex, { offsetMs: offset, noteType: beat.kind || 'unknown' })
+    const tapTargetTime = targetTimeForBeat(0)
+    const tapOffset = inputTime - tapTargetTime
+    if (beatIndex === 0 && !scoredRef.current[0] && Math.abs(tapOffset) <= LATE_EARLY_MS) {
+      recordResult(classifyOffset(tapOffset), 0, { offsetMs: tapOffset, noteType: 'tap' })
       return
     }
 
-    recordResult(classifyOffset(offset), beatIndex, { offsetMs: offset, noteType: 'tap' })
+    const targetTime = targetTimeForBeat(beatIndex)
+    const offset = targetTime == null ? null : inputTime - targetTime
+    recordResult('extraTap', beatIndex, { offsetMs: offset, noteType: beat.kind || 'hold' })
   }, [recordResult, targetTimeForBeat])
 
   const handlePad = useCallback((source = 'mouse') => {
@@ -555,49 +576,13 @@ export default function RhythmRacer() {
       }
     })
 
-    const latestCounts = countsRef.current
-    const misses = latestCounts.miss + latestCounts.restMistake
-    const close = latestCounts.perfect + latestCounts.good
-    const judged = Object.values(latestCounts).reduce((sum, val) => sum + val, 0)
-    const pct = judged ? Math.round((close / judged) * 100) : 0
-    const passed = misses === 0 && pct >= 75
-
     setPhase('review')
     setAttemptStart(null)
     attemptStartRef.current = null
-
-    if (livesRef.current <= 0) {
-      setCoach('MISS')
-      showLevelComplete(correctStages)
-      return
-    }
-
-    if (passed) {
-      const nextCorrect = correctStages + 1
-      setCorrectStages(nextCorrect)
-      setStageAttempt(1)
-      setCoach(nextCorrect >= 5 ? 'LEVEL_CLEAR' : 'STAGE_CLEAR')
-      if (nextCorrect >= 5) {
-        showLevelComplete(nextCorrect)
-      }
-      return
-    }
-
-    if (stageAttempt < 3) {
-      setStageAttempt(prev => prev + 1)
-      setCoach('MISS')
-      return
-    }
-
-    const nextFailed = failedStages + 1
-    setFailedStages(nextFailed)
-    setStageAttempt(1)
-    setCoach('MISS')
-
-    if (nextFailed >= 2) {
-      showLevelComplete(correctStages)
-    }
-  }, [correctStages, failedStages, recordResult, setCoach, showLevelComplete, stageAttempt, stopMetronomeInterval])
+    metronomeOnRef.current = false
+    setMetronomeOn(false)
+    setStageAttempt(prev => prev + 1)
+  }, [recordResult, stopMetronomeInterval])
 
   const tickGameplay = useCallback(() => {
     const now = performance.now()
@@ -607,19 +592,19 @@ export default function RhythmRacer() {
       beatsRef.current.forEach((beat, index) => {
         const target = targetTimeForBeat(index)
         if (target == null) return
-        if (beat.kind === 'tap' && !scoredRef.current[index] && now > target + LATE_EARLY_MS) {
+        if (index === 0 && beat.kind === 'tap' && !scoredRef.current[index] && now > target + LATE_EARLY_MS) {
           recordResult('miss', index, { offsetMs: now - target, noteType: 'tap' })
         }
       })
 
       if (metronomeOn && attemptStartRef.current != null) {
         const metroBeat = Math.floor((now - attemptStartRef.current) / RHYTHM_BEAT_MS)
-        if (metroBeat >= 0 && metroBeat < RHYTHM_BEATS_PER_ATTEMPT && metroBeat !== lastMetroBeatRef.current) {
+        if (metroBeat >= 0 && metroBeat < beatsRef.current.length && metroBeat !== lastMetroBeatRef.current) {
           lastMetroBeatRef.current = metroBeat
         }
       }
 
-      const endTime = attemptStartRef.current + RHYTHM_BEATS_PER_ATTEMPT * RHYTHM_BEAT_MS + 350
+      const endTime = attemptStartRef.current + beatsRef.current.length * RHYTHM_BEAT_MS + 350
       if (now >= endTime) {
         finishAttempt()
         return
@@ -629,8 +614,10 @@ export default function RhythmRacer() {
     rafRef.current = requestAnimationFrame(tickGameplay)
   }, [finishAttempt, metronomeOn, recordResult, targetTimeForBeat])
 
-  const beginAttempt = useCallback(() => {
+  const beginAttempt = useCallback(async () => {
     clearTimers()
+    stopMetronomeInterval()
+    await unlockAudio()
     scoredRef.current = {}
     countsRef.current = emptyCounts()
     setCounts(countsRef.current)
@@ -639,29 +626,36 @@ export default function RhythmRacer() {
     setStreak(0)
     streakRef.current = 0
     setCountBeat(1)
+    const now = performance.now()
+    const start = now + RHYTHM_BEAT_MS * 4
+    attemptStartRef.current = start
+    setAttemptStart(start)
+    setNowMs(now)
     setPhase('count-in')
     lastMetroBeatRef.current = -1
+    metronomeOnRef.current = true
+    setMetronomeOn(true)
     setCoachLine(getCoaching('PRE_GAME', ageGroup, levelConfig.key))
-    if (metronomeOn && !showInfo) {
-      startMetronomeInterval()
-    }
 
     for (let i = 1; i <= 4; i += 1) {
       timersRef.current.push(window.setTimeout(() => {
         setCountBeat(i)
-        if (!metronomeOn) playMetronomeClick()
+        if (metronomeOnRef.current && !showInfo) playMetronomeClick()
       }, (i - 1) * RHYTHM_BEAT_MS))
     }
 
+    for (let i = 0; i < beatsRef.current.length; i += 1) {
+      timersRef.current.push(window.setTimeout(() => {
+        if (metronomeOnRef.current && !showInfo) playMetronomeClick()
+      }, (4 + i) * RHYTHM_BEAT_MS))
+    }
+
+    rafRef.current = requestAnimationFrame(tickGameplay)
     timersRef.current.push(window.setTimeout(() => {
-      const start = performance.now()
-      attemptStartRef.current = start
-      setAttemptStart(start)
       setNowMs(start)
       setPhase('playing')
-      rafRef.current = requestAnimationFrame(tickGameplay)
     }, RHYTHM_BEAT_MS * 4))
-  }, [ageGroup, clearTimers, levelConfig.key, metronomeOn, playMetronomeClick, showInfo, startMetronomeInterval, tickGameplay])
+  }, [ageGroup, clearTimers, levelConfig.key, playMetronomeClick, showInfo, stopMetronomeInterval, tickGameplay, unlockAudio])
 
   const writePracticeSession = useCallback(async () => {
     if (written) return
@@ -700,9 +694,8 @@ export default function RhythmRacer() {
     clearTimers()
     stopMetronomeInterval()
     setPhase('done')
-    await writePracticeSession()
     navigate('/session-summary')
-  }, [clearTimers, navigate, stopMetronomeInterval, writePracticeSession])
+  }, [clearTimers, navigate, stopMetronomeInterval])
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -745,6 +738,7 @@ export default function RhythmRacer() {
       } else {
         stopMetronomeInterval()
       }
+      metronomeOnRef.current = next
       return next
     })
   }
@@ -817,7 +811,7 @@ If the student asks you to explain simpler, use shorter sentences and more physi
 
   const markerStyle = (marker) => {
     const target = attemptStart == null ? null : attemptStart + marker.beatIndex * RHYTHM_BEAT_MS
-    const current = phase === 'playing' && target != null ? nowMs : attemptStart || nowMs
+    const current = (phase === 'count-in' || phase === 'playing') && target != null ? nowMs : attemptStart || nowMs
     const msUntil = target == null ? marker.beatIndex * RHYTHM_BEAT_MS : target - current
     const x = CAR_X + (msUntil / (RHYTHM_BEAT_MS * TRAVEL_BEATS)) * 42
     return {
@@ -827,7 +821,7 @@ If the student asks you to explain simpler, use shorter sentences and more physi
     }
   }
 
-  const activeBeat = attemptStart == null ? -1 : clamp(Math.floor((nowMs - attemptStart) / RHYTHM_BEAT_MS), 0, RHYTHM_BEATS_PER_ATTEMPT - 1)
+  const activeBeat = attemptStart == null ? -1 : clamp(Math.floor((nowMs - attemptStart) / RHYTHM_BEAT_MS), 0, Math.max(0, beats.length - 1))
   const visibleBeat = phase === 'count-in' ? countBeat - 1 : phase === 'playing' ? activeBeat % RHYTHM_BEATS_PER_MEASURE : -1
   const padApproach = phase === 'playing' && markers.some(marker => {
     const target = attemptStart == null ? null : attemptStart + marker.beatIndex * RHYTHM_BEAT_MS
@@ -988,8 +982,8 @@ If the student asks you to explain simpler, use shorter sentences and more physi
             <button className="rr-back" onClick={goBack}>Back</button>
             <div className="rr-streak-circle">{streak}</div>
             <div className="rr-progress-mini">
-              <div className="rr-progress-label">{correctStages}/5</div>
-              <div className="rr-progress-track"><div className="rr-progress-fill" style={{ width: `${Math.min(100, (correctStages / 5) * 100)}%` }} /></div>
+              <div className="rr-progress-label">Attempts {Math.max(0, stageAttempt - 1)}</div>
+              <div className="rr-progress-track"><div className="rr-progress-fill" style={{ width: '0%' }} /></div>
             </div>
             <button className="rr-end" onClick={endSession} disabled={writeStatus === 'writing'}>
               {writeStatus === 'writing' ? 'Saving' : 'Done'}
@@ -1089,7 +1083,7 @@ If the student asks you to explain simpler, use shorter sentences and more physi
           </div>
           {[20, 40, 60, 80].map(pos => <div key={pos} className="rr-barline" style={{ left: `${pos}%` }} />)}
           <div className={`rr-target${carPulse ? ' pulse' : ''}`}>🏎️</div>
-          {phase === 'playing' && markers.map(marker => (
+          {(phase === 'count-in' || phase === 'playing') && markers.map(marker => (
             <div
               key={marker.id}
               className={`rr-marker ${marker.type}`}
@@ -1111,7 +1105,7 @@ If the student asks you to explain simpler, use shorter sentences and more physi
           </div>
           <div>
             <div className="rr-pattern-main">L{level} - {levelConfig.name}</div>
-            <div className="rr-pattern-sub">{levelConfig.displayPattern} - stage {correctStages + 1}/5 - attempt {stageAttempt}/3</div>
+            <div className="rr-pattern-sub">{levelConfig.displayPattern} - Phase 1 attempt {stageAttempt}</div>
           </div>
           <button className="rr-primary" onClick={beginAttempt} disabled={showIntro || phase === 'count-in' || phase === 'playing' || lives <= 0}>
             {phase === 'review' ? '▶ Next' : lives <= 0 ? 'No lives' : '▶ Play'}
