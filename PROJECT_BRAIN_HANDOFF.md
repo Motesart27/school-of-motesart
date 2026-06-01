@@ -95,6 +95,11 @@ Last Updated: May 23, 2026 | Bundle: index-DfXy9PFK.js
 - docs/SOM_ADAPTIVE_MUSIC_INTELLIGENCE_STRATEGY.md — adaptive strategy
 
 ## SESSION START PROTOCOL (next session)
+0. Confirm active model. Run /model and verify Opus 4.8 is selected before any
+   planning or build work. The "Opus Plan" header is the subscription tier, NOT
+   the active model. Sonnet is the silent default. Switch to Opus 4.8 at the
+   start of every session. (Root cause: settings.json "model": "opusplan" routed
+   non-plan work to Sonnet — now pinned to claude-opus-4-8.)
 1. Read PROJECT_BRAIN_HANDOFF.md (this file)
 2. Read docs/MOTESART_LANGUAGE_CONSTITUTION_v1_1.md
 3. Read motesart_constitution.md

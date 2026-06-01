@@ -41,6 +41,13 @@
 - Users table: "Student / User Name", "User Email", "Password Hash", "Role" (capitalized)
 - DPM%, DPM Status, Weekly Practice Minutes, Total Practice Minutes = computed, read-only
 
+## SESSION START PROTOCOL
+0. Confirm active model. Run /model and verify Opus 4.8 is selected before any
+   planning or build work. The "Opus Plan" header is the subscription tier, NOT
+   the active model. Sonnet is the silent default. Switch to Opus 4.8 at the
+   start of every session. (Pinned via .claude/settings.json "model":
+   "claude-opus-4-8" — if a session still shows Sonnet, re-check that setting.)
+
 ## SESSION END CHECKLIST
 After every session, update PROJECT_BRAIN_HANDOFF.md:
 - Date, what was built, files modified, commit hashes, result, next steps
