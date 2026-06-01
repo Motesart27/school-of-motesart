@@ -42,11 +42,28 @@
 - DPM%, DPM Status, Weekly Practice Minutes, Total Practice Minutes = computed, read-only
 
 ## SESSION START PROTOCOL
-0. Confirm active model. Run /model and verify Opus 4.8 is selected before any
-   planning or build work. The "Opus Plan" header is the subscription tier, NOT
-   the active model. Sonnet is the silent default. Switch to Opus 4.8 at the
-   start of every session. (Pinned via .claude/settings.json "model":
-   "claude-opus-4-8" — if a session still shows Sonnet, re-check that setting.)
+Step 0 — Confirm active model. Run /status to check the active model. SOM
+default is Sonnet (set in .claude/settings.json). The "Opus Plan" subscription
+header is NOT the active model. Stay on Sonnet for routine work. Escalate to
+Opus 4.8 only for the tasks listed in the Model Escalation Matrix, then return
+to Sonnet. Do not force Opus every session.
+
+## MODEL ESCALATION MATRIX
+SOM working default = Sonnet (set in .claude/settings.json). Opus 4.8 is
+intentional escalation only — NEVER a permanent default.
+
+Use SONNET for: repo search, file inspection, small edits, following approved
+specs, docs updates, PROJECT_BRAIN updates, commits/pushes, routine
+verification, CSS/UI polish, single-file work.
+
+Switch to OPUS 4.8 for: architecture decisions, written specs, cross-repo
+audits, security/auth/payment logic, Airtable schema changes, backend router
+changes, protected files (Registration.jsx, auth.py, GamePage.jsx), difficult
+debugging, final code review before merge, rollback/merge decisions, any task
+touching more than 3 files.
+
+Escalate:  /model claude-opus-4-8
+Return:    /model sonnet
 
 ## SESSION END CHECKLIST
 After every session, update PROJECT_BRAIN_HANDOFF.md:
