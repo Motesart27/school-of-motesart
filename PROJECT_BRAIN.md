@@ -1,5 +1,5 @@
 # PROJECT BRAIN — School of Motesart (SOM)
-> **Last Updated:** 2026-05-09
+> **Last Updated:** 2026-06-01
 > **Stable Version:** v2.1.0
 > **Status:** Production — Live on Railway
 > **Owner:** Denarius Motes (@Motesart27)
@@ -887,3 +887,42 @@ Next build sequence (not this session):
   Gate 3           → manual completion
 - Wire the gates in the next dedicated session
 - Deferred: car visual redesign (racing car silhouette), On Fire trail animation
+
+## June 1, 2026 — Onboarding + Comms skills prepared, first-lead email approved
+
+**What:** Preparation + decisions only. No code deployed this session.
+
+**Prepared (NOT yet uploaded/committed):**
+- som-comms skill (zip)
+- som-onboarding skill (zip)
+- motesart-skill-router update to register both
+- this PROJECT_BRAIN entry
+
+**Decisions locked this session:**
+- First-lead Email 1: clean plain-style version ACCEPTED after render check
+  (links work, Zelle block renders). Send from the 21:38 HTML draft only.
+- Strategic gate: stop building. Next win = one real student through the
+  full onboarding -> practice flow (live manual test); automate from results.
+
+**Pending execution (run order):**
+1. Upload som-comms + som-onboarding
+2. Update motesart-skill-router
+3. Append this entry, commit + push
+4. Add 4 onboarding fields manually in Airtable: Parent Name - Age -
+   Instrument - Goal  -- TO VERIFY: target table not confirmed in live state
+5. Use 21:38 Email 1 draft, fill placeholders, optional Zelle QR
+6. Clear duplicate drafts by eye (21:09 plain-text, May 23 jrosier@ tests)
+7. Send to first real lead -> 8. Stop, run live manual test
+
+**TO VERIFY (surfaced this session):**
+- Which Airtable base/table the 4 onboarding fields attach to.
+- Age + Instrument data path: PROJECT_BRAIN already notes som_user
+  localStorage stores only {id,name,email,role,status}; Age/Instrument come
+  from an Airtable lookup. Confirm the onboarding skill reads them from
+  Airtable, not localStorage, before relying on those fields.
+
+**Result:** No deploy this session. No protected file or flow touched.
+No app code changed. No Airtable changes. No email sent. Live manual test
+pending. Last shipped baseline remains May 27 (commit ce80adf).
+
+**Rollback:** N/A — no code changed.
