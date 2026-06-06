@@ -3,12 +3,14 @@ import { useRef, useCallback } from 'react'
 import './GamesDashboard.css'
 
 /* ── Video Game Card Component ── */
-function VideoGameCard({ id, title, titleColor, desc, badge, badgeClass, poster, video, videoRefs, onEnter, onLeave, bgSize }) {
+function VideoGameCard({ id, title, titleColor, desc, badge, badgeClass, poster, video, videoRefs, onEnter, onLeave, bgSize, onClick }) {
   return (
     <div
       className="gd-game-card"
       onMouseEnter={() => onEnter(id)}
       onMouseLeave={() => onLeave(id)}
+      onClick={onClick}
+      style={onClick ? { cursor: 'pointer' } : undefined}
     >
       <div className="gd-card-image" style={{ backgroundImage: poster ? `url('${poster}')` : 'none', backgroundSize: bgSize || 'cover' }}>
         {video ? (
@@ -31,7 +33,9 @@ function VideoGameCard({ id, title, titleColor, desc, badge, badgeClass, poster,
         </div>
       </div>
       <div className="gd-card-info">
-        <span className="gd-badge gd-badge-soon">Coming Soon</span>
+        {onClick
+          ? <span className="gd-badge gd-badge-play">Play Now</span>
+          : <span className="gd-badge gd-badge-soon">Coming Soon</span>}
         <div className="gd-card-title" style={{ color: titleColor }}>{title}</div>
         <div className="gd-card-desc">{desc}</div>
       </div>
@@ -190,6 +194,7 @@ export default function GamesDashboard() {
             videoRefs={videoRefs}
             onEnter={handleMouseEnter}
             onLeave={handleMouseLeave}
+            onClick={card.id === 'rhythm-racer' ? () => navigate('/rhythm-racer') : undefined}
           />
         ))}
       </div>
