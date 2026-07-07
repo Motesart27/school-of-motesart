@@ -30,7 +30,7 @@ import MoveItChapter from './pages/MoveItChapter.jsx'
 import OwnItChapter from './pages/OwnItChapter.jsx'
 import PracticeChapterWrapper from './pages/PracticeChapterWrapper.jsx'
 import DPMPlayground from './pages/DPMPlayground.jsx'
-import RhythmRacer from './pages/RhythmRacer.jsx'
+import RhythmRacer from './pages/RhythmRacerV2.jsx'
 
 function TamiGate() {
   const { pathname } = useLocation()

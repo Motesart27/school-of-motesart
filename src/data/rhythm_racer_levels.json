@@ -1,0 +1,168 @@
+[
+  {
+    "level": 1,
+    "name": "Whole Note",
+    "concept": "R_PULSE_WHOLE",
+    "bpm": 70,
+    "timeSig": "4/4",
+    "locked": false,
+    "counting": "1 2 3 4",
+    "stages": [
+      {
+        "id": "l1-stage-1",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "whole", "count": "1" }
+        ]
+      },
+      {
+        "id": "l1-stage-2",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "whole", "count": "1" }
+        ]
+      },
+      {
+        "id": "l1-stage-3",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "whole", "count": "1" }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 2,
+    "name": "Half Notes",
+    "concept": "R_PULSE_HALF",
+    "bpm": 70,
+    "timeSig": "4/4",
+    "locked": false,
+    "counting": "1 2 3 4",
+    "stages": [
+      {
+        "id": "l2-stage-1",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "half", "count": "1" },
+          { "beat": 3, "hand": "L", "type": "half", "count": "3" }
+        ]
+      },
+      {
+        "id": "l2-stage-2",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "half", "count": "1" },
+          { "beat": 3, "hand": "L", "type": "half", "count": "3" }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 3,
+    "name": "Quarter Notes",
+    "concept": "R_PULSE_QUARTER",
+    "bpm": 70,
+    "timeSig": "4/4",
+    "locked": false,
+    "counting": "1 2 3 4",
+    "stages": [
+      {
+        "id": "l3-stage-1",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "quarter", "count": "1" },
+          { "beat": 2, "hand": "R", "type": "quarter", "count": "2" },
+          { "beat": 3, "hand": "L", "type": "quarter", "count": "3" },
+          { "beat": 4, "hand": "R", "type": "quarter", "count": "4" }
+        ]
+      },
+      {
+        "id": "l3-stage-2",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "quarter", "count": "1" },
+          { "beat": 2, "hand": "R", "type": "quarter", "count": "2" },
+          { "beat": 3, "hand": "L", "type": "quarter", "count": "3" },
+          { "beat": 4, "hand": "R", "type": "quarter", "count": "4" }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 4,
+    "name": "Quarter Rest",
+    "concept": "R_REST_QUARTER",
+    "bpm": 72,
+    "timeSig": "4/4",
+    "locked": false,
+    "counting": "1 2 rest 4",
+    "stages": [
+      {
+        "id": "l4-stage-1",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "quarter", "count": "1" },
+          { "beat": 2, "hand": "R", "type": "quarter", "count": "2" },
+          { "beat": 3, "hand": "rest", "type": "rest", "count": "rest" },
+          { "beat": 4, "hand": "L", "type": "quarter", "count": "4" }
+        ]
+      },
+      {
+        "id": "l4-stage-2",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "quarter", "count": "1" },
+          { "beat": 2, "hand": "rest", "type": "rest", "count": "rest" },
+          { "beat": 3, "hand": "R", "type": "quarter", "count": "3" },
+          { "beat": 4, "hand": "rest", "type": "rest", "count": "rest" }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 5,
+    "name": "Eighth Notes",
+    "concept": "R_EIGHTH_STRAIGHT",
+    "bpm": 76,
+    "timeSig": "4/4",
+    "locked": false,
+    "counting": "1-and 2-and 3-and 4-and",
+    "stages": [
+      {
+        "id": "l5-stage-1",
+        "pattern": [
+          { "beat": 1, "hand": "L", "type": "eighth", "count": "1" },
+          { "beat": 1.5, "hand": "R", "type": "eighth", "count": "and" },
+          { "beat": 2, "hand": "L", "type": "eighth", "count": "2" },
+          { "beat": 2.5, "hand": "R", "type": "eighth", "count": "and" },
+          { "beat": 3, "hand": "L", "type": "eighth", "count": "3" },
+          { "beat": 3.5, "hand": "R", "type": "eighth", "count": "and" },
+          { "beat": 4, "hand": "L", "type": "eighth", "count": "4" },
+          { "beat": 4.5, "hand": "R", "type": "eighth", "count": "and" }
+        ]
+      }
+    ]
+  },
+  {
+    "level": 6,
+    "name": "Syncopation",
+    "concept": "R_SYNCOPATION",
+    "bpm": 78,
+    "timeSig": "4/4",
+    "locked": true,
+    "counting": "reserved",
+    "stages": []
+  },
+  {
+    "level": 7,
+    "name": "Dotted Rhythms",
+    "concept": "R_DOTTED",
+    "bpm": 78,
+    "timeSig": "4/4",
+    "locked": true,
+    "counting": "reserved",
+    "stages": []
+  },
+  {
+    "level": 8,
+    "name": "Triplets",
+    "concept": "R_TRIPLETS",
+    "bpm": 80,
+    "timeSig": "4/4",
+    "locked": true,
+    "counting": "reserved",
+    "stages": []
+  }
+]
