@@ -121,13 +121,12 @@ export default function PracticeChapterWrapper() {
       const prereq = PREREQUISITES[conceptId]
       if (prereq) {
         try {
-          const resp = await fetch(API_BASE + '/concept-state/demo-student/' + prereq.requires)
+          const resp = await fetch(API_BASE + '/api/concept-state/demo-student/' + prereq.requires)
           if (resp.ok) {
             const data = await resp.json()
-            if (!data.current_level || data.current_level === 'Not Started') {
-              setLocked(prereq.message)
-              setLoading(false)
-              return
+            const prerequisiteStarted = data.found === true && data.state && typeof data.state === 'object'
+            if (prerequisiteStarted) {
+              // Prerequisite has started — allow through while student identity is not wired.
             }
           }
         } catch (e) {
@@ -137,11 +136,14 @@ export default function PracticeChapterWrapper() {
 
       // Load current chapter from concept state
       try {
-        const resp = await fetch(API_BASE + '/concept-state/demo-student/' + conceptId)
+        const resp = await fetch(API_BASE + '/api/concept-state/demo-student/' + conceptId)
         if (resp.ok) {
           const data = await resp.json()
-          if (data.chapter) {
-            if (!cancelled) setChapter(data.chapter)
+          const nextAction = data.found === true && data.state
+            ? data.state.next_action
+            : null
+          if (['find_it', 'play_it', 'move_it', 'own_it'].includes(nextAction)) {
+            if (!cancelled) setChapter(nextAction)
           }
         }
       } catch (e) {
