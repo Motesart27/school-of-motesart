@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
-var API_BASE = 'https://motesart-converter.netlify.app'
 var CONCEPT_ID = 'T_SCALE_DEGREES_MAJOR'
 
 var SCALE_MAP = { 1: 'C', 2: 'D', 3: 'E', 4: 'F', 5: 'G', 6: 'A', 7: 'B', 8: 'C2' }
@@ -126,7 +125,6 @@ export default function ScaleDegreesPlayIt() {
   function postEvent() {
     var payload = {
       client_event_id: generateEventId(),
-      student_instrument_id: getStudentId(),
       concept_id: CONCEPT_ID,
       chapter: 'play_it',
       found_pairs: correctDegrees,
@@ -136,11 +134,8 @@ export default function ScaleDegreesPlayIt() {
       result: 'complete',
         success_summary: 'executed scale degrees on demand from home'
     }
-    fetch(API_BASE + '/api/practice-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).catch(function(err) { console.error('[ScaleDegreesPlayIt] event post failed:', err) })
+    postPracticeEvent(payload)
+      .catch(function(err) { console.error('[ScaleDegreesPlayIt] event post failed:', err) })
   }
 
   // Count total calls for progress dots

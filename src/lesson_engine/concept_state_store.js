@@ -104,9 +104,11 @@ export function subscribe(callback) {
  */
 export function getStudentId() {
   try {
-    return localStorage.getItem(STUDENT_KEY) || 'default_student'
+    const user = JSON.parse(localStorage.getItem('som_user') || 'null')
+    if (user && user.id) return user.id
+    return localStorage.getItem(STUDENT_KEY) || null
   } catch (e) {
-    return 'default_student'
+    return null
   }
 }
 

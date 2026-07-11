@@ -21,17 +21,19 @@ export default function ProofLoopPanel() {
   useEffect(() => {
     // Fetch from real API on mount
     const studentId = getStudentId()
-    fetch(API_BASE + '/api/concept-state/' + studentId + '/' + CONCEPT_ID)
-      .then(function(res) { return res.json() })
-      .then(function(data) {
-        if (data.found && data.state) {
-          console.log('[ProofLoop] API state loaded:', data.state)
-          setState(data.state)
-        }
-      })
-      .catch(function(err) {
-        console.warn('[ProofLoop] API fetch failed, using localStorage:', err)
-      })
+    if (studentId) {
+      fetch(API_BASE + '/api/concept-state/' + studentId + '/' + CONCEPT_ID)
+        .then(function(res) { return res.json() })
+        .then(function(data) {
+          if (data.found && data.state) {
+            console.log('[ProofLoop] API state loaded:', data.state)
+            setState(data.state)
+          }
+        })
+        .catch(function(err) {
+          console.warn('[ProofLoop] API fetch failed, using localStorage:', err)
+        })
+    }
 
     // Also subscribe to localStorage changes as fallback
     const unsub = subscribe((conceptId, newState) => {

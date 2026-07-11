@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
-var API_BASE = 'https://motesart-converter.netlify.app'
 var CONCEPT_ID = 'T_SCALE_DEGREES_MAJOR'
 var PASSES_REQUIRED = 2
 var HESITATION_MS = 3000
@@ -152,24 +151,19 @@ export default function ScaleDegreesOwnIt() {
   }, [feedback, done, failed, currentDegree, callPos, calls, wrongThisPass, cleanPasses])
 
   function postEvent(passed, passes) {
-    fetch(API_BASE + '/api/practice-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_event_id: generateEventId(),
-        student_instrument_id: getStudentId(),
-        concept_id: CONCEPT_ID,
-        chapter: 'own_it',
-        found_pairs: correctDegrees,
-        wrong_taps: totalWrongTaps,
-        attempt_count: totalAttempts.current,
-        hint_used: false,
-        hesitation_count: hesitationsThisRound.current,
-        feel_mode_stage: 'own_it',
-        visual_support_level: 'hidden',
-        result: 'complete',
-        success_summary: 'performed scale degrees without visual cues'
-      })
+    postPracticeEvent({
+      client_event_id: generateEventId(),
+      concept_id: CONCEPT_ID,
+      chapter: 'own_it',
+      found_pairs: correctDegrees,
+      wrong_taps: totalWrongTaps,
+      attempt_count: totalAttempts.current,
+      hint_used: false,
+      hesitation_count: hesitationsThisRound.current,
+      feel_mode_stage: 'own_it',
+      visual_support_level: 'hidden',
+      result: 'complete',
+      success_summary: 'performed scale degrees without visual cues'
     }).catch(function(err) { console.error('[ScaleDegreesOwnIt] event post failed:', err) })
   }
 

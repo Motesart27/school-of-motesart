@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
-var API_BASE = 'https://motesart-converter.netlify.app'
 var CONCEPT_ID = 'T_SCALE_DEGREES_MAJOR'
 
 // C major scale: degree → key name mapping
@@ -148,7 +147,6 @@ export default function ScaleDegreesFindIt() {
   function postEvent(found, wrong) {
     var payload = {
       client_event_id: generateEventId(),
-      student_instrument_id: getStudentId(),
       concept_id: CONCEPT_ID,
       chapter: 'find_it',
       found_pairs: found,
@@ -158,12 +156,8 @@ export default function ScaleDegreesFindIt() {
       result: 'complete',
         success_summary: 'located scale degrees by number from home'
     }
-    fetch(API_BASE + '/api/practice-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    .then(function(res) { return res.json() })
+    postPracticeEvent(payload)
+    .then(function(res) { return res.skipped ? res : res.json() })
     .catch(function(err) { console.error('[ScaleDegreesFindIt] event post failed:', err) })
   }
 

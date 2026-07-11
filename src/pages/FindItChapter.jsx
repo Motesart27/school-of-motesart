@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { replaceState, getStudentId } from '../lesson_engine/concept_state_store.js'
+import { replaceState } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
 /**
@@ -368,7 +369,6 @@ export default function FindItChapter() {
 function writeCompletionState(foundPairs, wrongTaps, attemptCount, hintUsed) {
   const eventPayload = {
     client_event_id: generateEventId(),
-    student_instrument_id: getStudentId(),
     concept_id: CONCEPT_ID,
     chapter: 'find_it',
     result: 'complete',
@@ -411,26 +411,23 @@ function writeCompletionState(foundPairs, wrongTaps, attemptCount, hintUsed) {
   console.log('[FindIt] Concept state written:', conceptState)
 
   // POST event to real backend, then recompute Concept_State
-  fetch(API_BASE + '/api/practice-events', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(eventPayload)
-  })
-    .then(function(res) { return res.json() })
+  postPracticeEvent(eventPayload)
+    .then(function(res) { return res.skipped ? res : res.json() })
     .then(function(data) {
       console.log('[FindIt] API event response:', data)
+      if (data.skipped || !data.event || !data.event.student_instrument_id) return null
       return fetch(API_BASE + '/api/concept-state/recompute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_instrument_id: eventPayload.student_instrument_id,
+          student_instrument_id: data.event.student_instrument_id,
           concept_id: eventPayload.concept_id
         })
       })
     })
-    .then(function(res) { return res.json() })
+    .then(function(res) { return res ? res.json() : null })
     .then(function(data) {
-      console.log('[FindIt] API recompute response:', data)
+      if (data) console.log('[FindIt] API recompute response:', data)
     })
     .catch(function(err) {
       console.warn('[FindIt] API write failed (localStorage still saved):', err)

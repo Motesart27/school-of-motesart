@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
-var API_BASE = 'https://motesart-converter.netlify.app'
 var CONCEPT_ID = 'T_SCALE_DEGREES_MAJOR'
 
 // Major scale intervals: W W H W W W H (in semitones: 2 2 1 2 2 2 1)
@@ -157,22 +156,17 @@ export default function ScaleDegreesMoveIt() {
   }
 
   function postHomeEvent(homeKey) {
-    fetch(API_BASE + '/api/practice-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_event_id: generateEventId(),
-        student_instrument_id: getStudentId(),
-        concept_id: CONCEPT_ID,
-        chapter: 'move_it',
-        home_key: homeKey,
-        found_pairs: correctDegrees,
-        wrong_taps: wrongTaps,
-        attempt_count: totalAttempts.current,
-        hint_used: false,
-        result: 'complete',
-        success_summary: 'transferred scale degrees to home ' + homeKey
-      })
+    postPracticeEvent({
+      client_event_id: generateEventId(),
+      concept_id: CONCEPT_ID,
+      chapter: 'move_it',
+      home_key: homeKey,
+      found_pairs: correctDegrees,
+      wrong_taps: wrongTaps,
+      attempt_count: totalAttempts.current,
+      hint_used: false,
+      result: 'complete',
+      success_summary: 'transferred scale degrees to home ' + homeKey
     }).catch(function(err) { console.error('[ScaleDegreesMoveIt] event post failed:', err) })
   }
 

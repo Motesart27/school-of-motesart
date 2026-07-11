@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { replaceState, getStudentId } from '../lesson_engine/concept_state_store.js'
+import { replaceState } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
 /**
@@ -148,7 +149,6 @@ export default function PlayItChapter() {
   function writeCompletionState(playedNotes, wrongTapsArr, attempts, hint, paceMs, stalled) {
     const eventPayload = {
       client_event_id: generateEventId(),
-      student_instrument_id: getStudentId(),
       concept_id: CONCEPT_ID,
       chapter: 'play_it',
       result: 'complete',
@@ -189,26 +189,23 @@ export default function PlayItChapter() {
     console.log('[PlayIt] Event payload:', eventPayload)
     console.log('[PlayIt] Concept state written:', conceptState)
 
-    fetch(API_BASE + '/api/practice-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(eventPayload)
-    })
-      .then(function(res) { return res.json() })
+    postPracticeEvent(eventPayload)
+      .then(function(res) { return res.skipped ? res : res.json() })
       .then(function(data) {
         console.log('[PlayIt] API event response:', data)
+        if (data.skipped || !data.event || !data.event.student_instrument_id) return null
         return fetch(API_BASE + '/api/concept-state/recompute', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            student_instrument_id: eventPayload.student_instrument_id,
+            student_instrument_id: data.event.student_instrument_id,
             concept_id: eventPayload.concept_id
           })
         })
       })
-      .then(function(res) { return res.json() })
+      .then(function(res) { return res ? res.json() : null })
       .then(function(data) {
-        console.log('[PlayIt] API recompute response:', data)
+        if (data) console.log('[PlayIt] API recompute response:', data)
       })
       .catch(function(err) {
         console.warn('[PlayIt] API write failed (localStorage still saved):', err)

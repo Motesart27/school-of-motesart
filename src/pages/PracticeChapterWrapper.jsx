@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getState } from '../lesson_engine/concept_state_store.js'
+import { getState, getStudentId } from '../lesson_engine/concept_state_store.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 import MetronomeControl from '../components/MetronomeControl.jsx'
 
@@ -116,12 +116,17 @@ export default function PracticeChapterWrapper() {
     async function loadState() {
       setLoading(true)
       setLocked(null)
+      const studentId = getStudentId()
+      if (!studentId) {
+        if (!cancelled) setLoading(false)
+        return
+      }
 
       // Check prerequisites
       const prereq = PREREQUISITES[conceptId]
       if (prereq) {
         try {
-          const resp = await fetch(API_BASE + '/api/concept-state/demo-student/' + prereq.requires)
+          const resp = await fetch(API_BASE + '/api/concept-state/' + studentId + '/' + prereq.requires)
           if (resp.ok) {
             const data = await resp.json()
             const prerequisiteStarted = data.found === true && data.state && typeof data.state === 'object'
@@ -136,7 +141,7 @@ export default function PracticeChapterWrapper() {
 
       // Load current chapter from concept state
       try {
-        const resp = await fetch(API_BASE + '/api/concept-state/demo-student/' + conceptId)
+        const resp = await fetch(API_BASE + '/api/concept-state/' + studentId + '/' + conceptId)
         if (resp.ok) {
           const data = await resp.json()
           const nextAction = data.found === true && data.state

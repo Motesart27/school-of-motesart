@@ -1,9 +1,8 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
-var API_BASE = 'https://motesart-converter.netlify.app'
 var CONCEPT_ID = 'T_MAJOR_SCALE_PATTERN'
 var SCALE = ['C', 'D', 'E', 'F', 'G', 'A', 'B', 'C2']
 var PASSES_REQUIRED = 2
@@ -192,7 +191,6 @@ export default function OwnItChapter() {
     if (finalNotes.length < SCALE.length) finalNotes.push(SCALE[SCALE.length - 1])
     var eventPayload = {
       client_event_id: generateEventId(),
-      student_instrument_id: getStudentId(),
       concept_id: CONCEPT_ID,
       chapter: 'own_it',
       played_notes: finalNotes,
@@ -207,12 +205,8 @@ export default function OwnItChapter() {
       stalled_on_note: null,
       pace_ms: avgPace
     }
-    fetch(API_BASE + '/api/practice-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(eventPayload)
-    })
-    .then(function(res) { return res.json() })
+    postPracticeEvent(eventPayload)
+    .then(function(res) { return res.skipped ? res : res.json() })
     .then(function(data) {
       if (data && data.confidence !== undefined) {
         setConfidence(data.confidence)

@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getStudentId, getState, replaceState } from '../lesson_engine/concept_state_store.js'
+import { getState, replaceState } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
 
-const API_BASE = 'https://motesart-converter.netlify.app'
 const CONCEPT_ID = 'T_MAJOR_SCALE_PATTERN'
 const CHAPTERS = ['Hear It', 'Say It', 'Find It', 'Play It', 'Move It', 'Own It']
 const CURRENT_CHAPTER = 4 // Move It = index 4
@@ -203,7 +203,6 @@ export default function MoveItChapter() {
     var avgPace = paceMs.length > 0 ? Math.round(paceMs.reduce(function(a,b){return a+b}, 0) / paceMs.length) : 0
     var eventPayload = {
       client_event_id: generateEventId(),
-      student_instrument_id: getStudentId(),
       concept_id: CONCEPT_ID,
       chapter: "move_it",
       home_key: homeKey,
@@ -216,12 +215,8 @@ export default function MoveItChapter() {
       stalled_on_note: stalled || null,
       pace_ms: avgPace
     }
-    fetch(API_BASE + "/api/practice-events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventPayload)
-    })
-    .then(function(res) { return res.json() })
+    postPracticeEvent(eventPayload)
+    .then(function(res) { return res.skipped ? res : res.json() })
     .then(function(data) {
       console.log("[MoveIt] practice-event response:", data)
       if (data && data.confidence !== undefined) {
@@ -480,4 +475,3 @@ var styles = {
   completionSub: { fontSize: 13, color: "#6b7280", lineHeight: 1.5, marginBottom: 16 },
   ctaBtn: { background: "#7c3aed", color: "#fff", border: "none", borderRadius: 10, padding: "12px 32px", fontSize: 15, fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 8px rgba(124,58,237,0.3)" }
 }
-

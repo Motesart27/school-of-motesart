@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { postPracticeEvent } from '../lesson_engine/postPracticeEvent.js'
 import levels from '../data/rhythm_racer_levels.json'
 
 const API_BASE = 'https://motesart-converter.netlify.app'
@@ -402,7 +402,6 @@ export default function RhythmRacerV2() {
 
     const payload = {
       client_event_id: makeEventId(),
-      student_instrument_id: user?.id || getStudentId(),
       concept_id: conceptId || level.concept,
       chapter: 'rhythm_racer',
       result: nextSummary.result,
@@ -429,18 +428,19 @@ export default function RhythmRacerV2() {
 
     try {
       console.log('[RhythmRacerV2] Event payload:', payload)
-      const res = await fetch(API_BASE + '/api/practice-events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      const res = await postPracticeEvent(payload)
+      if (res.skipped) {
+        setLogState('skipped')
+        return
+      }
       const data = await res.json()
       console.log('[RhythmRacerV2] API event response:', data)
+      if (!data.event || !data.event.student_instrument_id) return
       await fetch(API_BASE + '/api/concept-state/recompute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_instrument_id: payload.student_instrument_id,
+          student_instrument_id: data.event.student_instrument_id,
           concept_id: payload.concept_id,
         }),
       })
