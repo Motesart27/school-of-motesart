@@ -1036,3 +1036,17 @@ Final verification from a fresh clone passed `npm ci`, the production build, and
 The commit containing this entry is the governance-only closure-review candidate; its exact local and remote SHA must match in the preservation proof. Rollback condition: revert only the closure-review documentation commit.
 
 Phase 1, merge, deployment, pull-request creation, and additional remediation were not started.
+
+## 2026-07-16 — Phase 0R.5A test-credential containment review
+
+The Phase 0R closure review remains preserved at `236f3d9f70ac7471894a3171553e0f73a30bf49b`. This session was limited to the tracked test-account credential blocker.
+
+The account is classified as a test student with a current approved authenticated mobile-verification dependency. The old credential authenticated both before and after current-tree plaintext removal. Automatic disablement was therefore not permitted, and rotation could not proceed because no documented authorized account-management mechanism or approved external secret-storage destination was available. Manual secret-storage and rotation decisions remain required.
+
+The plaintext credential pair was surgically removed from `PROJECT_BRAIN_HANDOFF.md`; current tracked-tree identifier, password, and reusable-pair matches are zero. Historical Git objects were not rewritten. No replacement secret entered Git or evidence.
+
+Product/runtime paths remained unchanged from the closure-review commit. Install and production-build verification and candidate secret scans are recorded in `PHASE_0R_5A_CREDENTIAL_VERIFICATION_REPORT.md` and its compact summary. The commit containing this entry is the Phase 0R.5A branch tip; its exact local and remote SHA is recorded by the preservation proof.
+
+Rollback warning: reverting this commit may restore plaintext to the current branch and must not be done without security review.
+
+Phase 0R remains open pending Denarius review and operational invalidation of the old credential. Phase 1, merge, deployment, pull-request creation, history rewriting, and product-source work were not started.

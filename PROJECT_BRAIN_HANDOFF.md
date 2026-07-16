@@ -83,7 +83,7 @@ Last Updated: May 23, 2026 | Bundle: index-DfXy9PFK.js
 - AIRTABLE_BASE_ID: appTN4wNd5Kgbqdwl
 - MOTESART_ENGINE: 23fb225
 - MOTESART_PERSONALITY: 05ae905
-- Test student: jordan.rivers.som.test4@gmail.com / TestStudent27!
+- Test-account credentials are intentionally not stored in source control. Use the approved operational credential channel.
 - SOM backend: https://deployable-python-codebase-som-production.up.railway.app
 - TTS backend: https://protective-flow-production.up.railway.app
 - Netlify site ID: 68b307a9-ef37-4298-9e72-805381200e1c
