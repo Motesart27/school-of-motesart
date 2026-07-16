@@ -1,5 +1,5 @@
 /**
- * MiniCoachCard.jsx â Small coach card for dashboards + pop-out bubble
+ * MiniCoachCard.jsx — Small coach card for dashboards + pop-out bubble
  * Located at: src/components/MiniCoachCard.jsx
  *
  * Shows on: Student, Teacher, Parent, Game dashboards (NOT Ambassador)
@@ -34,7 +34,7 @@ export default function MiniCoachCard({ coach = DEFAULT_COACH }) {
         @keyframes miniCoachBubbleIn{from{opacity:0;transform:scale(.9) translateY(20px)}}
       `}</style>
 
-      {/* ââ Mini Card ââ */}
+      {/* ── Mini Card ── */}
       <div
         onClick={() => setShowBubble(true)}
         style={{
@@ -101,7 +101,7 @@ export default function MiniCoachCard({ coach = DEFAULT_COACH }) {
         }}>Open {"\u2197"}</button>
       </div>
 
-      {/* ââ Bubble Overlay ââ */}
+      {/* ── Bubble Overlay ── */}
       {showBubble && (
         <div
           onClick={() => setShowBubble(false)}

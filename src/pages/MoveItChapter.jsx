@@ -301,7 +301,7 @@ export default function MoveItChapter() {
         <button style={styles.hintBtn} onClick={handleHint}>Hint</button>
       </div>}
 
-      {/* Now playing cue ÃÂ¢ÃÂÃÂ HOME is prominent */}
+      {/* Now playing cue — HOME is prominent */}
       {!homeJustCompleted && !allHomesDone && <div style={styles.nowPlaying}>
         Now playing: <span style={styles.noteHighlight}>{NOTE_NUMBERS[currentStep] + ' (' + scale.labels[currentStep] + ')'}</span>
         {' - '}
@@ -310,7 +310,7 @@ export default function MoveItChapter() {
 
       
       {/* Pattern anchor */}
-      <div style={{ textAlign: "center", padding: "4px 20px 8px", fontSize: "12px", color: "#555", letterSpacing: "0.3px" }}>Together at 3â4 and 7â8</div>
+      <div style={{ textAlign: "center", padding: "4px 20px 8px", fontSize: "12px", color: "#555", letterSpacing: "0.3px" }}>Together at 3→4 and 7→8</div>
 
       {/* Progress strip */}
       {!homeJustCompleted && !allHomesDone && <div style={styles.progressStrip}>

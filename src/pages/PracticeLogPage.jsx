@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ T.A.M.i avatar base64 Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ─── T.A.M.i avatar base64 ─── */
 const TAMI_AVATAR = 'data:image/jpeg;base64,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';
 
-/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Color/Data Constants Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ─── Color/Data Constants ─── */
 const TC = { hw: '#14b8a6', sm: '#85B7EB', gm: '#EF9F27', lp: '#e84b8a' };
 const TN = { hw: 'Homework', sm: 'Sheet Music', gm: 'Games', lp: 'Live Practice' };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -47,7 +47,7 @@ const dayDetails = {
   25: { mins: 35, piece: 'Full Practice Session', type: 'Homework' }
 };
 
-/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ CSS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ─── CSS ─── */
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Outfit:wght@500;600&display=swap');
 .pl-shell *{box-sizing:border-box;margin:0;padding:0}
@@ -287,7 +287,7 @@ const CSS = `
 .pl-tamibtn svg{width:20px;height:20px}
 `;
 
-/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ SVG Icon Components Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ─── SVG Icon Components ─── */
 const IconHome = () => (<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.38)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>);
 const IconBook = () => (<svg viewBox="0 0 24 24" fill="none" stroke="#14b8a6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>);
 const IconScreen = () => (<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.38)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>);
@@ -297,7 +297,7 @@ const IconGear = () => (<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,25
 const IconBell = () => (<svg viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>);
 const IconMsg = () => (<svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>);
 
-/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Main Component Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+/* ─── Main Component ─── */
 export default function PracticeLogPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -329,7 +329,7 @@ export default function PracticeLogPage() {
   const periodLabel = { week: 'this week', month: 'this month', quarter: 'this quarter', year: 'this year' }[curPeriod];
   const typeName = curType === 'all' ? 'all types' : TN[curType];
 
-  /* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Chart Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
+  /* ─── Chart ─── */
   const buildChart = useCallback(() => {
     if (!chartRef.current) return;
     if (chartInstance.current) { chartInstance.current.destroy(); chartInstance.current = null; }
@@ -433,7 +433,7 @@ export default function PracticeLogPage() {
     <>
       <style>{CSS}</style>
       <div className="pl-shell">
-        {/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ SIDEBAR Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+        {/* ─── SIDEBAR ─── */}
         <div className={`pl-sb${sbCol ? ' c' : ''}`}>
           <div className="pl-sbtop">
             <div className="pl-slogo">School of Motesart</div>
@@ -469,7 +469,7 @@ export default function PracticeLogPage() {
           </div>
         </div>
 
-        {/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ MAIN Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */}
+        {/* ─── MAIN ─── */}
         <div className="pl-main">
           <div className="pl-topbar">
             <div>
@@ -703,7 +703,7 @@ export default function PracticeLogPage() {
       {/* Log Modal */}
       <div className={`pl-logmod${showLog ? ' show' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) setShowLog(false); }}>
         <div className="pl-logcard">
-          <div className="pl-loghd"><span className="pl-loghtitle">Log a Session</span><button className="pl-logclose" onClick={() => setShowLog(false)}>Ã¢ÂÂ</button></div>
+          <div className="pl-loghd"><span className="pl-loghtitle">Log a Session</span><button className="pl-logclose" onClick={() => setShowLog(false)}>×</button></div>
           <div className="pl-logfield"><div className="pl-loglbl">What did you practice?</div><input className="pl-loginput" placeholder="e.g. C Major Scale" defaultValue="C Major \u2014 Hands Together" /></div>
           
           <div className="pl-logtwocol"><div><div className="pl-loglbl">Type</div><select className="pl-logselect"><option>Homework</option><option>Sheet Music</option><option>Games</option><option>Live Practice</option></select></div><div><div className="pl-loglbl">Duration</div><div style={{position:'relative'}}><input className="pl-loginput" type="number" defaultValue="20" min="1" max="180" style={{paddingRight:'40px'}} /><span style={{position:'absolute',right:'15px',top:'50%',transform:'translateY(-50%)',fontSize:'12px',fontWeight:500,color:'rgba(255,255,255,0.25)',pointerEvents:'none'}}>min</span></div></div></div>

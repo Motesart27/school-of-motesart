@@ -933,3 +933,20 @@ Phase 0 evidence was reconstructed from authoritative production source `9b5449f
 Phase 0 made zero product or runtime modifications. Repository changes were limited to additive audit artifacts and the required PROJECT_BRAIN governance entry.
 
 The earlier local-only Phase 0 candidate 5ec9452c2265825626db54a2e04f601f21b2eade was lost before remote preservation and is superseded by this reconstructed candidate.
+
+## 2026-07-15 — Phase 0R.1A non-protected encoding remediation
+
+Phase 0 is closed and locked at `1683cb1225d9d43e7155f74bd96eca451e2294a6`. This session performed Phase 0R.1A only.
+
+Exact product files changed:
+- `src/components/MiniCoachCard.jsx`
+- `src/pages/MoveItChapter.jsx`
+- `src/pages/PracticeLogPage.jsx`
+
+Fourteen inventoried corrupted literals were replaced one-to-one. Protected and uncertain dashboard, Settings, GamePage, shared Tami, and lesson-engine occurrences were deferred in `PHASE_0R_PROTECTED_ENCODING_EXCEPTIONS.md`. The unavailable `b4758d3` Rhythm Racer and Login collision paths were deferred in `PHASE_0R_DEFERRED_COLLISIONS.md`; no lost work was recreated.
+
+Verification: locked install passed; production build passed; the repository has no test script; both complete 102-capture runs completed with zero navigation failures, zero console errors, and zero uncaught page errors. Dedicated before/after evidence confirms only the approved `/move-it` arrow text and `/practice-log` modal close glyph changes. Raw PNG hashes include documented animation/timing variance on unchanged routes; unexpected persistent product visual deltas were zero. No route, guard, behavior, layout, styling, configuration, dependency, API, Airtable, auth, or data-flow change was made.
+
+Rollback condition: if any approved glyph substitution produces an unanticipated product effect, revert the single Phase 0R.1A commit and return the branch to the locked baseline for review. The resulting commit is preserved on `feat/som-redesign-phase-0r` and in the verified Phase 0R.1A bundle; its exact SHA is the branch tip and remote preservation record.
+
+No later Phase 0R step, Phase 1 work, merge, or deployment was started.
