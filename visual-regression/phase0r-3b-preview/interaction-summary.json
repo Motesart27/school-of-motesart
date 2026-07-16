@@ -1,0 +1,63 @@
+{
+  "classification": "temporary DOM/network feasibility simulation; not implemented product behavior",
+  "currentAlertChecks": [
+    {
+      "outcome": "json-response",
+      "dialogCount": 1,
+      "dialogs": [
+        {
+          "type": "alert",
+          "messageClassification": "wake-success"
+        }
+      ]
+    },
+    {
+      "outcome": "network-failure",
+      "dialogCount": 1,
+      "dialogs": [
+        {
+          "type": "alert",
+          "messageClassification": "wake-failure"
+        }
+      ]
+    }
+  ],
+  "proposedRejectedLogin": {
+    "loginOutcome": "rejected",
+    "immediateState": {
+      "email": "preview-user@example.invalid",
+      "passwordPopulated": true,
+      "signInEnabled": true,
+      "googleEnabled": true
+    },
+    "wakeCallsBeforeRelease": 1,
+    "wakeCallsAfterFieldUpdates": 1,
+    "loginCalls": 1,
+    "loginErrorVisible": true,
+    "credentialState": {
+      "emailPreserved": true,
+      "passwordPreserved": true
+    },
+    "finalPath": "/login",
+    "dialogCount": 0
+  },
+  "proposedSuccessfulLogin": {
+    "loginOutcome": "accepted",
+    "immediateState": {
+      "email": "preview-user@example.invalid",
+      "passwordPopulated": true,
+      "signInEnabled": true,
+      "googleEnabled": true
+    },
+    "wakeCallsBeforeRelease": 1,
+    "wakeCallsAfterFieldUpdates": 1,
+    "loginCalls": 1,
+    "loginErrorVisible": false,
+    "credentialState": {
+      "emailPreserved": "not-applicable-after-redirect",
+      "passwordPreserved": "not-applicable-after-redirect"
+    },
+    "finalPath": "/student",
+    "dialogCount": 0
+  }
+}

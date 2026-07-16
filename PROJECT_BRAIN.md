@@ -978,3 +978,15 @@ Verification was privacy-sanitized: isolated `npm ci` and production builds pass
 The resulting Phase 0R.3A commit is the local and remote tip of `feat/som-redesign-phase-0r`, with its exact SHA recorded by the branch preservation proof. Rollback condition: revert only the single Phase 0R.3A commit.
 
 Login work, the deferred Settings Back glyph, protected encoding work, later Phase 0R work, Phase 1, merge, deployment, and pull-request creation were not started.
+
+## 2026-07-16 — Phase 0R.3B protected Login preview and exception ticket
+
+Phase 0R.3A is closed at `91326c10a0a51bfa1f87acdff7523bab84a4473d`. This session was limited to governance analysis and rendered previews for the protected Login wake flow.
+
+No Login, API, AuthContext, auth, route, backend, product, runtime, styling, dependency, or configuration source was edited. Current source confirms the public wake button calls the unauthenticated API root and produces browser alerts. Five controlled wake requests returned parseable JSON 404 responses in 86–240 ms, accepted the tested local frontend origin, set no cookie, and produced no observable auth/session side effect. The existing wake promise has no explicit timeout and treats parseable HTTP error JSON as resolution; the ticket recommends a four-second presentation-only bound without changing `api.js`.
+
+The preview harness and 12 sanitized captures live under `visual-regression/phase0r-3b-preview/`. Temporary DOM injection demonstrates current, pending, success, and delayed states at all three viewports; it is explicitly not implemented behavior. Deterministic interaction tests preserved immediate typing, independent login submission and errors, one wake call per mount, unchanged successful redirect behavior, and zero proposed alerts.
+
+Unavailable commit `b4758d32baed10f00e07848f0839e76dcf35d1e2` included Login work that was not recovered or reconstructed. Denarius must explicitly approve superseding it, both exact status strings, removal of the button and alerts, one non-blocking mount call with no auth change, and implementation in `Login.jsx` after preview review.
+
+The resulting governance-only commit is the local and remote tip of `feat/som-redesign-phase-0r`, with its exact SHA recorded by the preservation proof. Implementation, Phase 0R.4, committed-dist work, Phase 1, merge, deployment, and pull-request creation were not started.
