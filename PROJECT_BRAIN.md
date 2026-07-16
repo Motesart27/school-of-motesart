@@ -926,3 +926,10 @@ No app code changed. No Airtable changes. No email sent. Live manual test
 pending. Last shipped baseline remains May 27 (commit ce80adf).
 
 **Rollback:** N/A — no code changed.
+## 2026-07-15/16 — Phase 0 recovery reconstruction
+
+Phase 0 evidence was reconstructed from authoritative production source `9b5449f059d45afc56f9c1e389d8d7f78a3c26af`, including deploy provenance, repository/route/encoding/privacy/dead-file audits, and the complete three-viewport formal regression baseline. No remediation, merge, or deployment occurred.
+
+Phase 0 made zero product or runtime modifications. Repository changes were limited to additive audit artifacts and the required PROJECT_BRAIN governance entry.
+
+The earlier local-only Phase 0 candidate 5ec9452c2265825626db54a2e04f601f21b2eade was lost before remote preservation and is superseded by this reconstructed candidate.
