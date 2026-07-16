@@ -1064,3 +1064,15 @@ Authenticated mobile QA is temporarily suspended. Replacement registration remai
 Product/runtime paths remained byte-identical to the starting commit. The locked install and production build passed. The commit containing this entry is the Phase 0R.5B branch tip, with its exact local and remote SHA recorded by the preservation proof.
 
 Phase 0R.5B remains not ready solely because the mandatory read-only Airtable status/hash verification could not be performed. Phase 1, merge, deployment, pull-request creation, schema work, and product changes were not started.
+
+## 2026-07-16 — Phase 0R.5B final evidence reconciliation
+
+The initial Phase 0R.5B evidence is preserved at `15b278cf813f636b2736ef15f063d8dbaf8f18cf`. The previously missing independent Airtable read was later completed through the Denarius-authorized connected governance seat.
+
+The exact exposed test account is independently verified `Inactive`; its password-hash field is populated and independently verified changed from the pre-containment value. Exactly one target record matched. No replacement credential was retained, and no additional datastore write occurred during the verification read.
+
+The old historical credential remains conclusively rejected. Current tracked-tree identifier, password, reusable-pair, generated-build, and staged-evidence secret counts remain zero. Historical Git objects were not rewritten and no longer provide a usable credential.
+
+The singular Phase 0R closure blocker is resolved. Temporary authenticated-mobile-QA suspension remains accepted, while registration and Student Instruments enrollment-path work remain deferred to a separate backend/Airtable workstream.
+
+Phase 0R remains open only until Denarius formally declares closure. Phase 1, merge, deployment, pull-request creation, product work, and additional datastore activity were not started.

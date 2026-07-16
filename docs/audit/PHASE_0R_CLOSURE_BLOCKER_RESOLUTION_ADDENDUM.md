@@ -28,3 +28,14 @@ The old historical credential is now conclusively rejected by the production log
 Authenticated mobile QA is temporarily suspended. The pre-enrollment gate correctly rejects unenrolled identifiers, and the Student Instruments enrollment-path mismatch is deferred to a separate backend/Airtable workstream. Restoring a QA credential is not a Phase 0R closure requirement.
 
 The Airtable connector available to this session required OAuth authorization, and no independently authenticated fallback was available. Therefore `Status = Inactive` and the password-hash change are recorded as user-confirmed but not independently verified. Credential-blocker closure remains pending this final read-only datastore verification; no additional datastore mutation is required.
+
+## Final credential-blocker resolution
+
+The missing independent read was subsequently completed through the Denarius-authorized connected Airtable governance seat. The exact exposed test account is independently verified `Inactive`, its password-hash field is populated, and the current hash is independently verified different from the pre-containment value. Exactly one target record matched. The containment write affected only that record's `Status` and `Password Hash`, and no replacement credential was retained.
+
+The old credential remains conclusively rejected. Current tracked-tree plaintext, identifier, password, reusable-pair, generated-build, and staged-evidence secret counts are zero. Historical Git objects were not rewritten and are non-operational because the exposed credential is invalid.
+
+Temporary authenticated-mobile-QA suspension remains accepted. Registration and Student Instruments enrollment-path repair remain a separate backend/Airtable workstream and do not block Phase 0R credential closure.
+
+- remaining merge/release credential blocker: **no**;
+- Phase 0R credential blocker: **resolved**.

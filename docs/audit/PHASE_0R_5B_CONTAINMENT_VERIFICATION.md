@@ -50,3 +50,25 @@ Authenticated mobile QA is temporarily suspended. The exposed account was invali
 The production rejection and repository/build security gates pass. The mandatory independent Airtable status and hash-change checks remain unverified because connected Airtable authorization was unavailable.
 
 **PHASE 0R.5B NOT READY — Airtable Status and password-hash replacement could not be independently verified through an authorized read connection.**
+
+## 2026-07-16 — Independent-read supplement
+
+The verification missing from the initial Phase 0R.5B session has now been completed through the Denarius-authorized connected School of Motesart Airtable governance seat.
+
+Sanitized independent-read results:
+
+- exact target record found: **yes**;
+- matching target-record count: **1**;
+- account classification: **exposed test account**;
+- role: **Student**;
+- status: **Inactive**;
+- password-hash field populated: **yes**;
+- `hash_changed`: **yes**;
+- containment write affected one record and changed only `Status` and `Password Hash`;
+- replacement credential retained: **no**.
+
+No additional datastore write occurred during this read-only verification. The previous OAuth blocker is superseded by the authorized governance-seat read.
+
+This independent state reconciles with the already preserved production result: **OLD CREDENTIAL REJECTED**, HTTP 4xx, no token-shaped value, no user object, and no rate limit. Current-tree and generated-build secret counts remain zero, and Git history remains unchanged.
+
+**PHASE 0R.5B READY TO CLOSE CREDENTIAL BLOCKER**

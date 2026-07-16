@@ -3,11 +3,12 @@
   "airtable_account_classification": "EXPOSED_TEST_ACCOUNT",
   "airtable_role": "student",
   "airtable_status_reported": "Inactive",
-  "airtable_status_independently_verified": false,
+  "airtable_status_independently_verified": true,
   "password_hash_replacement_reported": true,
-  "password_hash_changed_independently_verified": false,
+  "password_hash_changed_independently_verified": true,
+  "matching_record_count": 1,
   "record_count_affected_reported": 1,
-  "airtable_read_blocker": "OAUTH_AUTHORIZATION_REQUIRED",
+  "airtable_read_blocker": null,
   "old_credential_result": "OLD_CREDENTIAL_REJECTED",
   "http_status_class": "4XX",
   "token_shaped_value_returned": false,
@@ -24,5 +25,6 @@
   "build": "PASS",
   "qa_dependency": "TEMPORARILY_SUSPENDED",
   "registration_enrollment_workstream": "DEFERRED",
-  "verdict": "PHASE_0R_5B_NOT_READY"
+  "credential_blocker_resolved": true,
+  "verdict": "PHASE_0R_5B_READY_TO_CLOSE_CREDENTIAL_BLOCKER"
 }
