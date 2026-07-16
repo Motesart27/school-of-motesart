@@ -1,0 +1,24 @@
+{
+  "removedValuesReproduced": false,
+  "emailValue": {
+    "matchesBefore": 2,
+    "matchesAfter": 1,
+    "remainingPaths": [
+      {
+        "path": "dist/assets/index-hSk4rzEK.js",
+        "classification": "preserved committed build output; modification forbidden in Phase 0R.3A"
+      }
+    ]
+  },
+  "telephoneValue": {
+    "matchesBefore": 2,
+    "matchesAfter": 1,
+    "remainingPaths": [
+      {
+        "path": "dist/assets/index-hSk4rzEK.js",
+        "classification": "preserved committed build output; modification forbidden in Phase 0R.3A"
+      }
+    ]
+  },
+  "settingsSourceDefaultsAbsent": true
+}

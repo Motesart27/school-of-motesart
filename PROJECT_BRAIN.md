@@ -966,3 +966,15 @@ Verification: isolated `npm ci` passed; the production build passed; 102 of 102 
 The resulting Phase 0R.2A commit is the local and remote tip of `feat/som-redesign-phase-0r`, with exact SHA recorded by the branch preservation proof. Rollback condition: revert only that single Phase 0R.2A commit.
 
 No other file was deleted. No product source, route, configuration, dependency, protected flow, collision path, locked baseline, later Phase 0R step, Phase 1 work, merge, or deployment was started.
+
+## 2026-07-16 — Phase 0R.3A Settings personal-contact default removal
+
+Phase 0R.2A is closed at `08eeb31d7b7a8bc21d3de76c071c5d169b9cf62d`. This session performed Phase 0R.3A only.
+
+`src/pages/Settings.jsx` was the only product source file changed. The audited hardcoded email and telephone defaults were removed without reproducing those personal values in governance or evidence. Email remains read-only and now uses the current authenticated user's `email` property with an empty fallback. Repository truth defines no canonical phone property in the supported `som_user` contract, so the phone field now has an empty default; no phone persistence, backend field, API, Airtable, auth, or save behavior was added.
+
+Verification was privacy-sanitized: isolated `npm ci` and production builds passed; nine targeted Settings captures passed across all three viewports; and paired full browser suites each completed 102 of 102 captures with zero navigation failures, console errors, page errors, final-URL changes, route/guard changes, or unexpected persistent visual changes. Expected visual changes were limited to removal of contact fallback text. The tracked committed `dist` artifact still contains the historical values and was preserved unchanged because build-output cleanup is outside this session.
+
+The resulting Phase 0R.3A commit is the local and remote tip of `feat/som-redesign-phase-0r`, with its exact SHA recorded by the branch preservation proof. Rollback condition: revert only the single Phase 0R.3A commit.
+
+Login work, the deferred Settings Back glyph, protected encoding work, later Phase 0R work, Phase 1, merge, deployment, and pull-request creation were not started.

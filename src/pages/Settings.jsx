@@ -77,8 +77,8 @@ export default function SettingsPage() {
  <div style={{fontSize:12,color:'rgba(255,255,255,.35)'}}>Click photo or button to upload</div>
  </div>
  <div className="set-field"><label>Full Name</label><input defaultValue={user?.name || 'Motesart'} /></div>
- <div className="set-field"><label>Email</label><input readOnly value={user?.email || 'motesartproductions1@gmail.com'} /><div className="field-hint">Email cannot be changed</div></div>
- <div className="set-field"><label>Phone Number</label><input defaultValue="631-741-8189" /></div>
+ <div className="set-field"><label>Email</label><input readOnly value={user?.email ?? ''} /><div className="field-hint">Email cannot be changed</div></div>
+ <div className="set-field"><label>Phone Number</label><input defaultValue="" /></div>
  <div className="set-field">
  <label>Preferred Contact Method</label>
  <div className="contact-row">

@@ -1,0 +1,30 @@
+{
+  "session": "Phase 0R.3A",
+  "startingCommit": "08eeb31d7b7a8bc21d3de76c071c5d169b9cf62d",
+  "routePatterns": 34,
+  "viewports": ["1440x900", "768x1024", "390x844"],
+  "before": {
+    "classification": "sanitized representation of starting fallback behavior",
+    "attempted": 102,
+    "completed": 102,
+    "navigationFailures": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0
+  },
+  "after": {
+    "classification": "authorized Phase 0R.3A source",
+    "attempted": 102,
+    "completed": 102,
+    "navigationFailures": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "finalUrlChanges": 0,
+    "routeGuardChanges": 0
+  },
+  "rawPixelMismatchCaptures": 50,
+  "expectedPersistentVisualDifferences": 3,
+  "expectedDifferenceRoute": "/settings",
+  "unexpectedPersistentVisualDifferences": 0,
+  "productBehaviorChanges": 0,
+  "bulkScreenshotsCommitted": false
+}
