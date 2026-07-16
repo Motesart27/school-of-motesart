@@ -1,0 +1,361 @@
+{
+  "sourceBase": "2c04f8b559954b8dcd5201d7b5dfdfe23650078c",
+  "captureCount": 9,
+  "sanitizedFixtures": true,
+  "captures": [
+    {
+      "surface": "login-public",
+      "route": "/login",
+      "authFixture": "public",
+      "viewport": "1440x900",
+      "requestedURL": "http://127.0.0.1:4174/login",
+      "finalURL": "http://127.0.0.1:4174/login",
+      "filename": "login-public__desktop-1440x900.png",
+      "screenshotSha256": "f926643d0cbeaf8759a8768d0d6a714dfc3106cf95c58b61a0dcc9ea219ecd2a",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": "Outfit, sans-serif",
+        "headingText": "School of Motesart",
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": true
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "login-public",
+      "route": "/login",
+      "authFixture": "public",
+      "viewport": "768x1024",
+      "requestedURL": "http://127.0.0.1:4174/login",
+      "finalURL": "http://127.0.0.1:4174/login",
+      "filename": "login-public__tablet-768x1024.png",
+      "screenshotSha256": "5bb7c909a6dd5a0af63c27c80448b35160cedec1745a61a1ba2ec4e1650ec5b7",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": "Outfit, sans-serif",
+        "headingText": "School of Motesart",
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": true
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "login-public",
+      "route": "/login",
+      "authFixture": "public",
+      "viewport": "390x844",
+      "requestedURL": "http://127.0.0.1:4174/login",
+      "finalURL": "http://127.0.0.1:4174/login",
+      "filename": "login-public__mobile-390x844.png",
+      "screenshotSha256": "d0352bd08a220be0acfec0aff00db38c15b1fa087b011cc7a0d5114d97a1bdc5",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": "Outfit, sans-serif",
+        "headingText": "School of Motesart",
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": true
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "student-shell",
+      "route": "/student",
+      "authFixture": "student",
+      "viewport": "1440x900",
+      "requestedURL": "http://127.0.0.1:4174/student",
+      "finalURL": "http://127.0.0.1:4174/student",
+      "filename": "student-shell__desktop-1440x900.png",
+      "screenshotSha256": "b3f6b910083e3c1839c6b9f4223afa35a0b20c4e977990eecdffc1b0bf5675fd",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": null,
+        "headingText": null,
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": false
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "student-shell",
+      "route": "/student",
+      "authFixture": "student",
+      "viewport": "768x1024",
+      "requestedURL": "http://127.0.0.1:4174/student",
+      "finalURL": "http://127.0.0.1:4174/student",
+      "filename": "student-shell__tablet-768x1024.png",
+      "screenshotSha256": "341daee056a2bf70fec262691e8f8c49c0b3a987d1e2057a407c58be732076d6",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": null,
+        "headingText": null,
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": false
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "student-shell",
+      "route": "/student",
+      "authFixture": "student",
+      "viewport": "390x844",
+      "requestedURL": "http://127.0.0.1:4174/student",
+      "finalURL": "http://127.0.0.1:4174/student",
+      "filename": "student-shell__mobile-390x844.png",
+      "screenshotSha256": "28c6c63c3538e1545fc5fd9599044842c67c0a0e3e9c286978458ac7714e6e50",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": null,
+        "headingText": null,
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": false
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "practice-log",
+      "route": "/practice-log",
+      "authFixture": "student",
+      "viewport": "1440x900",
+      "requestedURL": "http://127.0.0.1:4174/practice-log",
+      "finalURL": "http://127.0.0.1:4174/practice-log",
+      "filename": "practice-log__desktop-1440x900.png",
+      "screenshotSha256": "95a8faf1b968c64f8385f5158dfdd00397268fd92069633202a670dc9c08a776",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": null,
+        "headingText": null,
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": false
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Outfit:wght@500;600&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "practice-log",
+      "route": "/practice-log",
+      "authFixture": "student",
+      "viewport": "768x1024",
+      "requestedURL": "http://127.0.0.1:4174/practice-log",
+      "finalURL": "http://127.0.0.1:4174/practice-log",
+      "filename": "practice-log__tablet-768x1024.png",
+      "screenshotSha256": "69c96b68a89696c5dd57e7180422932431c80a8bbc87d329c5cd8d517a8aa8aa",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": null,
+        "headingText": null,
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": false
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Outfit:wght@500;600&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "surface": "practice-log",
+      "route": "/practice-log",
+      "authFixture": "student",
+      "viewport": "390x844",
+      "requestedURL": "http://127.0.0.1:4174/practice-log",
+      "finalURL": "http://127.0.0.1:4174/practice-log",
+      "filename": "practice-log__mobile-390x844.png",
+      "screenshotSha256": "8b5b0a30ed0605500a208de58f5e3be3473d193e9b8804416cde23e3bcbe8549",
+      "computed": {
+        "bodyFont": "\"DM Sans\", sans-serif",
+        "headingFont": null,
+        "headingText": null,
+        "variables": {
+          "surfaceBase": "#0A0D16",
+          "surfaceRaised": "#111527",
+          "textPrimary": "#F4F6FB",
+          "textMuted": "rgba(244,246,251,0.48)",
+          "accentPrimary": "#14B8A6",
+          "ambassadorGold": "#D6A84B"
+        },
+        "horizontalOverflowPx": 0,
+        "clippedControlsAndHeadings": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "outfitRequiredByRenderedHeading": false
+      },
+      "canonicalFontRequestCount": 1,
+      "canonicalFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap"
+      ],
+      "additionalLegacyFontRequests": [
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap",
+        "https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Outfit:wght@500;600&display=swap"
+      ],
+      "syneRequestCount": 0,
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ]
+}

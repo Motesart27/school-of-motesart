@@ -16,7 +16,7 @@
   "text": {
     "primary": {"value":"#F4F6FB","cssVariable":"--som-text-primary","usage":"primary readable content","prohibited":"solid accent button text where contrast fails","source":"Strategy E1","scope":"foundational","contrastOnRaised":"16.74:1"},
     "secondary": {"value":"rgba(244,246,251,0.64)","cssVariable":"--som-text-secondary","usage":"supporting content","prohibited":"disabled affordances","source":"Strategy E1","scope":"foundational","contrastOnRaised":"7.36:1"},
-    "muted": {"value":"rgba(244,246,251,0.42)","cssVariable":"--som-text-muted","usage":"nonessential metadata at compliant size or paired with stronger label","prohibited":"normal-size essential instructions","source":"Strategy E1","scope":"foundational","contrastOnRaised":"3.88:1; fails 4.5:1 normal-text floor"},
+    "muted": {"value":"rgba(244,246,251,0.48)","cssVariable":"--som-text-muted","usage":"nonessential metadata only; actual surface contrast must remain compliant","prohibited":"error instructions, required labels, essential navigation, primary educational guidance, critical status, or normal-size content below 4.5:1","source":"Strategy E1 amended by Denarius Phase 1B approval","scope":"foundational","contrastOnRaised":"4.662:1; passes 4.5:1 normal-text floor on #111527"},
     "disabled": {"value":"rgba(244,246,251,0.30)","cssVariable":"--som-text-disabled","usage":"disabled control text with non-color disabled cues","prohibited":"active or essential content","source":"Strategy E1","scope":"foundational","contrastOnRaised":"2.59:1; exempt only when truly disabled"}
   },
   "accent": {
@@ -42,7 +42,7 @@
     "teacher": {"value":"#F5A623","cssVariable":"--som-role-teacher","usage":"teacher identity","prohibited":"warning meaning by itself","source":"Strategy E1","scope":"role-specific"},
     "parent": {"value":"#3B82F6","cssVariable":"--som-role-parent","usage":"parent identity","prohibited":"DPM Drive without context","source":"Strategy E1","scope":"role-specific"},
     "ambassadorPrimary": {"value":"#22C55E","cssVariable":"--som-role-ambassador","usage":"ambassador identity primary","prohibited":"inventing an unspecified gold partner","source":"Strategy E1","scope":"role-specific"},
-    "ambassadorGold": {"value":null,"cssVariable":"--som-role-ambassador-gold","usage":"pending paired ambassador accent","prohibited":"implementation before Denarius resolves value","source":"Strategy E1 says green-gold pairing but provides no gold value","scope":"role-specific","unresolved":true},
+    "ambassadorGold": {"value":"#D6A84B","cssVariable":"--som-role-ambassador-gold","usage":"identity partner for Ambassador green #22C55E with visible text or green pairing","prohibited":"warning or encourage status, generic action color, teacher-gold substitute, or sole carrier of Ambassador identity","source":"Denarius Phase 1B approval amendment","scope":"role-specific"},
     "admin": {"value":"#F97316","cssVariable":"--som-role-admin","usage":"administrative identity","prohibited":"danger meaning by itself","source":"Strategy E1","scope":"role-specific"}
   },
   "dpm": {
@@ -94,6 +94,6 @@
     "exitEasing": {"value":"cubic-bezier(0.7,0,0.84,0)","cssVariable":"--som-ease-exit","usage":"exits","prohibited":"state interpolation","source":"Strategy J","scope":"foundational"},
     "stateEasing": {"value":"cubic-bezier(0.65,0,0.35,1)","cssVariable":"--som-ease-state","usage":"state transitions","prohibited":"celebration","source":"Strategy J","scope":"foundational"},
     "reduced": {"value":"120ms opacity crossfade","cssVariable":"--som-motion-reduced","usage":"prefers-reduced-motion alternative","prohibited":"transform, parallax, spring, particle, auto-scroll","source":"Strategy J/14","scope":"foundational"},
-    "celebrationSpring": {"value":{"stiffnessApprox":260,"dampingApprox":22},"cssVariable":null,"usage":"documentation only pending implementation choice","prohibited":"treating approximate strategy guidance as exact CSS token","source":"Strategy J uses approximate values","scope":"foundational","unresolved":true}
+    "celebrationSpring": {"value":{"stiffnessApprox":260,"dampingApprox":22},"cssVariable":null,"usage":"documentation only; excluded from production tokens and CSS variables","prohibited":"production CSS variable, executable motion constant, or treatment as exact guidance","source":"Strategy J approximate guidance; Denarius Phase 1B decision","scope":"foundational","documentationOnly":true,"runtime":false}
   }
 }

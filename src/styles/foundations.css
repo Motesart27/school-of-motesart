@@ -1,0 +1,50 @@
+:root {
+  color: var(--som-text-primary);
+  background-color: var(--som-surface-base);
+  font-family: var(--som-font-body);
+  font-synthesis: none;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  background-color: var(--som-surface-base);
+  color: var(--som-text-primary);
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--som-font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--som-font-heading);
+}
+
+button,
+input,
+select,
+textarea {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}

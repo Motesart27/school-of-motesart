@@ -1088,3 +1088,17 @@ Unresolved contract decisions are the unspecified ambassador gold partner, the a
 Verification completed 9 of 9 standalone captures with zero console errors, page errors, horizontal-overflow failures, undersized active targets, unnamed icon-only controls, Syne requests, or banned student-language matches. DM Sans and Outfit rendered in every capture. Product/runtime changes = 0.
 
 The commit containing this entry is the Phase 1 foundations-preview commit; its exact local and remote `feat/som-redesign-phase-1` SHA must match in the preservation proof. Phase 1 production implementation, Phase 1B, application tokens, font-loader changes, application components, `/dev/kit`, icon replacement, Practice Log migration, Chart.js removal, merge, deployment, and pull-request creation were not started.
+
+## 2026-07-16 — Phase 1B semantic tokens and canonical typography
+
+Phase 1 Session 1A is closed at `2c04f8b559954b8dcd5201d7b5dfdfe23650078c`. Denarius approved all eight preview decisions: the amended semantic contract; Outfit 500/600/700 headings; DM Sans 400/500/700 body/controls; the displayed 20/24 SVG icon grammar; component/state grammar; three StatusPill audience dictionaries; ChartFrame pattern; flag-gated admin-only `/dev/kit`; and the Phase 1B → 1C → 1D sequence. Icon, primitive, ChartFrame, and `/dev/kit` implementation remain deferred to their approved later sessions.
+
+The binding token amendments are Ambassador identity gold `#D6A84B` alongside green `#22C55E`, and muted text `rgba(244,246,251,0.48)`. The earlier 42% muted proposal is superseded; the approved value measures 4.662:1 against raised `#111527`. Celebration-spring approximations remain documentation-only and are absent from runtime exports.
+
+The final machine-readable token contract SHA-256 is `e75b6f562a710c2e19d0367d752f2fa3c93982472a87b751d721d1cb8fa6bb2e`. Production foundations are `src/styles/tokens.js` and `src/styles/foundations.css`, installed once from `src/main.jsx` before the unchanged React render tree. The document now requests only canonical DM Sans and Outfit weights once and no Syne. Legacy page-local loaders remain documented migration debt in `PHASE_1B_LEGACY_FONT_LOADER_REGISTER.md`; no protected or specialty loader was edited.
+
+Verification passed the dependency-free 12-family/81-variable contract test, locked `npm ci`, and production build. Nine targeted actual-application captures completed with zero console/page errors, zero Syne requests, installed variables present, and sanitized fixtures. The complete TTS-isolated 34-route × three-viewport suite completed 102/102 with zero navigation failures, console errors, page errors, normalized final-URL changes, route/guard changes, auth regressions, or unexpected persistent visual differences. Approved visual changes are limited to the canonical surface/typography foundation where legacy declarations do not override it.
+
+The commit containing this entry is the Phase 1B commit; its exact local and remote `feat/som-redesign-phase-1` SHA must match in the preservation proof. Rollback condition: revert only the Phase 1B commit.
+
+Phase 1C, Phase 1D, Icon, component primitives, `/dev/kit`, emoji/glyph replacement, Practice Log chart migration, Chart.js removal, theme/Tailwind changes, merge, deployment, and pull-request creation were not started.
