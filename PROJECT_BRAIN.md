@@ -1050,3 +1050,17 @@ Product/runtime paths remained unchanged from the closure-review commit. Install
 Rollback warning: reverting this commit may restore plaintext to the current branch and must not be done without security review.
 
 Phase 0R remains open pending Denarius review and operational invalidation of the old credential. Phase 1, merge, deployment, pull-request creation, history rewriting, and product-source work were not started.
+
+## 2026-07-16 — Phase 0R.5B containment verification
+
+Phase 0R.5A is preserved at `3b53f3ddd725b79957662d4a4d950491b3db4b12`. Denarius authorized temporary authenticated-mobile-QA suspension and reported that the exposed student test account was set to `Inactive`, its password hash was replaced from a discarded random secret, and one record only was affected.
+
+One sanitized production check conclusively rejected the old historical credential with a 4xx response, no token-shaped value, and no user object. Current tracked-tree identifier, password, and reusable-pair counts remain zero; generated output also contains zero matches. Historical Git objects were not rewritten.
+
+Independent Airtable read verification did not complete because the connected Airtable interface required OAuth authorization and no authenticated fallback was available. The reported inactive status and password-hash change therefore remain pending independent read confirmation. No Airtable write was attempted in this session.
+
+Authenticated mobile QA is temporarily suspended. Replacement registration remains correctly blocked for unenrolled identifiers; Student Instruments enrollment-path work is deferred to a separate backend/Airtable authorization. Restoring a QA credential is not required for Phase 0R closure.
+
+Product/runtime paths remained byte-identical to the starting commit. The locked install and production build passed. The commit containing this entry is the Phase 0R.5B branch tip, with its exact local and remote SHA recorded by the preservation proof.
+
+Phase 0R.5B remains not ready solely because the mandatory read-only Airtable status/hash verification could not be performed. Phase 1, merge, deployment, pull-request creation, schema work, and product changes were not started.
