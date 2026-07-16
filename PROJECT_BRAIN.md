@@ -990,3 +990,15 @@ The preview harness and 12 sanitized captures live under `visual-regression/phas
 Unavailable commit `b4758d32baed10f00e07848f0839e76dcf35d1e2` included Login work that was not recovered or reconstructed. Denarius must explicitly approve superseding it, both exact status strings, removal of the button and alerts, one non-blocking mount call with no auth change, and implementation in `Login.jsx` after preview review.
 
 The resulting governance-only commit is the local and remote tip of `feat/som-redesign-phase-0r`, with its exact SHA recorded by the preservation proof. Implementation, Phase 0R.4, committed-dist work, Phase 1, merge, deployment, and pull-request creation were not started.
+
+## 2026-07-16 — Phase 0R.3B protected Login silent-wake implementation
+
+The Phase 0R.3B preview is closed at `b567fa337f3725a00e144c63968448ae0a2bfbbb`. Denarius approved all five protected-flow decisions: superseding the unavailable `b4758d3` Login work for this exact change, both exact status strings, removing the wake button and alerts, one non-blocking mount wake call with no auth change, and surgical implementation in `src/pages/Login.jsx`.
+
+`src/pages/Login.jsx` was the only product source file changed. It now has isolated `pending`, `ready`, and `delayed` wake-presentation state; a guarded one-start request; and a four-second presentation-only bound. Pending displays `Warming up…`; rejected or timed-out presentation displays `Sign-in may take a moment.`; a resolved parseable-JSON request removes the status and retains `School of Motesart`. Resolution is not a backend-health, login-readiness, authentication-readiness, or health-check declaration.
+
+Protected equality proof confirms `extractUser`, authenticated redirect, `handleLogin`, `handleGoogle`, credential form, token/user handoff, `api.js`, and AuthContext are unchanged. Deterministic pending, ready, rejection, timeout, login-while-wake-pending, and successful-auth tests passed with one wake call per mount, no alert/dialog, and no auth regression. Isolated `npm ci` and the production build passed. Nine actual-behavior Login screenshots passed across all viewports. The complete 102-capture route suite completed with zero navigation failures, console errors, page errors, final-URL changes, route/guard changes, or unexpected persistent visual differences outside Login.
+
+The unavailable `b4758d32baed10f00e07848f0839e76dcf35d1e2` content was not reconstructed, inferred, or claimed; the production-derived branch remains controlling. The commit containing this entry is the Phase 0R.3B implementation commit, and its local and remote `feat/som-redesign-phase-0r` SHAs must match exactly in the preservation proof. Rollback condition: revert only that implementation commit.
+
+Phase 0R.4, protected encoding work, committed-dist work, Phase 1, merge, deployment, and pull-request creation were not started.

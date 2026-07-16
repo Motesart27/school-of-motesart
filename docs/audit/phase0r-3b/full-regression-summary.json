@@ -1,0 +1,28 @@
+{
+  "session": "Phase 0R.3B implementation",
+  "startingCommit": "b567fa337f3725a00e144c63968448ae0a2bfbbb",
+  "routePatterns": 34,
+  "viewports": ["1440x900", "768x1024", "390x844"],
+  "capturesAttempted": 102,
+  "capturesCompleted": 102,
+  "navigationFailures": 0,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "normalizedFinalUrlChanges": 0,
+  "routeGuardChanges": 0,
+  "expectedPersistentVisualDifferenceRoutes": ["/", "/login", "/__phase0_unmatched__"],
+  "expectedPersistentVisualDifferenceCaptures": 9,
+  "unexpectedPersistentVisualDifferencesOutsideLogin": 0,
+  "loginAuthRegressions": 0,
+  "rawHashComparison": {
+    "comparisonCorpus": "visual-regression/phase0r-1a/full-after-repeat/manifest.json",
+    "mismatchedCaptures": 53,
+    "passFailUse": "informational only; the comparison predates approved Phase 0R.2A, Phase 0R.3A, and this Login change and includes timing-sensitive renders"
+  },
+  "verificationStorage": "/private/tmp/som-phase0r-3b-full",
+  "ttsIsolation": {
+    "route": "/my-coach",
+    "method": "held the unrelated local /api/tts/speak request pending in a temporary copy of the locked census harness",
+    "repositoryFilesChanged": 0
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../context/AuthContext.jsx'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api.js'
@@ -33,6 +33,35 @@ export default function Login() {
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
+  const [wakePresentation, setWakePresentation] = useState('pending')
+  const wakeStartedRef = useRef(false)
+  const wakeRequestRef = useRef(null)
+
+  useEffect(() => {
+    if (!wakeStartedRef.current) {
+      wakeStartedRef.current = true
+      wakeRequestRef.current = Promise.resolve().then(() => api.wake())
+    }
+
+    let active = true
+    let presentationSettled = false
+    const settlePresentation = (state) => {
+      if (!active || presentationSettled) return
+      presentationSettled = true
+      clearTimeout(timeout)
+      setWakePresentation(state)
+    }
+    const timeout = setTimeout(() => settlePresentation('delayed'), 4000)
+
+    wakeRequestRef.current
+      .then(() => settlePresentation('ready'))
+      .catch(() => settlePresentation('delayed'))
+
+    return () => {
+      active = false
+      clearTimeout(timeout)
+    }
+  }, [])
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -129,13 +158,11 @@ export default function Login() {
 
           <div style={S.footer}>
             <span>School of Motesart</span>
-            <button
-              style={S.wakeBtn}
-              type="button"
-              onClick={() => api.wake().then(() => alert('Server is awake!')).catch(() => alert('Server may be starting up...'))}
-            >
-              Wake up servers
-            </button>
+            {wakePresentation !== 'ready' && (
+              <span role="status" aria-live="polite" style={S.wakeStatus}>
+                {wakePresentation === 'pending' ? 'Warming up…' : 'Sign-in may take a moment.'}
+              </span>
+            )}
           </div>
 
         </div>
@@ -169,5 +196,5 @@ const S = {
   socialRow: { display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20, width: '100%' },
   googleBtn: { padding: '12px 0', borderRadius: 10, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.07)', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" },
   footer: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, color: 'rgba(255,255,255,0.3)', fontSize: 12, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 16, width: '100%' },
-  wakeBtn: { padding: '6px 16px', background: 'linear-gradient(135deg,#d946ef,#a855f7)', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'DM Sans',sans-serif" },
+  wakeStatus: { color: 'rgba(255,255,255,0.42)', fontSize: 12, marginLeft: 16, textAlign: 'right' },
 }

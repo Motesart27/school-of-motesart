@@ -1,0 +1,25 @@
+{
+  "approvedPreview": "visual-regression/phase0r-3b-preview/",
+  "implementationEvidence": "visual-regression/phase0r-3b-implementation/",
+  "viewports": ["1440x900", "768x1024", "390x844"],
+  "statesCompared": {
+    "proposed-pending": "implemented-pending",
+    "proposed-success": "implemented-ready",
+    "proposed-delayed": "implemented-delayed"
+  },
+  "presentationChecks": {
+    "pendingExactText": true,
+    "pendingStyleMatchesApprovedInjection": true,
+    "readyFooterIdentityOnly": true,
+    "delayedExactText": true,
+    "delayedStyleMatchesApprovedInjection": true,
+    "wakeButtonAbsent": true,
+    "unrelatedLoginLayoutChange": false,
+    "responsiveBehaviorPreserved": true
+  },
+  "implementationScreenshotCount": 9,
+  "implementationConsoleErrors": 0,
+  "implementationPageErrors": 0,
+  "implementationDialogs": 0,
+  "comparisonMethod": "DOM semantics, exact approved text/style values, responsive visual inspection, and source diff; raw PNG equality is not used because the approved preview corpus contains timing-sensitive asset paints"
+}

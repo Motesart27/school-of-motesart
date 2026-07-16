@@ -1,0 +1,84 @@
+{
+  "sourceCommit": "b567fa337f3725a00e144c63968448ae0a2bfbbb",
+  "classification": "actual implemented Login behavior with deterministic sanitized network interception",
+  "pending": {
+    "statusText": "Warming up…",
+    "role": "status",
+    "ariaLive": "polite",
+    "controlsUsable": {
+      "emailAccepted": true,
+      "passwordAccepted": true,
+      "signInEnabled": true,
+      "googleEnabled": true
+    },
+    "dialogCount": 0
+  },
+  "ready": {
+    "parseableJsonResponseSelectsReadyWithoutHealthClaim": true,
+    "statusNodeAbsent": true,
+    "footerIdentityRetained": true,
+    "wakeCallsPerMount": [
+      1
+    ]
+  },
+  "rejectedWake": {
+    "wakeCalls": 1,
+    "delayedTextVisible": true,
+    "credentialsPreserved": true,
+    "loginErrorAbsent": true,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "dialogs": []
+  },
+  "timeout": {
+    "wakeCalls": 1,
+    "delayedAtMs": 4376,
+    "signInEnabledAtTimeout": true,
+    "remainedDelayedAfterLateResolution": true,
+    "consoleErrors": [],
+    "pageErrors": [],
+    "dialogs": []
+  },
+  "loginWhileWakePending": {
+    "loginMode": "rejected",
+    "immediate": {
+      "emailAccepted": true,
+      "passwordAccepted": true,
+      "signInEnabled": true,
+      "googleEnabled": true
+    },
+    "wakeCalls": 1,
+    "callsAfterFieldUpdates": 1,
+    "loginCalls": 1,
+    "loginErrorVisible": true,
+    "wakeFailureDidNotReplaceLoginError": true,
+    "emailPreserved": true,
+    "passwordPreserved": true,
+    "finalPath": "/login",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "dialogs": []
+  },
+  "successfulAuthentication": {
+    "loginMode": "accepted",
+    "immediate": {
+      "emailAccepted": true,
+      "passwordAccepted": true,
+      "signInEnabled": true,
+      "googleEnabled": true
+    },
+    "wakeCalls": 1,
+    "callsAfterFieldUpdates": 1,
+    "loginCalls": 1,
+    "loginErrorVisible": false,
+    "finalPath": "/student",
+    "consoleErrors": [],
+    "pageErrors": [],
+    "dialogs": []
+  },
+  "callCount": {
+    "onePerMount": true,
+    "afterEmailAndPasswordUpdates": 1,
+    "afterLoginErrorAndWakeStateChange": 1
+  }
+}
