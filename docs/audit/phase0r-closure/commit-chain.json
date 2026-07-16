@@ -1,0 +1,17 @@
+{
+  "lockedBaseline": "1683cb1225d9d43e7155f74bd96eca451e2294a6",
+  "tipReviewed": "76bf6187d5b00ca95ee4ff5840e4abb39f09f609",
+  "commitsAhead": 6,
+  "mergeCommits": 0,
+  "unexpectedCommits": 0,
+  "linear": true,
+  "sequence": [
+    "1683cb1225d9d43e7155f74bd96eca451e2294a6",
+    "1000cdd5d09be1ad368e42bca5cd2e1d3709e24c",
+    "08eeb31d7b7a8bc21d3de76c071c5d169b9cf62d",
+    "91326c10a0a51bfa1f87acdff7523bab84a4473d",
+    "b567fa337f3725a00e144c63968448ae0a2bfbbb",
+    "02642c9e973cd5c5cfbf0bf3ef798c1d054270c5",
+    "76bf6187d5b00ca95ee4ff5840e4abb39f09f609"
+  ]
+}

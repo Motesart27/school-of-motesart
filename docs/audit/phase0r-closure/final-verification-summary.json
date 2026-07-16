@@ -1,0 +1,25 @@
+{
+  "sourceCommit": "76bf6187d5b00ca95ee4ff5840e4abb39f09f609",
+  "node": "v25.9.0",
+  "npm": "11.12.1",
+  "npmCi": { "passed": true, "installed": 284, "audited": 285 },
+  "build": { "passed": true, "vite": "5.4.21", "modules": 136 },
+  "vulnerabilities": { "low": 1, "moderate": 7, "high": 2 },
+  "browser": {
+    "routePatterns": 34,
+    "viewports": 3,
+    "attempted": 102,
+    "completed": 102,
+    "navigationFailures": 0,
+    "consoleErrors": 0,
+    "pageErrors": 0,
+    "normalizedFinalUrlChanges": 0,
+    "routeGuardChanges": 0,
+    "loginAuthRegressions": 0,
+    "unexpectedPersistentVisualDifferences": 0,
+    "rawHashMismatchesVsPhase0r4a": 46
+  },
+  "trackedGeneratedPaths": { "node_modules": 0, "dist": 0, "dsStore": 0 },
+  "historicalSettingsContactMatches": { "trackedTree": 0, "generatedDist": 0 },
+  "phase1Authorized": false
+}

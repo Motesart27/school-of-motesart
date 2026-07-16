@@ -1018,3 +1018,21 @@ Isolated locked installs and production-model builds passed with identical packa
 The commit containing this entry is the Phase 0R.4A commit; its exact local and remote `feat/som-redesign-phase-0r` SHA must match in the preservation proof. Rollback condition: revert only the Phase 0R.4A commit.
 
 Phase 0R final closure, Phase 1, additional dead-file removal, protected encoding remediation, route remediation, merge, deployment, and pull-request creation were not started.
+
+## 2026-07-16 — Phase 0R final closure review
+
+Phase 0R.4A is closed at `76bf6187d5b00ca95ee4ff5840e4abb39f09f609`. This session performed governance, reconciliation, and Phase 1 readiness review only.
+
+The exact linear Phase 0R chain is locked Phase 0 `1683cb1` → encoding `1000cdd` → prototype privacy `08eeb31` → Settings privacy `91326c1` → Login preview `b567fa3` → protected Login implementation `02642c9` → repository hygiene `76bf618`. The range has six commits, no merge, and no unexpected commit.
+
+Forty-eight Phase 0 and required closure findings were classified: 8 resolved, 10 verified already absent, 10 deferred to named protected phases, 13 deferred to named feature/design phases, 4 accepted non-blocking repository risks, 2 superseded by governance decisions, and 1 still blocking closure. Protected encoding is assigned to the applicable dashboard, lesson-engine, Settings, TAMi, or GamePage approval gate. `/tami` and `/dpm-playground` are assigned to Phase 2 route governance. Unavailable `b4758d3` Login work was superseded only for the approved silent-wake implementation; Rhythm Racer work remains unrecovered and isolated for a separate game/data decision.
+
+The sole closure blocker is the Phase 0-inventoried test-account credential still tracked in `PROJECT_BRAIN_HANDOFF.md`. Its value is not reproduced here. Closure requires a separately authorized credential/privacy remediation that disables or rotates the account, removes current tracked plaintext, and verifies the result. Consequently the readiness verdict is `PHASE 0R NOT READY TO CLOSE`; Denarius has not declared Phase 0R closed.
+
+The existing dependency findings (1 low, 7 moderate, 2 high) require separately approved security/dependency triage and compatibility testing. The mixed-import and large-chunk Vite warnings are later performance/build follow-ups. Animation/timing/paint screenshot variance must be stabilized before the Phase 10 visual-regression/release gate.
+
+Final verification from a fresh clone passed `npm ci`, the production build, and 102 of 102 route captures with zero navigation failures, console errors, page errors, final-URL changes, route/guard changes, Login/auth regressions, or unexpected persistent visual differences. Generated `node_modules` and `dist` remained ignored and untracked; audited Settings contact values were absent from current tracked source and fresh output.
+
+The commit containing this entry is the governance-only closure-review candidate; its exact local and remote SHA must match in the preservation proof. Rollback condition: revert only the closure-review documentation commit.
+
+Phase 1, merge, deployment, pull-request creation, and additional remediation were not started.

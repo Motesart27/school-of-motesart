@@ -1,0 +1,19 @@
+{
+  "base": "1683cb1225d9be1ad368e42bca5cd2e1d3709e24c",
+  "tip": "76bf6187d5b00ca95ee4ff5840e4abb39f09f609",
+  "changedPaths": 5570,
+  "statusCounts": { "added": 292, "modified": 7, "deleted": 5271 },
+  "groups": {
+    "rootNodeModules": 5234,
+    "rootDist": 33,
+    "otherDsStore": 3,
+    "auditEvidence": 27,
+    "visualEvidence": 265,
+    "productSource": 5,
+    "obsoletePrototype": 1,
+    "gitignore": 1,
+    "governance": 1,
+    "other": 0
+  },
+  "protectedEqualityPassed": true
+}

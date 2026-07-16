@@ -1,0 +1,19 @@
+{
+  "totalFindings": 48,
+  "totals": {
+    "RESOLVED IN PHASE 0R": 8,
+    "VERIFIED ALREADY ABSENT": 10,
+    "DEFERRED TO NAMED PROTECTED PHASE": 10,
+    "DEFERRED TO NAMED FEATURE/DESIGN PHASE": 13,
+    "ACCEPTED NON-BLOCKING REPOSITORY RISK": 4,
+    "SUPERSEDED BY GOVERNANCE DECISION": 2,
+    "STILL BLOCKING PHASE 0R CLOSURE": 1
+  },
+  "closureBlockers": [
+    {
+      "id": "P-06",
+      "path": "PROJECT_BRAIN_HANDOFF.md",
+      "classification": "tracked test-account credential; value omitted"
+    }
+  ]
+}
