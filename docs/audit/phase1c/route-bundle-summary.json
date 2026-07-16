@@ -1,0 +1,29 @@
+{
+  "startingCommit": "e00a25f7cff1dbc894922eba51d7c33a311caba5",
+  "featureFlag": "VITE_ENABLE_DEV_KIT",
+  "flagOff": {
+    "routeRegistered": false,
+    "existingRouteCount": 34,
+    "devKitChunkCount": 0,
+    "recognizableDevKitCopyMatches": 0,
+    "navigationEntryCount": 0,
+    "wildcardBehaviorChanged": false
+  },
+  "flagOn": {
+    "route": "/dev/kit",
+    "lazyJavaScriptChunk": "DevKit-BC3KN3yC.js",
+    "lazyCssChunk": "DevKit-CHH0aDQy.css",
+    "accessMatrix": {
+      "unauthenticated": "/",
+      "student": "/student",
+      "parent": "/student",
+      "teacher": "/student",
+      "ambassador": "/student",
+      "admin": "/dev/kit"
+    },
+    "publicNavigationEntryCount": 0,
+    "adminDirectRefresh": "pass"
+  },
+  "guardFunctionsByteEquivalent": true,
+  "existingRoutesEquivalent": true
+}

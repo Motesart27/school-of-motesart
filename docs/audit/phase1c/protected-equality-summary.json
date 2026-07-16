@@ -1,0 +1,19 @@
+{
+  "base": "e00a25f7cff1dbc894922eba51d7c33a311caba5",
+  "guardHashesEqual": {
+    "ProtectedRoute": true,
+    "TeacherRoute": true,
+    "AdminRoute": true,
+    "AmbassadorRoute": true,
+    "ParentRoute": true,
+    "DashboardRedirect": true
+  },
+  "existingRoutesEqual": true,
+  "existingRouteCount": 34,
+  "authorizedNewRoute": "/dev/kit",
+  "protectedAndConfigPathsChanged": 0,
+  "changedExistingProductPaths": ["src/App.jsx", "src/pages/MyCoachPage.jsx"],
+  "packageOrLockfileChanges": 0,
+  "configurationChanges": 0,
+  "visualBaselineChanges": 0
+}

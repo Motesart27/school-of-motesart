@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext.jsx"
 import useTextToSpeech from "../hooks/useTextToSpeech.js"
+import { Icon } from "../components/ui/index.js"
 
 const COACHES = [
   {
@@ -333,8 +334,9 @@ export default function MyCoachPage() {
             border: "1px solid rgba(255,255,255,0.08)",
             color: "rgba(255,243,230,0.6)",
             borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 600,
-            cursor: "pointer", marginBottom: 24,
-          }}>{"←"} Back</button>
+            cursor: "pointer", marginBottom: 24, minHeight: 44,
+            display: "inline-flex", alignItems: "center", gap: 8,
+          }}><Icon name="arrow-left" size={20} decorative /> Back</button>
 
           {/* ── HERO SECTION ── */}
           <div style={{

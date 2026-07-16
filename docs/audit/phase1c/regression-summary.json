@@ -1,0 +1,20 @@
+{
+  "flagOff": true,
+  "routePatterns": 34,
+  "viewports": ["1440x900", "768x1024", "390x844"],
+  "attempted": 102,
+  "completed": 102,
+  "perViewport": 34,
+  "navigationFailures": 0,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "normalizedFinalUrlChanges": 0,
+  "authRegressions": 0,
+  "protectedFlowChanges": 0,
+  "unexpectedPersistentVisualDifferences": 0,
+  "expectedPersistentVisualDifferences": [
+    "src/pages/MyCoachPage.jsx Back button renders the approved arrow-left SVG in place of the visible text arrow"
+  ],
+  "bulkScreenshotsLocation": "/private/tmp/som-phase1c-regression-final",
+  "knownExternalTtsIsolation": "temporary request interception only; repository unchanged"
+}

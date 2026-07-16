@@ -1,0 +1,292 @@
+{
+  "sourceBase": "e00a25f7cff1dbc894922eba51d7c33a311caba5",
+  "featureFlag": "VITE_ENABLE_DEV_KIT=true",
+  "sanitizedFixtures": true,
+  "captureCount": 12,
+  "captures": [
+    {
+      "section": "icons-controls",
+      "route": "/dev/kit?section=icons-controls",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=icons-controls",
+      "viewport": "1440x900",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "icons-controls__desktop-1440x900.png",
+      "screenshotSha256": "d7d34a9ad95aaf242ef7fe073e52f157f82417205efda15a8f416fde857849d1",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 64,
+      "registrySizes": [
+        "20",
+        "24"
+      ]
+    },
+    {
+      "section": "icons-controls",
+      "route": "/dev/kit?section=icons-controls",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=icons-controls",
+      "viewport": "768x1024",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "icons-controls__tablet-768x1024.png",
+      "screenshotSha256": "bca80d36a4a9722fd2f0d6b425700d8b5a31b87f653132f2c370261af68513ca",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 64,
+      "registrySizes": [
+        "20",
+        "24"
+      ]
+    },
+    {
+      "section": "icons-controls",
+      "route": "/dev/kit?section=icons-controls",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=icons-controls",
+      "viewport": "390x844",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "icons-controls__mobile-390x844.png",
+      "screenshotSha256": "46749e0e74ffaccac468639dae7677f172c1927e43eedd0d708568e5e007ab47",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 64,
+      "registrySizes": [
+        "20",
+        "24"
+      ]
+    },
+    {
+      "section": "states-forms",
+      "route": "/dev/kit?section=states-forms",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=states-forms",
+      "viewport": "1440x900",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "states-forms__desktop-1440x900.png",
+      "screenshotSha256": "a1be375b71902ab3dc26375ed89335d4a21486d3be4cf701c1e3121fb15c3de5",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 0,
+      "registrySizes": []
+    },
+    {
+      "section": "states-forms",
+      "route": "/dev/kit?section=states-forms",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=states-forms",
+      "viewport": "768x1024",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "states-forms__tablet-768x1024.png",
+      "screenshotSha256": "192f394026ccfb863424e66b65ead01d7b1f5bf3f3daecda219ae7efeed5e03b",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 0,
+      "registrySizes": []
+    },
+    {
+      "section": "states-forms",
+      "route": "/dev/kit?section=states-forms",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=states-forms",
+      "viewport": "390x844",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "states-forms__mobile-390x844.png",
+      "screenshotSha256": "927e088550109a7373ecfc4b66bb8ba8ebd9cf36ac659ceb7f1dd3ec4e9ec2b8",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 0,
+      "registrySizes": []
+    },
+    {
+      "section": "overlays-feedback",
+      "route": "/dev/kit?section=overlays-feedback",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=overlays-feedback",
+      "viewport": "1440x900",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "overlays-feedback__desktop-1440x900.png",
+      "screenshotSha256": "95565c90fd26fcd185f22a6032abb7227e857969e274aad904a897e776f161cd",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 0,
+      "registrySizes": []
+    },
+    {
+      "section": "overlays-feedback",
+      "route": "/dev/kit?section=overlays-feedback",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=overlays-feedback",
+      "viewport": "768x1024",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "overlays-feedback__tablet-768x1024.png",
+      "screenshotSha256": "b27bd276c67c7c0e30cdff1d19080a1c1d0ff50d7721bbba901b52bcc659aed2",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 0,
+      "registrySizes": []
+    },
+    {
+      "section": "overlays-feedback",
+      "route": "/dev/kit?section=overlays-feedback",
+      "finalURL": "http://127.0.0.1:4176/dev/kit?section=overlays-feedback",
+      "viewport": "390x844",
+      "role": "admin",
+      "featureFlag": true,
+      "filename": "overlays-feedback__mobile-390x844.png",
+      "screenshotSha256": "be987d368f75f5da04288820c4854a9ac5e5e1f1c589e6ab3b39dce3639a76b3",
+      "consoleErrors": [],
+      "pageErrors": [],
+      "horizontalOverflowPx": 0,
+      "clippedControls": 0,
+      "minimumTargetFailures": 0,
+      "focusVisibleRulePresent": true,
+      "reducedMotion": true,
+      "registrySvgCount": 0,
+      "registrySizes": []
+    },
+    {
+      "section": "my-coach-back",
+      "route": "/my-coach",
+      "finalURL": "http://127.0.0.1:4176/my-coach",
+      "viewport": "1440x900",
+      "role": "student",
+      "featureFlag": true,
+      "filename": "my-coach-back__desktop-1440x900.png",
+      "screenshotSha256": "cd4762372774d73ea56d8a1ffa325197178cf1acb34ccfbf614d97baf27abd50",
+      "target": {
+        "x": 152,
+        "y": 32,
+        "width": 93.078125,
+        "height": 44
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "section": "my-coach-back",
+      "route": "/my-coach",
+      "finalURL": "http://127.0.0.1:4176/my-coach",
+      "viewport": "768x1024",
+      "role": "student",
+      "featureFlag": true,
+      "filename": "my-coach-back__tablet-768x1024.png",
+      "screenshotSha256": "30c295b7cc24eacd3f256a736dab83955bcd4ac8eee102969174dd645f30d5d6",
+      "target": {
+        "x": 32,
+        "y": 32,
+        "width": 93.078125,
+        "height": 44
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "section": "my-coach-back",
+      "route": "/my-coach",
+      "finalURL": "http://127.0.0.1:4176/my-coach",
+      "viewport": "390x844",
+      "role": "student",
+      "featureFlag": true,
+      "filename": "my-coach-back__mobile-390x844.png",
+      "screenshotSha256": "4f57e87c6e10788076daa63653b78fdd6a91a5913dd1f9568abfdec477e06310",
+      "target": {
+        "x": 32,
+        "y": 32,
+        "width": 93.078125,
+        "height": 44
+      },
+      "consoleErrors": [],
+      "pageErrors": []
+    }
+  ],
+  "accessMatrix": [
+    {
+      "role": "unauthenticated",
+      "finalPath": "/"
+    },
+    {
+      "role": "student",
+      "finalPath": "/student"
+    },
+    {
+      "role": "parent",
+      "finalPath": "/student"
+    },
+    {
+      "role": "teacher",
+      "finalPath": "/student"
+    },
+    {
+      "role": "ambassador",
+      "finalPath": "/student"
+    },
+    {
+      "role": "admin",
+      "finalPath": "/dev/kit"
+    }
+  ],
+  "interaction": {
+    "buttonKeyboardClicks": "1",
+    "disabledButtonDisabled": true,
+    "loadingAccessibleName": "true",
+    "iconOnlyAccessibleName": 1,
+    "inputLabel": true,
+    "selectLabel": true,
+    "inputErrorLinkage": "som-input-:r2:-error",
+    "filterPressed": "true",
+    "tabsEndFocus": "Reflection",
+    "tabsHomeFocus": "Warm-up",
+    "tooltipDescribedBy": ":r0:",
+    "tooltipClosedOnEscape": true,
+    "modalInitialFocus": "Confirm",
+    "modalScrollLocked": true,
+    "modalFocusWrapped": "Close dialog",
+    "modalRestored": "Open modal",
+    "drawerRole": 1,
+    "drawerFocusWrapped": "Close drawer",
+    "drawerRestored": "Open drawer",
+    "politeRegion": 1,
+    "dismissButton": 1,
+    "assertiveRegion": 1
+  }
+}

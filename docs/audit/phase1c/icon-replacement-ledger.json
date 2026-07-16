@@ -1,0 +1,22 @@
+{
+  "session": "Phase 1C",
+  "startingCommit": "e00a25f7cff1dbc894922eba51d7c33a311caba5",
+  "createdBeforeSourceEdit": true,
+  "replacementCount": 1,
+  "replacements": [
+    {
+      "sourceFile": "src/pages/MyCoachPage.jsx",
+      "lineFunctionContext": "Back navigation button near the end of MyCoachPage",
+      "priorGlyphCategory": "visible Unicode left arrow used as a navigation icon",
+      "semanticIconName": "arrow-left",
+      "size": 20,
+      "presentation": "decorative",
+      "accessibleNameSource": "the preserved visible button text Back",
+      "behaviorBefore": "native button calls navigate(-1)",
+      "behaviorAfter": "native button calls the same navigate(-1) handler",
+      "eligibilityReason": "explicitly authorized single non-protected existing-product pilot",
+      "sourceBlobShaBefore": "f2fd4e11f0ec002cff96f7393baba9ac9a5ea411",
+      "scopeExclusions": "No other MyCoachPage glyph, content, voice control, coach data, theme, card, or layout is changed."
+    }
+  ]
+}

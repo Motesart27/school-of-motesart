@@ -1102,3 +1102,17 @@ Verification passed the dependency-free 12-family/81-variable contract test, loc
 The commit containing this entry is the Phase 1B commit; its exact local and remote `feat/som-redesign-phase-1` SHA must match in the preservation proof. Rollback condition: revert only the Phase 1B commit.
 
 Phase 1C, Phase 1D, Icon, component primitives, `/dev/kit`, emoji/glyph replacement, Practice Log chart migration, Chart.js removal, theme/Tailwind changes, merge, deployment, and pull-request creation were not started.
+
+## 2026-07-16 — Phase 1C icon system, accessible primitives, and gated Admin Dev Kit
+
+Phase 1B is closed at `e00a25f7cff1dbc894922eba51d7c33a311caba5`. Denarius authorized Phase 1C. The controlling v1.1.1 strategy and work order were read from the explicitly authorized read-only `/Users/Denarius Motes/Downloads/SOM-Governance/` copies; they were not copied or modified.
+
+The production UI foundation is under `src/components/ui/`: 32 dependency-free local SVG icons plus Button, Card, StatusPill, Skeleton, EmptyState, ErrorState, Input, Select, Tabs, FilterChips, Tooltip, Modal, Drawer, ToastProvider, and useToast. StatusPill enforces the approved 9 student, 3 parent, and 4 staff/operations labels. Keyboard activation, label/error linkage, roving tabs, pressed chips, tooltip Escape behavior, modal/drawer focus trapping and restoration, polite/assertive toast regions, reduced motion, accessible names, and minimum targets passed.
+
+`VITE_ENABLE_DEV_KIT` is strict and default-off. With it absent, `/dev/kit` is unregistered, the public route census remains 34, and no DevKit chunk or identifying sample copy is emitted. In the temporary flag-on build, the lazy `/dev/kit` route uses the byte-identical existing AdminRoute: unauthenticated → `/`; student/parent/teacher/ambassador → `/student`; admin → `/dev/kit`. No navigation link or Netlify flag was added.
+
+The only existing-product glyph pilot is the My Coach Back button: the visible text arrow became the local 20px `arrow-left` SVG while Back, `navigate(-1)`, and page behavior remain unchanged. The 12 targeted screenshots are under `visual-regression/phase1c-icons-primitives/`. All completed with zero console/page errors, overflow, clipping, or target failures. The complete flag-off 34-route × three-viewport suite completed 102/102 with zero navigation failures, console errors, page errors, normalized final-URL changes, auth/guard/protected-flow regressions, or unexpected persistent visual differences.
+
+Protected sources, all guard functions and prior route elements, dependencies, configuration, Chart.js, Practice Log, theme.js, Tailwind, and locked baselines remain unchanged. The commit containing this entry is the Phase 1C commit; its exact local and remote `feat/som-redesign-phase-1` SHA must match in the preservation proof. Rollback condition: revert only the Phase 1C commit.
+
+Phase 1D, ChartFrame, additional icon replacement, broad migration, merge, deployment, pull-request creation, and Airtable work were not started.

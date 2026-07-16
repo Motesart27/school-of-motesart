@@ -1,0 +1,16 @@
+{
+  "session": "Phase 1C",
+  "startingCommit": "e00a25f7cff1dbc894922eba51d7c33a311caba5",
+  "npmCi": { "result": "pass", "packagesAdded": 284 },
+  "iconRegistry": { "names": 32, "unique": true, "supportedSizes": [20, 24], "rendersPerViewport": 64, "externalDependencies": 0 },
+  "primitiveCount": 14,
+  "featureFlag": "VITE_ENABLE_DEV_KIT",
+  "flagOffBuild": { "result": "pass", "devKitChunks": 0, "identifyingCopyMatches": 0 },
+  "flagOnBuild": { "result": "pass", "lazyDevKitJavaScriptChunks": 1, "lazyDevKitCssChunks": 1 },
+  "targetedCaptures": { "attempted": 12, "completed": 12, "consoleErrors": 0, "pageErrors": 0, "overflowFailures": 0, "targetFailures": 0 },
+  "fullRegression": { "attempted": 102, "completed": 102, "navigationFailures": 0, "consoleErrors": 0, "pageErrors": 0, "finalUrlChanges": 0, "unexpectedPersistentVisualDifferences": 0 },
+  "protectedPathChanges": 0,
+  "guardChanges": 0,
+  "packageOrConfigurationChanges": 0,
+  "phase1DStarted": false
+}

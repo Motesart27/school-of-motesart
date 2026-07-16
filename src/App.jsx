@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './context/AuthContext.jsx'
 import Login from './pages/Login.jsx'
@@ -31,6 +32,14 @@ import OwnItChapter from './pages/OwnItChapter.jsx'
 import PracticeChapterWrapper from './pages/PracticeChapterWrapper.jsx'
 import DPMPlayground from './pages/DPMPlayground.jsx'
 import RhythmRacer from './pages/RhythmRacerV2.jsx'
+import { Card, Skeleton } from './components/ui/index.js'
+
+const DEV_KIT_ENABLED = import.meta.env.VITE_ENABLE_DEV_KIT === 'true'
+const DevKit = DEV_KIT_ENABLED ? lazy(() => import('./pages/DevKit.jsx')) : null
+
+function DevKitLoading() {
+  return <Card variant="raised"><Skeleton label="Loading design kit" /></Card>
+}
 
 function TamiGate() {
   const { pathname } = useLocation()
@@ -99,6 +108,7 @@ export default function App() {
       <Route path="/teacher-tami" element={<TeacherRoute><TeacherTamiDashboard /></TeacherRoute>} />
       <Route path="/parent" element={<ParentRoute><ParentDashboard /></ParentRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      {DEV_KIT_ENABLED && <Route path="/dev/kit" element={<AdminRoute><Suspense fallback={<DevKitLoading />}><DevKit /></Suspense></AdminRoute>} />}
       <Route path="/ambassador" element={<AmbassadorRoute><AmbassadorDashboard /></AmbassadorRoute>} />
       <Route path="/game" element={<ProtectedRoute><GamePage /></ProtectedRoute>} />
       <Route path="/games" element={<ProtectedRoute><GamesDashboard /></ProtectedRoute>} />
