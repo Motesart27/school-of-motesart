@@ -1,0 +1,380 @@
+{
+  "generatedAt": "2026-07-16T15:27:56.110Z",
+  "sourceCommit": "7d3794c3a9ebc8266b72ed9d1163a8ec96d645ee",
+  "strategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+  "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+  "standalonePreview": true,
+  "implementedProductBehavior": false,
+  "captureCount": 9,
+  "captures": [
+    {
+      "board": "tokens-type",
+      "viewport": "1440x900",
+      "filename": "tokens-type__desktop-1440x900.png",
+      "sha256": "117003429463805ad822af270ffc36c46a9d382ba74665c05264aabed2bd31c2",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "tokens-type",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "tokens-type",
+      "viewport": "768x1024",
+      "filename": "tokens-type__tablet-768x1024.png",
+      "sha256": "bb65cc08bf0d6ac87f25f285eb22e7f958d2f85bfea58a0751cd082d520bdff8",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "tokens-type",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "tokens-type",
+      "viewport": "390x844",
+      "filename": "tokens-type__mobile-390x844.png",
+      "sha256": "db45baf93f1294407a626299b6d435e2661cc854b92ba5c14c87df9dd66be321",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "tokens-type",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "component-states",
+      "viewport": "1440x900",
+      "filename": "component-states__desktop-1440x900.png",
+      "sha256": "2d5e4eba38f2e7abfde29bde2bf9fca7138aec551cfd32264b7e4c080dbabdba",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "component-states",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "component-states",
+      "viewport": "768x1024",
+      "filename": "component-states__tablet-768x1024.png",
+      "sha256": "02e8db1e420a45e2529419ca3353efffdbd033813946c5d764796074edb2fe34",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "component-states",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "component-states",
+      "viewport": "390x844",
+      "filename": "component-states__mobile-390x844.png",
+      "sha256": "e58bc819ddf7fa962971e6cfcc814a149f41f779fbb080664eda0f1cc2b9ec5c",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "component-states",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "icons-chart-overlays",
+      "viewport": "1440x900",
+      "filename": "icons-chart-overlays__desktop-1440x900.png",
+      "sha256": "a13ab3e0cda0798f86bc59b83e51fbdb699bf309cdc9bdbd370b3655addbc0c7",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "icons-chart-overlays",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "icons-chart-overlays",
+      "viewport": "768x1024",
+      "filename": "icons-chart-overlays__tablet-768x1024.png",
+      "sha256": "bdd8ac91c817960805651e31e255dcd40f4f3998ec48d9c3f2aa61581c06e433",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "icons-chart-overlays",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    },
+    {
+      "board": "icons-chart-overlays",
+      "viewport": "390x844",
+      "filename": "icons-chart-overlays__mobile-390x844.png",
+      "sha256": "c0cb051b8ce1cd1d051c514f91354ba9b54c44464c3af1cd583573988d537020",
+      "controllingStrategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+      "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+      "fontFamiliesRequested": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "fontFamiliesActuallyRendered": [
+        "DM Sans",
+        "Outfit"
+      ],
+      "syneRequested": false,
+      "fontRequestCount": 3,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "accessibilityFindings": {
+        "board": {
+          "board": "icons-chart-overlays",
+          "strategy": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+          "standalone": true,
+          "implementedProductBehavior": false
+        },
+        "horizontalOverflowPx": 0,
+        "unnamedButtons": 0,
+        "undersizedTargets": 0,
+        "studentBannedLanguage": [],
+        "dmSansLoaded": true,
+        "outfitLoaded": true,
+        "computedBodyFamily": "\"DM Sans\", sans-serif",
+        "computedHeadingFamily": "Outfit, sans-serif",
+        "iconOnlyNamed": true,
+        "statusTextPresent": true,
+        "chartNonColorCues": true,
+        "reducedMotionActive": true
+      },
+      "statement": "Standalone DOM/CSS preview; not implemented product behavior and not an application route."
+    }
+  ]
+}

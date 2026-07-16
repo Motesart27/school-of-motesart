@@ -1,0 +1,99 @@
+{
+  "surface": {
+    "base": {"value":"#0A0D16","cssVariable":"--som-surface-base","usage":"page canvas","prohibited":"text or status","source":"Strategy E1","scope":"foundational"},
+    "raised": {"value":"#111527","cssVariable":"--som-surface-raised","usage":"cards and sidebars","prohibited":"text","source":"Strategy E1","scope":"foundational"},
+    "elevated": {"value":"#181D33","cssVariable":"--som-surface-elevated","usage":"menus, drawers, modal panels","prohibited":"body text","source":"Strategy E1","scope":"foundational"},
+    "overlay": {"value":"rgba(10,13,22,0.72)","cssVariable":"--som-surface-overlay","usage":"modal backdrop","prohibited":"content surface without backdrop semantics","source":"Strategy E1","scope":"foundational"},
+    "glass": {"value":"rgba(255,255,255,0.05)","cssVariable":"--som-surface-glass","usage":"restrained glass overlay","prohibited":"low-contrast text treatment","source":"Strategy E1","scope":"foundational"},
+    "shadow": {"value":"0 4px 24px rgba(0,0,0,0.35)","cssVariable":"--som-shadow-card","usage":"raised depth","prohibited":"every card or decorative stacking","source":"Strategy E1","scope":"foundational"},
+    "glow": {"value":"0 0 20px rgba(20,184,166,0.25)","cssVariable":"--som-glow-primary","usage":"rare selected or learning focus","prohibited":"default decoration","source":"Strategy E1; accent at 25%","scope":"foundational"}
+  },
+  "border": {
+    "subtle": {"value":"rgba(255,255,255,0.08)","cssVariable":"--som-border-subtle","usage":"default separation","prohibited":"focus indication","source":"Strategy E1","scope":"foundational"},
+    "strong": {"value":"rgba(255,255,255,0.16)","cssVariable":"--som-border-strong","usage":"emphasized separation","prohibited":"error meaning by itself","source":"Strategy E1","scope":"foundational"},
+    "focus": {"value":"#7DD3FC","cssVariable":"--som-border-focus","usage":"2px focus ring plus 2px offset","prohibited":"decorative glow","source":"Strategy E1/E3","scope":"foundational","contrastRequirement":"3:1 against adjacent colors"}
+  },
+  "text": {
+    "primary": {"value":"#F4F6FB","cssVariable":"--som-text-primary","usage":"primary readable content","prohibited":"solid accent button text where contrast fails","source":"Strategy E1","scope":"foundational","contrastOnRaised":"16.74:1"},
+    "secondary": {"value":"rgba(244,246,251,0.64)","cssVariable":"--som-text-secondary","usage":"supporting content","prohibited":"disabled affordances","source":"Strategy E1","scope":"foundational","contrastOnRaised":"7.36:1"},
+    "muted": {"value":"rgba(244,246,251,0.42)","cssVariable":"--som-text-muted","usage":"nonessential metadata at compliant size or paired with stronger label","prohibited":"normal-size essential instructions","source":"Strategy E1","scope":"foundational","contrastOnRaised":"3.88:1; fails 4.5:1 normal-text floor"},
+    "disabled": {"value":"rgba(244,246,251,0.30)","cssVariable":"--som-text-disabled","usage":"disabled control text with non-color disabled cues","prohibited":"active or essential content","source":"Strategy E1","scope":"foundational","contrastOnRaised":"2.59:1; exempt only when truly disabled"}
+  },
+  "accent": {
+    "primary": {"value":"#14B8A6","cssVariable":"--som-accent-primary","usage":"learning actions and selected states","prohibited":"white text directly on fill; use midnight text","source":"Strategy E1","scope":"foundational","contrastOnBase":"7.80:1"},
+    "primaryHover": {"value":"#2DD4BF","cssVariable":"--som-accent-primary-hover","usage":"primary hover","prohibited":"unlabeled status","source":"Strategy E1","scope":"foundational"},
+    "primaryDeep": {"value":"#0D9488","cssVariable":"--som-accent-primary-deep","usage":"pressed and sequential start","prohibited":"replacement for canonical primary","source":"Strategy E1","scope":"foundational"},
+    "intelligence": {"value":"#A855F7","cssVariable":"--som-accent-intelligence","usage":"TAMi intelligence accent","prohibited":"generic primary action","source":"Strategy E1","scope":"role-specific","contrastOnBase":"4.90:1"},
+    "intelligenceDeep": {"value":"#7C3AED","cssVariable":"--som-accent-intelligence-deep","usage":"TAMi gradient depth","prohibited":"student performance judgment","source":"Strategy E1","scope":"role-specific"},
+    "tamiGradient": {"value":"linear-gradient(135deg,#E84B8A,#A855F7)","cssVariable":"--som-gradient-tami","usage":"TAMi identity only","prohibited":"generic buttons or student assessment","source":"Strategy E1","scope":"role-specific"},
+    "coach": {"value":"#F97316","cssVariable":"--som-accent-coach","usage":"Motesart coach cues","prohibited":"danger without label","source":"Strategy E1","scope":"role-specific"},
+    "coachSoft": {"value":"rgba(249,115,22,0.12)","cssVariable":"--som-accent-coach-soft","usage":"coach tint","prohibited":"body text","source":"Strategy E1","scope":"role-specific"},
+    "gameGradient": {"value":"linear-gradient(135deg,#8B5CF6,#D946EF)","cssVariable":"--som-gradient-game","usage":"game-mode distinction","prohibited":"learning-mode primary actions","source":"Strategy E1","scope":"role-specific"}
+  },
+  "status": {
+    "success": {"value":"#22C55E","cssVariable":"--som-status-success","usage":"success with text/icon","prohibited":"sole carrier of meaning","source":"Strategy E1","scope":"foundational"},
+    "encourage": {"value":"#F5B93D","cssVariable":"--som-status-encourage","usage":"student encouragement with supportive copy","prohibited":"warning semantics","source":"Strategy E1","scope":"foundational"},
+    "warning": {"value":"#F97316","cssVariable":"--som-status-warning","usage":"attention with label/icon","prohibited":"student shame language","source":"Strategy E1","scope":"foundational"},
+    "danger": {"value":"#EF4444","cssVariable":"--som-status-danger","usage":"destructive/error with label/icon","prohibited":"primary child-facing action","source":"Strategy E1/E3","scope":"foundational"},
+    "info": {"value":"#38BDF8","cssVariable":"--som-status-info","usage":"neutral information with text","prohibited":"sole carrier of meaning","source":"Strategy E1","scope":"foundational"}
+  },
+  "role": {
+    "student": {"value":"#14B8A6","cssVariable":"--som-role-student","usage":"student identity","prohibited":"student performance judgment","source":"Strategy E1","scope":"role-specific"},
+    "teacher": {"value":"#F5A623","cssVariable":"--som-role-teacher","usage":"teacher identity","prohibited":"warning meaning by itself","source":"Strategy E1","scope":"role-specific"},
+    "parent": {"value":"#3B82F6","cssVariable":"--som-role-parent","usage":"parent identity","prohibited":"DPM Drive without context","source":"Strategy E1","scope":"role-specific"},
+    "ambassadorPrimary": {"value":"#22C55E","cssVariable":"--som-role-ambassador","usage":"ambassador identity primary","prohibited":"inventing an unspecified gold partner","source":"Strategy E1","scope":"role-specific"},
+    "ambassadorGold": {"value":null,"cssVariable":"--som-role-ambassador-gold","usage":"pending paired ambassador accent","prohibited":"implementation before Denarius resolves value","source":"Strategy E1 says green-gold pairing but provides no gold value","scope":"role-specific","unresolved":true},
+    "admin": {"value":"#F97316","cssVariable":"--som-role-admin","usage":"administrative identity","prohibited":"danger meaning by itself","source":"Strategy E1","scope":"role-specific"}
+  },
+  "dpm": {
+    "drive": {"value":"#3B82F6","cssVariable":"--som-dpm-drive","usage":"Drive subscore only","prohibited":"overall score or role identity without label","source":"Strategy E1/H","scope":"role-specific"},
+    "passion": {"value":"#F97316","cssVariable":"--som-dpm-passion","usage":"Passion subscore only","prohibited":"overall score","source":"Strategy E1/H","scope":"role-specific"},
+    "motivation": {"value":"#22C55E","cssVariable":"--som-dpm-motivation","usage":"Motivation subscore only","prohibited":"overall score","source":"Strategy E1/H","scope":"role-specific"}
+  },
+  "chart": {
+    "categorical": {"value":["#14B8A6","#A855F7","#38BDF8","#F5A623","#EC4899","#94A3B8"],"cssVariable":"--som-chart-1 through --som-chart-6","usage":"ordered categorical series with line/pattern cues","prohibited":"meaning by color alone","source":"Strategy E1/H","scope":"foundational"},
+    "sequential": {"value":"linear-gradient(90deg,#0D9488,#5EEAD4)","cssVariable":"--som-chart-sequential","usage":"low-to-high sequential values","prohibited":"categorical series","source":"Strategy E1/H","scope":"foundational"},
+    "diverging": {"value":{"negative":"#EF4444","mid":"#334155","positive":"#14B8A6"},"cssVariable":"--som-chart-diverging-negative/mid/positive","usage":"bounded diverging values with zero/midpoint","prohibited":"student-facing judgment without supportive language","source":"Strategy E1/H","scope":"foundational"}
+  },
+  "radius": {
+    "chart": {"value":"12px","cssVariable":"--som-radius-chart","usage":"chart regions","prohibited":"pills","source":"Strategy E2","scope":"foundational"},
+    "control": {"value":"12px","cssVariable":"--som-radius-control","usage":"buttons and inputs","prohibited":"pills","source":"Strategy E2","scope":"foundational"},
+    "card": {"value":"16px","cssVariable":"--som-radius-card","usage":"cards","prohibited":"compact status pills","source":"Strategy E2","scope":"foundational"},
+    "pill": {"value":"999px","cssVariable":"--som-radius-pill","usage":"pills and chips","prohibited":"modal/card shells","source":"Strategy E2","scope":"foundational"}
+  },
+  "space": {
+    "base": {"value":"4px","cssVariable":"--som-space-1","usage":"base unit","prohibited":"standalone page gutter","source":"Strategy E2","scope":"foundational"},
+    "2": {"value":"8px","cssVariable":"--som-space-2","usage":"tight gap","prohibited":"page gutter","source":"Strategy E2","scope":"foundational"},
+    "3": {"value":"12px","cssVariable":"--som-space-3","usage":"compact padding","prohibited":"desktop page gutter","source":"Strategy E2","scope":"foundational"},
+    "4": {"value":"16px","cssVariable":"--som-space-4","usage":"mobile gutter/card padding","prohibited":"none","source":"Strategy E2","scope":"foundational"},
+    "6": {"value":"24px","cssVariable":"--som-space-6","usage":"desktop gutter/section gap","prohibited":"compact controls","source":"Strategy E2","scope":"foundational"},
+    "8": {"value":"32px","cssVariable":"--som-space-8","usage":"major section gap","prohibited":"small controls","source":"Strategy E2","scope":"foundational"},
+    "12": {"value":"48px","cssVariable":"--som-space-12","usage":"page section rhythm","prohibited":"component internals","source":"Strategy E2","scope":"foundational"}
+  },
+  "type": {
+    "headingFamily": {"value":"Outfit, sans-serif","cssVariable":"--som-font-heading","usage":"headings and display","prohibited":"body copy","source":"Strategy E2","scope":"foundational"},
+    "bodyFamily": {"value":"DM Sans, sans-serif","cssVariable":"--som-font-body","usage":"body and controls","prohibited":"decorative display substitution","source":"Strategy E2","scope":"foundational"},
+    "weights": {"value":{"body":[400,500,700],"heading":[500,600,700]},"cssVariable":"not singular","usage":"single-load approved weights","prohibited":"production Syne or unapproved weights","source":"Strategy E2/K","scope":"foundational"},
+    "display": {"value":{"desktop":"32px","mobile":"26px","lineHeight":1.2},"cssVariable":"--som-type-display","usage":"rare display heading","prohibited":"dense cards","source":"Strategy E2","scope":"foundational"},
+    "h1": {"value":{"desktop":"24px","mobile":"22px","lineHeight":1.2},"cssVariable":"--som-type-h1","usage":"page title","prohibited":"multiple competing page titles","source":"Strategy E2","scope":"foundational"},
+    "h2": {"value":{"desktop":"20px","mobile":"18px","lineHeight":1.2},"cssVariable":"--som-type-h2","usage":"section title","prohibited":"body copy","source":"Strategy E2","scope":"foundational"},
+    "h3": {"value":{"desktop":"17px","mobile":"16px","lineHeight":1.2},"cssVariable":"--som-type-h3","usage":"card title","prohibited":"caption","source":"Strategy E2","scope":"foundational"},
+    "body": {"value":{"size":"15px","lineHeight":1.5},"cssVariable":"--som-type-body","usage":"default copy","prohibited":"overline","source":"Strategy E2","scope":"foundational"},
+    "label": {"value":{"size":"13px","lineHeight":1.5},"cssVariable":"--som-type-label","usage":"controls and labels","prohibited":"long passages","source":"Strategy E2","scope":"foundational"},
+    "caption": {"value":{"size":"12px","lineHeight":1.5},"cssVariable":"--som-type-caption","usage":"metadata with compliant contrast","prohibited":"essential instructions at muted opacity","source":"Strategy E2","scope":"foundational"},
+    "overline": {"value":{"size":"11px","lineHeight":1.5},"cssVariable":"--som-type-overline","usage":"short category label","prohibited":"sentences","source":"Strategy E2","scope":"foundational"},
+    "stat": {"value":{"hero":"40px","card":"32px","compact":"28px","lineHeight":1.1},"cssVariable":"--som-type-stat-*","usage":"numeric highlights","prohibited":"invented intelligence metrics","source":"Strategy E2","scope":"foundational"}
+  },
+  "motion": {
+    "instant": {"value":"90ms","cssVariable":"--som-motion-instant","usage":"press feedback","prohibited":"content entrance","source":"Strategy J","scope":"foundational"},
+    "fast": {"value":"180ms","cssVariable":"--som-motion-fast","usage":"hover/focus state","prohibited":"celebration","source":"Strategy J","scope":"foundational"},
+    "normal": {"value":"280ms","cssVariable":"--som-motion-normal","usage":"component transition","prohibited":"repeated ambient motion","source":"Strategy J","scope":"foundational"},
+    "slow": {"value":"420ms","cssVariable":"--som-motion-slow","usage":"drawer/modal transition","prohibited":"typing feedback","source":"Strategy J","scope":"foundational"},
+    "celebratory": {"value":["900ms","1200ms"],"cssVariable":"--som-motion-celebratory-min/max","usage":"rare student celebration","prohibited":"errors or routine navigation","source":"Strategy J","scope":"foundational"},
+    "enterEasing": {"value":"cubic-bezier(0.16,1,0.3,1)","cssVariable":"--som-ease-enter","usage":"entrances","prohibited":"exit","source":"Strategy J","scope":"foundational"},
+    "exitEasing": {"value":"cubic-bezier(0.7,0,0.84,0)","cssVariable":"--som-ease-exit","usage":"exits","prohibited":"state interpolation","source":"Strategy J","scope":"foundational"},
+    "stateEasing": {"value":"cubic-bezier(0.65,0,0.35,1)","cssVariable":"--som-ease-state","usage":"state transitions","prohibited":"celebration","source":"Strategy J","scope":"foundational"},
+    "reduced": {"value":"120ms opacity crossfade","cssVariable":"--som-motion-reduced","usage":"prefers-reduced-motion alternative","prohibited":"transform, parallax, spring, particle, auto-scroll","source":"Strategy J/14","scope":"foundational"},
+    "celebrationSpring": {"value":{"stiffnessApprox":260,"dampingApprox":22},"cssVariable":null,"usage":"documentation only pending implementation choice","prohibited":"treating approximate strategy guidance as exact CSS token","source":"Strategy J uses approximate values","scope":"foundational","unresolved":true}
+  }
+}

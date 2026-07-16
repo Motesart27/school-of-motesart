@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>School of Motesart — Phase 1 Foundation Preview</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="foundation-preview.css">
+</head>
+<body>
+  <svg class="svg-defs" aria-hidden="true">
+    <defs>
+      <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="8" stroke="currentColor" stroke-width="3" opacity=".42"/>
+      </pattern>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z"/></symbol>
+      <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12M9 18c0 1.7-1.6 3-3.5 3S2 19.7 2 18s1.6-3 3.5-3S9 16.3 9 18Zm10-2c0 1.7-1.6 3-3.5 3S12 17.7 12 16s1.6-3 3.5-3 3.5 1.3 3.5 3Z"/></symbol>
+      <symbol id="i-piano" viewBox="0 0 24 24"><path d="M3 5h18v14H3zM7 5v9m5-9v9m5-9v9M5 19v-5h14v5"/></symbol>
+      <symbol id="i-timer" viewBox="0 0 24 24"><path d="M9 2h6M12 6a8 8 0 1 1-8 8 8 8 0 0 1 8-8Zm0 4v4l3 2"/></symbol>
+      <symbol id="i-warning" viewBox="0 0 24 24"><path d="M12 3 2.5 20h19ZM12 9v5m0 3h.01"/></symbol>
+      <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10h.01"/></symbol>
+      <symbol id="i-game" viewBox="0 0 24 24"><path d="M7 8h10a5 5 0 0 1 4.6 7l-1.1 2.5a2 2 0 0 1-3.2.7L15.5 17h-7l-1.8 1.2a2 2 0 0 1-3.2-.7L2.4 15A5 5 0 0 1 7 8Z"/><path d="M7 11v4m-2-2h4m7-1h.01m2 2h.01"/></symbol>
+      <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10m-7 6h4"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="preview-header">
+    <div>
+      <p class="eyebrow">Phase 1 · Session 1A</p>
+      <h1>Foundation design-kit preview</h1>
+    </div>
+    <div class="preview-badges" aria-label="Preview status">
+      <span class="pill pill-info">Standalone preview</span>
+      <span class="pill pill-neutral">Not product behavior</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="board" data-board="tokens-type" aria-labelledby="tokens-title">
+      <div class="board-heading">
+        <div><p class="eyebrow">Board 1</p><h2 id="tokens-title">Tokens & typography</h2></div>
+        <p class="board-intro">A restrained midnight system: learning teal, role-aware accents, and two intentional type families.</p>
+      </div>
+
+      <div class="surface-grid">
+        <article class="surface surface-base"><span>Base</span><strong>#0A0D16</strong></article>
+        <article class="surface surface-raised"><span>Raised</span><strong>#111527</strong></article>
+        <article class="surface surface-elevated"><span>Elevated</span><strong>#181D33</strong></article>
+        <article class="surface surface-glass"><span>Glass</span><strong>5% white</strong></article>
+      </div>
+
+      <div class="token-layout">
+        <article class="panel palette-panel">
+          <div class="section-title"><h3>Semantic color</h3><span>Meaning + label</span></div>
+          <div class="swatch-group">
+            <h4>Core identity</h4>
+            <div class="swatches">
+              <div class="swatch"><i class="c-teal"></i><span>Learning</span><small>#14B8A6</small></div>
+              <div class="swatch"><i class="c-intelligence"></i><span>Intelligence</span><small>#A855F7</small></div>
+              <div class="swatch"><i class="c-coach"></i><span>Coach</span><small>#F97316</small></div>
+              <div class="swatch"><i class="c-tami"></i><span>TAMi identity</span><small>Magenta → violet</small></div>
+            </div>
+          </div>
+          <div class="swatch-group">
+            <h4>Roles</h4>
+            <div class="swatches compact">
+              <div class="swatch"><i class="c-student"></i><span>Student</span></div>
+              <div class="swatch"><i class="c-teacher"></i><span>Teacher</span></div>
+              <div class="swatch"><i class="c-parent"></i><span>Parent</span></div>
+              <div class="swatch"><i class="c-ambassador"></i><span>Ambassador</span><small>Gold pending</small></div>
+              <div class="swatch"><i class="c-admin"></i><span>Admin</span></div>
+            </div>
+          </div>
+          <div class="swatch-group">
+            <h4>DPM dimensions</h4>
+            <div class="swatches compact">
+              <div class="swatch"><i class="c-drive"></i><span>Drive</span></div>
+              <div class="swatch"><i class="c-passion"></i><span>Passion</span></div>
+              <div class="swatch"><i class="c-motivation"></i><span>Motivation</span></div>
+            </div>
+          </div>
+          <div class="swatch-group">
+            <h4>Status</h4>
+            <div class="swatches compact">
+              <div class="swatch"><i class="c-success"></i><span>Success</span></div>
+              <div class="swatch"><i class="c-encourage"></i><span>Encourage</span></div>
+              <div class="swatch"><i class="c-warning"></i><span>Warning</span></div>
+              <div class="swatch"><i class="c-danger"></i><span>Danger</span></div>
+              <div class="swatch"><i class="c-info"></i><span>Info</span></div>
+            </div>
+          </div>
+          <div class="chart-palette" aria-label="Categorical chart palette">
+            <span class="chart-1"></span><span class="chart-2"></span><span class="chart-3"></span><span class="chart-4"></span><span class="chart-5"></span><span class="chart-6"></span>
+          </div>
+        </article>
+
+        <article class="panel type-panel">
+          <div class="section-title"><h3>Type hierarchy</h3><span>Two families · six weights</span></div>
+          <div class="type-sample display-sample">Music learning, in motion.</div>
+          <div class="type-sample h1-sample">A clear page title</div>
+          <div class="type-sample h2-sample">A focused section</div>
+          <div class="type-sample h3-sample">A useful card title</div>
+          <p class="body-sample">DM Sans keeps directions, controls, and explanations calm and readable. Outfit gives headings a confident educational rhythm.</p>
+          <div class="text-levels">
+            <p class="text-primary"><strong>Primary</strong> · 16.74:1 on raised</p>
+            <p class="text-secondary"><strong>Secondary</strong> · 7.36:1 on raised</p>
+            <p class="text-muted"><strong>Muted</strong> · 3.88:1, metadata only</p>
+            <p class="text-disabled"><strong>Disabled</strong> · disabled controls only</p>
+          </div>
+          <div class="contract-note warning-note"><svg class="icon"><use href="#i-warning"/></svg><span>Muted normal text misses the 4.5:1 floor. Essential copy must use secondary or primary.</span></div>
+        </article>
+
+        <article class="panel scale-panel">
+          <div class="section-title"><h3>Shape, space & motion</h3><span>4px base rhythm</span></div>
+          <div class="radius-row"><span class="radius-demo r12">12</span><span class="radius-demo r16">16</span><span class="radius-demo rpill">Pill</span></div>
+          <div class="space-stack" aria-label="Spacing scale"><i class="s8"></i><i class="s12"></i><i class="s16"></i><i class="s24"></i><i class="s32"></i><i class="s48"></i></div>
+          <dl class="mini-spec"><div><dt>Focus</dt><dd>2px sky + 2px offset</dd></div><div><dt>Depth</dt><dd>One restrained card shadow</dd></div><div><dt>Motion</dt><dd>90 / 180 / 280 / 420ms</dd></div><div><dt>Reduced</dt><dd>120ms opacity only</dd></div></dl>
+          <div class="contract-note"><svg class="icon"><use href="#i-info"/></svg><span>Ambassador gold and approximate celebration spring remain unresolved—visible, not invented.</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="board" data-board="component-states" aria-labelledby="components-title">
+      <div class="board-heading">
+        <div><p class="eyebrow">Board 2</p><h2 id="components-title">Component state grammar</h2></div>
+        <p class="board-intro">Predictable states, visible focus, audience-safe language, and 44px interaction targets.</p>
+      </div>
+      <div class="component-grid">
+        <article class="panel wide">
+          <div class="section-title"><h3>Buttons</h3><span>Hover · pressed · focus are previewed explicitly</span></div>
+          <div class="button-row">
+            <button class="btn primary">Continue <svg class="icon"><use href="#i-arrow"/></svg></button>
+            <button class="btn secondary"><svg class="icon"><use href="#i-music"/></svg>Review lesson</button>
+            <button class="btn secondary hover-demo">Hover</button>
+            <button class="btn quiet">Not now</button>
+            <button class="btn danger">Remove item</button>
+            <button class="btn secondary focus-demo">Focused</button>
+            <button class="btn primary pressed-demo">Pressed</button>
+            <button class="btn secondary" aria-busy="true"><span class="spinner"></span>Loading</button>
+            <button class="btn primary" disabled>Unavailable</button>
+            <button class="icon-button" aria-label="Filter sample items"><svg class="icon"><use href="#i-filter"/></svg></button>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="section-title"><h3>Cards</h3><span>Static and interactive</span></div>
+          <div class="card-grid">
+            <div class="demo-card">Base card<small>Quiet structure</small></div>
+            <div class="demo-card raised">Raised card<small>Standard content surface</small></div>
+            <button class="demo-card interactive">Interactive<small>True button semantics</small></button>
+            <div class="demo-card selected"><svg class="icon"><use href="#i-check"/></svg>Selected<small>Label + border + icon</small></div>
+            <div class="demo-card elevated">Elevated<small>Overlay-level depth</small></div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="section-title"><h3>StatusPill dictionaries</h3><span>Audience-aware</span></div>
+          <div class="dictionary student-safe"><h4>Student-safe</h4><div class="pill-row"><span class="pill pill-neutral">Resting</span><span class="pill pill-info">Waking up</span><span class="pill pill-success">Rolling</span><span class="pill pill-encourage">On Fire</span><span class="pill pill-info">Let’s revisit</span><span class="pill pill-success">Getting there</span><span class="pill pill-success">Locked in</span><span class="pill pill-info">Growing</span><span class="pill pill-success">Building</span></div></div>
+          <div class="dictionary"><h4>Parent-safe</h4><div class="pill-row"><span class="pill pill-success">Doing great</span><span class="pill pill-info">Finding rhythm</span><span class="pill pill-encourage">Could use a boost</span></div></div>
+          <div class="dictionary"><h4>Staff / operations</h4><div class="pill-row"><span class="pill pill-success">On Track</span><span class="pill pill-encourage">Watch</span><span class="pill pill-warning">Needs Follow-up</span><span class="pill pill-danger">Urgent</span></div></div>
+        </article>
+
+        <article class="panel">
+          <div class="section-title"><h3>Inputs & select</h3><span>Labels persist</span></div>
+          <div class="form-grid">
+            <label class="field"><span>Practice focus</span><input placeholder="Choose a focus"><small>Help text stays connected.</small></label>
+            <label class="field"><span>Instrument</span><input value="Piano" readonly></label>
+            <label class="field field-focus"><span>Goal</span><input value="Build a steady rhythm"></label>
+            <label class="field field-error"><span>Session note</span><input aria-invalid="true" aria-describedby="note-error"><small id="note-error"><svg class="icon"><use href="#i-warning"/></svg>Add a short note or clear the field.</small></label>
+            <label class="field"><span>View</span><select><option>This week</option><option>Last week</option></select></label>
+            <label class="field"><span>Archived option</span><input value="Unavailable" disabled></label>
+          </div>
+        </article>
+
+        <article class="panel wide">
+          <div class="section-title"><h3>Tabs, filters & content states</h3><span>Mobile row scrolls inside its region</span></div>
+          <div class="tabs" role="tablist" aria-label="Sample learning views"><button role="tab" aria-selected="true">Overview</button><button class="hover-demo-tab" role="tab" aria-selected="false">Practice · hover</button><button class="focus-demo-tab" role="tab" aria-selected="false">Progress · focus</button><button role="tab" disabled>Insights</button></div>
+          <div class="chips" aria-label="Sample filters"><button aria-pressed="true">All sessions</button><button class="hover-demo-chip" aria-pressed="false">Piano · hover</button><button class="focus-demo-chip" aria-pressed="false">This month · focus</button><button disabled>Archived</button></div>
+          <div class="state-grid">
+            <div class="state-card"><div class="skeleton"></div><div class="skeleton short"></div><strong>Loading</strong><small>Reduced motion: no shimmer</small></div>
+            <div class="state-card"><svg class="icon icon-large"><use href="#i-music"/></svg><strong>No sessions yet</strong><small>Start when you’re ready.</small></div>
+            <div class="state-card error-state"><svg class="icon icon-large"><use href="#i-warning"/></svg><strong>Couldn’t load this view</strong><small>Try again. Your work is still safe.</small></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="board" data-board="icons-chart-overlays" aria-labelledby="icons-title">
+      <div class="board-heading">
+        <div><p class="eyebrow">Board 3</p><h2 id="icons-title">Icons, ChartFrame & overlays</h2></div>
+        <p class="board-intro">A currentColor SVG family, accessible data framing, and overlay behavior shown as a static contract.</p>
+      </div>
+      <div class="overlay-layout">
+        <article class="panel icon-panel">
+          <div class="section-title"><h3>SVG family</h3><span>20 / 24 grid · 1.5px stroke</span></div>
+          <div class="icon-showcase">
+            <div><svg class="icon"><use href="#i-arrow"/></svg><small>Arrow · 20</small></div>
+            <div><svg class="icon"><use href="#i-check"/></svg><small>Check · 20</small></div>
+            <div><svg class="icon"><use href="#i-play"/></svg><small>Play · 20</small></div>
+            <div><svg class="icon icon-24"><use href="#i-piano"/></svg><small>Piano · 24</small></div>
+            <div><svg class="icon icon-24"><use href="#i-timer"/></svg><small>Timer · 24</small></div>
+            <div><svg class="icon icon-24"><use href="#i-warning"/></svg><small>Warning · 24</small></div>
+          </div>
+          <div class="mode-row"><div class="mode academic"><svg class="icon icon-24"><use href="#i-music"/></svg><span>Academic mode</span></div><div class="mode game"><svg class="icon icon-24"><use href="#i-game"/></svg><span>Game mode</span></div></div>
+          <div class="tooltip-demo"><button class="icon-button" aria-label="About icon accessibility" aria-describedby="icon-tip"><svg class="icon"><use href="#i-info"/></svg></button><span role="tooltip" id="icon-tip">Keyboard and pointer reachable</span></div>
+        </article>
+
+        <article class="panel chart-frame">
+          <div class="chart-head"><div><div class="section-title"><h3>Practice rhythm</h3></div><p>How practice minutes changed across this sample week.</p></div><span class="pill pill-info">Sample data</span></div>
+          <div class="chart-meta"><span>Updated: preview fixture</span><span>Source: sanitized design sample</span></div>
+          <svg class="chart" role="img" aria-labelledby="chart-title chart-desc" viewBox="0 0 620 250">
+            <title id="chart-title">Sample practice minutes by day</title>
+            <desc id="chart-desc">A teal solid line rises from Monday to Wednesday, dips Thursday, and ends higher Friday. A violet dashed comparison line remains lower. Thursday includes a hatched data gap.</desc>
+            <g class="grid-lines"><path d="M50 45H590M50 100H590M50 155H590M50 210H590"/></g>
+            <g class="axis-labels"><text x="20" y="50">30m</text><text x="20" y="105">20m</text><text x="20" y="160">10m</text><text x="20" y="215">0m</text><text x="60" y="238">Mon</text><text x="185" y="238">Tue</text><text x="310" y="238">Wed</text><text x="435" y="238">Thu</text><text x="560" y="238">Fri</text></g>
+            <path class="line-main" d="M70 172L195 128L320 72L445 148L570 92"/>
+            <path class="line-compare" d="M70 190L195 170L320 142L445 132L570 124"/>
+            <g class="points"><circle cx="70" cy="172" r="5"/><circle cx="195" cy="128" r="5"/><circle cx="320" cy="72" r="5"/><rect class="gap" x="431" y="134" width="28" height="28" rx="4"/><circle cx="570" cy="92" r="5"/></g>
+          </svg>
+          <div class="legend"><span><i class="legend-solid"></i>This week</span><span><i class="legend-dash"></i>Previous sample</span><span><i class="legend-gap"></i>Incomplete data</span></div>
+          <p class="screen-summary"><strong>Accessible summary:</strong> The sample rises overall, with a midweek peak and an incomplete Thursday reading. No recommendation or prediction is implied.</p>
+        </article>
+
+        <article class="panel overlay-spec">
+          <div class="section-title"><h3>Overlay contracts</h3><span>Static preview · behavior specified</span></div>
+          <div class="overlay-stage">
+            <div class="toast" role="status" aria-live="polite"><svg class="icon"><use href="#i-check"/></svg><div><strong>Preferences saved</strong><small>Polite announcement</small></div><button class="icon-button small" aria-label="Dismiss preview toast"><svg class="icon"><use href="#i-close"/></svg></button></div>
+            <div class="mini-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc"><button class="icon-button small close" aria-label="Close sample dialog"><svg class="icon"><use href="#i-close"/></svg></button><span class="pill pill-neutral">Modal</span><h3 id="modal-title">Review this choice</h3><p id="modal-desc">Focus is trapped, Escape closes, and focus returns to the invoker.</p><div class="modal-actions"><button class="btn quiet">Go back</button><button class="btn primary">Confirm</button></div></div>
+            <aside class="mini-drawer" aria-labelledby="drawer-title"><span class="pill pill-neutral">Drawer</span><h3 id="drawer-title">Session details</h3><p>Edge-attached on wide screens; full-height with safe padding on mobile.</p><dl class="mini-spec"><div><dt>Initial focus</dt><dd>Close or first task</dd></div><div><dt>Dismiss</dt><dd>Escape + approved backdrop</dd></div><div><dt>Restore</dt><dd>Return to invoker</dd></div></dl></aside>
+          </div>
+          <div class="state-strip"><span><span class="spinner"></span>Loading</span><span><svg class="icon"><use href="#i-music"/></svg>Empty</span><span><svg class="icon"><use href="#i-info"/></svg>Unavailable</span><span><svg class="icon"><use href="#i-warning"/></svg>Error with recovery</span></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="preview-footer"><span>School of Motesart · Strategy v1.1.1</span><span>Standalone preview · No routes or product source</span></footer>
+  <script src="foundation-preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,1499 @@
++{
+  "sourceCommit": "7d3794c3a9ebc8266b72ed9d1163a8ec96d645ee",
+  "methodology": "Unicode interface-glyph lexical scan grouped by file and category. Line arrays preserve every detected occurrence location; pedagogical notation, comments, and UI graphics require context review before replacement.",
+  "totals": {
+    "groupCount": 91,
+    "occurrenceCount": 460,
+    "eligibleOccurrences": 161,
+    "deferredOccurrences": 299
+  },
+  "groups": [
+    {
+      "file": "src/components/MotesartCoachCard.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        47
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/MyCoach.jsx",
+      "category": "emoji",
+      "occurrenceCount": 5,
+      "lines": [
+        15,
+        16,
+        143
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/MyCoach.jsx",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        111
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/PracticeConceptView.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        648
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/PracticeSessionCockpit.jsx",
+      "category": "status-control",
+      "occurrenceCount": 2,
+      "lines": [
+        164,
+        202
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/PracticeSessionCockpit.jsx",
+      "category": "emoji",
+      "occurrenceCount": 3,
+      "lines": [
+        176,
+        188,
+        277
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/PracticeSessionCockpit.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        291
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/TamiChat.jsx",
+      "category": "arrow",
+      "occurrenceCount": 5,
+      "lines": [
+        363,
+        364,
+        365,
+        366,
+        644
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/TeachingVisuals.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        16
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/TelemetryPanel.jsx",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        206
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/TelemetryPanel.jsx",
+      "category": "emoji",
+      "occurrenceCount": 2,
+      "lines": [
+        206,
+        296
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/TelemetryPanel.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        347
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/components/gate0/FindHomeGate.jsx",
+      "category": "arrow",
+      "occurrenceCount": 11,
+      "lines": [
+        17,
+        372,
+        401,
+        409,
+        639,
+        671,
+        750,
+        753,
+        763,
+        883
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/FindHomeGate.jsx",
+      "category": "emoji",
+      "occurrenceCount": 9,
+      "lines": [
+        106,
+        236,
+        554,
+        659,
+        734,
+        832,
+        860,
+        898
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/FindHomeGate.jsx",
+      "category": "status-control",
+      "occurrenceCount": 2,
+      "lines": [
+        910,
+        914
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/MajorScalePatternGate.jsx",
+      "category": "arrow",
+      "occurrenceCount": 19,
+      "lines": [
+        7,
+        8,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        165,
+        340,
+        343,
+        432,
+        638,
+        713,
+        775
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/MajorScalePatternGate.jsx",
+      "category": "emoji",
+      "occurrenceCount": 7,
+      "lines": [
+        41,
+        359,
+        671,
+        730
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/MajorScalePatternGate.jsx",
+      "category": "status-control",
+      "occurrenceCount": 4,
+      "lines": [
+        701,
+        746,
+        750,
+        762
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/SkipAndTogetherGate.jsx",
+      "category": "arrow",
+      "occurrenceCount": 16,
+      "lines": [
+        14,
+        18,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        499,
+        514,
+        571,
+        576,
+        582,
+        693
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/SkipAndTogetherGate.jsx",
+      "category": "emoji",
+      "occurrenceCount": 10,
+      "lines": [
+        141,
+        195,
+        429,
+        512,
+        554,
+        598,
+        663,
+        682,
+        704
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/components/gate0/SkipAndTogetherGate.jsx",
+      "category": "status-control",
+      "occurrenceCount": 2,
+      "lines": [
+        709,
+        710
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/context/AuthContext.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        42
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/hooks/useMotesartVoice.js",
+      "category": "arrow",
+      "occurrenceCount": 3,
+      "lines": [
+        5
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/hooks/usePracticeLogDashboard.js",
+      "category": "arrow",
+      "occurrenceCount": 3,
+      "lines": [
+        31,
+        32,
+        33
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/golden_test_harness.js",
+      "category": "arrow",
+      "occurrenceCount": 26,
+      "lines": [
+        7,
+        14,
+        68,
+        381,
+        407,
+        408,
+        409,
+        410,
+        411,
+        412,
+        413,
+        414,
+        415,
+        416,
+        417,
+        418,
+        419,
+        420,
+        434,
+        468,
+        505,
+        537,
+        541,
+        549,
+        576
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/golden_test_harness.js",
+      "category": "emoji",
+      "occurrenceCount": 36,
+      "lines": [
+        324,
+        385,
+        428,
+        457,
+        462,
+        466,
+        486,
+        489,
+        498,
+        501,
+        537,
+        541,
+        545,
+        549,
+        553,
+        557,
+        561,
+        565,
+        569,
+        574
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/golden_test_harness.js",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        389
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/lesson_orchestrator.js",
+      "category": "arrow",
+      "occurrenceCount": 11,
+      "lines": [
+        8,
+        21,
+        22,
+        23,
+        426,
+        480
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/motesart_lesson_engine.js",
+      "category": "arrow",
+      "occurrenceCount": 8,
+      "lines": [
+        10,
+        41,
+        73,
+        926,
+        932
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/perception_shim.js",
+      "category": "arrow",
+      "occurrenceCount": 5,
+      "lines": [
+        20,
+        48,
+        57,
+        68
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/perception_state_adapter.js",
+      "category": "arrow",
+      "occurrenceCount": 4,
+      "lines": [
+        3,
+        86,
+        325,
+        343
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_bridge.js",
+      "category": "arrow",
+      "occurrenceCount": 14,
+      "lines": [
+        21,
+        36,
+        189,
+        196,
+        219,
+        248,
+        272,
+        282,
+        289,
+        306,
+        307,
+        308,
+        309
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_intelligence_layer.js",
+      "category": "arrow",
+      "occurrenceCount": 6,
+      "lines": [
+        23,
+        24,
+        99
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_micro_memory.js",
+      "category": "arrow",
+      "occurrenceCount": 4,
+      "lines": [
+        431,
+        441,
+        452,
+        465
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_question_handler.js",
+      "category": "arrow",
+      "occurrenceCount": 5,
+      "lines": [
+        16,
+        18,
+        20,
+        22,
+        24
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_question_handler.js",
+      "category": "music-achievement",
+      "occurrenceCount": 6,
+      "lines": [
+        121,
+        122,
+        127,
+        128
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_state_manager.js",
+      "category": "arrow",
+      "occurrenceCount": 4,
+      "lines": [
+        21,
+        22,
+        63
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_strategy_resolver.js",
+      "category": "arrow",
+      "occurrenceCount": 8,
+      "lines": [
+        31,
+        33,
+        46,
+        47,
+        63,
+        369,
+        388,
+        407
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_teaching_profiles.js",
+      "category": "arrow",
+      "occurrenceCount": 5,
+      "lines": [
+        246,
+        335,
+        340,
+        345,
+        350
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/lesson_engine/tami_timing_engine.js",
+      "category": "arrow",
+      "occurrenceCount": 7,
+      "lines": [
+        36,
+        39,
+        40,
+        384,
+        389,
+        394,
+        399
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/DPMPlayground.jsx",
+      "category": "status-control",
+      "occurrenceCount": 4,
+      "lines": [
+        73,
+        206,
+        294
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/DPMPlayground.jsx",
+      "category": "music-achievement",
+      "occurrenceCount": 2,
+      "lines": [
+        74,
+        207
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/DPMPlayground.jsx",
+      "category": "emoji",
+      "occurrenceCount": 5,
+      "lines": [
+        76,
+        77,
+        146,
+        209,
+        210
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/DPMPlayground.jsx",
+      "category": "arrow",
+      "occurrenceCount": 6,
+      "lines": [
+        292,
+        293,
+        294
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/FindItChapter.jsx",
+      "category": "arrow",
+      "occurrenceCount": 2,
+      "lines": [
+        179,
+        306
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/GamePage.jsx",
+      "category": "emoji",
+      "occurrenceCount": 3,
+      "lines": [
+        885,
+        1066,
+        1217
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/GamePage.jsx",
+      "category": "music-achievement",
+      "occurrenceCount": 1,
+      "lines": [
+        889
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/GamePage.jsx",
+      "category": "arrow",
+      "occurrenceCount": 4,
+      "lines": [
+        951,
+        977,
+        1057
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/GamesDashboard.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        130
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/HalfStepFindIt.jsx",
+      "category": "arrow",
+      "occurrenceCount": 2,
+      "lines": [
+        87
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepMoveIt.jsx",
+      "category": "arrow",
+      "occurrenceCount": 9,
+      "lines": [
+        12,
+        14,
+        88,
+        118,
+        211
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepMoveIt.jsx",
+      "category": "music-achievement",
+      "occurrenceCount": 2,
+      "lines": [
+        59,
+        70
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepMoveIt.jsx",
+      "category": "status-control",
+      "occurrenceCount": 4,
+      "lines": [
+        86,
+        252,
+        270,
+        298
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepMoveIt.jsx",
+      "category": "emoji",
+      "occurrenceCount": 1,
+      "lines": [
+        306
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepOwnIt.jsx",
+      "category": "status-control",
+      "occurrenceCount": 2,
+      "lines": [
+        7,
+        118
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepOwnIt.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        199
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepPlayIt.jsx",
+      "category": "music-achievement",
+      "occurrenceCount": 5,
+      "lines": [
+        42,
+        43,
+        44,
+        45,
+        46
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepPlayIt.jsx",
+      "category": "arrow",
+      "occurrenceCount": 8,
+      "lines": [
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        91
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepPlayIt.jsx",
+      "category": "status-control",
+      "occurrenceCount": 4,
+      "lines": [
+        61,
+        62,
+        306,
+        321
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HalfStepPlayIt.jsx",
+      "category": "emoji",
+      "occurrenceCount": 1,
+      "lines": [
+        306
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/HomeworkDashboard.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        234
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/Leaderboard.jsx",
+      "category": "emoji",
+      "occurrenceCount": 11,
+      "lines": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        35,
+        39,
+        76,
+        87,
+        95,
+        96
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/MoveItChapter.jsx",
+      "category": "arrow",
+      "occurrenceCount": 2,
+      "lines": [
+        313
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/MyCoachPage.jsx",
+      "category": "emoji",
+      "occurrenceCount": 14,
+      "lines": [
+        23,
+        24,
+        78,
+        79,
+        80,
+        81,
+        82,
+        647,
+        648,
+        649,
+        650,
+        651
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/MyCoachPage.jsx",
+      "category": "arrow",
+      "occurrenceCount": 3,
+      "lines": [
+        337,
+        485,
+        536
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/MyCoachPage.jsx",
+      "category": "music-achievement",
+      "occurrenceCount": 1,
+      "lines": [
+        582
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/ParentDashboard.jsx",
+      "category": "emoji",
+      "occurrenceCount": 2,
+      "lines": [
+        28,
+        98
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/PracticeLogPage.jsx",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        706
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/PracticeTracking.jsx",
+      "category": "emoji",
+      "occurrenceCount": 10,
+      "lines": [
+        51,
+        52,
+        53,
+        54,
+        55,
+        72,
+        81,
+        87,
+        91,
+        129
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/PracticeTracking.jsx",
+      "category": "status-control",
+      "occurrenceCount": 2,
+      "lines": [
+        105,
+        119
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/Registration.jsx",
+      "category": "emoji",
+      "occurrenceCount": 20,
+      "lines": [
+        24,
+        25,
+        27,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        453,
+        457,
+        464
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/Registration.jsx",
+      "category": "arrow",
+      "occurrenceCount": 13,
+      "lines": [
+        261,
+        290,
+        291,
+        326,
+        327,
+        370,
+        371,
+        406,
+        407,
+        433,
+        434,
+        469,
+        475
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/Registration.jsx",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        425
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/RhythmRacer.jsx",
+      "category": "emoji",
+      "occurrenceCount": 4,
+      "lines": [
+        995,
+        1085,
+        1111
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/RhythmRacer.jsx",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        1172
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/RhythmRacerV2.jsx",
+      "category": "emoji",
+      "occurrenceCount": 1,
+      "lines": [
+        538
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/ScaleDegreesFindIt.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        9
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/ScaleDegreesPlayIt.jsx",
+      "category": "arrow",
+      "occurrenceCount": 2,
+      "lines": [
+        18
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/SessionSummary.jsx",
+      "category": "emoji",
+      "occurrenceCount": 11,
+      "lines": [
+        42,
+        43,
+        44,
+        61,
+        62,
+        63,
+        64,
+        82,
+        93,
+        94,
+        96
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/StudentDashboard.jsx",
+      "category": "status-control",
+      "occurrenceCount": 1,
+      "lines": [
+        279
+      ],
+      "userFacingFunction": "status acknowledgement or close/check control; line-context review required",
+      "recommendedSemanticName": "check / close",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/StudentDashboard.jsx",
+      "category": "emoji",
+      "occurrenceCount": 3,
+      "lines": [
+        287,
+        446,
+        573
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/StudentDashboard.jsx",
+      "category": "arrow",
+      "occurrenceCount": 2,
+      "lines": [
+        299,
+        542
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/TeacherDashboard.jsx",
+      "category": "emoji",
+      "occurrenceCount": 1,
+      "lines": [
+        309
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/TeacherTamiDashboard.jsx",
+      "category": "emoji",
+      "occurrenceCount": 1,
+      "lines": [
+        263
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/WYLPractice.jsx",
+      "category": "arrow",
+      "occurrenceCount": 1,
+      "lines": [
+        5
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/WYLPracticeLive.jsx",
+      "category": "emoji",
+      "occurrenceCount": 1,
+      "lines": [
+        1527
+      ],
+      "userFacingFunction": "emoji used in UI copy, avatar, category, or control; manual semantic classification required",
+      "recommendedSemanticName": "semantic SVG name after context review",
+      "requiredSizePx": 24,
+      "protection": "DEFERRED_PROTECTED_OR_COLLISION",
+      "replacementEligibility": "DEFERRED_TO_NAMED_PROTECTED_OR_FEATURE_GATE"
+    },
+    {
+      "file": "src/pages/WYLPracticeStaff.jsx",
+      "category": "arrow",
+      "occurrenceCount": 3,
+      "lines": [
+        41,
+        525,
+        531
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/WYLPracticeStaff.jsx",
+      "category": "music-achievement",
+      "occurrenceCount": 1,
+      "lines": [
+        555
+      ],
+      "userFacingFunction": "music notation, achievement, or favorite symbol; distinguish pedagogy from UI",
+      "recommendedSemanticName": "music-note / star / heart",
+      "requiredSizePx": 24,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/pages/practiceLogApi.js",
+      "category": "arrow",
+      "occurrenceCount": 7,
+      "lines": [
+        7,
+        8,
+        9,
+        59,
+        67,
+        75,
+        136
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/services/practiceLogApi.js",
+      "category": "arrow",
+      "occurrenceCount": 8,
+      "lines": [
+        7,
+        8,
+        9,
+        61,
+        69,
+        77,
+        164,
+        256
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    },
+    {
+      "file": "src/services/ttsService.js",
+      "category": "arrow",
+      "occurrenceCount": 2,
+      "lines": [
+        4,
+        16
+      ],
+      "userFacingFunction": "directional navigation or explanatory flow; line-context review required",
+      "recommendedSemanticName": "arrow-left / arrow-right / arrow-up / arrow-down",
+      "requiredSizePx": 20,
+      "protection": "ELIGIBLE_NON_PROTECTED",
+      "replacementEligibility": "PHASE_1C_CONTEXT_REVIEW_REQUIRED"
+    }
+  ]
+}

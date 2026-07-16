@@ -1,0 +1,22 @@
+{
+  "sourceCommit": "7d3794c3a9ebc8266b72ed9d1163a8ec96d645ee",
+  "strategyVersion": "SOM_FRONTEND_REDESIGN_STRATEGY_v1.1.1",
+  "tokenContractSha256": "38dcd0457f8b82bbcacc035d06c64388ee444fd5cf1fdec0e17dced5683f808b",
+  "boards": 3,
+  "viewports": 3,
+  "screenshotsRequired": 9,
+  "screenshotsCaptured": 9,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "fontFamiliesRequested": ["DM Sans", "Outfit"],
+  "fontFamiliesRenderedInEveryCapture": true,
+  "syneRequests": 0,
+  "horizontalOverflowFailures": 0,
+  "undersizedTargetFailures": 0,
+  "unnamedIconOnlyControls": 0,
+  "studentBannedLanguageMatches": 0,
+  "productRuntimeChanges": 0,
+  "standalonePreview": true,
+  "productionImplementationStarted": false,
+  "unresolvedContractItems": ["ambassador gold value", "approximate celebration spring", "muted text usage restriction"]
+}

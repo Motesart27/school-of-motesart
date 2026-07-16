@@ -1076,3 +1076,15 @@ The old historical credential remains conclusively rejected. Current tracked-tre
 The singular Phase 0R closure blocker is resolved. Temporary authenticated-mobile-QA suspension remains accepted, while registration and Student Instruments enrollment-path work remain deferred to a separate backend/Airtable workstream.
 
 Phase 0R remains open only until Denarius formally declares closure. Phase 1, merge, deployment, pull-request creation, product work, and additional datastore activity were not started.
+
+## 2026-07-16 — Phase 1 Session 1A foundation preview
+
+Phase 0R was formally closed at `7d3794c3a9ebc8266b72ed9d1163a8ec96d645ee`. Denarius authorized Phase 1 with the phrase `REDESIGN PHASE 1 APPROVED`. The new `feat/som-redesign-phase-1` branch begins exactly at that closed tip; Session 1A remained preview and governance only.
+
+The extracted contracts and inventories are preserved in `docs/audit/PHASE_1_FOUNDATION_SOURCE_INVENTORY.md`, `PHASE_1_TOKEN_CONTRACT.md`, `PHASE_1_ICON_INVENTORY.md`, `PHASE_1_COMPONENT_CONTRACT.md`, `PHASE_1_FOUNDATIONS_PREVIEW_REPORT.md`, `PHASE_1_IMPLEMENTATION_SEQUENCE.md`, and `docs/audit/phase1-preview/`. The standalone rendered kit and nine screenshots are under `visual-regression/phase1-foundations-preview/` at 1440×900, 768×1024, and 390×844 for tokens/type, component states, and icons/ChartFrame/overlays.
+
+Unresolved contract decisions are the unspecified ambassador gold partner, the approximate celebration-spring guidance, the exact muted-text usage restriction, the component/icon/ChartFrame approvals, the default-off admin-only `/dev/kit` plan, and the proposed Phase 1B → 1C → 1D sequence. All eight decisions in the preview report require Denarius approval before implementation.
+
+Verification completed 9 of 9 standalone captures with zero console errors, page errors, horizontal-overflow failures, undersized active targets, unnamed icon-only controls, Syne requests, or banned student-language matches. DM Sans and Outfit rendered in every capture. Product/runtime changes = 0.
+
+The commit containing this entry is the Phase 1 foundations-preview commit; its exact local and remote `feat/som-redesign-phase-1` SHA must match in the preservation proof. Phase 1 production implementation, Phase 1B, application tokens, font-loader changes, application components, `/dev/kit`, icon replacement, Practice Log migration, Chart.js removal, merge, deployment, and pull-request creation were not started.
