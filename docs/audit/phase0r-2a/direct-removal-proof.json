@@ -1,0 +1,30 @@
+{
+  "startingCommit": "1000cdd5d09be1ad368e42bca5cd2e1d3709e24c",
+  "approvedPaths": {
+    "teacher-dashboard-v3.html": {
+      "startingState": "tracked",
+      "startingBlob": "d7bb908ea884423445941630df058f7a3ca37d47",
+      "startingSha256": "488a924f6206a8e9840e8dcca209d850102e6643c0880fa2fd9e6872220914ae",
+      "startingBytes": 811396,
+      "endingWorkingTreeState": "absent",
+      "endingBuildState": "absent"
+    },
+    "src/pages/teacher-dashboard-v3.jsx": {
+      "startingState": "absent",
+      "endingWorkingTreeState": "absent",
+      "endingBuildState": "absent",
+      "action": "none; no file was reconstructed"
+    }
+  },
+  "runtimeImports": 0,
+  "routes": 0,
+  "buildConfigOrOperationalReferences": 0,
+  "generatedFilenameMentions": 0,
+  "prototypeStructuralMarkersTested": 14,
+  "prototypeLongTextMarkersTested": 1,
+  "generatedPrototypeMarkerMatches": 0,
+  "directRequestStatus": 200,
+  "directRequestBodyBytes": 1187,
+  "directRequestBodyEqualsSpaIndex": true,
+  "prototypeContentServed": false
+}

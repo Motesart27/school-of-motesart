@@ -950,3 +950,19 @@ Verification: locked install passed; production build passed; the repository has
 Rollback condition: if any approved glyph substitution produces an unanticipated product effect, revert the single Phase 0R.1A commit and return the branch to the locked baseline for review. The resulting commit is preserved on `feat/som-redesign-phase-0r` and in the verified Phase 0R.1A bundle; its exact SHA is the branch tip and remote preservation record.
 
 No later Phase 0R step, Phase 1 work, merge, or deployment was started.
+
+## 2026-07-16 — Phase 0R.2A obsolete teacher-prototype removal
+
+Phase 0R.1A is closed at `1000cdd5d09be1ad368e42bca5cd2e1d3709e24c`. This session performed Phase 0R.2A only.
+
+Approved paths:
+- `teacher-dashboard-v3.html` — deleted.
+- `src/pages/teacher-dashboard-v3.jsx` — already absent from the authorized starting tree; no file was reconstructed or deleted.
+
+A fresh tracked-repository census found zero runtime imports, routes, build/configuration references, deployment references, HTML links, asset references, or filesystem reads for either path. The removed HTML prototype contained named or real-looking student fixtures and inactivity-style statistics; no names or fixture details are reproduced in the Phase 0R evidence.
+
+Verification: isolated `npm ci` passed; the production build passed; 102 of 102 browser captures completed with zero navigation failures, zero console errors, zero page errors, zero final-URL changes, zero route/guard changes, and zero unexpected persistent route visual changes. The removed prototype path is absent from build output; a direct request returns only the SPA shell and no prototype content. No duplicate screenshot corpus was committed.
+
+The resulting Phase 0R.2A commit is the local and remote tip of `feat/som-redesign-phase-0r`, with exact SHA recorded by the branch preservation proof. Rollback condition: revert only that single Phase 0R.2A commit.
+
+No other file was deleted. No product source, route, configuration, dependency, protected flow, collision path, locked baseline, later Phase 0R step, Phase 1 work, merge, or deployment was started.

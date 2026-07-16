@@ -1,0 +1,20 @@
+{
+  "startingCommit": "1000cdd5d09be1ad368e42bca5cd2e1d3709e24c",
+  "scope": "Phase 0R.2A only",
+  "attempted": 102,
+  "captured": 102,
+  "routePatterns": 34,
+  "viewports": {
+    "1440x900": 34,
+    "768x1024": 34,
+    "390x844": 34
+  },
+  "navigationFailures": 0,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "finalUrlMismatchesAgainstPhase0R1A": 0,
+  "rawPngHashMismatchesAgainstPhase0R1A": 50,
+  "unexpectedPersistentVisualDifferences": 0,
+  "routeOrGuardChanges": 0,
+  "bulkScreenshotsCommitted": false
+}
