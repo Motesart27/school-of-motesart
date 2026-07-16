@@ -1,0 +1,18 @@
+{
+  "sourceCommit": "02642c9e973cd5c5cfbf0bf3ef798c1d054270c5",
+  "candidateKind": "repository-tracking-only tree",
+  "routePatterns": 34,
+  "viewports": ["1440x900", "768x1024", "390x844"],
+  "capturesAttempted": 102,
+  "capturesCompleted": 102,
+  "capturesByViewport": { "1440x900": 34, "768x1024": 34, "390x844": 34 },
+  "navigationFailures": 0,
+  "consoleErrors": 0,
+  "pageErrors": 0,
+  "normalizedFinalUrlChanges": 0,
+  "routeGuardChanges": 0,
+  "loginAuthRegressions": 0,
+  "unexpectedPersistentVisualDifferences": 0,
+  "bulkScreenshotsCommitted": false,
+  "temporaryTtsIsolationModifiedRepository": false
+}

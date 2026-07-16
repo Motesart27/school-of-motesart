@@ -1,0 +1,21 @@
+{
+  "startingCommit": "02642c9e973cd5c5cfbf0bf3ef798c1d054270c5",
+  "starting": {
+    "rootNodeModules": { "trackedPaths": 5234, "trackedBytes": 67258265 },
+    "rootDist": { "trackedPaths": 33, "trackedBytes": 48847181 },
+    "dsStore": { "trackedPaths": 4, "trackedBytes": 24592 },
+    "trackedEnvironmentFiles": 0
+  },
+  "ending": {
+    "rootNodeModulesTrackedPaths": 0,
+    "rootDistTrackedPaths": 0,
+    "dsStoreTrackedPaths": 0,
+    "uniqueTrackedRemovals": 5270
+  },
+  "ignoreProof": {
+    "node_modules": true,
+    "dist": true,
+    "dsStore": true
+  },
+  "historyRewrite": false
+}

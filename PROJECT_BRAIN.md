@@ -1002,3 +1002,19 @@ Protected equality proof confirms `extractUser`, authenticated redirect, `handle
 The unavailable `b4758d32baed10f00e07848f0839e76dcf35d1e2` content was not reconstructed, inferred, or claimed; the production-derived branch remains controlling. The commit containing this entry is the Phase 0R.3B implementation commit, and its local and remote `feat/som-redesign-phase-0r` SHAs must match exactly in the preservation proof. Rollback condition: revert only that implementation commit.
 
 Phase 0R.4, protected encoding work, committed-dist work, Phase 1, merge, deployment, and pull-request creation were not started.
+
+## 2026-07-16 — Phase 0R.4A tracked dependency and build-output hygiene
+
+Phase 0R.3B implementation is closed at `02642c9e973cd5c5cfbf0bf3ef798c1d054270c5`. This session performed Phase 0R.4A repository hygiene only.
+
+Starting tracked counts were 5,234 paths under root `node_modules/`, 33 under root `dist/`, and four `.DS_Store` paths. Ending tracked counts are zero for all three categories. The 5,270 unique tracked removals are ordinary tree changes, not a Git-history rewrite; prior commits and verified bundles remain the historical preservation mechanism.
+
+`.gitignore` now contains only the approved blocks for `node_modules/`, `dist/`, the preserved `.netlify/` rule, and `.DS_Store`. `package.json`, `package-lock.json`, `netlify.toml`, Vite configuration, application source, routes, guards, auth, APIs, lessons, games, dashboards, locked baselines, and hand-authored assets remain unchanged.
+
+The stale tracked build contained the two previously audited historical Settings contact literals. Without reproducing them here, removal of tracked `dist` reduces both candidate tracked-tree match counts to zero, and a fresh current-source build also contains zero matches. This does not claim historical-object erasure.
+
+Isolated locked installs and production-model builds passed with identical package/deployment inputs. Starting and candidate outputs were byte-identical after excluding the authorized `.DS_Store` metadata that the starting public tree copied into its build. The complete 34-route × three-viewport suite completed 102 of 102 captures with zero navigation failures, console errors, page errors, normalized final-URL changes, route/guard changes, Login/auth regressions, or unexpected persistent visual differences.
+
+The commit containing this entry is the Phase 0R.4A commit; its exact local and remote `feat/som-redesign-phase-0r` SHA must match in the preservation proof. Rollback condition: revert only the Phase 0R.4A commit.
+
+Phase 0R final closure, Phase 1, additional dead-file removal, protected encoding remediation, route remediation, merge, deployment, and pull-request creation were not started.

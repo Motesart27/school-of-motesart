@@ -1,2 +1,11 @@
-# Local Netlify folder
-.netlify
+# Dependencies
+node_modules/
+
+# Generated build output
+dist/
+
+# Local Netlify metadata
+.netlify/
+
+# macOS metadata
+.DS_Store

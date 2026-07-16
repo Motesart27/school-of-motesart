@@ -1,0 +1,23 @@
+{
+  "startingCommit": "02642c9e973cd5c5cfbf0bf3ef798c1d054270c5",
+  "nodeVersion": "v25.9.0",
+  "npmVersion": "11.12.1",
+  "npmCi": { "passed": true, "packagesInstalled": 284, "packagesAudited": 285 },
+  "build": { "passed": true, "viteVersion": "5.4.21", "modulesTransformed": 136 },
+  "publicEnvironmentVariableNames": ["VITE_API_URL"],
+  "startingOutputFiles": 39,
+  "candidateOutputFiles": 38,
+  "authorizedMetadataDifference": "public/.DS_Store is no longer copied into generated output",
+  "byteIdenticalAfterMetadataExclusion": true,
+  "productSourceDifferences": 0,
+  "routeBehaviorDifferences": 0,
+  "historicalContactMatches": {
+    "candidateTrackedTree": { "emailCategory": 0, "telephoneCategory": 0 },
+    "candidateGeneratedDist": { "emailCategory": 0, "telephoneCategory": 0 }
+  },
+  "inputHashesUnchanged": {
+    "packageJson": true,
+    "packageLockJson": true,
+    "netlifyToml": true
+  }
+}
