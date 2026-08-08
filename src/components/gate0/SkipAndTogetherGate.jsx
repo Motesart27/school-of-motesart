@@ -21,6 +21,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadLesson } from './lessonDataLoader.js'
+import { buildGateResult, gateEvidenceAdapter } from './gateEvidenceAdapter.js'
 
 // ─── Design tokens (SOM locked) ──────────────────────────────────────────────
 const T = {
@@ -254,17 +255,19 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
   }, [ageBand])
 
   // ── Completion effect (step 9) ─────────────────────────────────────────────
+  // sessionStorage unchanged; shared construction + flag-gated-OFF evidence
+  // seam (VITE_GATE_EVIDENCE=1 to enable later — Amendment 4).
   useEffect(() => {
     if (step !== 9 || !lesson) return
-    const result = {
+    const result = buildGateResult({
       gateId: 'C_MAJOR_GATE_SKIP_TOGETHER',
       concept: 'skip_and_together',
-      completedAt: new Date().toISOString(),
       executionScore: execScore,
       ownershipPassed,
       feelCheckData: fcData,
-    }
+    })
     try { sessionStorage.setItem('gate1_skip_together_result', JSON.stringify(result)) } catch (e) {}
+    gateEvidenceAdapter(result)
     onGatePassed?.(result)
   }, [step])
 

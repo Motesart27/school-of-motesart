@@ -20,6 +20,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadLesson } from './lessonDataLoader.js'
+import { buildGateResult, gateEvidenceAdapter } from './gateEvidenceAdapter.js'
 
 // ─── Design tokens (SOM locked) ──────────────────────────────────────────────
 const T = {
@@ -520,20 +521,22 @@ export default function FindHomeGate({ onGatePassed, ageBand = 'child' }) {
     }
   }
 
-  // Complete — write sessionStorage and call onGatePassed
+  // Complete — write sessionStorage (unchanged) and call onGatePassed.
+  // Result construction is shared via buildGateResult; the canonical-evidence
+  // seam is flag-gated OFF (VITE_GATE_EVIDENCE=1 to enable later — Amendment 4).
   useEffect(() => {
     if (step !== 9 || !lesson) return
-    const result = {
+    const result = buildGateResult({
       gateId: 'C_MAJOR_GATE_FIND_HOME',
       concept: 'find_home',
-      completedAt: new Date().toISOString(),
       executionScore: execScore,
       ownershipPassed,
       feelCheckData: fcData, // internal only — not surfaced to student
-    }
+    })
     try {
       sessionStorage.setItem('gate0_find_home_result', JSON.stringify(result))
     } catch (e) {}
+    gateEvidenceAdapter(result)
     onGatePassed?.(result)
   }, [step])
 

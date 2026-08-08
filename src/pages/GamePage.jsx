@@ -4,8 +4,8 @@ import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { updateWYLFromBehavior } from "../services/wylEvolution.js"
 import { getState, setState } from '../lesson_engine/concept_state_store.js'
-
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
+import { submitEvidenceEvent, newClientEventId } from '../services/evidenceClient.js'
+import { validateConceptId } from '../lesson_engine/lock_package_bridge_config.js'
 
 // NOTE DATA 
 const NOTE_FREQS = [
@@ -348,7 +348,42 @@ export default function GamePage() {
  const conceptDisplayName = urlConcept === 'T_HALF_STEP' ? 'The Half Step'
    : urlConcept ? urlConcept.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
    : 'This Concept'
- const completeAssignment = (id) => { console.log('[SOM] Assignment complete:', id) }
+ // ── M1 canonical evidence path (replaces the completeAssignment stub) ──
+ // One EvidenceEvent per session. The client_event_id is pinned per session so
+ // any retry (or offline queue flush) reuses it → backend idempotent 200.
+ const evidenceIdRef = useRef(null)
+ const evidenceSubmittedRef = useRef(false)
+ const [evidenceMsg, setEvidenceMsg] = useState(null)
+ const submitSessionEvidence = () => {
+  if (evidenceSubmittedRef.current) return
+  if (!urlConcept) {
+   console.info('[SOM][FtN] No concept attached to this session — evidence skipped (no invented concept IDs)')
+   return
+  }
+  const check = validateConceptId(urlConcept)
+  if (!check.valid || !check.canonical.startsWith('T_')) {
+   console.warn('[SOM][FtN] URL concept is not canonical T_* — evidence skipped:', urlConcept)
+   return
+  }
+  evidenceSubmittedRef.current = true
+  if (!evidenceIdRef.current) evidenceIdRef.current = newClientEventId()
+  const s = sessionRef.current
+  const sessionAccuracy = s.attempts > 0 ? s.correct / s.attempts : 0
+  submitEvidenceEvent({
+   client_event_id: evidenceIdRef.current,
+   concept_id: check.canonical,
+   source_activity: 'find_the_note',
+   activity_variant: isHomeworkSession ? 'academic' : 'free_play',
+   ...(urlAssignmentId ? { assignment_id: urlAssignmentId } : {}),
+   chapter: 'find_it',
+   result: isHomeworkSession ? 'complete' : (sessionAccuracy >= 0.8 ? 'great' : sessionAccuracy >= 0.5 ? 'ok' : 'hard'),
+   notes_attempted: s.attempts,
+   notes_correct: s.correct,
+   mistake_tags: Object.keys(s.noteErrors).map(n => `missed_note_${n}`),
+   duration_min: Number(((Date.now() - s.startTime) / 60000).toFixed(2)),
+   tempo_factor: 1,
+  }).then(res => { if (res?.message) setEvidenceMsg(res.message) })
+ }
  const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 
  // Level lives in state so UI updates when it changes
@@ -410,51 +445,23 @@ export default function GamePage() {
  startTime: Date.now(), bestStreak: 0, currentStreak: 0,
  })
 
- // Log session + leaderboard
+ // Log session — M1 canonical evidence path only.
+ // Dead POSTs to /session/log and /leaderboard/submit REMOVED per M1_SPEC.
  const logSession = useCallback(async () => {
  if (sessionLogged) return
  const s = sessionRef.current
- const user = JSON.parse(localStorage.getItem('som_user') || '{}')
- const durationSeconds = Math.round((Date.now() - s.startTime) / 1000)
  const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
  const points = (s.correct * 100) + (s.bestStreak * 50)
  setSessionPoints(points)
+ setSessionLogged(true)
 
  try {
- await fetch(`${BACKEND_URL}/session/log`, {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- user_id: user.id || user.name || 'anonymous',
- user_name: user.name || 'Player',
- level, mode,
- correct: s.correct, attempts: s.attempts, accuracy,
- best_streak: s.bestStreak, replays_used: s.replaysUsed,
- duration_seconds: durationSeconds,
- note_errors: s.noteErrors,
- points,
- game_name: 'Find the Note',
- })
- })
- if (!isHomeworkSession) {
- await fetch(`${BACKEND_URL}/leaderboard/submit`, {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- user_id: user.id || user.name || 'anonymous',
- user_name: user.name || 'Player',
- game: 'Find the Note',
- level,
- points,
- accuracy,
- best_streak: s.bestStreak,
- })
- })
- }
- setSessionLogged(true)
  updateWYLFromBehavior("ear_training_session", { accuracy, level })
- if (isHomeworkSession && urlAssignmentId) {
- completeAssignment(urlAssignmentId)
+ // Canonical evidence write (single POST; skip+warn on non-canonical concept)
+ submitSessionEvidence()
+ if (isHomeworkSession && urlAssignmentId && urlConcept) {
+ // localStorage concept_state_store write is CACHE ONLY under M1 —
+ // the canonical Concept_State is computed by the backend from evidence.
  const sessionAccuracy = s.attempts > 0 ? s.correct / s.attempts : 0
  const prev = getState(urlConcept) || {}
  setState(urlConcept, {
@@ -466,7 +473,7 @@ export default function GamePage() {
  })
  }
  } catch (e) {
- console.warn('Session/leaderboard log failed:', e)
+ console.warn('Session log failed:', e)
  }
  }, [sessionLogged, mode, level])
 
@@ -690,6 +697,10 @@ export default function GamePage() {
  setStreak(0); setLives(3)
  setLevelProgress(0)
  setSessionLogged(false); setSessionPoints(0)
+ // New session = new evidence event (fresh client_event_id)
+ evidenceSubmittedRef.current = false
+ evidenceIdRef.current = null
+ setEvidenceMsg(null)
  sessionRef.current = {
  correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
  startTime: Date.now(), bestStreak: 0, currentStreak: 0,
@@ -747,7 +758,10 @@ export default function GamePage() {
 
  const streakStyle = getStreakStyle(streak)
  const s = sessionRef.current
+ // Internal only — Article XIII: students never see this as a percentage.
  const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
+ const earTier = accuracy >= 80 ? 'Owned it' : accuracy >= 50 ? 'Solid' : 'Growing'
+ const meterWord = (val) => val >= 80 ? 'Strong' : val >= 50 ? 'Growing' : 'Building'
  const progressPct = Math.min(100, (levelProgress / CORRECT_TO_LEVELUP) * 100)
 
  return (
@@ -1159,7 +1173,7 @@ export default function GamePage() {
  <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>{isHomeworkSession ? `You trained your ear on ${conceptDisplayName}` : `Level ${level} · Session Complete`}</div>
  <div className="gp-go-stats">
  {[[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],
- [accuracy+'%','Accuracy','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']
+ [earTier,'Ear Tier','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']
  ].map(([v,l,c])=>(
  <div key={l} className="gp-go-stat">
  <div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div>
@@ -1170,7 +1184,7 @@ export default function GamePage() {
  {!isHomeworkSession && (
  <div style={{padding:12,borderRadius:10,background:'rgba(234,179,8,.1)',border:'1px solid rgba(234,179,8,.3)',marginBottom:16}}>
  <div style={{fontSize:22,fontWeight:900,color:'#fbbf24'}}> {s.correct * 100 + s.bestStreak * 50} pts</div>
- <div style={{fontSize:11,color:'#92400e'}}>Logged to leaderboard</div>
+ <div style={{fontSize:11,color:'#92400e'}}>Session points</div>
  </div>
  )}
  {/* Ear Training Meter */}
@@ -1186,7 +1200,7 @@ export default function GamePage() {
  <div key={label} className="gp-ear-row">
  <div className="gp-ear-label">{label}</div>
  <div className="gp-ear-bar-wrap"><div className="gp-ear-bar-fill" style={{width:val+'%',background:grad}}/></div>
- <div className="gp-ear-score" style={{color:col}}>{val}%</div>
+ <div className="gp-ear-score" style={{color:col,width:52}}>{meterWord(val)}</div>
  </div>
  ))}
  </div>
@@ -1208,9 +1222,8 @@ export default function GamePage() {
  }
  </div>
  <div style={{marginTop:8}}>
- <span className="gp-tami-tag" style={{background:'rgba(34,197,94,.2)',color:'#4ade80',border:'1px solid rgba(34,197,94,.3)'}}> WYL Saved</span>
- <span className="gp-tami-tag" style={{background:'rgba(59,130,246,.2)',color:'#60a5fa',border:'1px solid rgba(59,130,246,.3)'}}> DPM Updated</span>
- <span className="gp-tami-tag" style={{background:'rgba(234,179,8,.2)',color:'#fbbf24',border:'1px solid rgba(234,179,8,.3)'}}> Leaderboard</span>
+ <span className="gp-tami-tag" style={{background:'rgba(34,197,94,.2)',color:'#4ade80',border:'1px solid rgba(34,197,94,.3)'}}>✓ Progress saved</span>
+ {evidenceMsg && <span className="gp-tami-tag" style={{background:'rgba(20,184,166,.15)',color:'#2dd4bf',border:'1px solid rgba(20,184,166,.3)'}}>{evidenceMsg}</span>}
  </div>
  </div>
  <div className="gp-go-actions">

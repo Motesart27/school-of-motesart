@@ -94,6 +94,10 @@ export const api = {
     request('/practice-logs', { method: 'POST', body: JSON.stringify(data) }),
 
   // ─── Homework ───────────────────────────────────────────────
+  // M1 canonical: caller-scoped assignments (Assigned first) —
+  // Concept ID / Status / Completed At / Evidence Ref
+  getMyAssignments: () => request('/assignments/mine'),
+
   getHomework: (studentName) =>
     request(`/assignments/student/${encodeURIComponent(studentName)}`),
 

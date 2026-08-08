@@ -14,6 +14,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { loadLesson } from './lessonDataLoader.js'
+import { buildGateResult, gateEvidenceAdapter } from './gateEvidenceAdapter.js'
 
 // ─── Design tokens (SOM locked values) ───────────────────────────────────────
 const T = {
@@ -766,7 +767,17 @@ export default function MajorScalePatternGate({ onGatePassed }) {
               })}
             </div>
 
-            <button onClick={() => onGatePassed?.({ executionScore: progressPct, ownershipPassed, confidenceScore })} style={{
+            <button onClick={() => {
+              // Shared construction + flag-gated-OFF evidence seam (Amendment 4).
+              // onGatePassed payload preserved exactly for the wrapper.
+              gateEvidenceAdapter(buildGateResult({
+                concept: 'major_scale_pattern',
+                executionScore: progressPct,
+                ownershipPassed,
+                confidenceScore,
+              }))
+              onGatePassed?.({ executionScore: progressPct, ownershipPassed, confidenceScore })
+            }} style={{
               width: '100%', padding: '16px 0',
               background: T.teal, border: 'none', borderRadius: 14,
               color: '#fff', fontFamily: T.display, fontWeight: 800, fontSize: 16,

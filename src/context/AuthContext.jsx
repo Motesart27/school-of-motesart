@@ -1,7 +1,35 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import { api } from '../services/api.js'
+import { flushEvidenceQueue } from '../services/evidenceClient.js'
+import { setStudentId } from '../lesson_engine/concept_state_store.js'
 
 const AuthContext = createContext(null)
+
+// ── M1 learning identity resolution ──────────────────────────────────────────
+// student_instrument_id comes from the backend only: the login/verify payload
+// directly, or the existing identity lookup (/student?email=) as a follow-up.
+// NO default_student fallback anywhere in the M1 path — unresolved stays null.
+const extractInstrumentId = (u) =>
+  u?.student_instrument_id ||
+  u?.learning_identity?.student_instrument_id ||
+  null
+
+async function resolveStudentInstrumentId(userData) {
+  const direct = extractInstrumentId(userData)
+  if (direct) return direct
+  if (!userData?.email) return null
+  try {
+    const rec = await api.getStudentByEmail(userData.email)
+    return (
+      rec?.student_instrument_id ||
+      rec?.student?.student_instrument_id ||
+      rec?.learning_identity?.student_instrument_id ||
+      null
+    )
+  } catch {
+    return null
+  }
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -27,6 +55,19 @@ export function AuthProvider({ children }) {
     setUser(u)
     // Store JWT token
     if (token) localStorage.setItem('som_token', token)
+
+    // M1: resolve learning identity (student_instrument_id), persist it in
+    // som_user, sync the concept-state cache namespace, and flush any queued
+    // evidence now that a fresh token is available.
+    resolveStudentInstrumentId(u).then(si => {
+      if (si) {
+        setStudentId(si)
+        setUser(prev => (prev ? { ...prev, student_instrument_id: si } : prev))
+      } else {
+        console.warn('[SOM Auth] student_instrument_id unresolved — evidence writes disabled until identity resolves')
+      }
+      flushEvidenceQueue()
+    })
   }
 
   // ── Logout: clear everything ──
@@ -34,6 +75,9 @@ export function AuthProvider({ children }) {
     setUser(null)
     localStorage.removeItem('som_user')
     localStorage.removeItem('som_token')
+    // M1: clear the cache namespace pointer — never let a stale identity leak
+    // into the next session (no default_student, no cross-student bleed).
+    setStudentId(null)
   }, [])
 
   // ── Update user fields (NEVER allow role mutation from frontend) ──
@@ -79,6 +123,12 @@ export function AuthProvider({ children }) {
         } else if (data.user) {
           // Refresh role from Airtable (in case admin changed it)
           setUser(prev => prev ? { ...prev, role: data.user.role || 'student' } : null)
+          // M1: (re)resolve learning identity on verified boot
+          resolveStudentInstrumentId({ ...user, ...data.user }).then(si => {
+            if (cancelled || !si) return
+            setStudentId(si)
+            setUser(prev => (prev ? { ...prev, student_instrument_id: si } : prev))
+          })
         }
       })
       .catch(() => {
@@ -93,8 +143,21 @@ export function AuthProvider({ children }) {
     return () => { cancelled = true }
   }, []) // Only on mount
 
+  // ── M1: flush queued evidence on app start ──
+  useEffect(() => {
+    flushEvidenceQueue()
+  }, [])
+
+  // ── M1: learning identity exposed to every surface ──
+  // Consumers must treat resolved:false as "no evidence writes" (sign-in
+  // prompt / skip + warn) — never substitute a default identity.
+  const learningIdentity = useMemo(() => ({
+    student_instrument_id: user?.student_instrument_id || null,
+    resolved: !!user?.student_instrument_id,
+  }), [user])
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, verifying }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, verifying, learningIdentity }}>
       {children}
     </AuthContext.Provider>
   )

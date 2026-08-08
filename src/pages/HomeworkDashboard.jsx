@@ -1,27 +1,55 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { api } from '../services/api.js'
+import rrLevels from '../data/rhythm_racer_levels.json'
 
-/* ── Placeholder data — replaced by API when wired ── */
-const ASGN = [
-  { id:'gate4_rhythm', title:'Gate 4 Rhythm — Whole Note Pulse', type:'Homework', concept:'R_PULSE_WHOLE', route:'/rhythm-racer?concept=R_PULSE_WHOLE&assignment_id=gate4_rhythm&level=1', status:'In Progress', statusCls:'ip', countdown:'2 days left', cpCls:'cp-amber', progress:0, overdue:false,
-    desc:'Open Rhythm Racer Level 1. Listen for the long whole-note pulse, wait through the count-in, and tap when the marker reaches the car.' },
-  { id:'gate5_rhythm', title:'Gate 5 Rhythm — Half Notes', type:'Homework', concept:'R_PULSE_HALF', route:'/rhythm-racer?concept=R_PULSE_HALF&assignment_id=gate5_rhythm&level=2', status:'Pending', statusCls:'pn', countdown:'4 days left', cpCls:'cp-teal', progress:0, overdue:false,
-    desc:'Open Rhythm Racer Level 2. Tap the half-note pattern on beats 1 and 3 while keeping the space between them steady.' },
-  { id:'gate6_rhythm', title:'Gate 6 Rhythm — Quarter Notes', type:'Homework', concept:'R_PULSE_QUARTER', route:'/rhythm-racer?concept=R_PULSE_QUARTER&assignment_id=gate6_rhythm&level=3', status:'Pending', statusCls:'pn', countdown:'This week', cpCls:'cp-teal', progress:0, overdue:false,
-    desc:'Open Rhythm Racer Level 3. Tap every beat in the measure and keep the pulse even from count-in through the final stage.' },
-]
+/* ── M1 live assignments — GET /assignments/mine (Assigned first) ──
+ * Contract fields: Concept ID / Status / Completed At / Evidence Ref.
+ * Mapping is defensive on field casing; unknown fields never invented. */
+const humanizeConcept = (c) =>
+  c ? c.replace(/^[TR]_/, '').replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()) : 'Assignment'
+
+const rrLevelForConcept = (concept) => {
+  const match = rrLevels.find(l => l.concept === concept)
+  return match ? match.level : 1
+}
+
+function mapAssignment(a) {
+  const id = a.assignment_id || a.id || ''
+  const concept = a.concept_id || a.concept || ''
+  const rawStatus = String(a.status || 'Assigned')
+  const completed = /complete/i.test(rawStatus)
+  const completedAt = a.completed_at || a.completedAt || null
+  const type = a.type || a.assignment_type || 'Homework'
+  return {
+    id,
+    concept,
+    type,
+    title: a.title || `${humanizeConcept(concept)}${concept.startsWith('R_') ? ' — Rhythm' : ''}`,
+    desc: a.description || a.desc || `Launch this assignment and complete the ${humanizeConcept(concept)} practice.`,
+    status: completed ? 'Completed' : rawStatus,
+    statusCls: completed ? 'co' : /progress/i.test(rawStatus) ? 'ip' : 'pn',
+    completed,
+    completedAt,
+    evidenceRef: a.evidence_ref || a.evidenceRef || null,
+    route: concept.startsWith('R_')
+      ? `/rhythm-racer?mode=academic&concept=${concept}&assignment_id=${id}&level=${rrLevelForConcept(concept)}`
+      : null,
+  }
+}
 const SHEETS = [
   { name:'C Major Scale', meta:'Added Jan 10 \u00b7 Ms. Johnson' },
   { name:'Hanon No. 1', meta:'Added Jan 8 \u00b7 Ms. Johnson' },
   { name:'G Major Scale', meta:'Added Jan 5 \u00b7 Ms. Johnson' },
   { name:'Twinkle Variation', meta:'Added Dec 20 \u00b7 Ms. Johnson' },
 ]
+// Article XIII: archive shows tier language, never scores/percentages.
 const ARCH = [
-  { name:'Interval Training', meta:'Homework \u00b7 5 attempts', score:100, color:'#22c55e', date:'Jan 18', bg:'rgba(34,197,94,0.1)' },
-  { name:'Note Reading Basics', meta:'Homework \u00b7 3 attempts', score:90, color:'#22c55e', date:'Jan 12', bg:'rgba(34,197,94,0.1)' },
-  { name:'Rhythm Exercise', meta:'Homework \u00b7 4 attempts', score:78, color:'#f59e0b', date:'Jan 6', bg:'rgba(245,158,11,0.1)' },
-  { name:'Sight Reading Test', meta:'Quiz \u00b7 2 attempts', score:62, color:'#f09595', date:'Dec 19', bg:'rgba(226,75,74,0.1)' },
+  { name:'Interval Training', meta:'Homework \u00b7 Completed \u2713', tier:'Owned it', color:'#22c55e', date:'Jan 18', bg:'rgba(34,197,94,0.1)' },
+  { name:'Note Reading Basics', meta:'Homework \u00b7 Completed \u2713', tier:'Owned it', color:'#22c55e', date:'Jan 12', bg:'rgba(34,197,94,0.1)' },
+  { name:'Rhythm Exercise', meta:'Homework \u00b7 Completed \u2713', tier:'Solid', color:'#f59e0b', date:'Jan 6', bg:'rgba(245,158,11,0.1)' },
+  { name:'Sight Reading Test', meta:'Quiz \u00b7 Completed \u2713', tier:'Growing', color:'#f09595', date:'Dec 19', bg:'rgba(226,75,74,0.1)' },
 ]
 const ANN = [
   { initials:'MJ', name:'Ms. Johnson', time:'Today \u00b7 9:00 AM', pinned:true, title:'Recital coming up \u2014 Jan 30th!', body:'Our winter recital is January 30th at 5pm. Please have your piece memorized by next week\u2019s lesson. Parents are welcome to attend!' },
@@ -147,13 +175,27 @@ const css = `
 .hw-tami-float img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 `
 
+// SHEETS / ARCH / ANN remain STAGED (sample content) in the M1 minimal live cut.
 const TABS = [
-  { id:'asgn', label:'Assignments', badge:3 },
-  { id:'sheet', label:'Sheet Music' },
-  { id:'arch', label:'Completed Archive' },
-  { id:'ann', label:'Announcements' },
+  { id:'asgn', label:'Assignments' },
+  { id:'sheet', label:'Sheet Music', staged:true },
+  { id:'arch', label:'Completed Archive', staged:true },
+  { id:'ann', label:'Announcements', staged:true },
 ]
-const FILTERS = ['All','Due Soon','Overdue','Completed']
+const FILTERS = ['All','Assigned','Completed']
+
+const StagedNote = () => (
+  <div style={{fontSize:10,color:'rgba(245,158,11,0.75)',background:'rgba(245,158,11,0.08)',border:'1px solid rgba(245,158,11,0.2)',borderRadius:8,padding:'6px 10px',flexShrink:0}}>
+    STAGED — sample content. This section is not live yet.
+  </div>
+)
+
+const fmtDate = (iso) => {
+  if (!iso) return ''
+  try {
+    return new Date(iso).toLocaleDateString(undefined, { month:'short', day:'numeric' })
+  } catch { return '' }
+}
 
 export default function HomeworkDashboard() {
   const { user } = useAuth()
@@ -166,9 +208,39 @@ export default function HomeworkDashboard() {
   const [guideShow, setGuideShow] = useState(false)
   const helpTimer = useRef(null)
 
+  // ── M1 live assignments ──
+  const [assignments, setAssignments] = useState([])
+  const [asgnLoading, setAsgnLoading] = useState(true)
+  const [asgnError, setAsgnError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    api.getMyAssignments()
+      .then(data => {
+        if (cancelled) return
+        const raw = Array.isArray(data) ? data : (data?.assignments || data?.items || [])
+        setAssignments(raw.map(mapAssignment).filter(a => a.id || a.concept))
+        setAsgnError(null)
+      })
+      .catch(err => {
+        if (cancelled) return
+        console.warn('[Homework] Failed to load assignments:', err?.message)
+        setAsgnError('Could not load your assignments right now.')
+      })
+      .finally(() => { if (!cancelled) setAsgnLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  const visibleAssignments = assignments.filter(a =>
+    filter === 'All' ? true : filter === 'Completed' ? a.completed : !a.completed
+  )
+  const assignedCount = assignments.filter(a => !a.completed).length
+
   const openDet = (a) => { setSelAsgn(a); setDetOpen(true); resetHelp() }
   const closeDet = () => { setDetOpen(false); resetHelp() }
   const resetHelp = () => { setHelpActive(false); setGuideShow(false); if(helpTimer.current) clearTimeout(helpTimer.current) }
+  // Launch routing preserved: Quiz → /game, Homework → /practice-live
+  // (R_* concepts route to Rhythm Racer with their curriculum level).
   const launchAssignment = (a) => {
     if (a.route) {
       navigate(a.route)
@@ -203,7 +275,9 @@ export default function HomeworkDashboard() {
       <div className="hw-tabs">
         {TABS.map(t => (
           <button key={t.id} className={`hw-tab${tab===t.id?' active':''}`} onClick={() => switchTab(t.id)}>
-            {t.label}{t.badge ? <span className="hw-tab-badge">{t.badge}</span> : null}
+            {t.label}
+            {t.id==='asgn' && assignedCount > 0 ? <span className="hw-tab-badge">{assignedCount}</span> : null}
+            {t.staged ? <span className="hw-tab-badge" style={{background:'rgba(255,255,255,0.06)',color:'rgba(255,255,255,0.3)'}}>STAGED</span> : null}
           </button>
         ))}
       </div>
@@ -218,28 +292,42 @@ export default function HomeworkDashboard() {
               <button key={f} className={`hw-fp${filter===f?' active':''}`} onClick={() => setFilter(f)}>{f}</button>
             ))}
           </div>
-          {ASGN.map(a => (
-            <div key={a.id} className={`hw-acard${a.overdue?' overdue':''}`} onClick={() => openDet(a)}>
+          {asgnLoading && (
+            <div style={{fontSize:12,color:'rgba(255,255,255,0.35)',padding:'18px 4px'}}>Loading your assignments…</div>
+          )}
+          {!asgnLoading && asgnError && (
+            <div style={{fontSize:12,color:'#f09595',padding:'18px 4px'}}>{asgnError}</div>
+          )}
+          {!asgnLoading && !asgnError && visibleAssignments.length === 0 && (
+            <div style={{fontSize:12,color:'rgba(255,255,255,0.35)',padding:'18px 4px'}}>
+              {filter==='Completed' ? 'Nothing completed yet — your finished work will show up here.' : 'No assignments right now. Nice and clear!'}
+            </div>
+          )}
+          {visibleAssignments.map(a => (
+            <div key={a.id || a.concept} className="hw-acard" onClick={() => openDet(a)}>
               <div className="hw-acard-left">
                 <div className="hw-acard-title">{a.title}</div>
                 <div className="hw-badges">
                   <span className={`hw-bdg ${a.type==='Quiz'?'hw-bdg-qz':'hw-bdg-hw'}`}>{a.type}</span>
-                  <span className={`hw-bdg hw-bdg-${a.statusCls}`}>{a.status}</span>
-                  <span className={`hw-cpill ${a.cpCls}`}>{a.countdown}</span>
+                  <span className={`hw-bdg hw-bdg-${a.statusCls}`}>{a.completed ? 'Completed ✓' : a.status}</span>
+                  {a.completed && a.completedAt ? <span className="hw-cpill cp-green">{fmtDate(a.completedAt)}</span> : null}
                 </div>
-                <div className="hw-prog-track"><div className={`hw-prog-fill${a.overdue?' red':''}`} style={{width:`${a.progress}%`}} /></div>
+                {/* Completed items show constitutional language only — no scores */}
+                {!a.completed && (
                 <button
                   onClick={e => { e.stopPropagation(); launchAssignment(a) }}
-                  style={{marginTop:8,padding:'5px 14px',borderRadius:20,border:'none',background:'#14b8a6',color:'#fff',fontSize:11,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif"}}
+                  style={{marginTop:6,padding:'10px 22px',borderRadius:22,border:'none',background:'#14b8a6',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif",minHeight:44,minWidth:110}}
                 >Launch →</button>
+                )}
               </div>
               <div className="hw-chev">{'\u203A'}</div>
             </div>
           ))}
         </div>
 
-        {/* ── SHEET MUSIC TAB ── */}
+        {/* ── SHEET MUSIC TAB (STAGED) ── */}
         <div className={`hw-tc${tab==='sheet'?' active':''}`}>
+          <StagedNote />
           <div className="hw-sheet-grid">
             {SHEETS.map((s,i) => (
               <div key={i} className="hw-sheet-card">
@@ -259,8 +347,9 @@ export default function HomeworkDashboard() {
           </div>
         </div>
 
-        {/* ── COMPLETED ARCHIVE TAB ── */}
+        {/* ── COMPLETED ARCHIVE TAB (STAGED) ── */}
         <div className={`hw-tc${tab==='arch'?' active':''}`} style={{gap:'8px'}}>
+          <StagedNote />
           {ARCH.map((r,i) => (
             <div key={i} className="hw-arch-row">
               <div className="hw-arch-ico" style={{background:r.bg}}>{'\u2713'}</div>
@@ -269,15 +358,16 @@ export default function HomeworkDashboard() {
                 <div className="hw-arch-meta">{r.meta}</div>
               </div>
               <div className="hw-arch-right">
-                <div className="hw-arch-score" style={{color:r.color}}>{r.score}%</div>
+                <div className="hw-arch-score" style={{color:r.color}}>{r.tier}</div>
                 <div className="hw-arch-date">{r.date}</div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* ── ANNOUNCEMENTS TAB ── */}
+        {/* ── ANNOUNCEMENTS TAB (STAGED) ── */}
         <div className={`hw-tc${tab==='ann'?' active':''}`} style={{gap:'9px'}}>
+          <StagedNote />
           {ANN.map((a,i) => (
             <div key={i} className="hw-ann-card">
               <div className="hw-ann-hd">
@@ -347,7 +437,7 @@ export default function HomeworkDashboard() {
                 <div className="hw-fb-av-img"><img src="/Motesart Avatar 1.PNG" alt="Motesart" onError={e => { e.target.style.display='none'; e.target.parentElement.textContent='M' }} /></div>
                 <div className="hw-fb-label">Motesart {'\u00b7'} Based on your last session</div>
               </div>
-              <div className="hw-fb-txt">Your accuracy on the right hand hit 92% last session {'\u2014'} that{'\u2019'}s real ownership. Left hand is at 71%. Try the three-note grouping approach: play notes 1-2-3, pause, then 4-5-6. You{'\u2019'}ll feel the pattern lock in.</div>
+              <div className="hw-fb-txt">Your right hand owned it last session {'\u2014'} that pattern is yours now. Your left hand is still growing. Try the three-note grouping approach: play notes 1-2-3, pause, then 4-5-6. You{'\u2019'}ll feel the pattern lock in.</div>
             </div>
           </div>
 
@@ -365,7 +455,7 @@ export default function HomeworkDashboard() {
               <div className="hw-vis">
                 <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#14b8a6'}} />Teacher sees submissions immediately</div>
                 <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#f59e0b'}} />Parent receives a weekly summary</div>
-                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#a78bfa'}} />T.A.M.i updates your DPM score</div>
+                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#a78bfa'}} />Your progress updates automatically</div>
               </div>
             </div>
           </div>

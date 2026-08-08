@@ -1,14 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import { submitEvidenceEvent, tierMessage } from '../services/evidenceClient.js'
 import levels from '../data/rhythm_racer_levels.json'
 
-const API_BASE = 'https://motesart-converter.netlify.app'
+// M1: canonical evidence goes to the Railway backend — the converter state
+// plane is no longer written from this surface.
 const PERFECT_MS = 50
 const GOOD_MS = 100
 const EDGE_MS = 180
 const MAX_LIVES = 3
+
+// Student-facing save-state labels (no internals, no numerics)
+const LOG_LABELS = {
+  idle: '',
+  posting: 'Saving…',
+  posted: 'Saved ✓',
+  queued: 'Saved — will sync when online',
+  failed: 'Not saved',
+  skipped: 'Practice only',
+  signin: 'Sign in to save progress',
+}
 
 const RESULT_TEXT = {
   perfect: ['PERFECT', "That's it. Locked in."],
@@ -21,10 +33,6 @@ const RESULT_TEXT = {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
-}
-
-function makeEventId() {
-  return 'evt_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9)
 }
 
 function weightedAccuracy(results) {
@@ -73,14 +81,22 @@ function getMistakePattern(results) {
 }
 
 function buildSummary(level, accuracy, results, durationSeconds) {
+  // `accuracy` and `mastery` are INTERNAL ONLY (Article XIII) — the student UI
+  // renders tier language via tierMessage(); numeric strings never render.
   const mistake = getMistakePattern(results)
   const mastery = accuracy >= 80 ? 'mastery_ready' : accuracy >= 60 ? 'developing' : 'needs_replay'
   return {
     mistake,
     mastery,
-    teacher: `Rhythm Racer L${level.level} ${level.name}: ${accuracy}% accuracy over ${results.length} judged notes in ${durationSeconds}s. Pattern: ${mistake}.`,
     avatar: accuracy >= 80 ? "That's it. Locked in." : "Oof. Let's back up a sec.",
   }
+}
+
+/** Map internal session outcomes onto the EvidenceEvent v1 result enum. */
+function toContractResult(result) {
+  if (result === 'academic_complete' || result === 'complete') return 'complete'
+  if (result === 'out_of_lives') return 'fail'
+  return 'complete'
 }
 
 function scheduleAt(audioContext, when, fn) {
@@ -197,7 +213,7 @@ function DrumPad({ side, label, active, onHit }) {
 export default function RhythmRacerV2() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { user } = useAuth()
+  const { learningIdentity } = useAuth()
 
   const requestedMode = searchParams.get('mode') || 'game'
   const isAcademic = requestedMode === 'academic'
@@ -224,6 +240,7 @@ export default function RhythmRacerV2() {
   const [sessionResults, setSessionResults] = useState([])
   const [summary, setSummary] = useState(null)
   const [logState, setLogState] = useState('idle')
+  const [serverEvidence, setServerEvidence] = useState(null)
 
   const audioRef = useRef(null)
   const timersRef = useRef([])
@@ -392,63 +409,55 @@ export default function RhythmRacerV2() {
     writePracticeEvent(nextSummary, combined)
   }
 
+  // M1 canonical evidence write — one POST to the Railway backend.
+  // Converter /api/practice-events and /api/concept-state/recompute calls
+  // REMOVED per M1_SPEC (no converter state-plane writes from this surface).
   async function writePracticeEvent(nextSummary, results) {
     if (loggedRef.current) return
     loggedRef.current = true
+
+    const evidenceConcept = conceptId || level.concept
+    if (!evidenceConcept || !/^R_[A-Z0-9_]+$/.test(evidenceConcept)) {
+      console.warn('[RhythmRacerV2] Concept is not canonical R_* — evidence skipped:', evidenceConcept)
+      setLogState('skipped')
+      return
+    }
+    if (!learningIdentity.resolved) {
+      console.warn('[RhythmRacerV2] No resolved student_instrument_id — evidence skipped (sign in required)')
+      setLogState('signin')
+      return
+    }
+
     setLogState('posting')
+    const judged = results.filter(item => item.result !== 'extra')
     const wrongTaps = results
       .filter(item => ['early', 'late', 'miss', 'extra'].includes(item.result))
       .map(item => item.count || item.result)
+    const mistakeTags =
+      nextSummary.mistake && nextSummary.mistake !== 'steady_pulse' ? [nextSummary.mistake] : []
 
-    const payload = {
-      client_event_id: makeEventId(),
-      student_instrument_id: user?.id || getStudentId(),
-      concept_id: conceptId || level.concept,
+    // client_event_id: generated as a uuid by evidenceClient and preserved
+    // across offline-queue retries (idempotent duplicate → 200).
+    const res = await submitEvidenceEvent({
+      concept_id: evidenceConcept,
       chapter: 'rhythm_racer',
-      result: nextSummary.result,
-      success_summary: `Rhythm Racer ${level.name}: ${nextSummary.accuracy}% accuracy`,
-      found_pairs: [],
-      wrong_taps: wrongTaps,
+      source_activity: 'rhythm_racer',
+      activity_variant: level.id || `level_${level.level}`,
+      ...(assignmentId ? { assignment_id: assignmentId } : {}),
       attempt_count: nextSummary.attempts,
-      hint_used: false,
+      wrong_taps: wrongTaps,
       tempo_factor: level.bpm / 70,
-      timestamp: new Date().toISOString(),
-      assignment_id: assignmentId,
-      activity_type: 'rhythm_racer',
+      result: toContractResult(nextSummary.result),
+      duration_min: Number((nextSummary.durationSeconds / 60).toFixed(2)),
+      event_timestamp: new Date().toISOString(),
       started_at: new Date(sessionStartRef.current).toISOString(),
       ended_at: new Date().toISOString(),
-      duration_seconds: nextSummary.durationSeconds,
-      accuracy: nextSummary.accuracy,
-      attempts: nextSummary.attempts,
-      hints_used: 0,
-      mistake_pattern: nextSummary.mistake,
-      mastery_status: nextSummary.mastery,
-      teacher_summary: nextSummary.teacher,
-      avatar_summary: nextSummary.avatar,
-    }
-
-    try {
-      console.log('[RhythmRacerV2] Event payload:', payload)
-      const res = await fetch(API_BASE + '/api/practice-events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
-      console.log('[RhythmRacerV2] API event response:', data)
-      await fetch(API_BASE + '/api/concept-state/recompute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          student_instrument_id: payload.student_instrument_id,
-          concept_id: payload.concept_id,
-        }),
-      })
-      setLogState('posted')
-    } catch (err) {
-      console.warn('[RhythmRacerV2] API write failed:', err)
-      setLogState('failed')
-    }
+      notes_attempted: judged.length,
+      notes_correct: judged.filter(i => i.result === 'perfect' || i.result === 'good').length,
+      mistake_tags: mistakeTags,
+    })
+    setServerEvidence(res)
+    setLogState(res.ok ? 'posted' : res.queued ? 'queued' : 'failed')
   }
 
   const playStage = useCallback(async () => {
@@ -529,6 +538,28 @@ export default function RhythmRacerV2() {
     setUnlockedLevel(Math.max(1, requestedLevel))
   }, [requestedLevel])
 
+  // M1: academic (homework) mode requires a resolved learning identity —
+  // no default_student fallback. Unresolved → sign-in prompt, no evidence.
+  if (isAcademic && !learningIdentity.resolved) {
+    return (
+      <main className="rr2-page">
+        <style>{styles}</style>
+        <section className="rr2-shell" style={{ maxWidth: 520, textAlign: 'center', padding: '42px 24px' }}>
+          <h1 style={{ fontFamily: "'Outfit','DM Sans',sans-serif", margin: '0 0 12px' }}>Rhythm Racer</h1>
+          <p style={{ color: '#e2e8f0', fontWeight: 800, margin: '0 0 6px' }}>Homework mode needs your student sign-in.</p>
+          <p style={{ color: '#94a3b8', margin: '0 0 24px' }}>Sign in so this session counts toward your assignment.</p>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            style={{ border: 0, borderRadius: 8, background: 'linear-gradient(135deg,#3ee0c8,#8b7ef8)', color: '#061225', padding: '15px 32px', fontWeight: 900, fontSize: 16, cursor: 'pointer', minHeight: 48, minWidth: 160 }}
+          >
+            Sign In
+          </button>
+        </section>
+      </main>
+    )
+  }
+
   return (
     <main className="rr2-page">
       <style>{styles}</style>
@@ -543,7 +574,8 @@ export default function RhythmRacerV2() {
           </div>
           <div className="rr2-progress-cell">
             <div className="rr2-progress-bar"><span style={{ height: `${progress}%` }} /></div>
-            <span><b>PROGRESS</b>{progress}%</span>
+            {/* Article XIII: stage count, not a percentage */}
+            <span><b>PROGRESS</b>{correctStages % 5}/5</span>
           </div>
         </header>
 
@@ -582,12 +614,13 @@ export default function RhythmRacerV2() {
         {summary && (
           <section className="rr2-summary">
             <h2>Session Summary</h2>
-            <p>{summary.accuracy}% accuracy - {summary.mastery.replace(/_/g, ' ')}</p>
-            <p>{summary.teacher}</p>
+            {/* Article XIII: tier language only — no accuracy %, no mastery status */}
+            <p>{(serverEvidence?.ok && serverEvidence.message) || tierMessage(summary.mastery)}</p>
+            <p>{summary.avatar}</p>
             <div className="rr2-summary-actions">
               {isAcademic && <button type="button" onClick={() => navigate('/homework')}>Back to Homework</button>}
-              {!isAcademic && <button type="button" onClick={() => { setSummary(null); setLives(MAX_LIVES); setPhase('ready'); loggedRef.current = false; sessionStartRef.current = Date.now() }}>Play Again</button>}
-              <span>Log: {logState}</span>
+              {!isAcademic && <button type="button" onClick={() => { setSummary(null); setServerEvidence(null); setLives(MAX_LIVES); setPhase('ready'); loggedRef.current = false; sessionStartRef.current = Date.now() }}>Play Again</button>}
+              <span>{LOG_LABELS[logState] || ''}</span>
             </div>
           </section>
         )}
@@ -610,5 +643,5 @@ const styles = `
 .rr2-feedback{margin:16px auto 0;max-width:560px;min-height:70px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(15,23,42,.78);border:1px solid rgba(148,163,184,.22)}.rr2-feedback strong{font-size:30px}.rr2-feedback span{color:#b8c2d8;font-weight:800}.rr2-feedback.perfect strong,.rr2-feedback.good strong{color:#3ee0c8}.rr2-feedback.early strong,.rr2-feedback.late strong{color:#facc15}.rr2-feedback.miss strong,.rr2-feedback.extra strong{color:#fb7185}
 .rr2-summary{margin-top:14px;padding:16px;border-radius:8px;background:rgba(8,13,32,.92);border:1px solid rgba(62,224,200,.28);text-align:center}.rr2-summary h2{margin:0 0 8px}.rr2-summary p{margin:6px 0;color:#cbd5e1}.rr2-summary-actions{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:12px}.rr2-summary-actions button{border:0;border-radius:8px;background:#3ee0c8;color:#062327;padding:10px 14px;font-weight:950;cursor:pointer}.rr2-summary-actions span{color:#94a3b8;font-weight:800}
 @keyframes rr2Pulse{0%{transform:scale(.9)}70%{transform:scale(1.08)}100%{transform:scale(1)}}@keyframes rr2Ripple{0%{opacity:.8;transform:scale(.55)}100%{opacity:0;transform:scale(1.45)}}
-@media (max-width:760px){.rr2-page{padding:10px}.rr2-shell{padding:10px}.rr2-topbar{grid-template-columns:1fr 1fr}.rr2-topbar>*{border-bottom:1px solid rgba(148,163,184,.2)}.rr2-progress-cell{grid-column:1/-1}.rr2-midrow{grid-template-columns:1fr;justify-items:center}.rr2-level,.rr2-play{justify-self:center}.rr2-pads{gap:10px}.rr2-pad{height:220px}.rr2-metal-rim{width:166px;height:166px}.rr2-mesh-head{width:128px;height:128px}.rr2-mesh-head strong{font-size:22px}.rr2-mesh-head small{margin-top:-28px}.rr2-lug{left:74px;top:74px;transform:scale(.72)}.rr2-rim-clamp{width:48px;margin-left:-24px}.rr2-staff-card{padding:8px}.rr2-count-label{font-size:11px}}
+@media (max-width:760px){.rr2-page{padding:10px}.rr2-shell{padding:10px}.rr2-pad{overflow:hidden}.rr2-topbar{grid-template-columns:1fr 1fr}.rr2-topbar>*{border-bottom:1px solid rgba(148,163,184,.2)}.rr2-progress-cell{grid-column:1/-1}.rr2-midrow{grid-template-columns:1fr;justify-items:center}.rr2-level,.rr2-play{justify-self:center}.rr2-pads{gap:10px}.rr2-pad{height:220px}.rr2-metal-rim{width:166px;height:166px}.rr2-mesh-head{width:128px;height:128px}.rr2-mesh-head strong{font-size:22px}.rr2-mesh-head small{margin-top:-28px}.rr2-lug{left:74px;top:74px;transform:scale(.72)}.rr2-rim-clamp{width:48px;margin-left:-24px}.rr2-staff-card{padding:8px}.rr2-count-label{font-size:11px}}
 `
