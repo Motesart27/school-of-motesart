@@ -1,5 +1,26 @@
 # SOM PROJECT BRAIN — HANDOFF
-Last Updated: May 23, 2026 | Bundle: index-DfXy9PFK.js
+Last Updated: August 8, 2026 | Bundle: index-DfXy9PFK.js (prod unchanged — branch work)
+
+## SESSION HANDOFF — August 8, 2026 (PKG-FE · branch-only)
+- What: M1 frontend evidence path per PKG-FE dispatch card (M1_SPEC amended
+  2026-08-08, MYA Amendments 1–4). Branch `feat/m1-evidence-frontend` off
+  main @ 9b5449f. NOT merged. NOT deployed. Backend contract frozen at
+  Deployable-python-codebase-som feat/m1-evidence-write-path @ 0ee4585.
+- Files: NEW src/services/evidenceClient.js, NEW src/components/gate0/
+  gateEvidenceAdapter.js (flag-gated OFF — VITE_GATE_EVIDENCE=1 enables later,
+  Amendment 4); MODIFIED api.js, AuthContext.jsx (learningIdentity), GamePage.jsx
+  (evidence path, dead /session/log + /leaderboard/submit POSTs removed),
+  RhythmRacerV2.jsx (Railway repoint, converter writes removed, tier language),
+  HomeworkDashboard.jsx (live GET /assignments/mine; SHEETS/ARCH/ANN STAGED),
+  concept_state_store.js (cache demotion, no default_student, read-through),
+  FindHomeGate/SkipAndTogetherGate/MajorScalePatternGate (shared seam).
+- Result: branch QA 38/38 (mocked backend — NOT production evidence):
+  single idempotent evidence POSTs, client_event_id reuse on retry verified,
+  zero converter calls, offline queue single-flush, mobile 390x844 + 393x852
+  clean, `npm run build` clean. Awaiting Codex review; merge/deploy held.
+- Note: GamePage.jsx is CLAUDE.md-protected; edited strictly per the explicit
+  PKG-FE dispatch order. Article XIII sweep on touched surfaces only —
+  StudentDashboard/TamiDashboard percentages left for a later pass.
 
 ## TWO-LANE ARCHITECTURE (LOCKED)
 
