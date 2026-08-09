@@ -61,8 +61,13 @@ export async function gateEvidenceAdapter(result) {
 
   const draft = {
     concept_id: canonical,
-    chapter: 'gate0',
-    source_activity: 'mastery_gate',
+    // Backend R1 canonical enums (M1_CHAPTERS / SOURCE_ACTIVITIES @ 69147f5):
+    // the gate chapter and gate source are both the literal 'gate' — the
+    // earlier 'gate0'/'mastery_gate' values were not in the backend enum and
+    // would 422 if this held seam were ever activated. Alignment only — the
+    // flag remains OFF and NO gate network evidence is written in this package.
+    chapter: 'gate',
+    source_activity: 'gate',
     activity_variant: result.concept,
     result: 'pass',
     proof: {

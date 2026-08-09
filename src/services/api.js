@@ -64,6 +64,12 @@ export const api = {
 
   verifySession: () => request('/auth/verify'),
 
+  // ─── M1 R1 canonical learning identity ──────────────────────
+  // JWT-resolved server-side. The ONLY academic identity source.
+  // (The legacy /student?email= lookup is removed — email never
+  // resolves student records, instruments, or evidence ownership.)
+  getLearningIdentity: () => request('/auth/learning-identity'),
+
   // ─── WYL ─────────────────────────────────────────────────────
   submitWYL: (userId, wylData) =>
     request('/students/wyl', {
@@ -85,7 +91,6 @@ export const api = {
 
   // ─── Students ───────────────────────────────────────────────
   getStudents: () => request('/students'),
-  getStudentByEmail: (email) => request(`/student?email=${encodeURIComponent(email)}`),
 
   // ─── Practice ───────────────────────────────────────────────
   getPracticeLogs: (studentId) =>
@@ -94,9 +99,17 @@ export const api = {
     request('/practice-logs', { method: 'POST', body: JSON.stringify(data) }),
 
   // ─── Homework ───────────────────────────────────────────────
-  // M1 canonical: caller-scoped assignments (Assigned first) —
-  // Concept ID / Status / Completed At / Evidence Ref
+  // M1 R1 canonical serializer: assignment_id IS the Airtable rec… id
+  // (the only completion/evidence linkage key); assignment_number is
+  // the Autonumber display value and never identifies anything.
   getMyAssignments: () => request('/assignments/mine'),
+
+  // M1 R1: the student's current active assignment. Explicit contract:
+  // { has_active_assignment: true,  assignment: {…canonical serializer…} }
+  // { has_active_assignment: false, assignment: null }
+  // 403 wrong_student → fail closed · 503 → retryable, never permanent.
+  getActiveAssignment: (studentInstrumentId) =>
+    request(`/concept-state/${encodeURIComponent(studentInstrumentId)}/active-assignment`),
 
   getHomework: (studentName) =>
     request(`/assignments/student/${encodeURIComponent(studentName)}`),

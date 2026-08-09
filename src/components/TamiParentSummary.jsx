@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react'
-import api from '../services/api.js'
-import { buildSignalContextFromStudentRecord } from '../ai/tami/tamiDataAdapter.js'
-import { runTamiDecisionEngine } from '../ai/tami/tamiDecisionEngine.js'
-import { formTamiOutput } from '../ai/tami/tamiOutputFormation.js'
+// M1 R1 fix 1: /student?email= is removed — no email-based student lookup.
+// The signal/decision imports return when a canonical parent→child endpoint exists.
 
 const FORBIDDEN_PARENT_WORDS = /\b(P0|P1|risk|confusionScore|masteryRiskScore|engagementRiskScore|intervention|at-risk|flagged|alert|urgent|nominal)\b/i
 
@@ -26,18 +24,12 @@ export default function TamiParentSummary({ childEmail }) {
     let cancelled = false
     if (!childEmail) return
     setLoading(true)
-    api.getStudentByEmail(childEmail)
-      .then(async record => {
-        const studentId = record?.id || record?.record_id || record?.fields?.id || childEmail
-        const logs = await api.getPracticeLogs(studentId).catch(() => null)
-        const signalContext = buildSignalContextFromStudentRecord(record, logs, null)
-        const decision = runTamiDecisionEngine(signalContext || {})
-        formTamiOutput({ decision, signals: signalContext, stakeholderMode: 'parent' })
-        const nextSummary = safeParentCopy(signalContext)
-        if (!cancelled) setSummary(nextSummary)
-      })
-      .catch(err => {
-        console.warn('[TAMI Parent Summary] Failed to load child data:', err)
+    // M1 R1 fix 1: the legacy /student?email= identity lookup is REMOVED —
+    // email never resolves a student record. Until a canonical parent→child
+    // linkage endpoint exists server-side, this summary renders its neutral
+    // fallback copy and makes no email-based lookups.
+    Promise.resolve()
+      .then(() => {
         if (!cancelled) setSummary({
           progressSummary: 'T.A.M.i could not read the latest practice data yet. The dashboard will try again later.',
           highlight: 'Your child still has access to practice tools.',

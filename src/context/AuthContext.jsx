@@ -1,35 +1,97 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { api } from '../services/api.js'
 import { flushEvidenceQueue } from '../services/evidenceClient.js'
 import { setStudentId } from '../lesson_engine/concept_state_store.js'
 
 const AuthContext = createContext(null)
 
-// ── M1 learning identity resolution ──────────────────────────────────────────
-// student_instrument_id comes from the backend only: the login/verify payload
-// directly, or the existing identity lookup (/student?email=) as a follow-up.
-// NO default_student fallback anywhere in the M1 path — unresolved stays null.
-const extractInstrumentId = (u) =>
-  u?.student_instrument_id ||
-  u?.learning_identity?.student_instrument_id ||
-  null
+// ── M1 R1 canonical learning identity ────────────────────────────────────────
+// The ONLY academic identity source is GET /auth/learning-identity (JWT-bound,
+// resolved server-side). Email NEVER resolves student records, instruments,
+// assignment identity, or evidence ownership. The legacy /student?email=
+// follow-up is removed entirely — no silent substitute identity source.
+//
+// Contract (backend R1 @ 69147f5):
+//   identity_status "resolved"           → student_instrument_id filled (exactly one owned instrument)
+//   identity_status "selection_required" → student_instrument_id null; NEVER owned_instruments[0];
+//                                          explicit student selection required (cached selection is a
+//                                          convenience pointer only and must re-validate against the
+//                                          CURRENT owned_instruments on every refresh)
+//   identity_status "unresolved"         → zero owned instruments; academic evidence writes blocked
+//   HTTP 503 identity_unavailable_retryable → transient; retryable; NEVER converted to permanent unresolved
 
-async function resolveStudentInstrumentId(userData) {
-  const direct = extractInstrumentId(userData)
-  if (direct) return direct
-  if (!userData?.email) return null
-  try {
-    const rec = await api.getStudentByEmail(userData.email)
-    return (
-      rec?.student_instrument_id ||
-      rec?.student?.student_instrument_id ||
-      rec?.learning_identity?.student_instrument_id ||
-      null
-    )
-  } catch {
-    return null
-  }
+// Cache-only snapshot consumed by evidenceClient (convenience pointer, never authority).
+const IDENTITY_SNAPSHOT_KEY = 'som_learning_identity'
+// Convenience pointer for an explicit multi-instrument selection, keyed to the user.
+const SELECTED_INSTRUMENT_KEY = 'som_selected_instrument'
+
+const EMPTY_IDENTITY = {
+  user_id: null,
+  student_record_id: null,
+  student_instrument_id: null,
+  role: null,
+  identity_status: null,           // null until the first successful fetch settles
+  selection_required: false,
+  owned_instruments: [],
+  selected_student_instrument_id: null,
+  learning_identity_ready: false,
+  learning_identity_retryable_error: false,
 }
+
+function readStoredSelection() {
+  try {
+    const raw = localStorage.getItem(SELECTED_INSTRUMENT_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch { return null }
+}
+
+function writeStoredSelection(userId, studentInstrumentId) {
+  try {
+    if (userId && studentInstrumentId) {
+      localStorage.setItem(SELECTED_INSTRUMENT_KEY, JSON.stringify({ user_id: userId, student_instrument_id: studentInstrumentId }))
+    } else {
+      localStorage.removeItem(SELECTED_INSTRUMENT_KEY)
+    }
+  } catch { /* storage unavailable — selection just won't persist */ }
+}
+
+/** The instrument evidence writes may use: resolved canonical id, or the
+ *  explicit (validated) selection when the backend demands a selection. */
+function effectiveInstrumentId(identity) {
+  if (identity.identity_status === 'resolved') return identity.student_instrument_id || null
+  if (identity.identity_status === 'selection_required') return identity.selected_student_instrument_id || null
+  return null
+}
+
+/** Cache-only snapshot for non-React consumers (evidenceClient). Never authority. */
+function writeIdentitySnapshot(identity) {
+  try {
+    const si = effectiveInstrumentId(identity)
+    localStorage.setItem(IDENTITY_SNAPSHOT_KEY, JSON.stringify({
+      student_instrument_id: si,
+      identity_status: identity.identity_status,
+      selection_required: !!identity.selection_required,
+      ready: !!identity.learning_identity_ready,
+      ts: new Date().toISOString(),
+    }))
+  } catch { /* cache only */ }
+}
+
+function clearIdentitySnapshot() {
+  try { localStorage.removeItem(IDENTITY_SNAPSHOT_KEY) } catch { /* cache only */ }
+}
+
+/** Transient failures stay retryable — they are NEVER a permanent unresolved verdict. */
+function isRetryableIdentityError(err) {
+  const status = err?.status
+  if (status === 503) return true            // identity_unavailable_retryable
+  if (status === 0 || status === undefined) return true // network failure / timeout
+  if (status === 408 || status === 429) return true
+  if (status >= 500) return true
+  return false
+}
+
+const IDENTITY_RETRY_DELAYS_MS = [5000, 10000, 20000] // then manual retry only
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
@@ -40,55 +102,169 @@ export function AuthProvider({ children }) {
   })
 
   const [verifying, setVerifying] = useState(false)
+  const [identity, setIdentity] = useState(EMPTY_IDENTITY)
+  const identityRef = useRef(identity)
+  identityRef.current = identity
+  const retryTimerRef = useRef(null)
+  const retryCountRef = useRef(0)
+  const fetchSeqRef = useRef(0)
 
-  // ── Persist to localStorage (but NEVER trust it as source of truth) ──
+  // ── Persist display user to localStorage (cache — never identity authority) ──
   useEffect(() => {
     if (user) localStorage.setItem('som_user', JSON.stringify(user))
     else localStorage.removeItem('som_user')
   }, [user])
 
-  // ── Login: set user from backend response only ──
+  const applyIdentity = useCallback((next) => {
+    setIdentity(next)
+    writeIdentitySnapshot(next)
+    // Concept-state cache namespace follows the effective identity (cache only).
+    setStudentId(effectiveInstrumentId(next))
+  }, [])
+
+  // ── Fetch GET /auth/learning-identity and settle the identity state ──
+  const refreshLearningIdentity = useCallback(async () => {
+    const token = localStorage.getItem('som_token')
+    if (!token) {
+      applyIdentity(EMPTY_IDENTITY)
+      return null
+    }
+    const seq = ++fetchSeqRef.current
+    try {
+      const data = await api.getLearningIdentity()
+      if (seq !== fetchSeqRef.current) return null // superseded by a newer fetch/logout
+
+      const owned = Array.isArray(data?.owned_instruments) ? data.owned_instruments : []
+      const ownedIds = new Set(owned.map(o => o?.student_instrument_id).filter(Boolean))
+
+      // Re-validate any cached selection against the CURRENT owned_instruments.
+      // A stale pointer (different user, or no longer owned) is discarded —
+      // selection is required again. The cache is convenience, never identity.
+      let selected = null
+      if (data?.identity_status === 'selection_required') {
+        const stored = readStoredSelection()
+        if (
+          stored?.student_instrument_id &&
+          stored?.user_id === data?.user_id &&
+          ownedIds.has(stored.student_instrument_id)
+        ) {
+          selected = stored.student_instrument_id
+        } else if (stored) {
+          writeStoredSelection(null, null) // discard stale pointer
+        }
+      } else {
+        writeStoredSelection(null, null) // resolved/unresolved need no selection pointer
+      }
+
+      const next = {
+        user_id: data?.user_id ?? null,
+        student_record_id: data?.student_record_id ?? null,
+        student_instrument_id: data?.student_instrument_id ?? null,
+        role: data?.role ?? null,
+        identity_status: data?.identity_status ?? 'unresolved',
+        selection_required: !!data?.selection_required,
+        owned_instruments: owned,
+        selected_student_instrument_id: selected,
+        learning_identity_ready: true,
+        learning_identity_retryable_error: false,
+      }
+      retryCountRef.current = 0
+      applyIdentity(next)
+
+      // Queued evidence can flush once a usable identity exists.
+      if (effectiveInstrumentId(next)) flushEvidenceQueue()
+      return next
+    } catch (err) {
+      if (seq !== fetchSeqRef.current) return null
+      const retryable = isRetryableIdentityError(err)
+      // Transient failure NEVER downgrades a previously-good identity to
+      // unresolved, and never becomes a permanent verdict.
+      const prev = identityRef.current
+      const next = {
+        ...prev,
+        learning_identity_ready: prev.learning_identity_ready && retryable ? prev.learning_identity_ready : false,
+        learning_identity_retryable_error: retryable,
+      }
+      // Keep prior resolved/selection data visible while retrying; a
+      // non-retryable unexpected failure clears readiness but invents nothing.
+      setIdentity(next)
+      writeIdentitySnapshot({ ...next, learning_identity_ready: false })
+      if (retryable) {
+        const delay = IDENTITY_RETRY_DELAYS_MS[retryCountRef.current]
+        if (delay !== undefined) {
+          retryCountRef.current += 1
+          if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+          retryTimerRef.current = setTimeout(() => { refreshLearningIdentity() }, delay)
+        }
+        console.warn('[SOM Auth] learning-identity temporarily unavailable — retryable, not unresolved')
+      } else {
+        console.warn('[SOM Auth] learning-identity request failed (non-retryable):', err?.message)
+      }
+      return null
+    }
+  }, [applyIdentity])
+
+  const retryLearningIdentity = useCallback(() => {
+    retryCountRef.current = 0
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
+    return refreshLearningIdentity()
+  }, [refreshLearningIdentity])
+
+  // ── Explicit multi-instrument selection (fix 2B) ──
+  // NEVER called automatically with owned_instruments[0] — this is the
+  // student's explicit choice, validated against the current owned set.
+  const selectInstrument = useCallback((studentInstrumentId) => {
+    const cur = identityRef.current
+    const ownedIds = new Set((cur.owned_instruments || []).map(o => o?.student_instrument_id).filter(Boolean))
+    if (!cur.selection_required || !studentInstrumentId || !ownedIds.has(studentInstrumentId)) {
+      console.warn('[SOM Auth] Ignored instrument selection outside the owned set:', studentInstrumentId)
+      return false
+    }
+    writeStoredSelection(cur.user_id, studentInstrumentId)
+    const next = { ...cur, selected_student_instrument_id: studentInstrumentId }
+    applyIdentity(next)
+    flushEvidenceQueue()
+    return true
+  }, [applyIdentity])
+
+  const clearInstrumentSelection = useCallback(() => {
+    const cur = identityRef.current
+    writeStoredSelection(null, null)
+    applyIdentity({ ...cur, selected_student_instrument_id: null })
+  }, [applyIdentity])
+
+  // ── Login: set user from backend response, then resolve canonical identity ──
   const login = (userData, token) => {
     // SECURITY: Role comes from backend (Airtable) only.
-    // Default to "student" if backend somehow omits role.
     const u = { ...userData, role: userData.role || 'student' }
     setUser(u)
-    // Store JWT token
     if (token) localStorage.setItem('som_token', token)
-
-    // M1: resolve learning identity (student_instrument_id), persist it in
-    // som_user, sync the concept-state cache namespace, and flush any queued
-    // evidence now that a fresh token is available.
-    resolveStudentInstrumentId(u).then(si => {
-      if (si) {
-        setStudentId(si)
-        setUser(prev => (prev ? { ...prev, student_instrument_id: si } : prev))
-      } else {
-        console.warn('[SOM Auth] student_instrument_id unresolved — evidence writes disabled until identity resolves')
-      }
-      flushEvidenceQueue()
-    })
+    // M1 R1: canonical learning identity comes ONLY from /auth/learning-identity.
+    refreshLearningIdentity()
   }
 
-  // ── Logout: clear everything ──
+  // ── Logout: clear everything (identity, snapshot, selection, cache namespace) ──
   const logout = useCallback(() => {
+    fetchSeqRef.current += 1 // invalidate any in-flight identity fetch
+    if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
     setUser(null)
     localStorage.removeItem('som_user')
     localStorage.removeItem('som_token')
-    // M1: clear the cache namespace pointer — never let a stale identity leak
-    // into the next session (no default_student, no cross-student bleed).
+    clearIdentitySnapshot()
+    writeStoredSelection(null, null)
+    setIdentity(EMPTY_IDENTITY)
+    // Clear the cache namespace pointer — no stale identity leaks into the
+    // next session (no default_student, no cross-student bleed).
     setStudentId(null)
   }, [])
 
   // ── Update user fields (NEVER allow role mutation from frontend) ──
   const updateUser = (updates) => {
-    // SECURITY: Strip role from any frontend update attempt.
-    // Role can ONLY change via Airtable → re-login.
     const { role, ...safeUpdates } = updates
     setUser(prev => prev ? { ...prev, ...safeUpdates } : null)
   }
 
-  // ── Listen for force-logout from API 401 responses ──
+  // ── Force-logout from API 401 responses ──
   useEffect(() => {
     const handler = () => {
       console.warn('[SOM Auth] Force-logout: token rejected by backend')
@@ -98,14 +274,23 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('som:force-logout', handler)
   }, [logout])
 
-  // ── Verify user still exists in Airtable on app boot ──
-  // Prevents legacy/ghost users from persisting via stale localStorage
+  // ── Backend demanded an explicit selection (409 selection_required on a write) ──
+  useEffect(() => {
+    const handler = () => {
+      console.warn('[SOM Auth] Backend requires explicit instrument selection — returning to selection flow')
+      clearInstrumentSelection()
+      refreshLearningIdentity()
+    }
+    window.addEventListener('som:selection-required', handler)
+    return () => window.removeEventListener('som:selection-required', handler)
+  }, [clearInstrumentSelection, refreshLearningIdentity])
+
+  // ── Verify session on app boot, then resolve canonical identity ──
   useEffect(() => {
     if (!user || !user.email) return
 
     const token = localStorage.getItem('som_token')
     if (!token) {
-      // No token = legacy session. Force re-login.
       console.warn('[SOM Auth] No token found — clearing legacy session')
       logout()
       return
@@ -123,16 +308,12 @@ export function AuthProvider({ children }) {
         } else if (data.user) {
           // Refresh role from Airtable (in case admin changed it)
           setUser(prev => prev ? { ...prev, role: data.user.role || 'student' } : null)
-          // M1: (re)resolve learning identity on verified boot
-          resolveStudentInstrumentId({ ...user, ...data.user }).then(si => {
-            if (cancelled || !si) return
-            setStudentId(si)
-            setUser(prev => (prev ? { ...prev, student_instrument_id: si } : prev))
-          })
+          // M1 R1: (re)resolve canonical learning identity on verified boot —
+          // any cached instrument selection re-validates in this refresh.
+          refreshLearningIdentity()
         }
       })
       .catch(() => {
-        // Backend unreachable — do NOT grant access. Force re-login.
         if (!cancelled) {
           console.warn('[SOM Auth] Backend unreachable — clearing session')
           logout()
@@ -143,21 +324,43 @@ export function AuthProvider({ children }) {
     return () => { cancelled = true }
   }, []) // Only on mount
 
-  // ── M1: flush queued evidence on app start ──
+  // ── Flush queued evidence on app start (evidenceClient re-checks identity) ──
   useEffect(() => {
     flushEvidenceQueue()
+    return () => { if (retryTimerRef.current) clearTimeout(retryTimerRef.current) }
   }, [])
 
-  // ── M1: learning identity exposed to every surface ──
-  // Consumers must treat resolved:false as "no evidence writes" (sign-in
-  // prompt / skip + warn) — never substitute a default identity.
+  // ── M1 R1 learning identity exposed to every surface ──
+  // evidence writes require: learning_identity_ready AND an effective
+  // instrument (resolved, or explicitly selected out of owned_instruments).
+  // unresolved / selection-pending / retryable-error states must NOT write.
   const learningIdentity = useMemo(() => ({
-    student_instrument_id: user?.student_instrument_id || null,
-    resolved: !!user?.student_instrument_id,
-  }), [user])
+    user_id: identity.user_id,
+    student_record_id: identity.student_record_id,
+    student_instrument_id: identity.student_instrument_id,
+    role: identity.role,
+    identity_status: identity.identity_status,
+    selection_required: identity.selection_required,
+    owned_instruments: identity.owned_instruments,
+    selected_student_instrument_id: identity.selected_student_instrument_id,
+    learning_identity_ready: identity.learning_identity_ready,
+    learning_identity_retryable_error: identity.learning_identity_retryable_error,
+  }), [identity])
+
+  const evidenceStudentInstrumentId = useMemo(() => effectiveInstrumentId(identity), [identity])
+  const evidenceReady = identity.learning_identity_ready && !!evidenceStudentInstrumentId
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, verifying, learningIdentity }}>
+    <AuthContext.Provider value={{
+      user, login, logout, updateUser, verifying,
+      learningIdentity,
+      evidenceStudentInstrumentId,
+      evidenceReady,
+      selectInstrument,
+      clearInstrumentSelection,
+      refreshLearningIdentity,
+      retryLearningIdentity,
+    }}>
       {children}
     </AuthContext.Provider>
   )

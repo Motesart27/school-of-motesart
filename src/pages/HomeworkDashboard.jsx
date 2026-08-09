@@ -1,12 +1,21 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api.js'
+import { isCanonicalAssignmentId } from '../services/evidenceClient.js'
+import InstrumentSelect from '../components/InstrumentSelect.jsx'
 import rrLevels from '../data/rhythm_racer_levels.json'
 
-/* ── M1 live assignments — GET /assignments/mine (Assigned first) ──
- * Contract fields: Concept ID / Status / Completed At / Evidence Ref.
- * Mapping is defensive on field casing; unknown fields never invented. */
+/* ── M1 R1 live assignments — GET /assignments/mine ──────────────────────────
+ * Aligned to the canonical backend R1 serializer (parse_assignment @ 69147f5):
+ *   id · assignment_id (Airtable rec… — the ONLY completion/evidence linkage
+ *   key) · assignment_number (Autonumber, DISPLAY ONLY) · name · status ·
+ *   student · due_date · title · minutes_target · type · teacher_feedback ·
+ *   homework_template · student_instruments · created_by · concept_id ·
+ *   completed_at · evidence_ref
+ * Canonical names only — the R1 serializer makes the old defensive aliases
+ * (concept, completedAt, evidenceRef, assignment_type, description)
+ * unnecessary, so they are removed rather than hiding contract mismatches. */
 const humanizeConcept = (c) =>
   c ? c.replace(/^[TR]_/, '').replace(/_/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()) : 'Assignment'
 
@@ -15,28 +24,53 @@ const rrLevelForConcept = (concept) => {
   return match ? match.level : 1
 }
 
+// Launch routing: R_* → Rhythm Racer · Quiz → /game · everything else →
+// /practice-live. The concept parameter is ONLY attached when the assignment
+// actually carries one — a missing concept is never replaced with an invented
+// default (no fabricated T_HALF_STEP / T_MAJOR_SCALE_PATTERN).
+function launchRouteFor(a) {
+  if (!a.assignmentId || !isCanonicalAssignmentId(a.assignmentId)) return null
+  if (a.concept && a.concept.startsWith('R_')) {
+    return `/rhythm-racer?mode=academic&concept=${encodeURIComponent(a.concept)}&assignment_id=${encodeURIComponent(a.assignmentId)}&level=${rrLevelForConcept(a.concept)}`
+  }
+  if (a.type === 'Quiz') {
+    return a.concept
+      ? `/game?mode=academic&concept=${encodeURIComponent(a.concept)}&assignment_id=${encodeURIComponent(a.assignmentId)}`
+      : null
+  }
+  return a.concept
+    ? `/practice-live?concept=${encodeURIComponent(a.concept)}&assignment_id=${encodeURIComponent(a.assignmentId)}`
+    : null
+}
+
 function mapAssignment(a) {
-  const id = a.assignment_id || a.id || ''
-  const concept = a.concept_id || a.concept || ''
-  const rawStatus = String(a.status || 'Assigned')
-  const completed = /complete/i.test(rawStatus)
-  const completedAt = a.completed_at || a.completedAt || null
-  const type = a.type || a.assignment_type || 'Homework'
-  return {
-    id,
+  if (!a || typeof a !== 'object') return null
+  const assignmentId = a.assignment_id || a.id || '' // both are the Airtable rec… id in the R1 serializer
+  const concept = a.concept_id || ''
+  const status = String(a.status || 'Assigned')
+  const completed = status === 'Completed'
+  const type = a.type || 'Homework'
+  const mapped = {
+    assignmentId,
+    assignmentNumber: a.assignment_number ?? null, // display-only, never an identifier
     concept,
     type,
-    title: a.title || `${humanizeConcept(concept)}${concept.startsWith('R_') ? ' — Rhythm' : ''}`,
-    desc: a.description || a.desc || `Launch this assignment and complete the ${humanizeConcept(concept)} practice.`,
-    status: completed ? 'Completed' : rawStatus,
-    statusCls: completed ? 'co' : /progress/i.test(rawStatus) ? 'ip' : 'pn',
+    name: a.name || '',
+    title: a.title || a.name || `${humanizeConcept(concept)}${concept.startsWith('R_') ? ' — Rhythm' : ''}`,
+    desc: concept
+      ? `Launch this assignment and complete the ${humanizeConcept(concept)} practice.`
+      : 'Your teacher will connect this assignment to a practice activity.',
+    status,
+    statusCls: completed ? 'co' : /progress/i.test(status) ? 'ip' : 'pn',
     completed,
-    completedAt,
-    evidenceRef: a.evidence_ref || a.evidenceRef || null,
-    route: concept.startsWith('R_')
-      ? `/rhythm-racer?mode=academic&concept=${concept}&assignment_id=${id}&level=${rrLevelForConcept(concept)}`
-      : null,
+    completedAt: a.completed_at || null,
+    evidenceRef: a.evidence_ref || null,
+    dueDate: a.due_date || null,
+    minutesTarget: a.minutes_target ?? null,
+    teacherFeedback: a.teacher_feedback || null,
   }
+  mapped.route = launchRouteFor(mapped)
+  return mapped
 }
 const SHEETS = [
   { name:'C Major Scale', meta:'Added Jan 10 \u00b7 Ms. Johnson' },
@@ -198,7 +232,7 @@ const fmtDate = (iso) => {
 }
 
 export default function HomeworkDashboard() {
-  const { user } = useAuth()
+  const { user, learningIdentity, evidenceStudentInstrumentId, evidenceReady, retryLearningIdentity } = useAuth()
   const navigate = useNavigate()
   const [tab, setTab] = useState('asgn')
   const [filter, setFilter] = useState('All')
@@ -208,18 +242,32 @@ export default function HomeworkDashboard() {
   const [guideShow, setGuideShow] = useState(false)
   const helpTimer = useRef(null)
 
-  // ── M1 live assignments ──
+  // ── M1 R1 identity-gated data ──
+  const identityStatus = learningIdentity.identity_status
+  const identityReady = learningIdentity.learning_identity_ready
+  const identityRetryable = learningIdentity.learning_identity_retryable_error
+  const needsSelection = identityStatus === 'selection_required' && !learningIdentity.selected_student_instrument_id
+
+  // ── M1 live assignments (canonical /assignments/mine) ──
   const [assignments, setAssignments] = useState([])
   const [asgnLoading, setAsgnLoading] = useState(true)
   const [asgnError, setAsgnError] = useState(null)
 
   useEffect(() => {
+    if (!identityReady) return
     let cancelled = false
+    setAsgnLoading(true)
     api.getMyAssignments()
       .then(data => {
         if (cancelled) return
-        const raw = Array.isArray(data) ? data : (data?.assignments || data?.items || [])
-        setAssignments(raw.map(mapAssignment).filter(a => a.id || a.concept))
+        // The R1 endpoint returns a bare array — anything else is a real
+        // contract mismatch and is surfaced, not aliased around.
+        if (!Array.isArray(data)) {
+          console.error('[Homework] /assignments/mine returned a non-array — contract mismatch:', typeof data)
+          setAsgnError('Could not load your assignments right now.')
+          return
+        }
+        setAssignments(data.map(mapAssignment).filter(a => a && (a.assignmentId || a.concept)))
         setAsgnError(null)
       })
       .catch(err => {
@@ -229,7 +277,44 @@ export default function HomeworkDashboard() {
       })
       .finally(() => { if (!cancelled) setAsgnLoading(false) })
     return () => { cancelled = true }
-  }, [])
+  }, [identityReady, identityStatus])
+
+  // ── M1 R1 active assignment — GET /concept-state/{si}/active-assignment ──
+  // Explicit contract only: has_active_assignment false → nothing is shown and
+  // nothing is fabricated (no T_MAJOR_SCALE_PATTERN, no legacy fallback).
+  // 403 → fail closed · 503 active_assignment_unavailable_retryable → retry UI.
+  const [activeAsgn, setActiveAsgn] = useState(null)
+  const [activeState, setActiveState] = useState('idle') // idle|loading|loaded|none|retryable|blocked
+  const fetchActiveAssignment = useCallback(() => {
+    const si = evidenceStudentInstrumentId
+    if (!si) { setActiveAsgn(null); setActiveState('idle'); return }
+    setActiveState('loading')
+    api.getActiveAssignment(si)
+      .then(data => {
+        if (data?.has_active_assignment && data?.assignment) {
+          setActiveAsgn(mapAssignment(data.assignment))
+          setActiveState('loaded')
+        } else {
+          // Explicit "no active assignment" — never inferred, never invented.
+          setActiveAsgn(null)
+          setActiveState('none')
+        }
+      })
+      .catch(err => {
+        setActiveAsgn(null)
+        if (err?.status === 403) {
+          console.error('[Homework] active-assignment 403 wrong_student — failing closed')
+          setActiveState('blocked')
+        } else if (err?.status === 503 || err?.status === 0 || err?.status >= 500) {
+          setActiveState('retryable')
+        } else {
+          console.warn('[Homework] active-assignment failed:', err?.message)
+          setActiveState('retryable')
+        }
+      })
+  }, [evidenceStudentInstrumentId])
+
+  useEffect(() => { fetchActiveAssignment() }, [fetchActiveAssignment])
 
   const visibleAssignments = assignments.filter(a =>
     filter === 'All' ? true : filter === 'Completed' ? a.completed : !a.completed
@@ -239,14 +324,10 @@ export default function HomeworkDashboard() {
   const openDet = (a) => { setSelAsgn(a); setDetOpen(true); resetHelp() }
   const closeDet = () => { setDetOpen(false); resetHelp() }
   const resetHelp = () => { setHelpActive(false); setGuideShow(false); if(helpTimer.current) clearTimeout(helpTimer.current) }
-  // Launch routing preserved: Quiz → /game, Homework → /practice-live
-  // (R_* concepts route to Rhythm Racer with their curriculum level).
+  // Launch routing: only routes derived from the assignment's own canonical
+  // fields (rec… assignment_id + real concept). No invented concepts, ever.
   const launchAssignment = (a) => {
-    if (a.route) {
-      navigate(a.route)
-      return
-    }
-    navigate(a.type === 'Quiz' ? `/game?mode=academic&concept=${a.concept||'T_HALF_STEP'}&assignment_id=${a.id}` : `/practice-live?concept=${a.concept||'T_HALF_STEP'}&assignment_id=${a.id}`)
+    if (a.route) navigate(a.route)
   }
   const toggleHelp = () => {
     if (helpActive) { resetHelp(); return }
@@ -287,6 +368,61 @@ export default function HomeworkDashboard() {
 
         {/* ── ASSIGNMENTS TAB ── */}
         <div className={`hw-tc${tab==='asgn'?' active':''}`}>
+
+          {/* Identity not settled yet — a retryable failure is NEVER treated as permanent */}
+          {!identityReady && identityRetryable && (
+            <div data-testid="identity-retryable" style={{fontSize:12,color:'rgba(255,255,255,0.5)',background:'#111827',border:'1px solid rgba(245,158,11,0.25)',borderRadius:12,padding:'14px 15px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexShrink:0}}>
+              <span>Reconnecting to your account…</span>
+              <button onClick={() => retryLearningIdentity()} style={{minHeight:44,padding:'8px 18px',borderRadius:20,border:'1px solid rgba(245,158,11,0.4)',background:'transparent',color:'#f59e0b',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif",flexShrink:0}}>Try again</button>
+            </div>
+          )}
+          {!identityReady && !identityRetryable && (
+            <div style={{fontSize:12,color:'rgba(255,255,255,0.35)',padding:'18px 4px'}}>Getting your account ready…</div>
+          )}
+
+          {/* Zero owned instruments — clear, non-technical setup state; evidence writes stay blocked */}
+          {identityReady && identityStatus === 'unresolved' && (
+            <div data-testid="identity-unresolved" style={{fontSize:12,color:'rgba(255,255,255,0.55)',background:'#111827',border:'1px solid rgba(255,255,255,0.1)',borderRadius:12,padding:'16px',lineHeight:1.6,flexShrink:0}}>
+              <div style={{fontFamily:"'Outfit',sans-serif",fontSize:14,fontWeight:700,color:'#fff',marginBottom:6}}>Almost there!</div>
+              Your account isn’t connected to an instrument yet, so assignments and practice saving are paused.
+              Ask your teacher to finish your setup — everything will show up here as soon as that’s done.
+            </div>
+          )}
+
+          {/* Multiple instruments — explicit student selection, never auto-picked */}
+          {identityReady && needsSelection && (
+            <InstrumentSelect title="Who is practicing today?" />
+          )}
+
+          {identityReady && identityStatus !== 'unresolved' && !needsSelection && (
+            <>
+              {/* ── Up Next: canonical active assignment (explicit contract only) ── */}
+              {activeState === 'loaded' && activeAsgn && (
+                <div data-testid="active-assignment" style={{background:'rgba(20,184,166,0.06)',border:'1px solid rgba(20,184,166,0.3)',borderRadius:12,padding:'13px 15px',display:'flex',alignItems:'center',gap:12,flexShrink:0}}>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:10,fontWeight:600,letterSpacing:'.06em',color:'#14b8a6',textTransform:'uppercase',marginBottom:4}}>Up Next</div>
+                    <div className="hw-acard-title" style={{marginBottom:6}}>{activeAsgn.title}</div>
+                    <div className="hw-badges" style={{marginBottom:activeAsgn.route?9:0}}>
+                      <span className={`hw-bdg ${activeAsgn.type==='Quiz'?'hw-bdg-qz':'hw-bdg-hw'}`}>{activeAsgn.type}</span>
+                      {activeAsgn.dueDate ? <span className="hw-cpill cp-amber">Due {fmtDate(activeAsgn.dueDate)}</span> : null}
+                    </div>
+                    {activeAsgn.route && (
+                      <button
+                        onClick={() => launchAssignment(activeAsgn)}
+                        style={{padding:'10px 22px',borderRadius:22,border:'none',background:'#14b8a6',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif",minHeight:44,minWidth:110}}
+                      >Start →</button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {activeState === 'retryable' && (
+                <div data-testid="active-assignment-retryable" style={{fontSize:12,color:'rgba(255,255,255,0.45)',background:'#111827',border:'1px solid rgba(255,255,255,0.08)',borderRadius:12,padding:'12px 15px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexShrink:0}}>
+                  <span>Checking for your next assignment…</span>
+                  <button onClick={fetchActiveAssignment} style={{minHeight:44,padding:'8px 18px',borderRadius:20,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'rgba(255,255,255,0.6)',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif",flexShrink:0}}>Try again</button>
+                </div>
+              )}
+              {/* activeState 'none' renders NOTHING — a missing assignment is never invented */}
+
           <div className="hw-filters">
             {FILTERS.map(f => (
               <button key={f} className={`hw-fp${filter===f?' active':''}`} onClick={() => setFilter(f)}>{f}</button>
@@ -304,25 +440,33 @@ export default function HomeworkDashboard() {
             </div>
           )}
           {visibleAssignments.map(a => (
-            <div key={a.id || a.concept} className="hw-acard" onClick={() => openDet(a)}>
+            <div key={a.assignmentId || a.concept} className="hw-acard" onClick={() => openDet(a)}>
               <div className="hw-acard-left">
                 <div className="hw-acard-title">{a.title}</div>
                 <div className="hw-badges">
                   <span className={`hw-bdg ${a.type==='Quiz'?'hw-bdg-qz':'hw-bdg-hw'}`}>{a.type}</span>
                   <span className={`hw-bdg hw-bdg-${a.statusCls}`}>{a.completed ? 'Completed ✓' : a.status}</span>
                   {a.completed && a.completedAt ? <span className="hw-cpill cp-green">{fmtDate(a.completedAt)}</span> : null}
+                  {!a.completed && a.dueDate ? <span className="hw-cpill cp-amber">Due {fmtDate(a.dueDate)}</span> : null}
                 </div>
                 {/* Completed items show constitutional language only — no scores */}
-                {!a.completed && (
+                {!a.completed && a.route && (
                 <button
                   onClick={e => { e.stopPropagation(); launchAssignment(a) }}
                   style={{marginTop:6,padding:'10px 22px',borderRadius:22,border:'none',background:'#14b8a6',color:'#fff',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif",minHeight:44,minWidth:110}}
                 >Launch →</button>
                 )}
+                {!a.completed && !a.route && (
+                  <div style={{marginTop:6,fontSize:11,color:'rgba(255,255,255,0.3)'}}>
+                    Not ready to launch yet — check back soon.
+                  </div>
+                )}
               </div>
               <div className="hw-chev">{'\u203A'}</div>
             </div>
           ))}
+            </>
+          )}
         </div>
 
         {/* ── SHEET MUSIC TAB (STAGED) ── */}
@@ -395,6 +539,15 @@ export default function HomeworkDashboard() {
           <div className="hw-dcard">
             <div className="hw-dcard-hd">What To Do</div>
             <div className="hw-desc">{selAsgn?.desc}</div>
+            {/* assignment_number is DISPLAY ONLY (Autonumber) — the rec… assignment_id
+                does all linkage and is never shown as a student-facing number */}
+            {(selAsgn?.assignmentNumber != null || selAsgn?.dueDate || selAsgn?.minutesTarget != null) && (
+              <div data-testid="assignment-meta" style={{marginTop:9,display:'flex',gap:6,flexWrap:'wrap'}}>
+                {selAsgn?.assignmentNumber != null && <span className="hw-cpill cp-teal">Assignment #{selAsgn.assignmentNumber}</span>}
+                {selAsgn?.dueDate && <span className="hw-cpill cp-amber">Due {fmtDate(selAsgn.dueDate)}</span>}
+                {selAsgn?.minutesTarget != null && <span className="hw-cpill cp-teal">{selAsgn.minutesTarget} min target</span>}
+              </div>
+            )}
             <div className="hw-help-wrap">
               <button className={`hw-help-btn${helpActive?' active':''}`} onClick={toggleHelp}>
                 <span style={{fontSize:'16px',flexShrink:0}}>{'\ud83d\ude4b'}</span>
@@ -425,6 +578,15 @@ export default function HomeworkDashboard() {
           {/* Feedback */}
           <div className="hw-dcard">
             <div className="hw-dcard-hd">Feedback</div>
+            {selAsgn?.teacherFeedback ? (
+              <div className="hw-fb-teacher">
+                <div className="hw-fb-hd">
+                  <div className="hw-fb-av-init">T</div>
+                  <div className="hw-fb-label">From your teacher</div>
+                </div>
+                <div className="hw-fb-txt">{selAsgn.teacherFeedback}</div>
+              </div>
+            ) : (
             <div className="hw-fb-teacher">
               <div className="hw-fb-hd">
                 <div className="hw-fb-av-init">MJ</div>
@@ -432,6 +594,7 @@ export default function HomeworkDashboard() {
               </div>
               <div className="hw-fb-txt">Great progress! Your right hand is really strong now {'\u2014'} focus on bringing your left hand timing up to match. Slow it down to 60bpm hands together and build from there.</div>
             </div>
+            )}
             <div className="hw-fb-motesart">
               <div className="hw-fb-hd">
                 <div className="hw-fb-av-img"><img src="/Motesart Avatar 1.PNG" alt="Motesart" onError={e => { e.target.style.display='none'; e.target.parentElement.textContent='M' }} /></div>

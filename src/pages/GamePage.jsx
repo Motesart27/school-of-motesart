@@ -4,7 +4,7 @@ import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { updateWYLFromBehavior } from "../services/wylEvolution.js"
 import { getState, setState } from '../lesson_engine/concept_state_store.js'
-import { submitEvidenceEvent, newClientEventId } from '../services/evidenceClient.js'
+import { submitEvidenceEvent, newClientEventId, isCanonicalAssignmentId } from '../services/evidenceClient.js'
 import { validateConceptId } from '../lesson_engine/lock_package_bridge_config.js'
 
 // NOTE DATA 
@@ -343,7 +343,14 @@ export default function GamePage() {
  const [searchParams] = useSearchParams()
  const urlMode = searchParams.get('mode')
  const urlConcept = searchParams.get('concept')
- const urlAssignmentId = searchParams.get('assignment_id')
+ const rawUrlAssignmentId = searchParams.get('assignment_id')
+ // M1 R1 fix 6: only the canonical Airtable rec… assignment_id may drive
+ // homework/evidence linkage. A legacy numeric "Assignment ID" in the URL is
+ // never treated as completion identity — the session downgrades to free play.
+ const urlAssignmentId = rawUrlAssignmentId && isCanonicalAssignmentId(rawUrlAssignmentId) ? rawUrlAssignmentId : null
+ if (rawUrlAssignmentId && !urlAssignmentId) {
+  console.warn('[SOM][FtN] Non-canonical assignment identifier in URL — homework linkage skipped:', rawUrlAssignmentId)
+ }
  const isHomeworkSession = !!(urlAssignmentId && urlMode === 'academic')
  const conceptDisplayName = urlConcept === 'T_HALF_STEP' ? 'The Half Step'
    : urlConcept ? urlConcept.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -382,7 +389,13 @@ export default function GamePage() {
    mistake_tags: Object.keys(s.noteErrors).map(n => `missed_note_${n}`),
    duration_min: Number(((Date.now() - s.startTime) / 60000).toFixed(2)),
    tempo_factor: 1,
-  }).then(res => { if (res?.message) setEvidenceMsg(res.message) })
+  }).then(res => {
+   // M1 R1 fix 4: 403 fails closed (no retry under another identity);
+   // 409 selection_required hands control back to explicit selection.
+   if (res?.failClosed) console.warn('[SOM][FtN] Evidence refused for this identity — failed closed, not retried')
+   if (res?.needsSelection) console.warn('[SOM][FtN] Instrument selection required — evidence not saved until the student picks')
+   if (res?.message) setEvidenceMsg(res.message)
+  })
  }
  const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 

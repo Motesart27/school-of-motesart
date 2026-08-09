@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { submitEvidenceEvent, tierMessage } from '../services/evidenceClient.js'
+import { submitEvidenceEvent, tierMessage, isCanonicalAssignmentId } from '../services/evidenceClient.js'
+import InstrumentSelect from '../components/InstrumentSelect.jsx'
 import levels from '../data/rhythm_racer_levels.json'
 
 // M1: canonical evidence goes to the Railway backend — the converter state
@@ -20,6 +21,8 @@ const LOG_LABELS = {
   failed: 'Not saved',
   skipped: 'Practice only',
   signin: 'Sign in to save progress',
+  selection: 'Pick your instrument to save progress',
+  mismatch: 'Not saved — sign-in doesn’t match this student',
 }
 
 const RESULT_TEXT = {
@@ -213,12 +216,18 @@ function DrumPad({ side, label, active, onHit }) {
 export default function RhythmRacerV2() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { learningIdentity } = useAuth()
+  const { user, learningIdentity, evidenceReady, retryLearningIdentity } = useAuth()
 
   const requestedMode = searchParams.get('mode') || 'game'
   const isAcademic = requestedMode === 'academic'
   const requestedLevel = clamp(Number(searchParams.get('level')) || 1, 1, 5)
-  const assignmentId = searchParams.get('assignment_id') || null
+  // M1 R1 fix 6: only a canonical Airtable rec… assignment_id links evidence
+  // to homework — a legacy numeric identifier is never completion identity.
+  const rawAssignmentId = searchParams.get('assignment_id') || null
+  const assignmentId = rawAssignmentId && isCanonicalAssignmentId(rawAssignmentId) ? rawAssignmentId : null
+  if (rawAssignmentId && !assignmentId) {
+    console.warn('[RhythmRacerV2] Non-canonical assignment identifier in URL — homework linkage skipped:', rawAssignmentId)
+  }
   const conceptId = searchParams.get('concept') || levelByNumber(requestedLevel).concept
 
   const [levelNumber, setLevelNumber] = useState(requestedLevel)
@@ -422,9 +431,16 @@ export default function RhythmRacerV2() {
       setLogState('skipped')
       return
     }
-    if (!learningIdentity.resolved) {
-      console.warn('[RhythmRacerV2] No resolved student_instrument_id — evidence skipped (sign in required)')
-      setLogState('signin')
+    if (!evidenceReady) {
+      // Canonical identity unresolved / selection pending / not settled →
+      // NO practice-event POST (M1 R1 fix 4). Never a substitute identity.
+      if (learningIdentity.identity_status === 'selection_required') {
+        console.warn('[RhythmRacerV2] Instrument selection pending — evidence NOT posted')
+        setLogState('selection')
+      } else {
+        console.warn('[RhythmRacerV2] No canonical student_instrument_id — evidence NOT posted (sign in required)')
+        setLogState('signin')
+      }
       return
     }
 
@@ -457,7 +473,15 @@ export default function RhythmRacerV2() {
       mistake_tags: mistakeTags,
     })
     setServerEvidence(res)
-    setLogState(res.ok ? 'posted' : res.queued ? 'queued' : 'failed')
+    // M1 R1 fix 4: wrong-student 403 fails closed (never retried under another
+    // identity); 409 selection_required returns the student to selection.
+    setLogState(
+      res.ok ? 'posted'
+      : res.queued ? 'queued'
+      : res.needsSelection ? 'selection'
+      : res.failClosed ? 'mismatch'
+      : 'failed'
+    )
   }
 
   const playStage = useCallback(async () => {
@@ -540,12 +564,25 @@ export default function RhythmRacerV2() {
 
   // M1: academic (homework) mode requires a resolved learning identity —
   // no default_student fallback. Unresolved → sign-in prompt, no evidence.
-  if (isAcademic && !learningIdentity.resolved) {
-    return (
+  // M1 R1 academic gate — canonical learning identity states (fix 2):
+  //   no sign-in            → sign-in prompt (no evidence)
+  //   identity 503/network  → retryable, NEVER converted to permanent unresolved
+  //   selection_required    → explicit student instrument selection (never auto)
+  //   unresolved (0 owned)  → student-safe setup state; evidence writes blocked
+  if (isAcademic && !evidenceReady) {
+    const gate = (body) => (
       <main className="rr2-page">
         <style>{styles}</style>
         <section className="rr2-shell" style={{ maxWidth: 520, textAlign: 'center', padding: '42px 24px' }}>
           <h1 style={{ fontFamily: "'Outfit','DM Sans',sans-serif", margin: '0 0 12px' }}>Rhythm Racer</h1>
+          {body}
+        </section>
+      </main>
+    )
+
+    if (!user) {
+      return gate(
+        <>
           <p style={{ color: '#e2e8f0', fontWeight: 800, margin: '0 0 6px' }}>Homework mode needs your student sign-in.</p>
           <p style={{ color: '#94a3b8', margin: '0 0 24px' }}>Sign in so this session counts toward your assignment.</p>
           <button
@@ -555,8 +592,48 @@ export default function RhythmRacerV2() {
           >
             Sign In
           </button>
-        </section>
-      </main>
+        </>
+      )
+    }
+
+    if (learningIdentity.identity_status === 'selection_required') {
+      return gate(
+        <>
+          <p style={{ color: '#e2e8f0', fontWeight: 800, margin: '0 0 14px' }}>One more step before you race.</p>
+          <div style={{ textAlign: 'left' }}>
+            <InstrumentSelect title="Who is practicing today?" compact />
+          </div>
+        </>
+      )
+    }
+
+    if (learningIdentity.learning_identity_ready && learningIdentity.identity_status === 'unresolved') {
+      return gate(
+        <>
+          <p style={{ color: '#e2e8f0', fontWeight: 800, margin: '0 0 6px' }}>Almost there!</p>
+          <p style={{ color: '#94a3b8', margin: '0 0 8px' }}>
+            Your account isn{'’'}t connected to an instrument yet, so homework saving is paused.
+          </p>
+          <p style={{ color: '#94a3b8', margin: '0 0 24px' }}>Ask your teacher to finish your setup.</p>
+        </>
+      )
+    }
+
+    // Identity not settled (loading or retryable outage) — keep it retryable.
+    return gate(
+      <>
+        <p style={{ color: '#e2e8f0', fontWeight: 800, margin: '0 0 6px' }}>Connecting to your account…</p>
+        <p style={{ color: '#94a3b8', margin: '0 0 24px' }}>Give it a second — your practice will save once you{'’'}re connected.</p>
+        {learningIdentity.learning_identity_retryable_error && (
+          <button
+            type="button"
+            onClick={() => retryLearningIdentity()}
+            style={{ border: 0, borderRadius: 8, background: 'linear-gradient(135deg,#3ee0c8,#8b7ef8)', color: '#061225', padding: '15px 32px', fontWeight: 900, fontSize: 16, cursor: 'pointer', minHeight: 48, minWidth: 160 }}
+          >
+            Try Again
+          </button>
+        )}
+      </>
     )
   }
 
