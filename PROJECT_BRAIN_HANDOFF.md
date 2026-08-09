@@ -1,5 +1,70 @@
 # SOM PROJECT BRAIN — HANDOFF
-Last Updated: August 8, 2026 | Bundle: index-DfXy9PFK.js (prod unchanged — branch work)
+Last Updated: August 9, 2026 | Bundle: prod unchanged — branch work
+
+## SESSION HANDOFF — August 9, 2026 (M1 R1 FRONTEND REMEDIATION · branch-only)
+- What: Targeted correction package per the MYA M1 R1 frontend card (follows
+  Codex PKG-RV review + completed backend R1). Branch
+  `fix/m1-r1-frontend-remediation-clean` off frozen `feat/m1-evidence-frontend`
+  @ a2c048b. NOT merged. NOT deployed. NO PR. Backend contract source of truth:
+  Deployable-python-codebase-som `fix/m1-r1-backend-remediation-clean`
+  @ 69147f5 (SHA verified against the local clone's git object DB).
+- Identity (fixes 1–3): /student?email= REMOVED everywhere (api.js method
+  deleted; AuthContext follow-up deleted; TamiParentSummary email lookup
+  disabled to neutral fallback). Canonical academic identity now comes ONLY
+  from GET /auth/learning-identity: resolved → auto-use; selection_required →
+  explicit student selection via NEW src/components/InstrumentSelect.jsx
+  (never owned_instruments[0]; cached pointer som_selected_instrument is
+  convenience-only, revalidated against current owned_instruments, stale →
+  discarded + re-selection); unresolved → student-safe setup state, writes
+  blocked; 503 identity_unavailable_retryable → retryable (bounded auto-retry
+  + manual Try Again), NEVER converted to permanent unresolved. AuthContext
+  exposes user_id, student_record_id, student_instrument_id, role,
+  identity_status, selection_required, owned_instruments,
+  selected_student_instrument_id, learning_identity_ready,
+  learning_identity_retryable_error (+ evidenceStudentInstrumentId /
+  evidenceReady / selectInstrument / retryLearningIdentity). Cache snapshot
+  som_learning_identity feeds evidenceClient (cache only, never authority).
+- Write path (fixes 4, 13): evidenceClient posts only under the canonical/
+  explicitly-selected instrument; 403 wrong_student FAILS CLOSED (no queue, no
+  retry, no identity substitution — queued 403s dropped loudly); 409
+  selection_required → som:selection-required event → AuthContext clears
+  selection → selection UI; 409 duplicate_event_mismatch → CONTRACT FAILURE
+  surfaced (console.error + flush report), never rewritten/replayed; 503/
+  network → queued with exact client_event_id + immutable payload (flush sends
+  identical JSON; QA asserts string-equality).
+- Contracts (fixes 5–9): student-safe Concept_State fields only (no
+  confidence/trend/mastery_ready/evidence_summary dependence); canonical rec…
+  assignment_id is the ONLY evidence/completion linkage (isCanonicalAssignmentId
+  guard in evidenceClient + GamePage + RRv2 — legacy numeric ids downgrade to
+  free play with warn); assignment_number is display-only (detail panel chip);
+  HomeworkDashboard aligned to the R1 serializer (canonical names, obsolete
+  aliases removed, non-array /mine surfaced as contract error, no invented
+  T_HALF_STEP launch fallback — concept-less assignments show "Not ready to
+  launch"); NEW Up Next card consumes GET /concept-state/{si}/active-assignment
+  (false → nothing rendered, 403 fail-closed, 503 retryable UI; no
+  T_MAJOR_SCALE_PATTERN fabrication).
+- Activities (fixes 10–12): Rhythm Racer bandless (no grade_band key when no
+  authoritative R_* mapping; never "3-5"); FtN/RR each exactly one canonical
+  evidence write, stable uuid client_event_id; zero converter learning-state
+  writes in all touched flows.
+- Governance (fixes 14–17): localStorage stays cache/pointer-only; Gate 0/1/2
+  network evidence still OFF (adapter's held draft re-pinned to backend enums
+  chapter='gate'/source_activity='gate' — alignment only, flag unchanged);
+  Article XIII: touched surfaces render tier language only (QA asserts no
+  visible %).
+- QA (fix 18): NEW tests/m1r1_qa.mjs (Playwright vs production build, backend
+  fully mocked — zero real network writes): 56/56 PASS covering every card
+  test incl. offline byte-stability + exact client_event_id, 403/409/503
+  semantics, canonical ids, fabrication bans, converter/gate zero, mobile
+  390x844 + 393x852. `npm run build` clean (pre-existing >500kB advisory).
+  Run: `npm i --no-save playwright && node tests/m1r1_qa.mjs` (artifacts to
+  qa-artifacts/, not committed).
+- Note: GamePage.jsx is CLAUDE.md-protected; edited strictly per the explicit
+  MYA R1 card. No dependency changes (playwright installed --no-save).
+  Observed, not changed: backend /assignments/mine returns [] for
+  selection_required students (server resolves si; list can't scope to a
+  client selection) — flagged in the R1 return; parent TamiParentSummary now
+  shows neutral copy pending a canonical parent→child endpoint.
 
 ## SESSION HANDOFF — August 8, 2026 (PKG-FE · branch-only)
 - What: M1 frontend evidence path per PKG-FE dispatch card (M1_SPEC amended
