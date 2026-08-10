@@ -24,10 +24,11 @@ import WYLPracticeLive from './pages/WYLPracticeLive.jsx'
 import WYLPracticeStaff from './pages/WYLPracticeStaff.jsx'
 import CurriculumPath from './pages/CurriculumPath.jsx'
 import ConceptHealth from './pages/ConceptHealth.jsx'
-import FindItChapter from './pages/FindItChapter.jsx'
-import PlayItChapter from './pages/PlayItChapter.jsx'
-import MoveItChapter from './pages/MoveItChapter.jsx'
-import OwnItChapter from './pages/OwnItChapter.jsx'
+// M1 R2-FE.1 — legacy proof-loop chapters (FindIt/PlayIt/MoveIt/OwnIt and
+// families) are QUARANTINED: they carried a competing learning authority
+// (browser-derived confidence/mastery + Converter /api/practice-events +
+// /api/concept-state writes). They are no longer imported by live routing;
+// PracticeChapterWrapper now routes gates + canonical Practice Live only.
 import PracticeChapterWrapper from './pages/PracticeChapterWrapper.jsx'
 import DPMPlayground from './pages/DPMPlayground.jsx'
 import RhythmRacer from './pages/RhythmRacerV2.jsx'
@@ -115,10 +116,14 @@ export default function App() {
       <Route path="/wyl-practice-staff" element={<TeacherRoute><WYLPracticeStaff /></TeacherRoute>} />
       <Route path="/curriculum" element={<TeacherRoute><CurriculumPath /></TeacherRoute>} />
       <Route path="/practice/:conceptId" element={<ProtectedRoute><PracticeChapterWrapper /></ProtectedRoute>} />
-      <Route path="/play-it" element={<ProtectedRoute><PlayItChapter /></ProtectedRoute>} />
-      <Route path="/find-it" element={<ProtectedRoute><FindItChapter /></ProtectedRoute>} />
-      <Route path="/move-it" element={<ProtectedRoute><MoveItChapter /></ProtectedRoute>} />
-      <Route path="/own-it" element={<ProtectedRoute><OwnItChapter /></ProtectedRoute>} />
+      {/* M1 R2-FE.1 — obsolete legacy proof-loop routes. The old chapter
+          system was a competing learning authority (local confidence writes +
+          Converter evidence/state calls) and is decommissioned from student
+          runtime. Direct visits land on the canonical Homework entry. */}
+      <Route path="/play-it" element={<Navigate to="/homework" replace />} />
+      <Route path="/find-it" element={<Navigate to="/homework" replace />} />
+      <Route path="/move-it" element={<Navigate to="/homework" replace />} />
+      <Route path="/own-it" element={<Navigate to="/homework" replace />} />
       <Route path="/concept-health" element={<TeacherRoute><ConceptHealth /></TeacherRoute>} />
       <Route path="/dpm-playground" element={<ProtectedRoute><DPMPlayground /></ProtectedRoute>} />
       <Route path="/rhythm-racer" element={<ProtectedRoute><RhythmRacer /></ProtectedRoute>} />

@@ -1,3 +1,21 @@
+/*
+ * ══════════════════════════════════════════════════════════════════════
+ * M1 R2-FE.1 — QUARANTINED LEGACY SOURCE (NOT ROUTED, NOT CANONICAL)
+ * ══════════════════════════════════════════════════════════════════════
+ * This legacy proof-loop file is retained for history/reference ONLY.
+ * It is NOT imported by live M1 routing (App.jsx / PracticeChapterWrapper
+ * route gates + canonical Practice Live only) and MUST NOT be re-routed
+ * into student runtime as-is: it derives confidence/mastery in the browser
+ * and/or talks to Converter learning-state endpoints
+ * (/api/practice-events, /api/concept-state[/recompute]), which violates
+ * Decision ① — Railway/SOM is the sole canonical learning-state authority
+ * (Practice_Events = evidence ledger, Concept_State = derived state,
+ * localStorage = cache only; Converter is NOT a mastery/evidence
+ * authority). If this experience is ever revived it must be migrated to
+ * canonical SOM/Railway evidence (submitEvidenceEvent) and backend
+ * Concept_State first.
+ * ══════════════════════════════════════════════════════════════════════
+ */
 import React, { useState, useEffect } from 'react'
 import { getState, subscribe, getStudentId } from '../lesson_engine/concept_state_store.js'
 

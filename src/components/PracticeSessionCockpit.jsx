@@ -83,6 +83,14 @@ export default function PracticeSessionCockpit({
 }) {
   const pct = Math.max(0, Math.min(100, conceptProgress))
   const progressColor = pct >= 80 ? '#00C49A' : pct >= 40 ? '#f97316' : '#e84b8a'
+  // M1 R2-FE.1 §H (Article XIII) — students never see an academic progress
+  // percentage. The mastery readout is Motesart tier language mapped onto the
+  // SAME stage thresholds the dots below already use; the bar stays a coarse
+  // visual band, and the numeric never renders.
+  const progressTier = pct >= 100 ? 'Owned'
+    : pct >= 66 ? 'Almost there'
+    : pct >= 33 ? 'Growing'
+    : 'Just starting'
 
   const stages = [
     { label: 'Find It', threshold: 33 },
@@ -141,8 +149,8 @@ export default function PracticeSessionCockpit({
             {/* Mastery progress card */}
             <div className="cockpit-card" style={{ padding: '20px 24px', animationDelay: '0.06s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Concept Mastery</span>
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 22, fontWeight: 800, color: progressColor }}>{pct}%</span>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Concept Journey</span>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 22, fontWeight: 800, color: progressColor }}>{progressTier}</span>
               </div>
               <div style={{ height: 7, borderRadius: 5, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
                 <div style={{
@@ -176,8 +184,10 @@ export default function PracticeSessionCockpit({
                 <span style={{ fontSize: 13 }}>🕐</span>
                 <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Last Session Recap</span>
               </div>
+              {/* M1 R2-FE.1 §H — no fabricated performance numerics on a
+                  student surface: the recap speaks Motesart tier language. */}
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7 }}>
-                You practiced <strong style={{ color: 'rgba(255,255,255,0.88)' }}>{conceptTitle}</strong> and answered correctly <strong style={{ color: '#00C49A' }}>4 of 5 times</strong>. T.A.M.i noticed you hesitate near the black keys — we'll focus on that today.
+                You practiced <strong style={{ color: 'rgba(255,255,255,0.88)' }}>{conceptTitle}</strong> and it&apos;s <strong style={{ color: '#00C49A' }}>really coming together</strong>. T.A.M.i noticed you hesitate near the black keys — we&apos;ll focus on that today.
               </div>
             </div>
 

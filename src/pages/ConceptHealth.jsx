@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import ProofLoopPanel from '../components/ProofLoopPanel.jsx';
+// M1 R2-FE.1 — ProofLoopPanel QUARANTINED: it presented Converter
+// /api/concept-state (with a localStorage fallback) as live teacher truth for
+// the proof loop. Converter is not a Concept_State/mastery authority
+// (Decision ①); canonical teacher views must read the SOM/Railway backend.
 
 const ConceptHealth = () => {
   const navigate = useNavigate();
@@ -221,8 +224,6 @@ const ConceptHealth = () => {
             </div>
           ))}
         </div>
-
-        <ProofLoopPanel />
 
         {/* Pilot Concepts Analysis */}
         <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Pilot Concepts Analysis</h2>

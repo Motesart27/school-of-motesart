@@ -1,70 +1,52 @@
-import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { getState } from '../lesson_engine/concept_state_store.js'
-import AmbassadorBubble from '../components/AmbassadorBubble.jsx'
-import MetronomeControl from '../components/MetronomeControl.jsx'
+import React from 'react'
+import { useParams, useNavigate, Navigate, useLocation } from 'react-router-dom'
+import { isCanonicalAssignmentId } from '../services/evidenceClient.js'
 
-// T_MAJOR_SCALE_PATTERN chapters
-import FindItChapter from './FindItChapter.jsx'
-import PlayItChapter from './PlayItChapter.jsx'
-import MoveItChapter from './MoveItChapter.jsx'
-import OwnItChapter from './OwnItChapter.jsx'
-
-// T_SCALE_DEGREES_MAJOR chapters
-import ScaleDegreesFindIt from './ScaleDegreesFindIt.jsx'
-import ScaleDegreesPlayIt from './ScaleDegreesPlayIt.jsx'
-import ScaleDegreesMoveIt from './ScaleDegreesMoveIt.jsx'
-import ScaleDegreesOwnIt from './ScaleDegreesOwnIt.jsx'
-
-// T_HALF_STEP chapters
-import HalfStepFindIt from './HalfStepFindIt.jsx'
-import HalfStepPlayIt from './HalfStepPlayIt.jsx'
-import HalfStepMoveIt from './HalfStepMoveIt.jsx'
-import HalfStepOwnIt from './HalfStepOwnIt.jsx'
-
-// SOM Mastery Intelligence Engine — Gate 0
+// SOM Mastery Intelligence Engine — governed gates (LIVE, preserved).
 import MajorScalePatternGate from '../components/gate0/MajorScalePatternGate.jsx'
 import FindHomeGate from '../components/gate0/FindHomeGate.jsx'
-// Gate 1 — Skip & Together
 import SkipAndTogetherGate from '../components/gate0/SkipAndTogetherGate.jsx'
 
 /**
- * PracticeChapterWrapper
- * Thin wrapper for /practice/:conceptId
- * Determines which chapter to render based on concept state.
- * Enforces prerequisite rules between concepts.
+ * PracticeChapterWrapper — M1 R2-FE.1 LEGACY LEARNING-AUTHORITY QUARANTINE.
+ *
+ * This wrapper previously loaded Converter Concept_State
+ * (motesart-converter.netlify.app/api/concept-state/…) to pick a legacy
+ * proof-loop chapter (FindIt/PlayIt/MoveIt/OwnIt + ScaleDegrees/HalfStep
+ * families), whose runtime derived confidence/mastery in the browser, wrote
+ * local Concept_State, POSTed evidence to Converter /api/practice-events and
+ * asked Converter to recompute Concept_State. That entire system violated
+ * Decision ① (Railway/SOM is the SOLE canonical learning-state authority;
+ * Practice_Events is the canonical evidence ledger; Concept_State is the
+ * canonical derived state; localStorage is cache only) and is DECOMMISSIONED
+ * from live student runtime.
+ *
+ * What remains routable here:
+ *
+ *   1. Governed gates (unchanged behavior, evidence flag stays OFF):
+ *        /practice/C_MAJOR_GATE_0
+ *        /practice/C_MAJOR_GATE_FIND_HOME
+ *        /practice/C_MAJOR_GATE_SKIP_TOGETHER
+ *
+ *   2. Every other conceptId redirects to canonical Practice Live:
+ *        /practice/T_HALF_STEP  →  /practice-live?concept=T_HALF_STEP
+ *      The concept id is passed through EXACTLY (no alias, no default
+ *      substitution). Practice Live's canonical resolver renders supported
+ *      concepts and FAILS CLOSED (student-safe "not ready" screen with
+ *      Back to Homework) for anything unknown. A canonical rec… assignment_id
+ *      query parameter is preserved across the redirect; malformed ones are
+ *      dropped (assignment_number is never an identifier).
+ *
+ * ZERO Converter learning-state traffic originates here: no
+ * /api/concept-state reads, no /api/practice-events writes, no recompute.
  */
-
-const API_BASE = 'https://motesart-converter.netlify.app'
-
-const PREREQUISITES = {
-  T_SCALE_DEGREES_MAJOR: {
-    requires: 'T_MAJOR_SCALE_PATTERN',
-    message: 'Finish the major scale pattern first. Then the degrees will make sense.'
-  },
-  T_HALF_STEP: {
-    requires: 'T_SCALE_DEGREES_MAJOR',
-    message: 'Finish the scale degrees first. Then the half steps will click.'
-  }
-}
-
-const CHAPTER_MESSAGES = {
-  find_it: 'Look and listen closely. Find the notes on the keyboard!',
-  play_it: 'Now play along! Match the rhythm and stay in time.',
-  move_it: 'Feel the movement. Let your body connect with the music.',
-  own_it: 'Make it yours. You know this \u2014 show it!'
-}
 
 export default function PracticeChapterWrapper() {
   const { conceptId } = useParams()
-  const [chapter, setChapter] = useState('find_it')
-  const [loading, setLoading] = useState(true)
-  const [locked, setLocked] = useState(null)
-
   const navigate = useNavigate()
+  const location = useLocation()
 
-  // SOM Mastery Intelligence Engine — Gate 0
-  // Bypasses the legacy chapter/API loading system entirely.
+  // ── Governed gates (LIVE) — network evidence remains OFF ──
   if (conceptId === 'C_MAJOR_GATE_0') {
     return <MajorScalePatternGate onGatePassed={(result) => {
       try {
@@ -95,7 +77,6 @@ export default function PracticeChapterWrapper() {
     }} />
   }
 
-  // Gate 1 — Skip & Together
   if (conceptId === 'C_MAJOR_GATE_SKIP_TOGETHER') {
     return <SkipAndTogetherGate onGatePassed={(result) => {
       try {
@@ -110,151 +91,14 @@ export default function PracticeChapterWrapper() {
     }} />
   }
 
-  useEffect(() => {
-    let cancelled = false
+  // ── Canonical practice — one authority, one surface ──
+  // The concept id travels verbatim; Practice Live resolves it canonically or
+  // fails closed. Only a canonical rec… assignment_id survives the redirect.
+  const params = new URLSearchParams()
+  params.set('concept', conceptId || '')
+  const incoming = new URLSearchParams(location.search)
+  const asgn = incoming.get('assignment_id')
+  if (asgn && isCanonicalAssignmentId(asgn)) params.set('assignment_id', asgn)
 
-    async function loadState() {
-      setLoading(true)
-      setLocked(null)
-
-      // Check prerequisites
-      const prereq = PREREQUISITES[conceptId]
-      if (prereq) {
-        try {
-          const resp = await fetch(API_BASE + '/api/concept-state/demo-student/' + prereq.requires)
-          if (resp.ok) {
-            const data = await resp.json()
-            const prerequisiteStarted = data.found === true && data.state && typeof data.state === 'object'
-            if (prerequisiteStarted) {
-              // Prerequisite has started — allow through while student identity is not wired.
-            }
-          }
-        } catch (e) {
-          // API down \u2014 allow through with local state
-        }
-      }
-
-      // Load current chapter from concept state
-      try {
-        const resp = await fetch(API_BASE + '/api/concept-state/demo-student/' + conceptId)
-        if (resp.ok) {
-          const data = await resp.json()
-          const nextAction = data.found === true && data.state
-            ? data.state.next_action
-            : null
-          if (['find_it', 'play_it', 'move_it', 'own_it'].includes(nextAction)) {
-            if (!cancelled) setChapter(nextAction)
-          }
-        }
-      } catch (e) {
-        // API down \u2014 default to find_it
-      }
-
-      if (!cancelled) setLoading(false)
-    }
-
-    loadState()
-    return () => { cancelled = true }
-  }, [conceptId])
-
-  const isWarm = conceptId === 'T_HALF_STEP'
-  const bgColor = isWarm ? '#F6F4EF' : '#0a0a14'
-  const textColor = isWarm ? '#94A3B8' : '#64748b'
-
-  if (loading) {
-    return (
-      <div style={{
-        background: bgColor, color: textColor, minHeight: '100vh',
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontFamily: "'DM Sans', sans-serif",
-        fontSize: 14
-      }}>
-        Loading chapter...
-      </div>
-    )
-  }
-
-  if (locked) {
-    return (
-      <div style={{
-        background: bgColor, color: isWarm ? '#D97706' : '#f59e0b', minHeight: '100vh',
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        justifyContent: 'center', fontFamily: "'DM Sans', sans-serif",
-        padding: 40, textAlign: 'center'
-      }}>
-        <div style={{ fontSize: 28, marginBottom: 12 }}>\ud83d\udd12</div>
-        <div style={{ fontSize: 15, maxWidth: 360, lineHeight: 1.5 }}>{locked}</div>
-      </div>
-    )
-  }
-
-  // Resolve chapter component
-  const concept = conceptId
-  let ChapterContent = null
-
-  if (concept === 'T_MAJOR_SCALE_PATTERN') {
-    if (chapter === 'find_it') ChapterContent = FindItChapter
-    else if (chapter === 'play_it') ChapterContent = PlayItChapter
-    else if (chapter === 'move_it') ChapterContent = MoveItChapter
-    else if (chapter === 'own_it') ChapterContent = OwnItChapter
-    else ChapterContent = FindItChapter
-  } else if (concept === 'T_SCALE_DEGREES_MAJOR') {
-    if (chapter === 'find_it') ChapterContent = ScaleDegreesFindIt
-    else if (chapter === 'play_it') ChapterContent = ScaleDegreesPlayIt
-    else if (chapter === 'move_it') ChapterContent = ScaleDegreesMoveIt
-    else if (chapter === 'own_it') ChapterContent = ScaleDegreesOwnIt
-    else ChapterContent = ScaleDegreesFindIt
-  } else if (concept === 'T_HALF_STEP') {
-    if (chapter === 'find_it') ChapterContent = HalfStepFindIt
-    else if (chapter === 'play_it') ChapterContent = HalfStepPlayIt
-    else if (chapter === 'move_it') ChapterContent = HalfStepMoveIt
-    else if (chapter === 'own_it') ChapterContent = HalfStepOwnIt
-    else ChapterContent = HalfStepFindIt
-  }
-
-  if (!ChapterContent) {
-    return (
-      <div style={{
-        background: '#0a0a14', color: '#ef4444', minHeight: '100vh',
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'center', fontFamily: 'sans-serif',
-        fontSize: 14
-      }}>
-        Unknown concept: {conceptId}
-      </div>
-    )
-  }
-
-  const tamiMsg = CHAPTER_MESSAGES[chapter] || CHAPTER_MESSAGES.find_it
-  const metronomeDefault = chapter === 'play_it' || chapter === 'move_it'
-  const ambassadorQuiet = chapter === 'own_it'
-  const isHalfStep = concept === 'T_HALF_STEP'
-
-  // HalfStep chapters manage their own coach, controls, and layout
-  if (isHalfStep) {
-    return (
-      <div style={{ position: 'relative', minHeight: '100vh', background: '#F6F4EF' }}>
-        <ChapterContent currentChapter={chapter} onChapterChange={setChapter} />
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ position: 'relative', minHeight: '100vh', background: '#0a0a14' }}>
-      {/* Metronome control \u2014 top right */}
-      <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 900 }}>
-        <MetronomeControl bpm={72} defaultOn={metronomeDefault} />
-      </div>
-
-      {/* Chapter content */}
-      <ChapterContent />
-
-      {/* Ambassador bubble \u2014 bottom right */}
-      <AmbassadorBubble
-        message={tamiMsg}
-        ambassadorId="motesart"
-        quiet={ambassadorQuiet}
-      />
-    </div>
-  )
+  return <Navigate to={`/practice-live?${params.toString()}`} replace />
 }
