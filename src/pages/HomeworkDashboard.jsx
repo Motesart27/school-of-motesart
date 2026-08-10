@@ -249,35 +249,70 @@ export default function HomeworkDashboard() {
   const needsSelection = identityStatus === 'selection_required' && !learningIdentity.selected_student_instrument_id
 
   // ── M1 live assignments (canonical /assignments/mine) ──
+  // M1 R1.1: with a multi-instrument identity the fetch carries the student's
+  // EXPLICIT selection (?student_instrument_id=<rec…>) — authorized by the
+  // backend against the SAME R1 identity authority. A resolved single-
+  // instrument identity keeps the unchanged parameterless call.
+  const selectionSi = identityStatus === 'selection_required'
+    ? (learningIdentity.selected_student_instrument_id || null)
+    : null
   const [assignments, setAssignments] = useState([])
   const [asgnLoading, setAsgnLoading] = useState(true)
-  const [asgnError, setAsgnError] = useState(null)
+  const [asgnFail, setAsgnFail] = useState(null) // null | 'blocked' | 'retryable' | 'error'
+  const asgnSeqRef = useRef(0)
 
-  useEffect(() => {
+  const fetchAssignments = useCallback(() => {
     if (!identityReady) return
-    let cancelled = false
+    const seq = ++asgnSeqRef.current
+    // Multi-instrument before selection: no fetch — the selection panel IS the
+    // state (never a false "no homework" empty state), and the backend would
+    // correctly answer an unparameterised call with 409 selection_required.
+    if (identityStatus === 'selection_required' && !selectionSi) {
+      setAssignments([]); setAsgnFail(null); setAsgnLoading(false)
+      return
+    }
+    // Instrument switch: the previous instrument's rows leave the screen NOW —
+    // nothing from instrument A may remain visible while B loads (M1 R1.1).
+    setAssignments([])
     setAsgnLoading(true)
-    api.getMyAssignments()
+    api.getMyAssignments(selectionSi)
       .then(data => {
-        if (cancelled) return
+        if (seq !== asgnSeqRef.current) return
         // The R1 endpoint returns a bare array — anything else is a real
         // contract mismatch and is surfaced, not aliased around.
         if (!Array.isArray(data)) {
           console.error('[Homework] /assignments/mine returned a non-array — contract mismatch:', typeof data)
-          setAsgnError('Could not load your assignments right now.')
+          setAsgnFail('error')
           return
         }
         setAssignments(data.map(mapAssignment).filter(a => a && (a.assignmentId || a.concept)))
-        setAsgnError(null)
+        setAsgnFail(null)
       })
       .catch(err => {
-        if (cancelled) return
-        console.warn('[Homework] Failed to load assignments:', err?.message)
-        setAsgnError('Could not load your assignments right now.')
+        if (seq !== asgnSeqRef.current) return
+        if (err?.status === 409) {
+          // Stale/invalid selection — the backend demands an explicit
+          // selection. Same R1 flow the evidence client uses: clear the
+          // selection pointer and return to the selection panel.
+          console.warn('[Homework] /assignments/mine 409 selection_required — returning to instrument selection')
+          window.dispatchEvent(new CustomEvent('som:selection-required'))
+          setAsgnFail(null)
+        } else if (err?.status === 403) {
+          // wrong_student — fail closed. Another student's rows are never shown.
+          console.error('[Homework] /assignments/mine 403 wrong_student — failing closed')
+          setAsgnFail('blocked')
+        } else if (err?.status === 503 || err?.status === 0 || err?.status >= 500) {
+          // identity_unavailable_retryable / infrastructure — retryable, never permanent.
+          setAsgnFail('retryable')
+        } else {
+          console.warn('[Homework] Failed to load assignments:', err?.message)
+          setAsgnFail('error')
+        }
       })
-      .finally(() => { if (!cancelled) setAsgnLoading(false) })
-    return () => { cancelled = true }
-  }, [identityReady, identityStatus])
+      .finally(() => { if (seq === asgnSeqRef.current) setAsgnLoading(false) })
+  }, [identityReady, identityStatus, selectionSi])
+
+  useEffect(() => { fetchAssignments() }, [fetchAssignments])
 
   // ── M1 R1 active assignment — GET /concept-state/{si}/active-assignment ──
   // Explicit contract only: has_active_assignment false → nothing is shown and
@@ -431,10 +466,21 @@ export default function HomeworkDashboard() {
           {asgnLoading && (
             <div style={{fontSize:12,color:'rgba(255,255,255,0.35)',padding:'18px 4px'}}>Loading your assignments…</div>
           )}
-          {!asgnLoading && asgnError && (
-            <div style={{fontSize:12,color:'#f09595',padding:'18px 4px'}}>{asgnError}</div>
+          {!asgnLoading && asgnFail === 'blocked' && (
+            <div data-testid="assignments-blocked" style={{fontSize:12,color:'#f09595',padding:'18px 4px'}}>
+              These assignments aren{'’'}t available on this account.
+            </div>
           )}
-          {!asgnLoading && !asgnError && visibleAssignments.length === 0 && (
+          {!asgnLoading && asgnFail === 'retryable' && (
+            <div data-testid="assignments-retryable" style={{fontSize:12,color:'rgba(255,255,255,0.5)',background:'#111827',border:'1px solid rgba(255,255,255,0.08)',borderRadius:12,padding:'12px 15px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:10,flexShrink:0}}>
+              <span>Couldn{'’'}t load your assignments {'—'} this is temporary.</span>
+              <button onClick={fetchAssignments} style={{minHeight:44,padding:'8px 18px',borderRadius:20,border:'1px solid rgba(255,255,255,0.15)',background:'transparent',color:'rgba(255,255,255,0.6)',fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',sans-serif",flexShrink:0}}>Try again</button>
+            </div>
+          )}
+          {!asgnLoading && asgnFail === 'error' && (
+            <div style={{fontSize:12,color:'#f09595',padding:'18px 4px'}}>Could not load your assignments right now.</div>
+          )}
+          {!asgnLoading && !asgnFail && visibleAssignments.length === 0 && (
             <div style={{fontSize:12,color:'rgba(255,255,255,0.35)',padding:'18px 4px'}}>
               {filter==='Completed' ? 'Nothing completed yet — your finished work will show up here.' : 'No assignments right now. Nice and clear!'}
             </div>

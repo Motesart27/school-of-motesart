@@ -102,7 +102,16 @@ export const api = {
   // M1 R1 canonical serializer: assignment_id IS the Airtable rec… id
   // (the only completion/evidence linkage key); assignment_number is
   // the Autonumber display value and never identifies anything.
-  getMyAssignments: () => request('/assignments/mine'),
+  // M1 R1.1: for a multi-instrument identity the canonical SELECTED
+  // Student Instruments record travels as ?student_instrument_id=<rec…>
+  // (encoded). The backend authorizes it with the SAME R1 identity
+  // authority: 403 wrong_student · 409 selection_required · 503 retryable.
+  getMyAssignments: (studentInstrumentId) =>
+    request(
+      studentInstrumentId
+        ? `/assignments/mine?student_instrument_id=${encodeURIComponent(studentInstrumentId)}`
+        : '/assignments/mine'
+    ),
 
   // M1 R1: the student's current active assignment. Explicit contract:
   // { has_active_assignment: true,  assignment: {…canonical serializer…} }
