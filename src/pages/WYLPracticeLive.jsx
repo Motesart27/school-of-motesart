@@ -9,10 +9,16 @@ import TelemetryPanel from '../components/TelemetryPanel'
 import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
 import PracticeConceptView from '../components/PracticeConceptView.jsx'
 import { CONCEPT_VIEW_CONFIG } from '../config/conceptViewConfig.js'
-// M1 R2-FE §E — read-only store access. Practice Live never writes academic
-// state locally; canonical Concept_State is backend-derived (Practice_Events →
-// Concept_State) and reaches this cache only via server-refreshed reads.
-import { getState } from '../lesson_engine/concept_state_store.js'
+// M1 R3-FE §D — Railway Concept_State is the AUTHORITY for teaching phase.
+// The local store is written ONLY with server-returned snapshots (cache of
+// the last canonical response); it is never read to choose teaching state.
+import { replaceState as storeCacheServerSnapshot } from '../lesson_engine/concept_state_store.js'
+import {
+  fetchServerConceptState,
+  logPracticeLiveSession,
+  readAssignmentIdFromUrl,
+  submitPracticeLiveEvidence,
+} from '../services/practiceLiveEvidence.js'
 import { useMotesartStudentState } from '../hooks/useMotesartStudentState.js'
 import { runMotesartThinkingEngine } from '../ai/motesart/motesartThinkingEngine.js'
 import { buildMotesartVoiceResponse } from '../ai/motesart/motesartVoicePersona.js'
@@ -538,7 +544,11 @@ const CONCEPT_CONFIG_MAP = {
   'find-home': {
     concept: 'Find Home',
     description: 'Every song has a home. Home is 1. In C major, C is home.',
-    conceptId: 'T_FIND_HOME',
+    // M1 R3-FE §J — NOT a canonical evidence/mastery concept id. Find Home
+    // is the Gate-0 teaching experience (ratified concept:
+    // T_TONIC_RECOGNITION, pending registry); this flow submits NO canonical
+    // evidence and claims no Concept_State.
+    conceptId: null,
     steps: [
       {
         type: 'speak',
@@ -627,7 +637,10 @@ const CONCEPT_CONFIG_MAP = {
   'skip-and-together': {
     concept: 'Skip & Together',
     description: 'Some notes skip — space between them. Some notes hold hands — they are together.',
-    conceptId: 'T_SKIP_AND_TOGETHER',
+    // M1 R3-FE §J — NOT a canonical concept id. Skip & Together is the
+    // Gate-1 teaching experience whose ratified concepts are T_HALF_STEP +
+    // T_WHOLE_STEP (two proofs, one verdict) — never a single substitute id.
+    conceptId: null,
     steps: [
       {
         type: 'speak',
@@ -1039,7 +1052,13 @@ function CelebrationOverlay({ type }) {
 export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studentId, studentProfile, wylProfile }) {
   const navigate = useNavigate()
   const videoRef = useRef(null)
-  const { user: authUser } = useAuth()
+  const { user: authUser, evidenceStudentInstrumentId } = useAuth()
+  // M1 R3-FE §B — the canonical launch assignment id: read once, validated
+  // to the exact rec… shape, preserved for the WHOLE session, submitted
+  // verbatim with canonical evidence. Never fabricated (free practice: null).
+  const sessionAssignmentIdRef = React.useRef(readAssignmentIdFromUrl())
+  const evidenceSubmittedRef = React.useRef(false)
+  const attemptsRef = React.useRef(0)
 
   // Concept routing — read ?concept= from URL, stable for session lifetime.
   //
@@ -1069,6 +1088,10 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
   const [practiceView, setPracticeView] = useState('cockpit')
   const [timer, setTimer] = useState(0)
+  // Ref mirror so end-of-session writes read the REAL elapsed time (the
+  // callbacks close over stale state otherwise).
+  const timerRef = React.useRef(0)
+  React.useEffect(() => { timerRef.current = timer }, [timer])
   const [paused, setPaused] = useState(false)
   const [chatOpen, setChatOpen] = useState(true)
   const [cameraReady, setCameraReady] = useState(false)
@@ -1125,22 +1148,61 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [awaitingResponse, setAwaitingResponse] = React.useState(false)
   const [practiceCorrect, setPracticeCorrect] = React.useState(0)
   const [responseTimeout, setResponseTimeout] = React.useState(null)
-  // Cache-only read (M1 §C): a server-refreshed Concept_State snapshot used
-  // for phase presentation — never locally derived. Null-safe so an
-  // unsupported concept reaches the fail-closed screen instead of crashing.
-  const [conceptState, setConceptState] = useState(() =>
-    currentConcept ? (getState(currentConcept.conceptId) || {}) : {})
+  // M1 R3-FE §D — Railway Concept_State is AUTHORITATIVE for phase. No
+  // localStorage read seeds this state: the cache can be stale or user-
+  // edited and must never override (or stand in for) a fresh server answer.
+  const [conceptState, setConceptState] = useState({})
+  // 'loading' | 'ready' | 'unavailable' — unavailable renders a retryable
+  // chip and NEVER fabricates ownership/confidence/default mastery state.
+  const [conceptStateStatus, setConceptStateStatus] = useState('loading')
+  const [conceptStateRetryTick, setConceptStateRetryTick] = useState(0)
   const [sessionCorrect, setSessionCorrect] = useState(0)
   const [micCheckState, setMicCheckState] = React.useState('idle')
   const [micFailed, setMicFailed] = React.useState(false)
 
   const ACTIVE_CONCEPT_ID = currentConcept?.conceptId ?? null
+
+  React.useEffect(() => {
+    let cancelled = false
+    async function loadCanonicalState() {
+      if (!ACTIVE_CONCEPT_ID) {
+        // Non-canonical teaching flow — no Concept_State claim to make.
+        setConceptState({}); setConceptStateStatus('ready')
+        return
+      }
+      setConceptStateStatus('loading')
+      const res = await fetchServerConceptState(ACTIVE_CONCEPT_ID)
+      if (cancelled) return
+      if (res.ok) {
+        setConceptState(res.state || {})
+        setConceptStateStatus('ready')
+        // §D — the local store caches ONLY the last server-returned snapshot.
+        try { storeCacheServerSnapshot(ACTIVE_CONCEPT_ID, { ...res.state, _source: 'server' }) } catch { /* cache only */ }
+      } else {
+        // Outage: retryable — never a fabricated phase, never the stale cache.
+        setConceptState({})
+        setConceptStateStatus('unavailable')
+      }
+    }
+    loadCanonicalState()
+    return () => { cancelled = true }
+  }, [ACTIVE_CONCEPT_ID, evidenceStudentInstrumentId, conceptStateRetryTick])
   const conceptConfig = ACTIVE_CONCEPT_ID ? CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID] : undefined
+  // M1 R3-FE §D — the STUDENT-safe server contract carries confidence_tier
+  // (Article XIII), so phase derives from the tier; elevated payloads with
+  // ownership_state still map through the legacy keys.
   const phaseMap = {
     introduced: 'teach', practicing: 'guide',
-    accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release'
+    accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release',
+    not_ready: 'teach', developing: 'guide', almost_owned: 'confirm',
+    mastered: 'release',
   }
-  const currentPhase = phaseMap[conceptState?.ownership_state || 'introduced']
+  // §D — phase claims come from the canonical server snapshot ONLY. While
+  // loading/unavailable the engine keeps its neutral 'teach' default and the
+  // retryable chip (below) tells the truth about missing data.
+  const currentPhase = conceptStateStatus === 'ready'
+    ? (phaseMap[conceptState?.ownership_state || conceptState?.confidence_tier || 'introduced'] || 'teach')
+    : 'teach'
   const motesartStudentState = useMotesartStudentState({
     ageBand: studentProfile?.ageBand || studentProfile?.age_band,
     currentPhase,
@@ -1177,7 +1239,24 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       if (currentConcept?.nextConcept) {
         setTimeout(() => { window.location.href = '/practice-live?concept=' + currentConcept.nextConcept }, 2000)
       }
-      setLessonComplete({ engagement: { attentionScore: 100 } })
+      setLessonComplete({ engagement: {} })
+      // M1 R3-FE §B — the session's ONE canonical evidence event: exact
+      // preserved launch assignment id (or none for free practice), exact
+      // canonical concept, canonical SI via the evidence client. Fire once.
+      if (!evidenceSubmittedRef.current && ACTIVE_CONCEPT_ID) {
+        evidenceSubmittedRef.current = true
+        submitPracticeLiveEvidence({
+          conceptId: ACTIVE_CONCEPT_ID,
+          assignmentId: sessionAssignmentIdRef.current,
+          trigger: 'complete',
+          stats: {
+            quizCorrect: quizCorrectRef.current,
+            practiceCorrect: practiceCorrectRef.current,
+            attempts: attemptsRef.current,
+            durationSec: timerRef.current || 0,
+          },
+        }).catch(err => console.error('[PracticeLive] evidence failed:', String(err)))
+      }
       return
     }
     teachingStepRef.current = step
@@ -1258,6 +1337,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
     if (responseTimeout) clearTimeout(responseTimeout)
 
+    attemptsRef.current += 1
     const heard = transcript.toLowerCase().trim()
     const expected = current.expect
     const evaluation = evaluateStudentResponse(heard, expected, current.prompt, currentConcept.concept)
@@ -1762,16 +1842,32 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       perceptionBridgeRef.current = null
     }
     if (orchestratorRef.current) await orchestratorRef.current.stop()
-    // Fix 5 — write practice log on session end (non-blocking)
+    // M1 R3-FE §B — a partial session (ended before completion) submits its
+    // canonical evidence WITHOUT the assignment link (a partial never
+    // completes homework); zero-activity sessions submit nothing.
+    if (!evidenceSubmittedRef.current && ACTIVE_CONCEPT_ID) {
+      evidenceSubmittedRef.current = true
+      submitPracticeLiveEvidence({
+        conceptId: ACTIVE_CONCEPT_ID,
+        assignmentId: null,
+        trigger: 'end',
+        stats: {
+          quizCorrect: quizCorrectRef.current,
+          practiceCorrect: practiceCorrectRef.current,
+          attempts: attemptsRef.current,
+          durationSec: timerRef.current || 0,
+        },
+      }).catch(err => console.error('[PracticeLive] evidence failed:', String(err)))
+    }
+    // M1 R3-FE §C — practice-log ANALYTICS ride on the canonical Student
+    // Instruments identity (never the local display-user record); no canonical SI → no log.
     try {
-      const user = JSON.parse(localStorage.getItem('som_user') || '{}')
-      const duration_min = Math.round((timer || 0) / 60)
-      await api.logPracticeSession({
-        concept_ids: currentConcept?.conceptId || null,
-        activity_type: 'live_practice',
-        duration_min: duration_min < 1 ? 1 : duration_min,
-        student_id: user.student_id || user.id || null,
-        piece_name: currentConcept?.title || currentConcept?.conceptId || null,
+      const duration_min = Math.round((timerRef.current || 0) / 60)
+      await logPracticeLiveSession({
+        studentInstrumentId: evidenceStudentInstrumentId || null,
+        conceptId: ACTIVE_CONCEPT_ID,
+        durationMin: duration_min,
+        pieceName: currentConcept?.title || currentConcept?.concept || null,
       })
     } catch (err) {
       console.error('Practice log save failed:', String(err))
@@ -1795,7 +1891,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
           <div style={{ textAlign:'center', color:'rgba(255,255,255,0.9)' }}>
             <h2 style={{ fontFamily:'Outfit', fontSize:32, marginBottom:16 }}>Session Complete</h2>
             <p style={{ fontSize:14, color:'rgba(255,255,255,0.5)', marginBottom:24 }}>
-              {fmtTime(timer)} · {lessonComplete.engagement?.attentionScore || 0}% attention
+              {fmtTime(timer)} · Focused work — nice session.
             </p>
             <button className="wyl-bar__btn" onClick={() => navigate('/dashboard')} style={{ fontSize:14, padding:'10px 24px' }}>
               Back to Dashboard
@@ -1855,27 +1951,41 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     </div>
   )
 
+  const conceptStateChip = conceptStateStatus === 'unavailable' ? (
+    <div data-testid="concept-state-retryable" style={{ position:'fixed', top:10, left:'50%', transform:'translateX(-50%)', zIndex:9997, display:'flex', alignItems:'center', gap:10, padding:'8px 14px', background:'rgba(245,158,11,0.12)', border:'1px solid rgba(245,158,11,0.35)', borderRadius:10, color:'#fbbf24', fontSize:12, fontWeight:600 }}>
+      <span>Your progress info is temporarily unavailable.</span>
+      <button onClick={() => setConceptStateRetryTick(t => t + 1)} style={{ padding:'4px 12px', borderRadius:8, border:'1px solid rgba(245,158,11,0.45)', background:'transparent', color:'#fbbf24', fontSize:12, fontWeight:700, cursor:'pointer' }}>Retry</button>
+    </div>
+  ) : null
+
   if (practiceView === 'cockpit') return (
+    <>
+    {conceptStateChip}
     <PracticeSessionCockpit
       onBegin={async () => { setPracticeView('concept'); startLesson() }}
       conceptTitle={currentConcept.concept}
       conceptDesc={currentConcept.description}
       motesartSuggestion={conceptConfig?.speechTexts?.teach}
+      journeyLabel={conceptStateStatus === 'ready' && ACTIVE_CONCEPT_ID
+        ? ({ mastered: 'Mastered', owned: 'Owned it', almost_owned: 'Almost there', developing: 'Growing', not_ready: 'Just starting' }[conceptState?.confidence_tier] || 'Just starting')
+        : null}
     />
+    </>
   )
 
   if (practiceView === 'concept') return (
     <>
+      {conceptStateChip}
       <PracticeConceptView
         conceptName={coaching.concept || currentConcept.concept}
         conceptDesc={currentConcept.description}
         phase={currentPhase}
         speechText={coaching.message || ''}
-        highlightedKeys={conceptConfig.highlightedKeys}
-        homeKeyIndex={conceptConfig.homeKeyIndex}
+        highlightedKeys={conceptConfig?.highlightedKeys}
+        homeKeyIndex={conceptConfig?.homeKeyIndex}
         answerOptions={[]}
         correctAnswer={null}
-        bpm={conceptConfig.bpm}
+        bpm={conceptConfig?.bpm}
         autoSpeak={false}
         studentTurn={awaitingResponse}
         retryMode={retryMode}

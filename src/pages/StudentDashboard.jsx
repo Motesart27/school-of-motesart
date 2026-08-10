@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
+
 // Flat nav items with SVG icons
 const NAV_ITEMS = [
   { key: 'Home', icon: 'home' },
@@ -342,9 +344,32 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
   }, [triggerDpm])
   // DPM donut calculations
   const C = 2 * Math.PI * 42
-  const drive = 1, passion = 27, motivation = 0, overall = 9
-  const dA = (drive / 100) * C
-  const pA = (passion / 100) * C
+  // M1 R3-FE §G/§N — NO hardcoded numeric DPM. The dashboard consumes the
+  // backend's Article XIII student-safe DPM payload (qualitative status +
+  // time facts). A 503 outage renders 'temporarily unavailable' with retry —
+  // never risk colors, never fabricated zeros.
+  const { learningIdentity } = useAuth()
+  const [dpmSafe, setDpmSafe] = useState(null)          // student-safe payload
+  const [dpmStatus, setDpmStatus] = useState('loading') // loading|ready|unavailable
+  const [dpmRetry, setDpmRetry] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    async function loadDpm() {
+      const rec = learningIdentity?.student_record_id
+      if (!rec) { setDpmStatus('ready'); setDpmSafe(null); return }
+      setDpmStatus('loading')
+      try {
+        const token = localStorage.getItem('som_token')
+        const res = await fetch(`${API_URL}/students/${encodeURIComponent(rec)}/dpm`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+        if (cancelled) return
+        if (!res.ok) { setDpmStatus('unavailable'); setDpmSafe(null); return }
+        setDpmSafe(await res.json()); setDpmStatus('ready')
+      } catch { if (!cancelled) { setDpmStatus('unavailable'); setDpmSafe(null) } }
+    }
+    loadDpm()
+    return () => { cancelled = true }
+  }, [learningIdentity?.student_record_id, dpmRetry])
+
 
   // Sparkline - highlight today
   const todayIndex = new Date().getDay()
@@ -494,43 +519,26 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
             <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 500 }}>Building</span>
           </div>
           <div style={{ padding: 16, flex: 1, display: 'flex', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              {/* SVG Donut */}
-              <div style={{ position: 'relative' }}>
-                <svg width="100" height="100" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#378ADD" strokeWidth="8"
-                    strokeDasharray={dpmVisible ? `${dA} ${C - dA}` : `0 ${C}`} transform="rotate(-90 50 50)" strokeLinecap="round" style={{ transition: 'stroke-dasharray 1.2s ease-out' }} />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#f59e0b" strokeWidth="8"
-                    strokeDasharray={dpmVisible ? `${pA} ${C - pA}` : `0 ${C}`} strokeDashoffset={`${-(dA + 4)}`} style={{ transition: 'stroke-dasharray 1.2s ease-out 0.25s' }}
-                    transform="rotate(-90 50 50)" strokeLinecap="round" />
-                  {motivation > 0 && (
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="#22c55e" strokeWidth="8"
-                      strokeDasharray={dpmVisible ? `${(motivation / 100) * C} ${C - (motivation / 100) * C}` : `0 ${C}`}
-                      strokeDashoffset={`${-(dA + pA + 8)}`}
-                      transform="rotate(-90 50 50)" strokeLinecap="round"  style={{ transition: 'stroke-dasharray 1.2s ease-out 0.5s' }} />
-                  )}
-                </svg>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 800 }}>{overall}%</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>DPM</div>
+            {/* M1 R3-FE §G/§N — Article XIII: the student surface renders the
+                backend's QUALITATIVE DPM only (status + time facts). No
+                Drive/Passion/Motivation percentages, no numeric ring; a 503
+                outage says so honestly and offers retry — never risk colors,
+                never fabricated zeros. */}
+            {dpmStatus === 'unavailable' ? (
+              <div data-testid="dpm-unavailable" style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Your practice info is temporarily unavailable.</span>
+                <button onClick={() => setDpmRetry(t => t + 1)} style={{ alignSelf:'flex-start', padding:'6px 16px', borderRadius:8, border:'1px solid rgba(255,255,255,0.2)', background:'transparent', color:'rgba(255,255,255,0.7)', fontSize:12, fontWeight:600, cursor:'pointer' }}>Try again</button>
+              </div>
+            ) : (
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 20, fontWeight: 800, color: '#14b8a6' }}>
+                  {dpmStatus === 'loading' ? '…' : (dpmSafe?.status || 'Getting started')}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
+                  {dpmSafe?.weekly_minutes != null ? `${Math.round(dpmSafe.weekly_minutes)} practice minutes this week` : 'Play and practice to grow your momentum.'}
                 </div>
               </div>
-              {/* Legend */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { color: '#378ADD', label: 'Drive', value: `${drive}%` },
-                  { color: '#f59e0b', label: 'Passion', value: `${passion}%` },
-                  { color: '#22c55e', label: 'Motivation', value: `${motivation}%` },
-                ].map(d => (
-                  <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
-                    <span style={{ color: 'rgba(255,255,255,0.45)' }}>{d.label}</span>
-                    <span style={{ color: '#fff', fontWeight: 700 }}>{d.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -641,14 +649,13 @@ function GameView({ navigate, motesartAvatar }) {
             ))}
           </div>
         </Card>
-        <Card title="DPM Game Scores">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-            {[{ v: '0%', l: 'Drive', c: '#3b82f6' }, { v: '0%', l: 'Passion', c: '#f97316' }, { v: '0%', l: 'Motivation', c: '#22c55e' }].map(s => (
-              <div key={s.l} style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 18, fontWeight: 700, color: s.c }}>{s.v}</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{s.l}</div>
-              </div>
-            ))}
+        <Card title="Practice Momentum">
+          {/* M1 R3-FE §G — no numeric DPM components on the student surface;
+              qualitative effort language only. */}
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>
+            {dpmStatus === 'unavailable'
+              ? 'Temporarily unavailable — try again soon.'
+              : (dpmSafe?.status || 'Play and practice to build your momentum.')}
           </div>
         </Card>
       </div>

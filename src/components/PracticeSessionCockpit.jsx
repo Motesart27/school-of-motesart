@@ -76,26 +76,22 @@ export default function PracticeSessionCockpit({
   phase            = 'Phase 1',
   conceptTitle     = 'Middle C',
   conceptDesc      = 'Finding and playing Middle C with confidence on the piano keyboard.',
-  conceptProgress  = 42,
+  // M1 R3-FE §G/§H — no fabricated default progress. journeyLabel is the
+  // server-derived qualitative tier (string) or null when the canonical
+  // state is not available; nothing numeric is reconstructed.
+  journeyLabel     = null,
   assignments      = [],
   motesartSuggestion = "Let's get into it.",
   onBegin,
 }) {
-  const pct = Math.max(0, Math.min(100, conceptProgress))
-  const progressColor = pct >= 80 ? '#00C49A' : pct >= 40 ? '#f97316' : '#e84b8a'
-  // M1 R2-FE.1 §H (Article XIII) — students never see an academic progress
-  // percentage. The mastery readout is Motesart tier language mapped onto the
-  // SAME stage thresholds the dots below already use; the bar stays a coarse
-  // visual band, and the numeric never renders.
-  const progressTier = pct >= 100 ? 'Owned'
-    : pct >= 66 ? 'Almost there'
-    : pct >= 33 ? 'Growing'
-    : 'Just starting'
+  // M1 R3-FE §G — no percentage math at all on this student surface: the
+  // journey readout is the server-derived tier word (or an honest dash).
+  const progressTier = journeyLabel || '—'
 
   const stages = [
-    { label: 'Find It', threshold: 33 },
-    { label: 'Play It', threshold: 66 },
-    { label: 'Own It',  threshold: 100 },
+    { label: 'Find It' },
+    { label: 'Play It' },
+    { label: 'Own It' },
   ]
 
   return (
@@ -150,44 +146,31 @@ export default function PracticeSessionCockpit({
             <div className="cockpit-card" style={{ padding: '20px 24px', animationDelay: '0.06s' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
                 <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Concept Journey</span>
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 22, fontWeight: 800, color: progressColor }}>{progressTier}</span>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 22, fontWeight: 800, color: '#00C49A' }}>{progressTier}</span>
               </div>
-              <div style={{ height: 7, borderRadius: 5, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', borderRadius: 5,
-                  background: `linear-gradient(90deg,${progressColor},${progressColor}99)`,
-                  width: `${pct}%`,
-                  transition: 'width 1.1s cubic-bezier(0.16,1,0.3,1)',
-                }} />
-              </div>
+              {/* M1 R3-FE §G — the width-percentage progress bar and
+                  pct-threshold stage dots are REMOVED: no reconstructed
+                  academic percentage rendering on a student surface. The
+                  stage names remain as qualitative journey labels only. */}
               <div style={{ display: 'flex', gap: 18, marginTop: 12 }}>
-                {stages.map(s => {
-                  const done = pct >= s.threshold
-                  return (
-                    <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <div className="cockpit-stage-dot" style={{
-                        background: done ? '#00C49A' : 'rgba(255,255,255,0.08)',
-                        border: done ? 'none' : '1.5px solid rgba(255,255,255,0.14)',
-                      }}>
-                        {done && <span style={{ fontSize: 8, color: '#0a0a1a', fontWeight: 900 }}>✓</span>}
-                      </div>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: done ? '#00C49A' : 'rgba(255,255,255,0.3)' }}>{s.label}</span>
-                    </div>
-                  )
-                })}
+                {stages.map(s => (
+                  <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div className="cockpit-stage-dot" style={{ background: 'rgba(255,255,255,0.08)', border: '1.5px solid rgba(255,255,255,0.14)' }} />
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.45)' }}>{s.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Last session recap */}
+            {/* M1 R3-FE §H — the fabricated last-session recap is GONE:
+                absence of canonical history remains absence. */}
             <div className="cockpit-card" style={{ padding: '18px 22px', animationDelay: '0.12s' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <span style={{ fontSize: 13 }}>🕐</span>
-                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Last Session Recap</span>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Last Session</span>
               </div>
-              {/* M1 R2-FE.1 §H — no fabricated performance numerics on a
-                  student surface: the recap speaks Motesart tier language. */}
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7 }}>
-                You practiced <strong style={{ color: 'rgba(255,255,255,0.88)' }}>{conceptTitle}</strong> and it&apos;s <strong style={{ color: '#00C49A' }}>really coming together</strong>. T.A.M.i noticed you hesitate near the black keys — we&apos;ll focus on that today.
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.7 }}>
+                No previous session data yet.
               </div>
             </div>
 

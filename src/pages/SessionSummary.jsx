@@ -54,8 +54,8 @@ export default function SessionSummary() {
       <div className="ss-header"><h1 style={{fontSize: mob ? 18 : 24,fontWeight:700}}>Session Complete!</h1><p style={{fontSize:13,color:'#9ca3af',marginTop:4}}>Game Mode • Find the Note</p></div>
       <div className="ss-main">
         <div className="ss-section"><div className="ss-perf">
-          <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#14b8a6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="62.8"/></svg><div className="ss-ring-val">75%</div><div className="ss-ring-label">Accuracy</div></div>
-          <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#8b5cf6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="94.2"/></svg><div className="ss-ring-val">63%</div><div className="ss-ring-label">Level Progress</div></div>
+          <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#14b8a6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="62.8"/></svg><div className="ss-ring-val" style={{fontSize:15}}>Almost there</div><div className="ss-ring-label">Accuracy</div></div>
+          <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#8b5cf6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="94.2"/></svg><div className="ss-ring-val" style={{fontSize:15}}>Growing</div><div className="ss-ring-label">Level Progress</div></div>
         </div></div>
         <div className="ss-section"><div className="ss-stats">
           <div className="ss-stat purple"><div className="ss-sicon">🎯</div><div className="ss-sval">Lv.5</div><div className="ss-slbl">Level Reached</div></div>
@@ -72,12 +72,13 @@ export default function SessionSummary() {
         <div className="ss-section"><div className="ss-dpm">
           <div style={{fontSize:13,fontWeight:600,color:'#9ca3af',marginBottom:12}}>DPM Impact This Session</div>
           <div className="ss-dpm-row">
-            {[['Drive','+2','#3b82f6'],['Passion','+3','#f97316'],['Motivation','+1','#22c55e']].map(([n,v,c])=>(
-              <div key={n} className="ss-dpm-item"><div style={{fontSize:18,fontWeight:700,color:'#4ade80'}}>{v}</div><div style={{fontSize:11,color:'#6b7280',marginTop:4}}>{n}</div><div style={{width:32,height:4,borderRadius:9999,background:c,margin:'8px auto 0'}}/></div>
+            {/* M1 R3-FE §G — qualitative effect words, no numeric DPM deltas */}
+            {[['Drive','Growing','#3b82f6'],['Passion','Growing','#f97316'],['Motivation','Steady','#22c55e']].map(([n,v,c])=>(
+              <div key={n} className="ss-dpm-item"><div style={{fontSize:14,fontWeight:700,color:'#4ade80'}}>{v}</div><div style={{fontSize:11,color:'#6b7280',marginTop:4}}>{n}</div><div style={{width:32,height:4,borderRadius:9999,background:c,margin:'8px auto 0'}}/></div>
             ))}
           </div>
         </div></div>
-        <div className="ss-section"><div className="ss-lb-pos"><div style={{fontSize:13,color:'#c4b5fd'}}>Your Current Position</div><div style={{fontSize:40,fontWeight:700,marginTop:4}}>#4</div><div style={{fontSize:11,color:'#9ca3af',marginTop:4}}>on TAMi Leaderboard</div></div></div>
+        <div className="ss-section"><div className="ss-lb-pos"><div style={{fontSize:13,color:'#c4b5fd'}}>Your Current Position</div><div style={{fontSize:40,fontWeight:700,marginTop:4}}>#4</div><div style={{fontSize:11,color:'#9ca3af',marginTop:4}}>on the Game Points board</div></div></div>
         <div className="ss-section"><div className="ss-mini">
           <div style={{display:'flex',alignItems:'center',gap:8,fontWeight:600,marginBottom:12}}>🏆 TAMi Leaders</div>
           {LEADERS.map((l,i)=>(

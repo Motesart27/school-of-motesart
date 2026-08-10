@@ -83,6 +83,13 @@ const ConceptHealth = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #111827, #1f2937)', color: '#fff', fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" }}>
+      {/* M1 R3-FE §E — this surface currently renders DEMO data. It is
+          explicitly labeled so mock numbers can never be mistaken for
+          canonical student state; production teacher truth comes from the
+          SOM/Railway backend (Practice_Events → Concept_State). */}
+      <div data-testid="demo-data-banner" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 8, padding: '10px 16px', margin: '12px 0', color: '#f59e0b', fontSize: 13, fontWeight: 600 }}>
+        Demo data — not canonical student state. Live student learning truth comes from the SOM backend.
+      </div>
       <style>{`
         @keyframes expandDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 1000px; } }
         @keyframes slideInLeft { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }

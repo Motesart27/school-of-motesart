@@ -118,6 +118,9 @@ export default function CurriculumPath() {
 
   // Use live data if available, fall back to mock
   const activePHASES = livePhases || PHASES
+  // M1 R3-FE §E — the mock fallback is DEMO ONLY and is labeled as such
+  // in the UI below whenever live canonical data is absent.
+  const usingMock = !liveStates
   const activeSTATES = liveStates || MOCK_STUDENT_STATES
 
   const currentPhase = activePHASES.find(p => p.num === selectedPhaseNum)
@@ -138,6 +141,11 @@ export default function CurriculumPath() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #111827, #1f2937)', color: '#fff', fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", overflowX: 'hidden' }}>
+      {usingMock && (
+        <div data-testid="demo-data-banner" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 8, padding: '10px 16px', margin: '12px 0', color: '#f59e0b', fontSize: 13, fontWeight: 600 }}>
+          Demo data — not canonical student state.
+        </div>
+      )}
       <style>{`
         @keyframes pulseCurrent {
           0%, 100% { box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.5); }

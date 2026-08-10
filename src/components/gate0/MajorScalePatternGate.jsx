@@ -1,6 +1,6 @@
 /**
  * MajorScalePatternGate.jsx
- * Gate 0 — Pattern Mind
+ * Gate 2 — Pattern Mind (M1 R3-FE §J — ratified numbering: T_MAJOR_SCALE_PATTERN is GATE 2)
  * SOM Mastery Intelligence Engine — Phase 1A
  *
  * Reads L00_major_scale_pattern.json and runs the full proof loop:
@@ -332,7 +332,7 @@ function QuestionCard({ q, onAnswer, disabled }) {
   )
 }
 
-// ─── Main Gate 0 Component ────────────────────────────────────────────────────
+// ─── Main Gate 2 Component ────────────────────────────────────────────────────
 export default function MajorScalePatternGate({ onGatePassed }) {
   const [lesson, setLesson]           = useState(null)
   const [loadError, setLoadError]     = useState(null)
@@ -358,7 +358,7 @@ export default function MajorScalePatternGate({ onGatePassed }) {
     <div style={{ background: T.bg, color: T.red, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: T.font, padding: 40, textAlign: 'center' }}>
       <div>
         <div style={{ fontSize: 32, marginBottom: 12 }}>⚠️</div>
-        <div style={{ fontSize: 15 }}>Could not load Gate 0 lesson data.</div>
+        <div style={{ fontSize: 15 }}>Could not load Gate 2 lesson data.</div>
         <div style={{ fontSize: 12, color: T.muted, marginTop: 8 }}>{loadError}</div>
       </div>
     </div>
@@ -558,7 +558,7 @@ export default function MajorScalePatternGate({ onGatePassed }) {
           onError={e => { e.currentTarget.style.display='none' }} />
         <div>
           <div style={{ fontFamily: T.display, fontWeight: 800, fontSize: 13, color: T.teal, letterSpacing: '0.05em' }}>MOTESART</div>
-          <div style={{ fontSize: 11, color: T.muted }}>Gate 0 · Pattern Mind</div>
+          <div style={{ fontSize: 11, color: T.muted }}>Gate 2 · Pattern Mind</div>
         </div>
         <div style={{ flex: 1 }} />
         {/* Progress bar */}
@@ -731,7 +731,7 @@ export default function MajorScalePatternGate({ onGatePassed }) {
             <div style={{ fontSize: 48, marginBottom: 16 }}>🎯</div>
             <div style={{
               fontFamily: T.display, fontWeight: 800, fontSize: 26, color: T.teal, marginBottom: 8,
-            }}>Gate 0 — Pattern Mind</div>
+            }}>Gate 2 — Pattern Mind</div>
             <div style={{ fontSize: 15, color: T.muted, marginBottom: 28, lineHeight: 1.6 }}>
               {motesartResponse(confidenceScore)}
             </div>

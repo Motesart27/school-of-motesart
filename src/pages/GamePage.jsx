@@ -1187,17 +1187,18 @@ export default function GamePage() {
  {/* Ear Training Meter */}
  <div className="gp-ear-meter">
  <div style={{fontSize:14,fontWeight:700,color:'#0ea5e9',marginBottom:12}}> Ear Training Meter</div>
+ {/* M1 R3-FE §G — accuracy-derived percentage-width academic bars are
+     REMOVED: qualitative skill words only (game scoring/lives unchanged). */}
  {[
- ['Pitch Accuracy', Math.min(accuracy+7,100), 'linear-gradient(90deg,#22c55e,#4ade80)', '#4ade80'],
- ['Note Memory', Math.max(accuracy-10,0), 'linear-gradient(90deg,#3b82f6,#60a5fa)', '#60a5fa'],
- ['Sequence Order', Math.max(accuracy-20,0), 'linear-gradient(90deg,#f97316,#fb923c)', '#fb923c'],
- ['Speed', Math.min(accuracy+15,100),'linear-gradient(90deg,#a855f7,#c084fc)', '#c084fc'],
- ['Replay Efficiency', Math.max(accuracy-5,0),'linear-gradient(90deg,#14b8a6,#2dd4bf)', '#2dd4bf'],
- ].map(([label,val,grad,col])=>(
+ ['Pitch', '#4ade80'],
+ ['Note Memory', '#60a5fa'],
+ ['Sequence Order', '#fb923c'],
+ ['Speed', '#c084fc'],
+ ['Replay Efficiency', '#2dd4bf'],
+ ].map(([label,col])=>(
  <div key={label} className="gp-ear-row">
  <div className="gp-ear-label">{label}</div>
- <div className="gp-ear-bar-wrap"><div className="gp-ear-bar-fill" style={{width:val+'%',background:grad}}/></div>
- <div className="gp-ear-score" style={{color:col,width:52}}>{meterWord(val)}</div>
+ <div className="gp-ear-score" style={{color:col}}>{earTier}</div>
  </div>
  ))}
  </div>

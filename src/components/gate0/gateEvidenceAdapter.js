@@ -18,12 +18,24 @@
 
 export const GATE_EVIDENCE_ENABLED = import.meta.env.VITE_GATE_EVIDENCE === '1'
 
-// Canonical concept mapping for gate surfaces. null = no canonical T_* id
-// assigned in the lock package yet → evidence must be skipped, never invented.
-const GATE_CANONICAL_CONCEPTS = {
+// M1 R3-FE §J — RATIFIED gate → canonical concept governance (the seam
+// stays HELD OFF; this mapping documents the ratified truth and never
+// invents ids):
+//   Gate 0  find_home          → T_TONIC_RECOGNITION (ratified; pending in
+//                                the backend registry — until the registry
+//                                carries it, an enabled seam would be
+//                                refused loudly, never aliased)
+//   Gate 1  skip_and_together  → T_HALF_STEP (Together) + T_WHOLE_STEP
+//                                (Skip): TWO canonical proofs behind ONE
+//                                ownership verdict — there is NO single
+//                                substitute concept id (T_FIND_HOME /
+//                                T_SKIP_AND_TOGETHER are NOT canonical and
+//                                may never carry evidence or mastery).
+//   Gate 2  major_scale_pattern → T_MAJOR_SCALE_PATTERN
+export const GATE_CANONICAL_CONCEPTS = {
   major_scale_pattern: 'T_MAJOR_SCALE_PATTERN',
-  find_home: null,
-  skip_and_together: null,
+  find_home: 'T_TONIC_RECOGNITION',
+  skip_and_together: null, // dual-concept gate: T_HALF_STEP + T_WHOLE_STEP — never one substitute id
 }
 
 /**

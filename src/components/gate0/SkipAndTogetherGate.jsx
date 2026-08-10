@@ -160,6 +160,30 @@ function StepBar({ currentStep, totalSteps = 9 }) {
 }
 
 // ─── Speak or text input ──────────────────────────────────────────────────────
+
+// M1 R3-FE §I — proper component for the sequence blanks: the previous
+// inline IIFE called React.useState inside a conditional render, which
+// violated the Rules of Hooks and CRASHED the quiz at this question
+// (React #310) — making the ownership step unreachable at runtime.
+function SequenceBuildInput({ onSubmit, disabled }) {
+  const [a, setA] = React.useState('')
+  const [b, setB] = React.useState('')
+  return (
+    <div>
+      <div style={{ fontSize: 14, color: T.text, marginBottom: 12 }}>
+        Fill in: S – S –{' '}
+        <input value={a} onChange={e => setA(e.target.value)} maxLength={1} placeholder="?"
+          style={{ width: 44, background: 'rgba(255,255,255,0.08)', border: `1px solid ${T.border}`, borderRadius: 8, padding: '4px 8px', color: T.text, fontFamily: T.font, fontSize: 15, textAlign: 'center' }} />
+        {' '}– S – S – S –{' '}
+        <input value={b} onChange={e => setB(e.target.value)} maxLength={1} placeholder="?"
+          style={{ width: 44, background: 'rgba(255,255,255,0.08)', border: `1px solid ${T.border}`, borderRadius: 8, padding: '4px 8px', color: T.text, fontFamily: T.font, fontSize: 15, textAlign: 'center' }} />
+      </div>
+      <button onClick={() => onSubmit(`${a.trim()},${b.trim()}`)} disabled={!a || !b || disabled}
+        style={{ background: T.tealDim, border: `1px solid ${T.teal}55`, borderRadius: 10, padding: '9px 20px', color: T.teal, fontFamily: T.font, fontSize: 13, fontWeight: 700, cursor: (!a || !b || disabled) ? 'not-allowed' : 'pointer', opacity: (!a || !b) ? 0.5 : 1 }}>Submit</button>
+    </div>
+  )
+}
+
 function SpeakOrText({ onAnswer, disabled, placeholder = 'Type your answer...' }) {
   const [val, setVal]           = useState('')
   const [listening, setListening] = useState(false)
@@ -346,8 +370,17 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
     if (q.type === 'multiple_choice' || q.type === 'binary_choice') {
       correct = norm === (q.correct || '').toLowerCase()
     } else if (q.type === 'sequence_build') {
-      const expected = (q.correct_sequence || []).join(',').toUpperCase()
-      correct = norm.toUpperCase().replace(/\s/g,'') === expected.replace(/,/g,'') || norm.toUpperCase().replace(/\s/g,'') === expected
+      // M1 R3-FE §I — the runtime blank-fill UI submits the two blanked
+      // positions (indexes 2 and 6 of the pattern) as single letters; the
+      // old full-string comparison could NEVER match, so the quiz (and the
+      // ownership step after it) was uncompletable at runtime. Accept the
+      // blank letters, the full sequence, or a listed acceptable phrase.
+      const seq = q.correct_sequence || []
+      const blankLetters = [seq[2], seq[6]].map(w => ((w || '')[0] || '').toUpperCase()).join('')
+      const compact = norm.toUpperCase().replace(/[^A-Z]/g, '')
+      const fullCompact = seq.join('').toUpperCase().replace(/[^A-Z]/g, '')
+      const phrase = (q.acceptable_answers || []).some(a => norm === a.toLowerCase())
+      correct = phrase || compact === blankLetters || compact === fullCompact
     } else if (q.is_ownership_gate === true) {
       // M1 R2-FE §G — the ownership question is governed by the two-proof
       // evaluator even when it appears inside the quiz loop, so the quiz
@@ -364,6 +397,7 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
     setFeedback({ correct, msg: correct ? q.motesart_correct : q.motesart_wrong })
 
     if (correct) {
+      if (q.is_ownership_gate === true) setOwnershipPassed(true)
       fbTimer.current = setTimeout(() => {
         setFeedback(null)
         const qs = lesson.gate_steps.step_6_quiz_it.questions
@@ -372,7 +406,13 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
           const allAns = { ...answers, [q.question_id]: { correct: true } }
           const passed = Object.values(allAns).filter(a => a.correct).length
           setExecScore(Math.round((passed / qs.length) * 100))
-          goStep(7); setMotesartMsg('')
+          // M1 R3-FE §I — ownership is asked exactly ONCE: the unique
+          // is_ownership_gate question inside this quiz, evaluated by the
+          // two-proof governance above. Its correct answer IS the ownership
+          // verdict, so success advances DIRECTLY to the result — the old
+          // duplicate Step 7 (a second ask with a missing prompt) is gone.
+          if (q.is_ownership_gate === true) setOwnershipPassed(true)
+          goStep(8); setMotesartMsg('')
         }
       }, 1400)
     } else {
@@ -409,30 +449,8 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
     setActiveWYL({ mode, ...wyls[mode] })
   }
 
-  function handleOwnership(raw) {
-    // M1 R2-FE §F — the ownership question is resolved FROM LESSON DATA (the
-    // unique is_ownership_gate question, G1_Q7 under step_6_quiz_it). The old
-    // read of step_7_explain_it.acceptable_signals pointed at a field that
-    // does not exist in L01 — ownership silently broke. No second hardcoded
-    // signal list lives here; zero/multiple ownership questions fail clearly.
-    const ownershipQ = resolveOwnershipQuestion(lesson)
-    if (!ownershipQ) {
-      clearTimeout(fbTimer.current)
-      setFeedback({ correct: false, msg: 'This gate needs a teacher check before it can finish — your work is safe.' })
-      return
-    }
-    // §G — two-proof governance: the explanation must prove BOTH semantic
-    // sides (skip AND together) per the lesson's required_signal_groups.
-    const correct = ownershipExplanationPasses(ownershipQ, raw)
-    setOwnershipPassed(correct)
-    clearTimeout(fbTimer.current)
-    setFeedback({ correct, msg: correct ? ownershipQ.motesart_correct : ownershipQ.motesart_wrong })
-    if (correct) {
-      fbTimer.current = setTimeout(() => { setFeedback(null); goStep(8) }, 1800)
-    } else {
-      fbTimer.current = setTimeout(() => setFeedback(null), 2200)
-    }
-  }
+  // M1 R3-FE §I — handleOwnership removed with the duplicate Step 7; the
+  // two-proof evaluation lives in handleQuizAnswer (ownershipGovernance).
 
   function tierMsg(score) {
     const tiers = lesson?.mastery_rule?.confidence_tiers
@@ -606,7 +624,14 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
         )}
 
         {/* ──── STEP 6 — Quiz It ──── */}
-        {step === 6 && currentQ && (
+        {step === 6 && !resolveOwnershipQuestion(lesson) && (
+          /* M1 R3-FE §I — broken lesson data (zero or multiple ownership
+             questions) fails CLEARLY before any quiz answer is taken. */
+          <div style={{ padding: 24, textAlign: 'center', color: T.muted, fontSize: 15 }}>
+            This gate needs a teacher check before it can finish — your work is safe.
+          </div>
+        )}
+        {step === 6 && !!resolveOwnershipQuestion(lesson) && currentQ && (
           <div style={{ animation: 'fadeSlideUp 0.35s both' }}>
             <div style={{ display: 'flex', gap: 5, marginBottom: 18 }}>
               {qs.map((q, i) => (
@@ -641,24 +666,10 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
                 </div>
               )}
 
-              {currentQ.type === 'sequence_build' && (() => {
-                const [a, setA] = React.useState('')
-                const [b, setB] = React.useState('')
-                return (
-                  <div>
-                    <div style={{ fontSize: 14, color: T.text, marginBottom: 12 }}>
-                      Fill in: S – S –{' '}
-                      <input value={a} onChange={e => setA(e.target.value)} maxLength={1} placeholder="?"
-                        style={{ width: 44, background: 'rgba(255,255,255,0.08)', border: `1px solid ${T.border}`, borderRadius: 8, padding: '4px 8px', color: T.text, fontFamily: T.font, fontSize: 15, textAlign: 'center' }} />
-                      {' '}– S – S – S –{' '}
-                      <input value={b} onChange={e => setB(e.target.value)} maxLength={1} placeholder="?"
-                        style={{ width: 44, background: 'rgba(255,255,255,0.08)', border: `1px solid ${T.border}`, borderRadius: 8, padding: '4px 8px', color: T.text, fontFamily: T.font, fontSize: 15, textAlign: 'center' }} />
-                    </div>
-                    <button onClick={() => handleQuizAnswer(currentQ, `${a.trim()},${b.trim()}`)} disabled={!a || !b || !!feedback}
-                      style={{ background: T.tealDim, border: `1px solid ${T.teal}55`, borderRadius: 10, padding: '9px 20px', color: T.teal, fontFamily: T.font, fontSize: 13, fontWeight: 700, cursor: (!a || !b || !!feedback) ? 'not-allowed' : 'pointer', opacity: (!a || !b) ? 0.5 : 1 }}>Submit</button>
-                  </div>
-                )
-              })()}
+              {currentQ.type === 'sequence_build' && (
+                <SequenceBuildInput disabled={!!feedback}
+                  onSubmit={val => handleQuizAnswer(currentQ, val)} />
+              )}
 
               {(currentQ.type === 'recall_spoken_or_typed' || currentQ.type === 'ownership_explain') && (
                 <SpeakOrText onAnswer={raw => handleQuizAnswer(currentQ, raw)} disabled={!!feedback} placeholder={currentQ.type === 'ownership_explain' ? 'Explain in your own words...' : 'Type your answer...'} />
@@ -677,22 +688,8 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
           </div>
         )}
 
-        {/* ──── STEP 7 — Explain It (ownership) ──── */}
-        {step === 7 && (
-          <div style={{ animation: 'fadeSlideUp 0.35s both' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, padding: '8px 14px', background: T.purpleDim, border: `1px solid ${T.purple}44`, borderRadius: 10 }}>
-              <span style={{ fontSize: 16 }}>🔑</span>
-              <span style={{ fontSize: 13, color: T.purple, fontWeight: 600 }}>Ownership gate — explain it in your own words</span>
-            </div>
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 16, padding: '20px 20px', marginBottom: 16 }}>
-              <div style={{ fontSize: 17, color: T.text, fontWeight: 500, lineHeight: 1.6, marginBottom: 16 }}>{lesson.gate_steps.step_7_explain_it.prompt}</div>
-              <SpeakOrText onAnswer={handleOwnership} disabled={!!feedback} placeholder="Explain in your own words..." />
-            </div>
-            <Feedback feedback={feedback} />
-          </div>
-        )}
-
-        {/* ──── STEP 8 — Homework ──── */}
+        {/* M1 R3-FE §I — Step 7 REMOVED: ownership is asked exactly once
+            inside the quiz via the unique is_ownership_gate question. */}
         {step === 8 && (
           <div style={{ animation: 'fadeSlideUp 0.4s both' }}>
             <div style={{ fontFamily: T.display, fontWeight: 700, fontSize: 18, color: T.text, marginBottom: 6 }}>Practice</div>
@@ -710,7 +707,7 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
                 {lesson.homework_game.description}
               </div>
             </div>
-            <button onClick={() => navigate('/game?mode=academic&concept=find_together&assignment_id=gate1_find_together&level=1')} style={{ width: '100%', padding: '15px 0', background: T.teal, border: 'none', borderRadius: 14, color: '#fff', fontFamily: T.display, fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>
+            <button onClick={() => navigate('/game?mode=academic&concept=find_together&level=1')} style={{ width: '100%', padding: '15px 0', background: T.teal, border: 'none', borderRadius: 14, color: '#fff', fontFamily: T.display, fontWeight: 800, fontSize: 16, cursor: 'pointer', marginBottom: 10 }}>
               Practice now — Find Together →
             </button>
             <button onClick={() => goStep(9)} style={{ width: '100%', padding: '11px 0', background: 'none', border: `1px solid ${T.border}`, borderRadius: 14, color: T.muted, fontFamily: T.font, fontSize: 13, cursor: 'pointer' }}>

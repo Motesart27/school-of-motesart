@@ -33,7 +33,7 @@ export default function Leaderboard() {
             </button>
             <div>
               <div style={{ fontSize:18, fontWeight:700, display:'flex', alignItems:'center', gap:8 }}>🏆 TAMi Ambassadors</div>
-              <div style={{ fontSize:13, color:'#9ca3af' }}>Top performers in musical mastery</div>
+              <div style={{ fontSize:13, color:'#9ca3af' }}>Game points board — friendly competition from games, not a learning report</div>
             </div>
           </div>
           <button onClick={() => navigate('/game')} style={{ padding:'8px 16px', background:'linear-gradient(135deg,#0d9488,#0891b2)', color:'#fff', border:'none', borderRadius:8, fontSize:13, fontWeight:600, cursor:'pointer' }}>🎮 Play Game</button>

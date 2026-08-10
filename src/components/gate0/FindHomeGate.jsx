@@ -878,7 +878,7 @@ export default function FindHomeGate({ onGatePassed, ageBand = 'child' }) {
               </div>
             </div>
 
-            <button onClick={() => navigate('/game?mode=academic&concept=find_home&assignment_id=gate0_find_home&level=1')} style={{
+            <button onClick={() => navigate('/game?mode=academic&concept=find_home&level=1')} style={{
               width: '100%', padding: '15px 0', background: T.teal, border: 'none', borderRadius: 14,
               color: '#fff', fontFamily: T.display, fontWeight: 800, fontSize: 16, cursor: 'pointer',
               marginBottom: 10,

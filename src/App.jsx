@@ -48,7 +48,9 @@ function TeacherRoute({ children }) {
   const { user } = useAuth()
   if (!user) return <Navigate to="/" replace />
   const role = (user.role || '').toLowerCase()
-  if (role !== 'teacher' && role !== 'admin') return <Navigate to="/student" replace />
+  // M1 R3-FE — founder is a legitimate elevated role (matches the backend's
+  // central ELEVATED_ROLES policy).
+  if (role !== 'teacher' && role !== 'admin' && role !== 'founder') return <Navigate to="/student" replace />
   return <ErrorBoundary>{children}<TamiGate /></ErrorBoundary>
 }
 
@@ -125,7 +127,9 @@ export default function App() {
       <Route path="/move-it" element={<Navigate to="/homework" replace />} />
       <Route path="/own-it" element={<Navigate to="/homework" replace />} />
       <Route path="/concept-health" element={<TeacherRoute><ConceptHealth /></TeacherRoute>} />
-      <Route path="/dpm-playground" element={<ProtectedRoute><DPMPlayground /></ProtectedRoute>} />
+      {/* M1 R3-FE §G — internal DPM simulator: raw numeric analytics are
+          teacher/admin/founder tooling; ordinary students are redirected. */}
+      <Route path="/dpm-playground" element={<TeacherRoute><DPMPlayground /></TeacherRoute>} />
       <Route path="/rhythm-racer" element={<ProtectedRoute><RhythmRacer /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

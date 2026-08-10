@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api.js'
@@ -370,6 +370,16 @@ export default function HomeworkDashboard() {
   )
   const assignedCount = assignments.filter(a => !a.completed).length
 
+  // M1 R3-FE §A — an instrument switch clears EVERYTHING about A's detail
+  // immediately: the drawer closes and the selected assignment object is
+  // dropped, so no stale A title/body/feedback can remain visible while B
+  // loads, and stale A responses can never reopen A's detail (responses
+  // never open the drawer; only an explicit user click does).
+  React.useEffect(() => {
+    setDetOpen(false)
+    setSelAsgn(null)
+  }, [selectionSi, evidenceStudentInstrumentId, identityStatus])
+
   const openDet = (a) => { setSelAsgn(a); setDetOpen(true); resetHelp() }
   const closeDet = () => { setDetOpen(false); resetHelp() }
   const resetHelp = () => { setHelpActive(false); setGuideShow(false); if(helpTimer.current) clearTimeout(helpTimer.current) }
@@ -648,19 +658,17 @@ export default function HomeworkDashboard() {
               </div>
             ) : (
             <div className="hw-fb-teacher">
-              <div className="hw-fb-hd">
-                <div className="hw-fb-av-init">MJ</div>
-                <div className="hw-fb-label">From Ms. Johnson {'\u00b7'} Jan 17</div>
-              </div>
-              <div className="hw-fb-txt">Great progress! Your right hand is really strong now {'\u2014'} focus on bringing your left hand timing up to match. Slow it down to 60bpm hands together and build from there.</div>
+              {/* M1 R3-FE §H — absence of canonical feedback stays absence:
+                  no invented teacher quotes, names, or dates. */}
+              <div className="hw-fb-txt" style={{color:'rgba(255,255,255,0.45)'}}>No teacher feedback yet.</div>
             </div>
             )}
             <div className="hw-fb-motesart">
               <div className="hw-fb-hd">
                 <div className="hw-fb-av-img"><img src="/Motesart Avatar 1.PNG" alt="Motesart" onError={e => { e.target.style.display='none'; e.target.parentElement.textContent='M' }} /></div>
-                <div className="hw-fb-label">Motesart {'\u00b7'} Based on your last session</div>
+                <div className="hw-fb-label">Motesart</div>
               </div>
-              <div className="hw-fb-txt">Your right hand owned it last session {'\u2014'} that pattern is yours now. Your left hand is still growing. Try the three-note grouping approach: play notes 1-2-3, pause, then 4-5-6. You{'\u2019'}ll feel the pattern lock in.</div>
+              <div className="hw-fb-txt">Open the practice and Motesart will guide you step by step.</div>
             </div>
           </div>
 

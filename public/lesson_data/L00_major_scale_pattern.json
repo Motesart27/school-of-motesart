@@ -1,6 +1,6 @@
 {
   "concept_id": "major_scale_pattern",
-  "gate": 0,
+  "gate": 2,
   "gate_name": "Pattern Mind",
   "lesson_file": "L00_major_scale_pattern",
   "phase": "Visual",
@@ -295,30 +295,7 @@
     ]
   },
   "evidence_logging": {
-    "table": "SOM_Mastery_Ledger",
-    "base": "appTN4wNd5Kgbqdwl",
-    "status": "TO VERIFY — table and field names must be confirmed against live Airtable before any write",
-    "fields_to_write": {
-      "student_email": "from session",
-      "concept": "Major Scale Pattern",
-      "lesson_id": "L00_major_scale_pattern",
-      "gate": 0,
-      "evidence_type": "self_practice | teacher_observed | zoom_class",
-      "mistake_category": "from mistake_detection.categories[].code",
-      "mistake_detail": "free text from session",
-      "next_drill": "derived from mistake_detection next_action",
-      "confidence_score": "0-100 from mastery_rule tiers",
-      "gate_reached": "exposure | understanding | execution | ownership | mastery",
-      "execution_passed": "boolean",
-      "ownership_passed": "boolean",
-      "timestamp": "auto",
-      "session_id": "wyl session id or zoom meeting id"
-    },
-    "evidence_weights": {
-      "teacher_observed": 1.0,
-      "zoom_class": 0.85,
-      "self_practice": 0.7
-    }
+    "_governance_note": "M1 R3-FE: the former evidence_logging block referenced a nonexistent mastery-ledger table and was removed. No such authority exists. Canonical learning truth: Practice_Events (immutable evidence ledger) and Concept_State (derived state) on the SOM/Railway backend. Gate evidence writes remain feature-held OFF (gateEvidenceAdapter)."
   },
   "next_gate": {
     "unlocks": "L01_c_major_number_map",

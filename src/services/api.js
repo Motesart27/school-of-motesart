@@ -134,11 +134,15 @@ export const api = {
     request(`/sessions?student_id=${encodeURIComponent(studentId)}`),
 
   // ─── T.A.M.i Chat ───────────────────────────────────────────
-  chatWithTami: (studentName, message, conversationHistory = [], currentPage = '', userRole = '', userId = '') =>
+  // M1 R3-FE §M — the backend derives a STUDENT's TAMi target from the JWT
+  // canonical identity; the display name is presentation only and is NEVER
+  // sent as target identity. Elevated cross-student calls use canonical
+  // Students record ids via the dedicated teacher methods below.
+  chatWithTami: (_displayNameIgnored, message, conversationHistory = [], currentPage = '', userRole = '', userId = '') =>
     request('/api/tami/chat', {
       method: 'POST',
       body: JSON.stringify({
-        student_id: studentName,
+        student_id: '',
         user_id: userId,
         message,
         conversation_history: conversationHistory,
@@ -147,11 +151,11 @@ export const api = {
       }),
     }),
 
-  chatWithTamiVoice: (studentName, message, conversationHistory = [], currentPage = '', userRole = '', userId = '') =>
+  chatWithTamiVoice: (_displayNameIgnored, message, conversationHistory = [], currentPage = '', userRole = '', userId = '') =>
     request('/api/tami/chat/voice', {
       method: 'POST',
       body: JSON.stringify({
-        student_id: studentName,
+        student_id: '',
         user_id: userId,
         message,
         conversation_history: conversationHistory,
@@ -160,8 +164,8 @@ export const api = {
       }),
     }),
 
-  tamiWeeklyReview: (studentName) =>
-    request('/tami/weekly-review', { method: 'POST', body: JSON.stringify({ student_name: studentName }) }),
+  tamiWeeklyReview: (studentRecordId) =>
+    request('/tami/weekly-review', { method: 'POST', body: JSON.stringify({ student_id: studentRecordId }) }),
 
   // ─── T.A.M.i History ─────────────────────────────────────────
   loadTamiHistory: async (userId) => {
