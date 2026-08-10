@@ -153,10 +153,13 @@ export async function createSession(data) {
 
     const mappedEvent = eventMap[data?.activity_type] || "live_practice"
 
-    updateWYLFromBehavior(mappedEvent, {
-      accuracy: data?.accuracy || data?.accuracy_pct || 70,
-      duration: data?.duration || 0,
-    })
+    // M1 R2-FE §K — no fabricated numerics: accuracy is included ONLY when a
+    // real numeric exists (student-safe payloads carry accuracy_tier instead,
+    // and a missing forbidden numeric is NOT a failure and NOT a default 70).
+    const wylPayload = { duration: data?.duration || 0 }
+    const rawAccuracy = data?.accuracy ?? data?.accuracy_pct
+    if (typeof rawAccuracy === 'number') wylPayload.accuracy = rawAccuracy
+    updateWYLFromBehavior(mappedEvent, wylPayload)
   } catch {}
   return result
 }
@@ -167,6 +170,21 @@ export async function createSession(data) {
  * Transform a backend session object to the shape the component expects.
  * Backend uses snake_case activity_type enums; component uses typeKey shortcodes.
  */
+// ─── M1 R2-FE §K — Article XIII tier presentation (BE.2 student shapes) ─────
+// Student payloads carry accuracy_tier (no accuracy_pct) and dpm: null.
+// Tiers render as Motesart language; absent numerics stay absent — never 0.
+const TIER_LABELS = {
+  mastered: "Mastered",
+  owned: "Owned it",
+  almost_owned: "Almost there",
+  developing: "Growing",
+  not_ready: "Just starting",
+};
+// Discrete five-band bar widths — tier presentation, not a hidden-% readout.
+const TIER_BAND_WIDTH = {
+  mastered: 100, owned: 88, almost_owned: 72, developing: 45, not_ready: 20,
+};
+
 export function transformSession(apiSession) {
   const activityToTypeKey = {
     homework: "hw",
@@ -188,11 +206,16 @@ export function transformSession(apiSession) {
     type: ACTIVITY_LABELS[apiSession.activity_type] || apiSession.activity_type,
     typeKey: activityToTypeKey[apiSession.activity_type] || "hw",
     dur: apiSession.duration_min,
-    acc: apiSession.accuracy_pct != null ? `${apiSession.accuracy_pct}%` : "—",
+    // M1 R2-FE §K — prefer the student-safe accuracy_tier; raw percentages
+    // only ever appear when an elevated payload actually supplies them.
+    acc: apiSession.accuracy_tier != null
+      ? (TIER_LABELS[apiSession.accuracy_tier] || apiSession.accuracy_tier)
+      : (apiSession.accuracy_pct != null ? `${apiSession.accuracy_pct}%` : "—"),
     feel: ratingToFeel[apiSession.self_rating] || "—",
-    d: apiSession.dpm?.drive ?? 0,
-    p: apiSession.dpm?.passion ?? 0,
-    m: apiSession.dpm?.motivation ?? 0,
+    // Absent DPM numerics stay absent (null) — never reconstructed as 0.
+    d: apiSession.dpm?.drive ?? null,
+    p: apiSession.dpm?.passion ?? null,
+    m: apiSession.dpm?.motivation ?? null,
     amb: apiSession.ambassador_note || "",
     source: apiSession.source === "school" ? "School" : "Standalone",
   };
@@ -232,15 +255,26 @@ export function transformPeriod(apiPeriod) {
       count: apiPeriod.consistency_days,
       days: buildConsistencyDots(apiPeriod.consistency_days, apiPeriod.consistency_total),
     },
-    dpm: {
-      d: apiPeriod.dpm?.drive || 0,
-      p: apiPeriod.dpm?.passion || 0,
-      m: apiPeriod.dpm?.motivation || 0,
-    },
+    // M1 R2-FE §K — student periods carry dpm: null (withheld); it stays
+    // null rather than becoming fake zeros. Elevated payloads keep numbers.
+    dpm: apiPeriod.dpm
+      ? {
+          d: apiPeriod.dpm.drive ?? null,
+          p: apiPeriod.dpm.passion ?? null,
+          m: apiPeriod.dpm.motivation ?? null,
+        }
+      : null,
     pieces: (apiPeriod.piece_progress || []).map((p) => ({
       name: p.name,
-      meta: `${p.sessions} sessions · ${p.accuracy_pct}% accuracy`,
-      pct: p.mastery_pct,
+      // Tier language first (student shape); % only when elevated supplies it.
+      meta: p.accuracy_tier != null
+        ? `${p.sessions} sessions · ${TIER_LABELS[p.accuracy_tier] || p.accuracy_tier}`
+        : `${p.sessions} sessions · ${p.accuracy_pct != null ? p.accuracy_pct + "% accuracy" : "—"}`,
+      // mastery_pct no longer exists anywhere (backend §J); bars use the
+      // discrete tier band, or the elevated accuracy when present.
+      pct: p.accuracy_tier != null
+        ? (TIER_BAND_WIDTH[p.accuracy_tier] ?? 20)
+        : (p.accuracy_pct ?? null),
     })),
     insight: apiPeriod.insight_text || "",
     personalBests: [

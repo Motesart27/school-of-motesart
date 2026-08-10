@@ -3,7 +3,8 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { updateWYLFromBehavior } from "../services/wylEvolution.js"
-import { getState, setState } from '../lesson_engine/concept_state_store.js'
+// M1 R2-FE §C — concept_state_store is no longer imported here: GamePage
+// derives NO canonical-shaped state locally. Evidence → backend projection.
 import { submitEvidenceEvent, newClientEventId, isCanonicalAssignmentId } from '../services/evidenceClient.js'
 import { validateConceptId } from '../lesson_engine/lock_package_bridge_config.js'
 
@@ -472,19 +473,12 @@ export default function GamePage() {
  updateWYLFromBehavior("ear_training_session", { accuracy, level })
  // Canonical evidence write (single POST; skip+warn on non-canonical concept)
  submitSessionEvidence()
- if (isHomeworkSession && urlAssignmentId && urlConcept) {
- // localStorage concept_state_store write is CACHE ONLY under M1 —
- // the canonical Concept_State is computed by the backend from evidence.
- const sessionAccuracy = s.attempts > 0 ? s.correct / s.attempts : 0
- const prev = getState(urlConcept) || {}
- setState(urlConcept, {
- ...prev,
- attempts: (prev.attempts || 0) + s.attempts,
- confidence: Math.min(1, ((prev.confidence || 0) + sessionAccuracy) / 2),
- last_session_date: new Date().toISOString(),
- ownership_state: prev.ownership_state || 'practicing'
- })
- }
+ // M1 R2-FE §C — the frontend NEVER derives canonical learning state. The
+ // former localStorage write here computed a local `confidence` and an
+ // `ownership_state` from gameplay — a competing mastery authority. It is
+ // REMOVED: evidence goes through submitSessionEvidence() and the backend
+ // projection (Practice_Events → Concept_State) is the only canonical
+ // truth. Gameplay-local UI state (points, lives, streak) is unaffected.
  } catch (e) {
  console.warn('Session log failed:', e)
  }
@@ -730,21 +724,11 @@ export default function GamePage() {
   setNameItAnswer(num)
   setNameItCorrect(correct)
 
-  if (urlConcept) {
-   const prev = getState(urlConcept) || {}
-   const newState = {
-    ...prev,
-    attempts: (prev.attempts || 0) + 1,
-    confidence: correct
-     ? Math.min(1, (prev.confidence || 0) + 0.05)
-     : Math.max(0, (prev.confidence || 0) - 0.02),
-    mistake_history: correct ? prev.mistake_history : {
-     ...(prev.mistake_history || {}),
-     number_mapping: ((prev.mistake_history || {}).number_mapping || 0) + 1
-    }
-   }
-   setState(urlConcept, newState)
-  }
+  // M1 R2-FE §C — REMOVED: the per-answer local confidence adjustment
+  // (+0.05/−0.02) and mistake_history accumulation independently derived
+  // canonical-shaped mastery state in the browser. Canonical Concept_State
+  // is computed ONLY by the backend from submitted evidence; the local
+  // store stays a server-snapshot cache and is never written from gameplay.
 
   const sessionLog = JSON.parse(
    localStorage.getItem('som_name_it_log') || '[]'

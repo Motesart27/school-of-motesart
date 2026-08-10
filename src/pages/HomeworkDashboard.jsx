@@ -318,14 +318,27 @@ export default function HomeworkDashboard() {
   // Explicit contract only: has_active_assignment false → nothing is shown and
   // nothing is fabricated (no T_MAJOR_SCALE_PATTERN, no legacy fallback).
   // 403 → fail closed · 503 active_assignment_unavailable_retryable → retry UI.
+  //
+  // M1 R2-FE §A — the SAME stale-response protection the assignment list has:
+  // every fetch takes a sequence number; switching instrument A → B clears
+  // A's card IMMEDIATELY and bumps the sequence, so a delayed A response —
+  // success OR error — can never overwrite B's state. Loading/error state
+  // always belongs to the CURRENT instrument only. (Sequence guard, not just
+  // effect cleanup: a stale promise still resolves — its writes are dropped.)
   const [activeAsgn, setActiveAsgn] = useState(null)
   const [activeState, setActiveState] = useState('idle') // idle|loading|loaded|none|retryable|blocked
+  const activeSeqRef = useRef(0)
   const fetchActiveAssignment = useCallback(() => {
+    const seq = ++activeSeqRef.current
     const si = evidenceStudentInstrumentId
-    if (!si) { setActiveAsgn(null); setActiveState('idle'); return }
+    // Instrument switch (or no instrument): the previous instrument's card
+    // leaves the screen NOW — nothing stale may remain visible (§A).
+    setActiveAsgn(null)
+    if (!si) { setActiveState('idle'); return }
     setActiveState('loading')
     api.getActiveAssignment(si)
       .then(data => {
+        if (seq !== activeSeqRef.current) return   // stale success — dropped
         if (data?.has_active_assignment && data?.assignment) {
           setActiveAsgn(mapAssignment(data.assignment))
           setActiveState('loaded')
@@ -336,6 +349,7 @@ export default function HomeworkDashboard() {
         }
       })
       .catch(err => {
+        if (seq !== activeSeqRef.current) return   // stale error — dropped
         setActiveAsgn(null)
         if (err?.status === 403) {
           console.error('[Homework] active-assignment 403 wrong_student — failing closed')

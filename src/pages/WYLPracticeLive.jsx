@@ -1,6 +1,7 @@
 // motesart-personality-v2-tts-fixed
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import api from '../services/api.js'
 import { VisualOverlay, VISUAL_COMPONENT_MAP, VISUAL_LABELS, C_MAJOR_NOTES, KeyboardDiagram } from '../components/TeachingVisuals'
 import useTamiQuestions from '../hooks/useTamiQuestions'
@@ -8,7 +9,10 @@ import TelemetryPanel from '../components/TelemetryPanel'
 import PracticeSessionCockpit from '../components/PracticeSessionCockpit.jsx'
 import PracticeConceptView from '../components/PracticeConceptView.jsx'
 import { CONCEPT_VIEW_CONFIG } from '../config/conceptViewConfig.js'
-import { getState, setState } from '../lesson_engine/concept_state_store.js'
+// M1 R2-FE §E — read-only store access. Practice Live never writes academic
+// state locally; canonical Concept_State is backend-derived (Practice_Events →
+// Concept_State) and reaches this cache only via server-refreshed reads.
+import { getState } from '../lesson_engine/concept_state_store.js'
 import { useMotesartStudentState } from '../hooks/useMotesartStudentState.js'
 import { runMotesartThinkingEngine } from '../ai/motesart/motesartThinkingEngine.js'
 import { buildMotesartVoiceResponse } from '../ai/motesart/motesartVoicePersona.js'
@@ -1035,12 +1039,31 @@ function CelebrationOverlay({ type }) {
 export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studentId, studentProfile, wylProfile }) {
   const navigate = useNavigate()
   const videoRef = useRef(null)
+  const { user: authUser } = useAuth()
 
-  // Concept routing — read ?concept= from URL, stable for session lifetime
+  // Concept routing — read ?concept= from URL, stable for session lifetime.
+  //
+  // M1 R2-FE §B — CANONICAL CONCEPT LAUNCH ADAPTER. Homework launches carry
+  // the canonical backend concept id (T_HALF_STEP, T_WHOLE_STEP,
+  // T_MAJOR_SCALE_PATTERN, …). Resolution order:
+  //   1. legacy internal slug → its CONCEPT_CONFIG_MAP entry (unchanged)
+  //   2. canonical T_* id   → the ONE config entry whose conceptId matches
+  //   3. anything else, or a canonical id with no real Practice Live config,
+  //      → null → the fail-closed unavailable screen. NEVER a silent
+  //      substitution of T_HALF_STEP or any other default.
+  // Canonical ids stay canonical — nothing here renames, aliases, or invents
+  // backend concepts; this is a presentation/route adapter only. The
+  // assignment_id query param (canonical rec… id) passes through untouched.
   const currentConcept = React.useMemo(() => {
     try {
-      const slug = new URLSearchParams(window.location.search).get('concept') || 'major-scale-pattern'
-      return CONCEPT_CONFIG_MAP[slug] || null
+      const param = new URLSearchParams(window.location.search).get('concept')
+      const slug = param || 'major-scale-pattern'   // no param → unchanged default
+      if (CONCEPT_CONFIG_MAP[slug]) return CONCEPT_CONFIG_MAP[slug]
+      if (/^T_[A-Z0-9_]+$/.test(slug)) {
+        const entry = Object.values(CONCEPT_CONFIG_MAP).find(c => c.conceptId === slug)
+        if (entry) return entry
+      }
+      return null
     } catch { return null }
   }, [])
 
@@ -1102,13 +1125,17 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   const [awaitingResponse, setAwaitingResponse] = React.useState(false)
   const [practiceCorrect, setPracticeCorrect] = React.useState(0)
   const [responseTimeout, setResponseTimeout] = React.useState(null)
-  const [conceptState, setConceptState] = useState(() => getState(currentConcept.conceptId) || {})
+  // Cache-only read (M1 §C): a server-refreshed Concept_State snapshot used
+  // for phase presentation — never locally derived. Null-safe so an
+  // unsupported concept reaches the fail-closed screen instead of crashing.
+  const [conceptState, setConceptState] = useState(() =>
+    currentConcept ? (getState(currentConcept.conceptId) || {}) : {})
   const [sessionCorrect, setSessionCorrect] = useState(0)
   const [micCheckState, setMicCheckState] = React.useState('idle')
   const [micFailed, setMicFailed] = React.useState(false)
 
-  const ACTIVE_CONCEPT_ID = currentConcept.conceptId
-  const conceptConfig = CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID]
+  const ACTIVE_CONCEPT_ID = currentConcept?.conceptId ?? null
+  const conceptConfig = ACTIVE_CONCEPT_ID ? CONCEPT_VIEW_CONFIG[ACTIVE_CONCEPT_ID] : undefined
   const phaseMap = {
     introduced: 'teach', practicing: 'guide',
     accurate_with_support: 'confirm', accurate_without_support: 'release', owned: 'release'
@@ -1142,7 +1169,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     return () => { _onMicFail = null }
   }, [])
 
-  const THEORY_STEPS = currentConcept.steps
+  const THEORY_STEPS = currentConcept?.steps ?? []
 
   const advanceTeaching = React.useCallback(async (step) => {
     if (step >= THEORY_STEPS.length) {
@@ -1507,7 +1534,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         await reviewAndAdvance(PROVE_REVIEW_TEXT, returnToQuiz)
       }
     }
-  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, speakMotesart, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept.concept, currentPhase, lessonId, motesartStudentState, studentProfile?.ageBand, studentProfile?.age_band, wylProfile])
+  }, [awaitingResponse, THEORY_STEPS, responseTimeout, advanceTeaching, speakMotesart, ACTIVE_CONCEPT_ID, conceptConfig, currentConcept?.concept, currentPhase, lessonId, motesartStudentState, studentProfile?.ageBand, studentProfile?.age_band, wylProfile])
   handleStudentInputRef.current = handleStudentInput
 
   const startLesson = React.useCallback(async () => {
@@ -1611,7 +1638,6 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       const { TAMiTimingEngine } = await import('../lesson_engine/tami_timing_engine.js')
       const { TAMiDifficultyLadder } = await import('../lesson_engine/tami_difficulty_ladder.js')
       const { TAMiProfileManager } = await import('../lesson_engine/tami_teaching_profiles.js')
-      const { replaceState: storeReplaceState } = await import('../lesson_engine/concept_state_store.js')
 
       const engine = new MotesartLessonEngine()
       const orchestrator = new LessonOrchestrator(engine, ui, {
@@ -1663,18 +1689,24 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
       tamiStackRef.current = tami
 
       const { createPerceptionBridge } = await import('../lesson_engine/perception_integration.js')
+      // M1 R2-FE §E — CANONICAL AUTHORITY SEPARATION. The perception bridge's
+      // classifier-derived state (confidence, trend, recommended_strategy) is
+      // SESSION-SCOPED adaptive-teaching signal. It must NEVER be persisted
+      // into the concept-state cache: replaceState() here used to clobber the
+      // server-refreshed Concept_State snapshot with engine-invented numbers,
+      // creating a second mastery authority. The bridge keeps its own
+      // in-memory PerceptionSession for in-lesson adaptation; ownership truth
+      // stays backend-derived (Practice_Events → Concept_State) only.
       const perceptionBridge = createPerceptionBridge({
         engine, stateManager: tami.stateManager,
-        studentId: studentId || 'default_student',
-        onStateUpdate: (conceptId, state) => {
-          storeReplaceState(conceptId, state)
-        },
+        studentId: studentId ?? null, // M1: never invent an identity
+        onStateUpdate: () => { /* session-only — no canonical/cache persist */ },
         onError: (err) => console.warn('[Perception] Error:', err.message),
       })
       perceptionBridgeRef.current = perceptionBridge
 
       tami.bridge.connect({
-        lessonId, studentId: studentId || 'default_student',
+        lessonId, studentId: studentId ?? null, // M1: never invent an identity
         studentProfile: studentProfile || {},
         wylProfile: wylProfile || { visual:30, auditory:25, readwrite:20, kinesthetic:25 },
         dpmScores: motesartStudentState.dpmSignals || { drive:50, passion:50, motivation:50, overall:50 },
@@ -1705,13 +1737,19 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     return () => window.removeEventListener('keydown', handler)
   }, [waitingForInput, handleStudentInput])
 
+  // M1 R2-FE §D — telemetry (numeric confidence internals) is INTERNAL
+  // TOOLING. The toggle is gated on elevated roles: an ordinary student can
+  // never open it — not in dev, not in production, not via the shortcut.
+  const telemetryAllowed = ['teacher', 'admin', 'founder']
+    .includes(String(authUser?.role || '').toLowerCase())
   useEffect(() => {
+    if (!telemetryAllowed) return undefined
     const handler = (e) => {
       if (e.ctrlKey && e.shiftKey && e.key === 'T') { e.preventDefault(); setShowTelemetry(prev => !prev) }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [telemetryAllowed])
 
   const handleEnd = useCallback(async () => {
     if (videoRef.current?.srcObject) videoRef.current.srcObject.getTracks().forEach(t => t.stop())
@@ -1780,20 +1818,30 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   }, [awaitingResponse, promptMode, retryMode, theoryIsSpeaking])
 
   if (!currentConcept) {
-    const badSlug = new URLSearchParams(window.location.search).get('concept')
+    // M1 R2-FE §B — FAIL CLOSED, student-safe. An unsupported or unknown
+    // concept never silently becomes a different lesson; the student gets a
+    // clear unavailable state and a way back. No internals are shown.
     return (
-      <div style={{
+      <div data-testid="practice-unavailable" style={{
         display:'flex', flexDirection:'column', alignItems:'center',
-        justifyContent:'center', height:'100vh',
+        justifyContent:'center', height:'100vh', padding:24, textAlign:'center',
         background:'#0d1117', color:'rgba(255,255,255,0.7)',
-        fontFamily:'DM Sans, sans-serif', gap:16
+        fontFamily:'DM Sans, sans-serif', gap:14
       }}>
-        <div style={{fontSize:18, color:'#ef4444'}}>
-          Concept not found: {badSlug || '(none)'}
+        <div style={{fontFamily:'Outfit, sans-serif', fontSize:20, fontWeight:700, color:'#fff'}}>
+          This practice isn{'’'}t ready yet
         </div>
-        <div style={{fontSize:13, color:'rgba(255,255,255,0.4)'}}>
-          Check the assignment or URL parameter.
+        <div style={{fontSize:13, color:'rgba(255,255,255,0.45)', maxWidth:420, lineHeight:1.6}}>
+          Motesart doesn{'’'}t have this lesson set up for live practice
+          right now. Your assignment is safe {'—'} ask your teacher, or
+          head back and try another one.
         </div>
+        <button
+          onClick={() => navigate('/homework')}
+          style={{marginTop:6, minHeight:44, padding:'10px 26px', borderRadius:22,
+            border:'none', background:'#14b8a6', color:'#fff', fontSize:13,
+            fontWeight:600, cursor:'pointer', fontFamily:'DM Sans, sans-serif'}}
+        >Back to Homework</button>
       </div>
     )
   }
@@ -1924,7 +1972,7 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
         <VisualOverlay visual={currentVisual} activeTones={activeTones} />
         <MotesartCard coaching={coaching} chatOpen={chatOpen} onToggleChat={() => setChatOpen(!chatOpen)} onStudentQuestion={handleStudentQuestion} avatarSrc={motesartAvatar} />
         <CelebrationOverlay type={celebration} />
-        <TelemetryPanel engineRef={engineRef} tamiStackRef={tamiStackRef} questionHistory={questionHistory} visible={showTelemetry} />
+        <TelemetryPanel engineRef={engineRef} tamiStackRef={tamiStackRef} questionHistory={questionHistory} visible={showTelemetry && telemetryAllowed} />
 
         {ttsUnavailable && sessionStarted && (
           <div style={{ position:'absolute', top:68, left:'50%', transform:'translateX(-50%)', zIndex:20, padding:'8px 18px', background:'rgba(251,191,36,0.12)', border:'1px solid rgba(251,191,36,0.3)', borderRadius:10, color:'#fbbf24', fontSize:12, fontWeight:600, whiteSpace:'nowrap' }}>

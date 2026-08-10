@@ -402,7 +402,30 @@
             "no space between"
           ],
           "motesart_correct": "That is ownership. You can explain the difference, not just repeat the words.",
-          "motesart_wrong": "You've got the idea. Now make it exact: skip has space, together has no space."
+          "motesart_wrong": "You've got the idea. Now make it exact: skip has space, together has no space.",
+          "required_signal_groups": {
+            "skip": [
+              "skip has a note between",
+              "skip has space",
+              "note between",
+              "key between",
+              "space between",
+              "one between",
+              "skips a key",
+              "whole step"
+            ],
+            "together": [
+              "together has no note between",
+              "no note between",
+              "no key between",
+              "no space",
+              "nothing between",
+              "right next to",
+              "next to each other",
+              "holding hands",
+              "half step"
+            ]
+          }
         }
       ]
     },

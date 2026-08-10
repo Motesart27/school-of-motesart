@@ -22,6 +22,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { loadLesson } from './lessonDataLoader.js'
 import { buildGateResult, gateEvidenceAdapter } from './gateEvidenceAdapter.js'
+import { resolveOwnershipQuestion, ownershipExplanationPasses } from './ownershipGovernance.js'
 
 // ─── Design tokens (SOM locked) ──────────────────────────────────────────────
 const T = {
@@ -347,6 +348,11 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
     } else if (q.type === 'sequence_build') {
       const expected = (q.correct_sequence || []).join(',').toUpperCase()
       correct = norm.toUpperCase().replace(/\s/g,'') === expected.replace(/,/g,'') || norm.toUpperCase().replace(/\s/g,'') === expected
+    } else if (q.is_ownership_gate === true) {
+      // M1 R2-FE §G — the ownership question is governed by the two-proof
+      // evaluator even when it appears inside the quiz loop, so the quiz
+      // pass and the Explain It verdict can never disagree.
+      correct = ownershipExplanationPasses(q, norm)
     } else {
       correct = (q.acceptable_answers || q.acceptable_signals || []).some(a => norm.includes(a.toLowerCase()))
     }
@@ -404,11 +410,23 @@ export default function SkipAndTogetherGate({ onGatePassed, ageBand = 'child' })
   }
 
   function handleOwnership(raw) {
-    const signals = lesson.gate_steps.step_7_explain_it.acceptable_signals
-    const correct = signals.some(s => raw.toLowerCase().includes(s.toLowerCase()))
+    // M1 R2-FE §F — the ownership question is resolved FROM LESSON DATA (the
+    // unique is_ownership_gate question, G1_Q7 under step_6_quiz_it). The old
+    // read of step_7_explain_it.acceptable_signals pointed at a field that
+    // does not exist in L01 — ownership silently broke. No second hardcoded
+    // signal list lives here; zero/multiple ownership questions fail clearly.
+    const ownershipQ = resolveOwnershipQuestion(lesson)
+    if (!ownershipQ) {
+      clearTimeout(fbTimer.current)
+      setFeedback({ correct: false, msg: 'This gate needs a teacher check before it can finish — your work is safe.' })
+      return
+    }
+    // §G — two-proof governance: the explanation must prove BOTH semantic
+    // sides (skip AND together) per the lesson's required_signal_groups.
+    const correct = ownershipExplanationPasses(ownershipQ, raw)
     setOwnershipPassed(correct)
     clearTimeout(fbTimer.current)
-    setFeedback({ correct, msg: correct ? lesson.gate_steps.step_7_explain_it.motesart_correct : lesson.gate_steps.step_7_explain_it.motesart_wrong })
+    setFeedback({ correct, msg: correct ? ownershipQ.motesart_correct : ownershipQ.motesart_wrong })
     if (correct) {
       fbTimer.current = setTimeout(() => { setFeedback(null); goStep(8) }, 1800)
     } else {

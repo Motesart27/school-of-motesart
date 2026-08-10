@@ -2,6 +2,24 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+// ─── M1 R2-FE §D — Article XIII presentation helpers ─────────────────────────
+// Student surfaces show TIER LANGUAGE and qualitative momentum words — never
+// raw accuracy/mastery/DPM percentages (the demo data keeps numerics
+// internally; these helpers are the ONLY way grading reaches the screen).
+// Tier thresholds match the shared constitutional bands (95/85/70/40).
+const ACC_TIER = (n) => (n >= 95 ? 'Mastered' : n >= 85 ? 'Owned it' : n >= 70 ? 'Almost there' : n >= 40 ? 'Growing' : 'Just starting');
+const accLabel = (acc) => {
+  if (acc == null) return '\u2014';
+  if (typeof acc === 'string' && !/\d/.test(acc)) return acc;            // already a tier word
+  const n = parseInt(acc, 10);
+  return Number.isFinite(n) ? ACC_TIER(n) : '\u2014';
+};
+// Qualitative momentum words (no numeric scale, no hidden-% reconstruction).
+const dpmWord = (n) => (n == null ? '\u2014' : n >= 80 ? 'Strong' : n >= 60 ? 'On Track' : n >= 40 ? 'Building' : 'Needs care');
+// Discrete five-band bar widths — tier presentation, not a percentage readout.
+const tierBandWidth = (n) => (n >= 95 ? 100 : n >= 85 ? 88 : n >= 70 ? 72 : n >= 40 ? 45 : 20);
+const pieceMetaLabel = (meta) => String(meta || '').replace(/(\d+)% accuracy/, (_, n) => ACC_TIER(parseInt(n, 10)));
+
 /* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ T.A.M.i avatar base64 Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 const TAMI_AVATAR = 'data:image/jpeg;base64,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';
 
@@ -14,7 +32,7 @@ const DOW = ['S','M','T','W','T','F','S'];
 const sessions = [
   { t: 'C Major \u2014 Hands Together', date: 'Today', type: 'Homework', tkey: 'hw', dur: 22, acc: '87%', feel: 'OK', src_school: 'Teacher assigned', src_sa: 'Motesart assigned', d: 82, p: 71, m: 88, amb: 'Your left hand timing improved this session \u2014 great consistency! Try slowing to 60bpm next time.' },
   { t: 'Hanon Exercise No. 1', date: 'Yesterday', type: 'Sheet Music', tkey: 'sm', dur: 18, acc: '74%', feel: 'OK', src_school: 'Teacher assigned', src_sa: 'From library', d: 75, p: 68, m: 79, amb: 'Solid session. Your fourth finger is still the weakest link \u2014 try isolating fingers 3 and 4.' },
-  { t: 'Find the Note \u2014 Level 3', date: 'Tuesday', type: 'Games', tkey: 'gm', dur: 13, acc: '91%', feel: 'Great', src_school: 'Student choice', src_sa: 'Student choice', d: 88, p: 90, m: 85, amb: '91% accuracy on Level 3 \u2014 that\u2019s your personal best! Your ear training is really clicking.' },
+  { t: 'Find the Note \u2014 Level 3', date: 'Tuesday', type: 'Games', tkey: 'gm', dur: 13, acc: '91%', feel: 'Great', src_school: 'Student choice', src_sa: 'Student choice', d: 88, p: 90, m: 85, amb: 'Level 3 is Owned \u2014 that\u2019s your personal best! Your ear training is really clicking.' },
   { t: 'Scale Recognition Practice', date: 'Monday', type: 'Homework', tkey: 'hw', dur: 11, acc: '62%', feel: 'Hard', src_school: 'Teacher assigned', src_sa: 'Motesart assigned', d: 65, p: 55, m: 70, amb: 'Short but focused \u2014 that counts. Minor scale recognition is still developing.' },
   { t: 'Live Practice Session', date: 'Monday', type: 'Live Practice', tkey: 'lp', dur: 12, acc: '79%', feel: 'OK', src_school: 'Student choice', src_sa: 'Student choice', d: 78, p: 72, m: 80, amb: 'Good energy in this session. You\u2019re building real consistency.' }
 ];
@@ -570,9 +588,9 @@ export default function PracticeLogPage() {
                     onMouseEnter={() => setDpmAnimated(prev => ({ ...prev, [d.key]: true }))}
                     onMouseLeave={() => setDpmAnimated(prev => ({ ...prev, [d.key]: false }))}>
                     <div className="pl-dpmlbl" style={{ color: d.color }}>{d.label}</div>
-                    <div className="pl-dpmval" style={{ color: d.color }}>{pd.dpm[d.key]}</div>
+                    <div className="pl-dpmval" style={{ color: d.color }}>{dpmWord(pd.dpm[d.key])}</div>
                     <div className="pl-dpmsub" style={{ color: d.subColor }}>{d.sub}</div>
-                    <div className="pl-dpmbar"><div className="pl-dpmfill" style={{ background: d.fill, width: dpmAnimated[d.key] ? pd.dpm[d.key] + '%' : '0%' }} /></div>
+                    <div className="pl-dpmbar"><div className="pl-dpmfill" style={{ background: d.fill, width: dpmAnimated[d.key] ? tierBandWidth(pd.dpm[d.key]) + '%' : '0%' }} /></div>
                   </div>
                 ))}
               </div>
@@ -592,8 +610,8 @@ export default function PracticeLogPage() {
               <div className="pl-cardhd">Piece Progress <span className="pl-chdsub">{periodLabel}</span></div>
               {pd.pieces.map((pc, i) => (
                 <div className="pl-prow" key={i}>
-                  <div className="pl-prowlbls"><span className="pl-prowname">{pc.n}</span><span className="pl-prowmeta">{pc.s}</span></div>
-                  <div className="pl-prowtrack"><div className="pl-prowfill" style={{ width: pc.w + '%', background: pc.c }} /></div>
+                  <div className="pl-prowlbls"><span className="pl-prowname">{pc.n}</span><span className="pl-prowmeta">{pieceMetaLabel(pc.s)}</span></div>
+                  <div className="pl-prowtrack"><div className="pl-prowfill" style={{ width: tierBandWidth(pc.w) + '%', background: pc.c }} /></div>
                 </div>
               ))}
             </div>
@@ -688,12 +706,12 @@ export default function PracticeLogPage() {
           <div className="pl-sdethd">{sdetSession.t}</div>
           <div className="pl-sdetmeta">{sdetSession.date} &middot; {sdetSession.type} &middot; {sdetSession.dur} min</div>
           <div className="pl-sdetrow"><div className="pl-sdetlbl">Source</div><div className="pl-sdetval">{isSch ? sdetSession.src_school : sdetSession.src_sa}</div></div>
-          <div className="pl-sdetrow"><div className="pl-sdetlbl">Accuracy</div><div className="pl-sdetval">{sdetSession.acc}</div></div>
+          <div className="pl-sdetrow"><div className="pl-sdetlbl">Accuracy</div><div className="pl-sdetval">{accLabel(sdetSession.acc)}</div></div>
           <div className="pl-sdetrow"><div className="pl-sdetlbl">How it felt</div><div className="pl-sdetval">{sdetSession.feel}</div></div>
           <div className="pl-sdetdpm">
-            <div className="pl-sdetdtile" style={{ background: 'rgba(55,138,221,0.08)', border: '1px solid rgba(55,138,221,0.12)' }}><div className="pl-sdetdlbl" style={{ color: '#85B7EB' }}>Drive</div><div className="pl-sdetdval" style={{ color: '#85B7EB' }}>{sdetSession.d}</div></div>
-            <div className="pl-sdetdtile" style={{ background: 'rgba(239,157,39,0.08)', border: '1px solid rgba(239,157,39,0.12)' }}><div className="pl-sdetdlbl" style={{ color: '#EF9F27' }}>Passion</div><div className="pl-sdetdval" style={{ color: '#EF9F27' }}>{sdetSession.p}</div></div>
-            <div className="pl-sdetdtile" style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.12)' }}><div className="pl-sdetdlbl" style={{ color: '#a855f7' }}>Motivation</div><div className="pl-sdetdval" style={{ color: '#a855f7' }}>{sdetSession.m}</div></div>
+            <div className="pl-sdetdtile" style={{ background: 'rgba(55,138,221,0.08)', border: '1px solid rgba(55,138,221,0.12)' }}><div className="pl-sdetdlbl" style={{ color: '#85B7EB' }}>Drive</div><div className="pl-sdetdval" style={{ color: '#85B7EB' }}>{dpmWord(sdetSession.d)}</div></div>
+            <div className="pl-sdetdtile" style={{ background: 'rgba(239,157,39,0.08)', border: '1px solid rgba(239,157,39,0.12)' }}><div className="pl-sdetdlbl" style={{ color: '#EF9F27' }}>Passion</div><div className="pl-sdetdval" style={{ color: '#EF9F27' }}>{dpmWord(sdetSession.p)}</div></div>
+            <div className="pl-sdetdtile" style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.12)' }}><div className="pl-sdetdlbl" style={{ color: '#a855f7' }}>Motivation</div><div className="pl-sdetdval" style={{ color: '#a855f7' }}>{dpmWord(sdetSession.m)}</div></div>
           </div>
           <div className="pl-sdetamb"><div style={{ fontSize: '10px', fontWeight: 500, color: '#14b8a6', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: '3px' }}>Motesart</div><div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.48)', lineHeight: 1.5 }}>{sdetSession.amb}</div></div>
           <button className="pl-sdetclose" onClick={() => setShowSdet(false)}>Close</button>
