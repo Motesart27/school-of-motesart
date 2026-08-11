@@ -125,6 +125,7 @@ function Piano({ keys, octaves, pressed, onKeyPress, mob, labelMode }) {
  {whiteKeys.map((k,i) => (
  <div
  key={i}
+ data-testid="piano-key"
  onClick={() => onKeyPress(k.idx, i, k.scaleNote)}
  style={{
  flex:1,

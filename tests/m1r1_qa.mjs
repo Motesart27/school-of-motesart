@@ -367,6 +367,10 @@ try {
     const { context, page } = await newPage(browser)
     await page.goto(`${BASE}/game?mode=academic&concept=T_HALF_STEP&assignment_id=${ASSIGNMENT_REC}`)
     await waitForIdentitySettled(page)
+    // M1 R3.1-FE §B — zero-attempt sessions no longer submit evidence at all
+    // (see GamePage.jsx submitSessionEvidence); play one note so this block
+    // still exercises the 403 fail-closed path it's actually testing.
+    await page.click('[data-testid="piano-key"]')
     await page.click('button:has-text("End Game")')
     await sleep(1500)
     const posts = practicePosts(scenario)
@@ -387,6 +391,7 @@ try {
     })
     await page.goto(`${BASE}/game?mode=academic&concept=T_HALF_STEP&assignment_id=${ASSIGNMENT_REC}`)
     await waitForIdentitySettled(page)
+    await page.click('[data-testid="piano-key"]')
     await page.click('button:has-text("End Game")')
     await sleep(1500)
     const posts = practicePosts(scenario)
@@ -408,6 +413,7 @@ try {
     const { context, page } = await newPage(browser)
     await page.goto(`${BASE}/game?mode=academic&concept=T_HALF_STEP&assignment_id=${ASSIGNMENT_REC}`)
     await waitForIdentitySettled(page)
+    await page.click('[data-testid="piano-key"]')
     await page.click('button:has-text("End Game")')
     await sleep(1500)
     const posts = practicePosts(scenario)
@@ -425,6 +431,7 @@ try {
     const { context, page } = await newPage(browser)
     await page.goto(`${BASE}/game?mode=academic&concept=T_HALF_STEP&assignment_id=${ASSIGNMENT_REC}`)
     await waitForIdentitySettled(page)
+    await page.click('[data-testid="piano-key"]')
     await page.click('button:has-text("End Game")')
     await sleep(1200)
     await page.click('button:has-text("End Game")').catch(() => {})
@@ -455,6 +462,7 @@ try {
     const { context, page } = await newPage(browser)
     await page.goto(`${BASE}/game?mode=academic&concept=T_HALF_STEP&assignment_id=42`)
     await waitForIdentitySettled(page)
+    await page.click('[data-testid="piano-key"]')
     await page.click('button:has-text("End Game")')
     await sleep(1200)
     const posts = practicePosts(scenario)
@@ -537,6 +545,7 @@ try {
     const { context, page } = await newPage(browser)
     await page.goto(`${BASE}/game?mode=academic&concept=T_HALF_STEP&assignment_id=${ASSIGNMENT_REC}`)
     await waitForIdentitySettled(page)
+    await page.click('[data-testid="piano-key"]')
     await context.setOffline(true)
     mock.offline = true
     await page.click('button:has-text("End Game")')

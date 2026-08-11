@@ -81,6 +81,53 @@ const IDENT_MULTI = {
     { student_instrument_id: CELLO, instrument: 'Cello', label: 'Alice' },
   ],
 }
+// M1 R3.1-FE — canonical /practice-log/dashboard/{studentId} fixture. Shape
+// matches src/services/practiceLogApi.js's transformPeriod/transformSession/
+// transformCalendar contract exactly (frozen field names, PRACTICE_LOG_SCHEMA.md).
+const practiceLogPeriod = (dpm) => ({
+  trend: {
+    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+    all: [11, 0, 13, 35, 0, 0, 0], homework: [11, 0, 0, 22, 0, 0, 0],
+    sheet_music: [0, 0, 13, 0, 0, 0, 0], games: [0, 0, 0, 8, 0, 0, 0], live_practice: [0, 0, 0, 5, 0, 0, 0],
+  },
+  goal_vs_actual: { labels: ['Homework', 'Sheet Music', 'Games', 'Live Practice'], actual: [33, 13, 8, 5], goal: [60, 30, 15, 10] },
+  breakdown: {
+    homework: { minutes: 39, pct: 46 }, sheet_music: { minutes: 22, pct: 26 },
+    games: { minutes: 13, pct: 15 }, live_practice: { minutes: 12, pct: 14 },
+  },
+  consistency_days: 4, consistency_total: 7,
+  dpm,
+  piece_progress: [
+    { name: 'C Major Scale', sessions: 8, accuracy_tier: 'owned' },
+    { name: 'Hanon No. 1', sessions: 5, accuracy_tier: 'developing' },
+  ],
+  insight_text: 'Thursday was your strongest session this week.',
+  personal_bests: { longest_session_min: 35, most_sessions_week: 4, best_month_min: 312 },
+})
+const DEFAULT_PRACTICE_LOG_DASHBOARD = {
+  student: { id: 'recSTU_ALICE', name: 'Alice', instrument: 'Piano', grade: '6th Grade', school: 'Westside Music', level: 4 },
+  periods: {
+    // Article XIII: student payloads withhold dpm on most periods (null) —
+    // 'week' carries it so D1/D2 can verify the tier-WORD mapping still works
+    // when the backend DOES supply it (e.g. an elevated/allowed context).
+    week: practiceLogPeriod({ drive: 82, passion: 74, motivation: 66 }),
+    month: practiceLogPeriod(null), quarter: practiceLogPeriod(null), year: practiceLogPeriod(null),
+  },
+  sessions: [
+    {
+      log_id: 'log1', title: 'C Major — Hands Together', practiced_at: new Date().toISOString(),
+      activity_type: 'homework', duration_min: 22, accuracy_tier: 'owned', self_rating: 'ok',
+      dpm: { drive: 82, passion: 71, motivation: 88 }, ambassador_note: 'Great consistency this session.', source: 'school',
+    },
+    {
+      log_id: 'log2', title: 'Hanon Exercise No. 1', practiced_at: new Date(Date.now() - 86400000).toISOString(),
+      activity_type: 'sheet_music', duration_min: 18, accuracy_tier: 'developing', self_rating: 'ok',
+      dpm: null, ambassador_note: '', source: 'school',
+    },
+  ],
+  calendar: { days: { '1': 20, '2': 0, '3': 35, '4': 12 } },
+}
+
 const row = (id, num, title, si, extra = {}) => ({
   id, assignment_id: id, assignment_number: num, name: title, title,
   status: 'Assigned', student: ['recSTU_ALICE'], due_date: '2026-08-14',
@@ -191,6 +238,16 @@ async function makeContext(browser, opts) {
       const r = (opts.active || (() => ({ body: { has_active_assignment: false, assignment: null } })))(am[1])
       if (r.delayMs) await new Promise(res => setTimeout(res, r.delayMs))
       return route.fulfill({ status: r.status || 200, json: r.body })
+    }
+    // M1 R3.1-FE — PracticeLogPage now reads real canonical data via
+    // usePracticeLogDashboard() instead of local mock arrays; mock the
+    // dashboard payload so the D1-D4 §D tier-word assertions still exercise
+    // the real render path end to end.
+    if (u.pathname.match(/^\/practice-log\/dashboard\/[^/]+$/)) {
+      const r = opts.practiceLogDashboard || (() => ({ body: DEFAULT_PRACTICE_LOG_DASHBOARD }))
+      const res = r(u)
+      if (res.delayMs) await new Promise(resolve => setTimeout(resolve, res.delayMs))
+      return route.fulfill({ status: res.status || 200, json: res.body })
     }
     return route.fulfill({ status: 404, json: { detail: 'qa-unmocked' } })
   })

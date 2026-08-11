@@ -358,6 +358,16 @@ export default function PracticeLogPage() {
   const [sdetIdx, setSdetIdx] = useState(0);
   const [showLog, setShowLog] = useState(false);
   const [logFeel, setLogFeel] = useState('ok');
+  // M1 R3.1-FE — "Log a Session" now persists through the existing
+  // authorized canonical write path (usePracticeLogDashboard.createSession
+  // -> POST /practice-log/sessions). Controlled fields + submit status so
+  // the UI never claims "logged" before the save is confirmed.
+  const [logPieceName, setLogPieceName] = useState('');
+  const [logType, setLogType] = useState('homework');
+  const [logDuration, setLogDuration] = useState('20');
+  const [logNotes, setLogNotes] = useState('');
+  const [logStatus, setLogStatus] = useState('idle'); // idle|saving|error
+  const [logError, setLogError] = useState(null);
   const [sfSort, setSfSort] = useState('date');
   const [sfType, setSfType] = useState('all');
   const [activePop, setActivePop] = useState(null);
@@ -455,6 +465,38 @@ export default function PracticeLogPage() {
   if (sfSort === 'dur') filteredSessions = [...filteredSessions].sort((a, b) => b.dur - a.dur);
 
   const openSession = (i) => { setSdetIdx(i); setShowSdet(true); };
+
+  // M1 R3.1-FE — real persistence via the existing canonical write path.
+  // Shows "logged" ONLY after a confirmed save; 401/403/409/503/network all
+  // render an honest error and leave the modal open (no silent success).
+  const LOG_TYPE_TO_ACTIVITY = { Homework: 'homework', 'Sheet Music': 'sheet_music', Games: 'games', 'Live Practice': 'live_practice' };
+  const LOG_FEEL_TO_RATING = { rough: 'hard', hard: 'hard', ok: 'ok', good: 'great', great: 'great' };
+  const submitLogSession = async () => {
+    if (logStatus === 'saving') return
+    if (!studentId) {
+      setLogStatus('error'); setLogError('Sign in to log a practice session.')
+      return
+    }
+    setLogStatus('saving'); setLogError(null)
+    const result = await dashboard.createSession({
+      student_id: studentId,
+      duration_min: Number(logDuration) || 1,
+      activity_type: LOG_TYPE_TO_ACTIVITY[logType] || 'homework',
+      piece_name: logPieceName.trim() || null,
+      self_rating: LOG_FEEL_TO_RATING[logFeel] || 'ok',
+      source: isSch ? 'school' : 'standalone',
+      notes: logNotes.trim() || undefined,
+    })
+    if (result?.success) {
+      setLogStatus('idle')
+      setShowLog(false)
+      setLogPieceName(''); setLogType('homework'); setLogDuration('20'); setLogNotes(''); setLogFeel('ok')
+      pop('Session logged! Motesart is analyzing your practice...')
+    } else {
+      setLogStatus('error')
+      setLogError(result?.error || 'Could not save your session — try again.')
+    }
+  }
   // Empty-session fallback so the (always-mounted, visibility-toggled) detail
   // modal never crashes on sessions[0] when a real student has zero sessions.
   const sdetSession = sessions[sdetIdx] || sessions[0] || { t: '', date: '', type: '', dur: 0, acc: null, feel: '—', src_school: '—', src_sa: '—', d: null, p: null, m: null, amb: '' };
@@ -779,9 +821,9 @@ export default function PracticeLogPage() {
       <div className={`pl-logmod${showLog ? ' show' : ''}`} onClick={(e) => { if (e.target === e.currentTarget) setShowLog(false); }}>
         <div className="pl-logcard">
           <div className="pl-loghd"><span className="pl-loghtitle">Log a Session</span><button className="pl-logclose" onClick={() => setShowLog(false)}>Ã¢ÂÂ</button></div>
-          <div className="pl-logfield"><div className="pl-loglbl">What did you practice?</div><input className="pl-loginput" placeholder="e.g. C Major Scale" defaultValue="C Major \u2014 Hands Together" /></div>
-          
-          <div className="pl-logtwocol"><div><div className="pl-loglbl">Type</div><select className="pl-logselect"><option>Homework</option><option>Sheet Music</option><option>Games</option><option>Live Practice</option></select></div><div><div className="pl-loglbl">Duration</div><div style={{position:'relative'}}><input className="pl-loginput" type="number" defaultValue="20" min="1" max="180" style={{paddingRight:'40px'}} /><span style={{position:'absolute',right:'15px',top:'50%',transform:'translateY(-50%)',fontSize:'12px',fontWeight:500,color:'rgba(255,255,255,0.25)',pointerEvents:'none'}}>min</span></div></div></div>
+          <div className="pl-logfield"><div className="pl-loglbl">What did you practice?</div><input className="pl-loginput" placeholder="e.g. C Major Scale" value={logPieceName} onChange={e => setLogPieceName(e.target.value)} /></div>
+
+          <div className="pl-logtwocol"><div><div className="pl-loglbl">Type</div><select className="pl-logselect" value={logType} onChange={e => setLogType(e.target.value)}><option>Homework</option><option>Sheet Music</option><option>Games</option><option>Live Practice</option></select></div><div><div className="pl-loglbl">Duration</div><div style={{position:'relative'}}><input className="pl-loginput" type="number" value={logDuration} onChange={e => setLogDuration(e.target.value)} min="1" max="180" style={{paddingRight:'40px'}} /><span style={{position:'absolute',right:'15px',top:'50%',transform:'translateY(-50%)',fontSize:'12px',fontWeight:500,color:'rgba(255,255,255,0.25)',pointerEvents:'none'}}>min</span></div></div></div>
           <div className="pl-logfield">
             <div className="pl-loglbl">How did it feel?</div>
             <div className="pl-logfeel">
@@ -790,9 +832,12 @@ export default function PracticeLogPage() {
               ))}
             </div>
           </div>
-          <div className="pl-logfield"><div className="pl-loglbl">Notes <span style={{fontWeight:400,letterSpacing:0,textTransform:'none',color:'rgba(255,255,255,0.2)'}}>(optional)</span></div><textarea className="pl-lognotes" placeholder="Struggled with left hand on bar 12..." /></div>
-            <button className="pl-logsubmit" onClick={() => { setShowLog(false); pop('Session logged! Motesart is analyzing your practice...'); }}>Save Session</button>
-          <button className="pl-logcancel" onClick={() => setShowLog(false)}>Cancel</button>
+          <div className="pl-logfield"><div className="pl-loglbl">Notes <span style={{fontWeight:400,letterSpacing:0,textTransform:'none',color:'rgba(255,255,255,0.2)'}}>(optional)</span></div><textarea className="pl-lognotes" placeholder="Struggled with left hand on bar 12..." value={logNotes} onChange={e => setLogNotes(e.target.value)} /></div>
+          {logStatus === 'error' && (
+            <div data-testid="log-session-error" style={{ color: '#f87171', fontSize: 12, margin: '4px 0 8px' }}>{logError}</div>
+          )}
+            <button className="pl-logsubmit" data-testid="log-session-submit" disabled={logStatus === 'saving'} style={logStatus === 'saving' ? { opacity: 0.6, cursor: 'not-allowed' } : undefined} onClick={submitLogSession}>{logStatus === 'saving' ? 'Saving\u2026' : 'Save Session'}</button>
+          <button className="pl-logcancel" onClick={() => { setShowLog(false); setLogStatus('idle'); setLogError(null) }}>Cancel</button>
         </div>
       </div>
     </>
