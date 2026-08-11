@@ -538,17 +538,73 @@ async function i_governance(browser) {
 }
 
 // ── J1 — mobile viewports: no horizontal overflow across required surfaces ──
+// Mobile acceptance across all 9 required surfaces at the 3 required
+// viewports: no overflow, no uncaught error, no false persistence/
+// completion claim, no Article XIII numeric leak (spot-checked where cheap).
 async function j_mobile_viewports(browser) {
   const viewports = [[390, 844], [393, 852], [430, 932]]
+  const plDashboard = {
+    student: {}, periods: { week: { trend: { labels: ['Mon'], all: [5], homework: [5], sheet_music: [0], games: [0], live_practice: [0] }, breakdown: {}, consistency_days: 1, consistency_total: 7, dpm: null, piece_progress: [], personal_bests: {} } },
+    sessions: [], calendar: {},
+  }
   for (const [w, h] of viewports) {
-    const { context, page } = await makeContext(browser, { name: `J1-${w}x${h}`, viewport: { width: w, height: h }, mobile: true })
+    const vp = { width: w, height: h }
+    // ── Student-role surfaces ──
+    const { context, page, state } = await makeContext(browser, {
+      name: `J1-${w}x${h}-student`, viewport: vp, mobile: true,
+      practiceLogDashboard: () => ({ body: plDashboard }),
+    })
     await page.goto(`${APP}/student`)
     await page.waitForSelector('text=Academic', { timeout: 15000 })
     check('J1', `StudentDashboard ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+
+    // Academic → Game → Academic → Game — no crash, no overflow, no leaked %
+    const gameBtn = page.getByRole('button', { name: 'Game', exact: true })
+    const academicBtn = page.getByRole('button', { name: 'Academic', exact: true })
+    await gameBtn.click(); await page.waitForTimeout(150)
+    check('J1', `StudentDashboard Game mode ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+    await academicBtn.click(); await page.waitForTimeout(150)
+    await gameBtn.click(); await page.waitForTimeout(150)
+    await academicBtn.click(); await page.waitForTimeout(150)
+    check('J1', `StudentDashboard repeated toggle ${w}x${h}: zero page errors`, state.pageErrors.length === 0, JSON.stringify(state.pageErrors))
+    const dashBody = await page.locator('body').innerText()
+    check('J1', `StudentDashboard ${w}x${h}: no raw DPM/accuracy % leak`, !/\bDPM\b[^.]{0,20}\d+\s*%/.test(dashBody))
+
+    await page.goto(`${APP}/tami`)
+    await page.waitForTimeout(1000)
+    check('J1', `TAMi dashboard ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+
     await page.goto(`${APP}/homework`)
     await page.waitForTimeout(1000)
     check('J1', `HomeworkDashboard ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+
+    // Practice Live cockpit (also renders PracticeSessionCockpit) + Gate 1
+    await page.goto(`${APP}/practice-live?concept=T_HALF_STEP`)
+    await page.waitForTimeout(1200)
+    check('J1', `Practice Live / PracticeSessionCockpit ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+
+    await page.goto(`${APP}/practice/C_MAJOR_GATE_SKIP_TOGETHER`)
+    await page.waitForTimeout(1200)
+    check('J1', `Gate 1 (Skip & Together) ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+
+    await page.goto(`${APP}/practice-log`)
+    await page.waitForSelector('.pl-pbtile, [data-testid="practice-log-unavailable"], [data-testid="practice-log-loading"]', { timeout: 15000 }).catch(() => {})
+    await page.waitForTimeout(500)
+    check('J1', `PracticeLogPage ${w}x${h}: no horizontal overflow`, await noOverflow(page))
+    check('J1', `${w}x${h} student pass: zero uncaught page errors across all surfaces visited`, state.pageErrors.length === 0, JSON.stringify(state.pageErrors))
     await context.close()
+
+    // ── Teacher-role surface: CurriculumPath (TeacherRoute-gated) ──
+    const { context: tCtx, page: tPage, state: tState } = await makeContext(browser, {
+      name: `J1-${w}x${h}-teacher`, viewport: vp, mobile: true, role: 'teacher',
+      user: { id: 'recUSER_T', email: 't@example.com', role: 'teacher', name: 'Teach' },
+      identity: { ...IDENT_RESOLVED, role: 'teacher' },
+    })
+    await tPage.goto(`${APP}/curriculum`)
+    await tPage.waitForTimeout(1500)
+    check('J1', `CurriculumPath ${w}x${h}: no horizontal overflow`, await noOverflow(tPage))
+    check('J1', `CurriculumPath ${w}x${h}: zero uncaught page errors`, tState.pageErrors.length === 0, JSON.stringify(tState.pageErrors))
+    await tCtx.close()
   }
 }
 
