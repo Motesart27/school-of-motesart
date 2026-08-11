@@ -3,7 +3,7 @@
     "gate": 1,
     "gate_name": "Skip and Together",
     "concept_id": "skip_and_together",
-    "traditional_concept": "T_SKIP_TOGETHER",
+    "traditional_concept": "T_HALF_STEP + T_WHOLE_STEP",
     "lesson_file": "L01_skip_and_together",
     "curriculum_path": "C Major Scale Mastery Path",
     "phase": "Gate 1 of 8",
@@ -46,7 +46,7 @@
     "knowledge": {
       "active": true,
       "engine": "GateProofLoop",
-      "concept": "T_SKIP_TOGETHER",
+      "concept": "T_HALF_STEP + T_WHOLE_STEP",
       "status": "PLANNED_NOT_BUILT",
       "homework_route": "/practice/C_MAJOR_GATE_SKIP_TOGETHER",
       "measures": [
@@ -75,7 +75,7 @@
   "translation_layer": {
     "student_language": "Skip, together, holding hands, 3 and 4, 7 and 8",
     "teacher_language": "Whole step and half step recognition inside the major scale pattern",
-    "system_language": "T_SKIP_TOGETHER, T_WHOLE_STEP, T_HALF_STEP, C_MAJOR_SKIP_TOGETHER_OWNED"
+    "system_language": "T_WHOLE_STEP, T_HALF_STEP, C_MAJOR_SKIP_TOGETHER_OWNED"
   },
   "narrative_intensity": {
     "child": {
@@ -288,7 +288,7 @@
         "music_world_name_1": "Whole step",
         "motesart_word_2": "Together",
         "music_world_name_2": "Half step",
-        "system_id": "T_SKIP_TOGETHER",
+        "system_id": "T_HALF_STEP + T_WHOLE_STEP",
         "reveal_trigger": "after step_3 and step_4 both completed"
       }
     },

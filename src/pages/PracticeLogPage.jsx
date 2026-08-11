@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import usePracticeLogDashboard from '../hooks/usePracticeLogDashboard.js';
 
 // ─── M1 R2-FE §D — Article XIII presentation helpers ─────────────────────────
 // Student surfaces show TIER LANGUAGE and qualitative momentum words — never
@@ -29,41 +30,59 @@ const TN = { hw: 'Homework', sm: 'Sheet Music', gm: 'Games', lp: 'Live Practice'
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW = ['S','M','T','W','T','F','S'];
 
-const sessions = [
-  { t: 'C Major \u2014 Hands Together', date: 'Today', type: 'Homework', tkey: 'hw', dur: 22, acc: '87%', feel: 'OK', src_school: 'Teacher assigned', src_sa: 'Motesart assigned', d: 82, p: 71, m: 88, amb: 'Your left hand timing improved this session \u2014 great consistency! Try slowing to 60bpm next time.' },
-  { t: 'Hanon Exercise No. 1', date: 'Yesterday', type: 'Sheet Music', tkey: 'sm', dur: 18, acc: '74%', feel: 'OK', src_school: 'Teacher assigned', src_sa: 'From library', d: 75, p: 68, m: 79, amb: 'Solid session. Your fourth finger is still the weakest link \u2014 try isolating fingers 3 and 4.' },
-  { t: 'Find the Note \u2014 Level 3', date: 'Tuesday', type: 'Games', tkey: 'gm', dur: 13, acc: '91%', feel: 'Great', src_school: 'Student choice', src_sa: 'Student choice', d: 88, p: 90, m: 85, amb: 'Level 3 is Owned \u2014 that\u2019s your personal best! Your ear training is really clicking.' },
-  { t: 'Scale Recognition Practice', date: 'Monday', type: 'Homework', tkey: 'hw', dur: 11, acc: '62%', feel: 'Hard', src_school: 'Teacher assigned', src_sa: 'Motesart assigned', d: 65, p: 55, m: 70, amb: 'Short but focused \u2014 that counts. Minor scale recognition is still developing.' },
-  { t: 'Live Practice Session', date: 'Monday', type: 'Live Practice', tkey: 'lp', dur: 12, acc: '79%', feel: 'OK', src_school: 'Student choice', src_sa: 'Student choice', d: 78, p: 72, m: 80, amb: 'Good energy in this session. You\u2019re building real consistency.' }
-];
+// M1 R3.1-FE \u00a7D/\u00a7F \u2014 the hardcoded `sessions` array and `P` (period stats:
+// DPM, accuracy%, pieces, insights, personal bests, dated session log) mocks
+// were REMOVED. Every one of those fields is now read from
+// usePracticeLogDashboard(), which fetches the real
+// GET /practice-log/dashboard/{studentId} response (see
+// src/services/practiceLogApi.js \u2014 already Article-XIII-safe: absent DPM/
+// accuracy numerics stay null/absent, never a fabricated default). See
+// buildPd()/buildSessions() below for the small shape adapter between the
+// hook's field names and this page's existing render code.
+const PIECE_COLORS = ['#14b8a6', '#EF9F27', '#85B7EB', '#e84b8a', '#a855f7'];
+const TYPE_INDEX = { hw: 0, sm: 1, gm: 2, lp: 3 };
 
-const P = {
-  week: { xl: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], ds: { all: [11,0,13,35,0,0,0], hw: [11,0,0,22,0,0,0], sm: [0,0,13,0,0,0,0], gm: [0,0,0,8,0,0,0], lp: [0,0,0,5,0,0,0] }, goalAll: { labels: ['Homework','Sheet Music','Games','Live Practice'], actual: [33,13,8,5], goal: [60,30,15,10] }, goalSingle: { hw: { actual: [11,0,0,22,0,0,0], goal: 10 }, sm: { actual: [0,0,13,0,0,0,0], goal: 8 }, gm: { actual: [0,0,0,8,0,0,0], goal: 5 }, lp: { actual: [0,0,0,5,0,0,0], goal: 5 } }, bk: { hw: [39,46], sm: [22,26], gm: [13,15], lp: [12,14] }, cons: { v: '4 of 7 days', days: [1,1,1,1,0,0,0] }, dpm: { d: 78, p: 65, m: 82 }, pieces: [{ n: 'C Major Scale', s: '8 sessions \u00b7 92% accuracy', w: 92, c: '#14b8a6' },{ n: 'Hanon No. 1', s: '5 sessions \u00b7 74% accuracy', w: 74, c: '#EF9F27' },{ n: 'Scale Recognition', s: '3 sessions \u00b7 61% accuracy', w: 61, c: '#85B7EB' }], ins: 'Thursday was your strongest session this week. Drive and Motivation are strong \u2014 let\u2019s work on Passion by exploring a piece you personally love.', pb: ['35','4','312'] },
-  month: { xl: ['W1','W2','W3','W4'], ds: { all: [52,78,89,93], hw: [30,40,45,50], sm: [12,20,24,28], gm: [6,10,12,9], lp: [4,8,8,6] }, goalAll: { labels: ['Homework','Sheet Music','Games','Live Practice'], actual: [165,84,37,26], goal: [120,60,40,32] }, goalSingle: { hw: { actual: [30,40,45,50], goal: 30 }, sm: { actual: [12,20,24,28], goal: 15 }, gm: { actual: [6,10,12,9], goal: 10 }, lp: { actual: [4,8,8,6], goal: 8 } }, bk: { hw: [155,50], sm: [84,27], gm: [37,12], lp: [26,8] }, cons: { v: '18 of 31 days', days: [1,1,0,1,1,0,1] }, dpm: { d: 81, p: 70, m: 85 }, pieces: [{ n: 'C Major Scale', s: '22 sessions \u00b7 94% accuracy', w: 94, c: '#14b8a6' },{ n: 'Hanon No. 1', s: '16 sessions \u00b7 79% accuracy', w: 79, c: '#EF9F27' },{ n: 'Scale Recognition', s: '10 sessions \u00b7 68% accuracy', w: 68, c: '#85B7EB' }], ins: 'Week 3 was your best month yet \u2014 89 minutes! You are most consistent mid-week.', pb: ['35','6','312'] },
-  quarter: { xl: ['Oct','Nov','Dec','Jan'], ds: { all: [180,220,265,312], hw: [90,110,130,160], sm: [45,60,75,90], gm: [25,30,35,38], lp: [20,20,25,24] }, goalAll: { labels: ['Homework','Sheet Music','Games','Live Practice'], actual: [490,270,128,89], goal: [400,160,120,80] }, goalSingle: { hw: { actual: [90,110,130,160], goal: 100 }, sm: { actual: [45,60,75,90], goal: 50 }, gm: { actual: [25,30,35,38], goal: 30 }, lp: { actual: [20,20,25,24], goal: 20 } }, bk: { hw: [490,50], sm: [270,28], gm: [128,13], lp: [89,9] }, cons: { v: '62 of 92 days', days: [1,1,1,0,1,1,0] }, dpm: { d: 83, p: 72, m: 87 }, pieces: [{ n: 'C Major Scale', s: '55 sessions \u00b7 95% accuracy', w: 95, c: '#14b8a6' },{ n: 'Hanon No. 1', s: '38 sessions \u00b7 83% accuracy', w: 83, c: '#EF9F27' },{ n: 'Scale Recognition', s: '28 sessions \u00b7 74% accuracy', w: 74, c: '#85B7EB' }], ins: 'You\u2019ve improved 73% in practice minutes from October to January.', pb: ['42','8','312'] },
-  year: { xl: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], ds: { all: [120,95,140,160,110,180,200,155,185,220,265,312], hw: [60,48,70,80,55,90,100,78,92,110,130,160], sm: [30,24,35,40,28,45,50,39,46,55,75,90], gm: [18,14,21,24,17,27,30,23,28,33,35,38], lp: [12,9,14,16,10,18,20,15,19,22,25,24] }, goalAll: { labels: ['Homework','Sheet Music','Games','Live Practice'], actual: [1073,507,288,184], goal: [900,480,240,180] }, goalSingle: { hw: { actual: [60,48,70,80,55,90,100,78,92,110,130,160], goal: 75 }, sm: { actual: [30,24,35,40,28,45,50,39,46,55,75,90], goal: 40 }, gm: { actual: [18,14,21,24,17,27,30,23,28,33,35,38], goal: 20 }, lp: { actual: [12,9,14,16,10,18,20,15,19,22,25,24], goal: 15 } }, bk: { hw: [1073,52], sm: [507,25], gm: [288,14], lp: [184,9] }, cons: { v: '198 of 365 days', days: [1,1,0,1,1,1,0] }, dpm: { d: 84, p: 73, m: 88 }, pieces: [{ n: 'C Major Scale', s: '92 sessions \u00b7 96% accuracy', w: 96, c: '#14b8a6' },{ n: 'Hanon No. 1', s: '64 sessions \u00b7 88% accuracy', w: 88, c: '#EF9F27' },{ n: 'Scale Recognition', s: '42 sessions \u00b7 81% accuracy', w: 81, c: '#85B7EB' }], ins: 'What a year __USER__! You started at 120 minutes in January and hit 312 in December \u2014 nearly 3x growth.', pb: ['42','8','312'] }
-};
+function buildPd(rawPd) {
+  if (!rawPd) return null;
+  const goalAll = rawPd.goalAll || { labels: ['Homework','Sheet Music','Games','Live Practice'], actual: [0,0,0,0], goal: [0,0,0,0] };
+  const goalSingle = {};
+  for (const key of ['hw','sm','gm','lp']) {
+    goalSingle[key] = { actual: rawPd.trend?.[key] || [], goal: goalAll.goal?.[TYPE_INDEX[key]] || 0 };
+  }
+  return {
+    xl: rawPd.chartLabels || [],
+    ds: rawPd.trend || { all: [], hw: [], sm: [], gm: [], lp: [] },
+    goalAll,
+    goalSingle,
+    bk: rawPd.breakdown || { hw: [0,0], sm: [0,0], gm: [0,0], lp: [0,0] },
+    cons: { v: rawPd.consistency?.label || '0 of 0 days', days: rawPd.consistency?.days || [0,0,0,0,0,0,0] },
+    // \u00a7K/Article XIII \u2014 student payloads carry dpm:null (withheld); it stays
+    // null so the UI can render an honest "not available" state instead of
+    // crashing or fabricating zeros.
+    dpm: rawPd.dpm || null,
+    pieces: (rawPd.pieces || []).map((p, i) => ({ n: p.name, s: p.meta, w: p.pct ?? 0, c: PIECE_COLORS[i % PIECE_COLORS.length] })),
+    ins: rawPd.insight || '',
+    pb: rawPd.personalBests || ['0','0','0'],
+  };
+}
 
-const MD = {
-  '0': [0,0,1,0,2,3,1,0,2,1,0,3,2,1,0,0,1,2,3,2,1,0,0,1,2,1,0,0,0,1,0],
-  '-1': [0,1,2,1,0,2,3,2,1,0,1,2,3,2,1,0,0,1,2,1,0,1,3,2,1,0,1,2,3,2,0],
-  '-2': [1,0,2,1,3,2,1,0,1,2,0,3,2,1,0,1,2,3,1,0,2,1,0,1,2,3,2,1,0,0],
-  '-3': [0,1,2,3,1,0,2,1,0,1,2,3,2,0,1,2,1,0,1,2,3,1,0,0,1,2,1,0,1,2,0]
-};
+function buildSessions(hookSessions) {
+  return (hookSessions || []).map(s => ({
+    ...s,
+    t: s.title,
+    // The real backend only distinguishes School vs Standalone \u2014 it does not
+    // carry the old mock's fabricated "Teacher assigned"/"Motesart assigned"
+    // distinction, so both view modes show the same real source.
+    src_school: s.source,
+    src_sa: s.source,
+  }));
+}
 
-const dayDetails = {
-  4: { mins: 22, piece: 'C Major \u2014 Hands Together', type: 'Homework' },
-  7: { mins: 18, piece: 'Hanon Exercise No. 1', type: 'Sheet Music' },
-  10: { mins: 13, piece: 'Find the Note \u2014 Level 3', type: 'Games' },
-  11: { mins: 25, piece: 'Scale Recognition', type: 'Homework' },
-  14: { mins: 11, piece: 'Scale Recognition Practice', type: 'Homework' },
-  15: { mins: 12, piece: 'Live Practice Session', type: 'Live Practice' },
-  18: { mins: 30, piece: 'C Major \u2014 Both Hands', type: 'Homework' },
-  19: { mins: 15, piece: 'Hanon No. 1', type: 'Sheet Music' },
-  21: { mins: 20, piece: 'Find the Note \u2014 Level 4', type: 'Games' },
-  22: { mins: 28, piece: 'C Major Scale Review', type: 'Homework' },
-  25: { mins: 35, piece: 'Full Practice Session', type: 'Homework' }
-};
+// M1 R3.1-FE \u00a7D/\u00a7F \u2014 the hardcoded MD (calendar heatmap) and dayDetails
+// (fake per-day session details) mocks were removed. This page now reads
+// calendarData from usePracticeLogDashboard, which transforms the REAL
+// /practice-log/dashboard/{studentId} response (practiceLogApi.transformCalendar) \u2014
+// no invented practice days, no fabricated piece names.
 
 /* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ CSS Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 const CSS = `
@@ -318,10 +337,15 @@ const IconMsg = () => (<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke
 /* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ Main Component Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
 export default function PracticeLogPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, learningIdentity } = useAuth();
   const userName = user?.name?.split(' ')[0] || 'Student';
   const userFullName = user?.name || 'Student';
   const userInitials = (user?.name || 'S').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+
+  // M1 R3.1-FE \u00a7D/\u00a7F \u2014 real canonical practice-log data (never fabricated).
+  const studentId = learningIdentity?.student_instrument_id || learningIdentity?.selected_student_instrument_id || null;
+  const dashboard = usePracticeLogDashboard(studentId);
+
   const [sbCol, setSbCol] = useState(false);
   const [isSch, setIsSch] = useState(true);
   const [curPeriod, setCurPeriod] = useState('week');
@@ -329,7 +353,7 @@ export default function PracticeLogPage() {
   const [chartView, setChartView] = useState('trend');
   const [calMonth, setCalMonth] = useState(0);
   const [tamiOpen, setTamiOpen] = useState(false);
-  const [tamiMsg, setTamiMsg] = useState(`4 sessions this week ${userName} \u2014 you\u2019re building real momentum!`);
+  const [tamiMsg, setTamiMsg] = useState(`Welcome back, ${userName} \u2014 keep building your momentum!`);
   const [showSdet, setShowSdet] = useState(false);
   const [sdetIdx, setSdetIdx] = useState(0);
   const [showLog, setShowLog] = useState(false);
@@ -343,7 +367,8 @@ export default function PracticeLogPage() {
   const chartInstance = useRef(null);
   const tamiTimeout = useRef(null);
 
-  const pd = P[curPeriod];
+  const pd = buildPd(dashboard.periodData?.[curPeriod]);
+  const sessions = buildSessions(dashboard.sessions);
   const periodLabel = { week: 'this week', month: 'this month', quarter: 'this quarter', year: 'this year' }[curPeriod];
   const typeName = curType === 'all' ? 'all types' : TN[curType];
 
@@ -352,7 +377,8 @@ export default function PracticeLogPage() {
     if (!chartRef.current) return;
     if (chartInstance.current) { chartInstance.current.destroy(); chartInstance.current = null; }
     const ctx = chartRef.current;
-    const p = P[curPeriod];
+    const p = buildPd(dashboard.periodData?.[curPeriod]);
+    if (!p) return;
     const Chart = window.Chart;
     if (!Chart) return;
 
@@ -379,7 +405,7 @@ export default function PracticeLogPage() {
         chartInstance.current = new Chart(ctx, { type: 'bar', data: { labels: p.xl, datasets: [{ label: 'Actual', data: sg.actual, backgroundColor: color, borderRadius: 3, barPercentage: .42, categoryPercentage: .8 }, { label: 'Goal', data: gl, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 3, barPercentage: .42, categoryPercentage: .8 }] }, options: { responsive: true, maintainAspectRatio: false, animation: { duration: 800, easing: 'easeInOutQuart' }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.dataset.label + ': ' + c.raw + ' min' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 9 }, maxRotation: 0 } }, y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.35)', font: { size: 9 }, callback: v => v + 'm' }, beginAtZero: true } } } });
       }
     }
-  }, [curPeriod, curType, chartView]);
+  }, [curPeriod, curType, chartView, dashboard.periodData]);
 
   useEffect(() => { buildChart(); }, [buildChart]);
 
@@ -409,17 +435,19 @@ export default function PracticeLogPage() {
   const toggleEnv = () => {
     const next = !isSch;
     setIsSch(next);
-    if (next) pop(`4 sessions this week ${userName} \u2014 you\u2019re building real momentum!`);
+    if (next) pop(`Welcome back to School mode, ${userName} \u2014 keep building real momentum!`);
     else pop(`Keep going ${userName} \u2014 every session builds your musicianship!`);
   };
 
-  /* Calendar */
+  /* Calendar — real month/year + intensity map from usePracticeLogDashboard
+     (§D/§F: no invented practice days, no fabricated per-day piece names). */
   const now = new Date();
-  const calMo = (now.getMonth() + calMonth + 12) % 12;
-  const calYr = now.getFullYear() + (now.getMonth() + calMonth < 0 ? -1 : 0);
+  const calMo = (dashboard.calMonth || now.getMonth() + 1) - 1;
+  const calYr = dashboard.calYear || now.getFullYear();
   const daysInMonth = new Date(calYr, calMo + 1, 0).getDate();
   const firstDay = new Date(calYr, calMo, 1).getDay();
-  const calData = MD[calMonth.toString()] || MD['0'];
+  const calData = dashboard.calendarData || {};
+  const isCurrentOrFutureMonth = calYr > now.getFullYear() || (calYr === now.getFullYear() && calMo >= now.getMonth());
 
   /* Session filtering */
   const typeMap = { Homework: 'hw', 'Sheet Music': 'sm', Games: 'gm', 'Live Practice': 'lp' };
@@ -427,7 +455,9 @@ export default function PracticeLogPage() {
   if (sfSort === 'dur') filteredSessions = [...filteredSessions].sort((a, b) => b.dur - a.dur);
 
   const openSession = (i) => { setSdetIdx(i); setShowSdet(true); };
-  const sdetSession = sessions[sdetIdx] || sessions[0];
+  // Empty-session fallback so the (always-mounted, visibility-toggled) detail
+  // modal never crashes on sessions[0] when a real student has zero sessions.
+  const sdetSession = sessions[sdetIdx] || sessions[0] || { t: '', date: '', type: '', dur: 0, acc: null, feel: '—', src_school: '—', src_sa: '—', d: null, p: null, m: null, amb: '' };
 
   /* Chart legend items */
   const legendItems = [];
@@ -447,6 +477,26 @@ export default function PracticeLogPage() {
     }
   }
 
+  // M1 R3.1-FE §D/§F — honest loading/outage states instead of ever
+  // rendering fabricated period stats or session history.
+  if (dashboard.status === 'loading') {
+    return (
+      <div data-testid="practice-log-loading" style={{ minHeight: '100vh', background: '#0a0e1a', color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'DM Sans',sans-serif", fontSize: 13 }}>
+        Loading your practice log…
+      </div>
+    );
+  }
+  if (dashboard.status === 'error' || !pd) {
+    return (
+      <div data-testid="practice-log-unavailable" style={{ minHeight: '100vh', background: '#0a0e1a', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, fontFamily: "'DM Sans',sans-serif", padding: 24, textAlign: 'center' }}>
+        <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)' }}>Your practice log is temporarily unavailable.</div>
+        {dashboard.error?.retryable !== false && (
+          <button onClick={dashboard.retry} style={{ padding: '8px 20px', borderRadius: 20, border: '1px solid rgba(20,184,166,0.4)', background: 'rgba(20,184,166,0.1)', color: '#14b8a6', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Try again</button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <>
       <style>{CSS}</style>
@@ -460,7 +510,7 @@ export default function PracticeLogPage() {
           <div className="pl-sbid">
             <div className="pl-sbn">{userFullName}</div>
             <div className="pl-sbr">Student</div>
-            <div className="pl-sbctx">{isSch ? '6th Grade \u00b7 Piano \u00b7 Westside Music' : 'Level 4 \u00b7 Piano \u00b7 Independent'}</div>
+            <div className="pl-sbctx">{[dashboard.student?.grade, dashboard.student?.instrument, isSch ? dashboard.student?.school : null].filter(Boolean).join(' \u00b7 ') || (dashboard.student?.instrument || 'Student')}</div>
           </div>
           <div className="pl-sbidm"><div className="pl-mav">{userInitials}</div></div>
           <div className="pl-sbnav">
@@ -575,25 +625,31 @@ export default function PracticeLogPage() {
               </div>
             </div>
 
-            {/* DPM */}
+            {/* DPM — Article XIII: student payloads withhold dpm (backend
+                returns dpm:null); rendered honestly rather than crashing on
+                a null lookup or fabricating a zero/"Building" verdict. */}
             <div className="pl-card">
               <div className="pl-cardhd">DPM Breakdown <span className="pl-chdsub">{periodLabel}</span></div>
-              <div className="pl-dpmgrid">
-                {[
-                  { key: 'd', glow: 'glow-d', label: 'Drive', color: '#85B7EB', fill: '#378ADD', bg: 'rgba(55,138,221,0.08)', border: 'rgba(55,138,221,0.14)', subColor: 'rgba(133,183,235,0.6)', sub: 'Showing up consistently' },
-                  { key: 'p', glow: 'glow-p', label: 'Passion', color: '#EF9F27', fill: '#EF9F27', bg: 'rgba(239,157,39,0.08)', border: 'rgba(239,157,39,0.14)', subColor: 'rgba(239,157,39,0.6)', sub: 'Engagement in sessions' },
-                  { key: 'm', glow: 'glow-m', label: 'Motivation', color: '#a855f7', fill: '#a855f7', bg: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.14)', subColor: 'rgba(168,85,247,0.6)', sub: 'Pushing through challenges' }
-                ].map(d => (
-                  <div key={d.key} className={`pl-dpmtile ${d.glow}`} style={{ background: d.bg, border: `1px solid ${d.border}` }}
-                    onMouseEnter={() => setDpmAnimated(prev => ({ ...prev, [d.key]: true }))}
-                    onMouseLeave={() => setDpmAnimated(prev => ({ ...prev, [d.key]: false }))}>
-                    <div className="pl-dpmlbl" style={{ color: d.color }}>{d.label}</div>
-                    <div className="pl-dpmval" style={{ color: d.color }}>{dpmWord(pd.dpm[d.key])}</div>
-                    <div className="pl-dpmsub" style={{ color: d.subColor }}>{d.sub}</div>
-                    <div className="pl-dpmbar"><div className="pl-dpmfill" style={{ background: d.fill, width: dpmAnimated[d.key] ? tierBandWidth(pd.dpm[d.key]) + '%' : '0%' }} /></div>
-                  </div>
-                ))}
-              </div>
+              {!pd.dpm ? (
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, margin: 0 }}>DPM breakdown isn't shown here — check your DPM Score on the dashboard.</p>
+              ) : (
+                <div className="pl-dpmgrid">
+                  {[
+                    { key: 'd', glow: 'glow-d', label: 'Drive', color: '#85B7EB', fill: '#378ADD', bg: 'rgba(55,138,221,0.08)', border: 'rgba(55,138,221,0.14)', subColor: 'rgba(133,183,235,0.6)', sub: 'Showing up consistently' },
+                    { key: 'p', glow: 'glow-p', label: 'Passion', color: '#EF9F27', fill: '#EF9F27', bg: 'rgba(239,157,39,0.08)', border: 'rgba(239,157,39,0.14)', subColor: 'rgba(239,157,39,0.6)', sub: 'Engagement in sessions' },
+                    { key: 'm', glow: 'glow-m', label: 'Motivation', color: '#a855f7', fill: '#a855f7', bg: 'rgba(168,85,247,0.08)', border: 'rgba(168,85,247,0.14)', subColor: 'rgba(168,85,247,0.6)', sub: 'Pushing through challenges' }
+                  ].map(d => (
+                    <div key={d.key} className={`pl-dpmtile ${d.glow}`} style={{ background: d.bg, border: `1px solid ${d.border}` }}
+                      onMouseEnter={() => setDpmAnimated(prev => ({ ...prev, [d.key]: true }))}
+                      onMouseLeave={() => setDpmAnimated(prev => ({ ...prev, [d.key]: false }))}>
+                      <div className="pl-dpmlbl" style={{ color: d.color }}>{d.label}</div>
+                      <div className="pl-dpmval" style={{ color: d.color }}>{dpmWord(pd.dpm[d.key])}</div>
+                      <div className="pl-dpmsub" style={{ color: d.subColor }}>{d.sub}</div>
+                      <div className="pl-dpmbar"><div className="pl-dpmfill" style={{ background: d.fill, width: dpmAnimated[d.key] ? tierBandWidth(pd.dpm[d.key]) + '%' : '0%' }} /></div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Ambassador */}
@@ -622,9 +678,9 @@ export default function PracticeLogPage() {
               <div className="pl-calhead">
                 <div className="pl-cardhd" style={{ marginBottom: 0 }}>Practice Calendar</div>
                 <div className="pl-calnav">
-                  <div className="pl-calarr" onClick={() => calMonth > -3 && setCalMonth(calMonth - 1)}>{'\u2039'}</div>
+                  <div className="pl-calarr" onClick={() => dashboard.navigateCalendar('prev')}>{'\u2039'}</div>
                   <div className="pl-calmth">{MONTHS[calMo]} {calYr}</div>
-                  <div className="pl-calarr" onClick={() => calMonth < 0 && setCalMonth(calMonth + 1)}>{'\u203A'}</div>
+                  <div className="pl-calarr" onClick={() => !isCurrentOrFutureMonth && dashboard.navigateCalendar('next')}>{'\u203A'}</div>
                 </div>
               </div>
               <div className="pl-calgrid">
@@ -632,9 +688,8 @@ export default function PracticeLogPage() {
                 {Array.from({ length: firstDay }).map((_, i) => <div key={'e' + i} className="pl-calcell empty" />)}
                 {Array.from({ length: daysInMonth }).map((_, i) => {
                   const dayNum = i + 1;
-                  const lvl = calData[i] || 0;
+                  const lvl = calData[dayNum] || 0;
                   const isToday = calMo === now.getMonth() && calYr === now.getFullYear() && dayNum === now.getDate();
-                  const dd = dayDetails[dayNum];
                   return (
                     <div key={dayNum} className={`pl-calcell l${lvl}${isToday ? ' today' : ''}${lvl === 0 ? '' : ''}`}
                       onClick={(e) => {
@@ -646,8 +701,10 @@ export default function PracticeLogPage() {
                       {activePop === dayNum && lvl > 0 && (
                         <div className="pl-daypop" onClick={e => e.stopPropagation()}>
                           <div className="pl-daypop-date">{MONTHS[calMo]} {dayNum}, {calYr}</div>
-                          <div className="pl-daypop-mins">{dd ? dd.mins : lvl * 12} min practiced</div>
-                          <div className="pl-daypop-detail">{dd ? `${dd.piece} \u00b7 ${dd.type}` : ['Light session','Good session','Strong session'][lvl - 1]}</div>
+                          {/* \u00a7D/\u00a7F \u2014 the calendar API returns an intensity band (0-4),
+                              not exact minutes or a piece name, so only the honestly-
+                              available qualitative label renders here. */}
+                          <div className="pl-daypop-detail">{['','Light session','Good session','Strong session','Best session'][lvl] || 'Practiced'}</div>
                         </div>
                       )}
                     </div>

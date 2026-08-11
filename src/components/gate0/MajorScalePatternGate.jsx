@@ -783,7 +783,13 @@ export default function MajorScalePatternGate({ onGatePassed }) {
               color: '#fff', fontFamily: T.display, fontWeight: 800, fontSize: 16,
               cursor: 'pointer',
             }}>
-              Next: Sound Recognition — Gate 1 →
+              {/* M1 R3.1-FE §J — the prior copy claimed "Next: Sound
+                  Recognition — Gate 1", which is both a backwards gate
+                  number (Gate 2 cannot lead to Gate 1) and a gate with no
+                  content-supported registry entry. Gate 2 is the last
+                  ratified gate in this package — no fabricated next-gate
+                  metadata. */}
+              Gate 2 complete — Continue →
             </button>
 
             <button onClick={() => { setPhase('quiz'); setQIdx(0); setAnswers({}); setAttemptCounts({}); setOwnershipPassed(false); setFeedback(null) }}

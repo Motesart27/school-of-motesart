@@ -39,10 +39,44 @@ export function resolveOwnershipQuestion(lesson) {
   return owners[0]
 }
 
+// M1 R3.1-FE §I — plain substring containment let phrases proving only ONE
+// side falsely satisfy the OTHER side's group whenever a bare skip signal
+// (e.g. "note between") is itself a literal substring of a together signal's
+// negated phrasing (e.g. "no note between"). "Together has no note between
+// them." must FAIL (it never proves Skip) — but the bare "note between"
+// substring sits right inside "no note between", so naive .includes() gave
+// it credit for Skip too. A signal match is only counted when it is NOT
+// immediately preceded by a negation word, unless the signal's own text
+// already starts with that negation (so the together group's own "no note
+// between" phrasing still matches normally). All occurrences are scanned —
+// not just the first — so a real dual-proof answer ("Together has no note
+// between them, while Skip has one note between.") still passes.
+const NEGATION_WORDS = ['no', 'not', 'never']
+
+function _precededByNegation(text, matchIndex) {
+  const before = text.slice(0, matchIndex).trimEnd()
+  const lastWord = (before.split(/\s+/).pop() || '').replace(/[^a-z']/g, '')
+  return NEGATION_WORDS.includes(lastWord)
+}
+
+function _signalMatches(signal, text) {
+  const sig = String(signal || '').toLowerCase()
+  if (!sig) return false
+  if (new RegExp(`^(${NEGATION_WORDS.join('|')})\\b`).test(sig)) {
+    // The signal itself already asserts the negation (e.g. "no note
+    // between") — plain containment is correct here.
+    return text.includes(sig)
+  }
+  let idx = text.indexOf(sig)
+  while (idx !== -1) {
+    if (!_precededByNegation(text, idx)) return true
+    idx = text.indexOf(sig, idx + 1)
+  }
+  return false
+}
+
 function _groupMatches(signalList, text) {
-  return (Array.isArray(signalList) ? signalList : []).some(
-    s => s && text.includes(String(s).toLowerCase())
-  )
+  return (Array.isArray(signalList) ? signalList : []).some(s => _signalMatches(s, text))
 }
 
 /**

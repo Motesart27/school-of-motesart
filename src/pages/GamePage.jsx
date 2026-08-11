@@ -362,6 +362,10 @@ export default function GamePage() {
  const evidenceIdRef = useRef(null)
  const evidenceSubmittedRef = useRef(false)
  const [evidenceMsg, setEvidenceMsg] = useState(null)
+ // M1 R3.1-FE §M — 'pending' | 'ok' | 'queued' | 'rejected'. "Assignment
+ // Complete!" / "Progress saved" render ONLY once this reaches 'ok' —
+ // never optimistically from isHomeworkSession alone.
+ const [evidenceOutcome, setEvidenceOutcome] = useState('pending')
  const submitSessionEvidence = () => {
   if (evidenceSubmittedRef.current) return
   if (!urlConcept) {
@@ -373,9 +377,24 @@ export default function GamePage() {
    console.warn('[SOM][FtN] URL concept is not canonical T_* — evidence skipped:', urlConcept)
    return
   }
+  // M1 R3.1-FE §C — a legacy/aliased concept id (e.g. C_HALFWHOLE, which
+  // normalizes to T_HALF_STEP) must NOT silently generate assignment-linked
+  // evidence: an assignment launch must carry the EXACT canonical id already.
+  if (urlAssignmentId && urlConcept !== check.canonical) {
+   console.warn('[SOM][FtN] Non-canonical/aliased concept id with an assignment link — evidence skipped (fail closed):', urlConcept, '->', check.canonical)
+   return
+  }
+  const s = sessionRef.current
+  // M1 R3.1-FE §B — zero academic activity is NOT completion: no attempts
+  // means the student never actually entered the governed exercise, so no
+  // Practice_Event (complete or otherwise) may be submitted — never
+  // "Assignment Complete", never "Progress saved" on an empty session.
+  if (s.attempts <= 0) {
+   console.info('[SOM][FtN] Zero session activity — evidence skipped (no fabricated completion)')
+   return
+  }
   evidenceSubmittedRef.current = true
   if (!evidenceIdRef.current) evidenceIdRef.current = newClientEventId()
-  const s = sessionRef.current
   const sessionAccuracy = s.attempts > 0 ? s.correct / s.attempts : 0
   submitEvidenceEvent({
    client_event_id: evidenceIdRef.current,
@@ -396,7 +415,11 @@ export default function GamePage() {
    if (res?.failClosed) console.warn('[SOM][FtN] Evidence refused for this identity — failed closed, not retried')
    if (res?.needsSelection) console.warn('[SOM][FtN] Instrument selection required — evidence not saved until the student picks')
    if (res?.message) setEvidenceMsg(res.message)
-  })
+   // M1 R3.1-FE §M — only a confirmed backend success reaches 'ok'; 503/
+   // network stays 'queued' (retryable, not a success claim) and every
+   // other outcome is 'rejected'. Never optimistic.
+   setEvidenceOutcome(res?.ok ? 'ok' : res?.queued ? 'queued' : 'rejected')
+  }).catch(() => setEvidenceOutcome('rejected'))
  }
  const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
 
@@ -708,6 +731,7 @@ export default function GamePage() {
  evidenceSubmittedRef.current = false
  evidenceIdRef.current = null
  setEvidenceMsg(null)
+ setEvidenceOutcome('pending')
  sessionRef.current = {
  correct: 0, attempts: 0, noteErrors: {}, replaysUsed: 0,
  startTime: Date.now(), bestStreak: 0, currentStreak: 0,
@@ -1166,7 +1190,7 @@ export default function GamePage() {
  <div className="gp-modal-backdrop" onClick={()=>setShowGameOver(false)}/>
  <div className="gp-modal gp-go-modal">
  <div style={{fontSize:44,marginBottom:4}}></div>
- <div style={{fontSize:26,fontWeight:900}}>{isHomeworkSession ? 'Assignment Complete!' : 'Game Over!'}</div>
+ <div style={{fontSize:26,fontWeight:900}}>{isHomeworkSession && evidenceOutcome === 'ok' ? 'Assignment Complete!' : 'Game Over!'}</div>
  <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>{isHomeworkSession ? `You trained your ear on ${conceptDisplayName}` : `Level ${level} · Session Complete`}</div>
  <div className="gp-go-stats">
  {[[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],
@@ -1220,13 +1244,17 @@ export default function GamePage() {
  }
  </div>
  <div style={{marginTop:8}}>
- <span className="gp-tami-tag" style={{background:'rgba(34,197,94,.2)',color:'#4ade80',border:'1px solid rgba(34,197,94,.3)'}}>✓ Progress saved</span>
+ {evidenceOutcome === 'ok' && <span className="gp-tami-tag" style={{background:'rgba(34,197,94,.2)',color:'#4ade80',border:'1px solid rgba(34,197,94,.3)'}}>✓ Progress saved</span>}
  {evidenceMsg && <span className="gp-tami-tag" style={{background:'rgba(20,184,166,.15)',color:'#2dd4bf',border:'1px solid rgba(20,184,166,.3)'}}>{evidenceMsg}</span>}
  </div>
  </div>
  <div className="gp-go-actions">
  <button className="gp-go-restart" onClick={()=>{setShowGameOver(false);resetGame()}}>® Play Again</button>
- <button className="gp-go-summary" onClick={()=>navigate('/session-summary')}> Summary</button>
+ <button className="gp-go-summary" onClick={()=>navigate('/session-summary', { state: {
+   mode: 'game', concept: conceptDisplayName, level, correct: s.correct, attempts: s.attempts,
+   bestStreak: s.bestStreak, livesLeft: lives, points: sessionPoints + (s.correct * 100),
+   durationSec: Math.round((Date.now() - s.startTime) / 1000),
+ } })}> Summary</button>
  </div>
  </div>
  </div>

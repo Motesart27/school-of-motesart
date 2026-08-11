@@ -84,7 +84,10 @@ function DashboardRedirect() {
   const role = (user.role || 'User').toLowerCase()
   if (role === 'admin') return <Navigate to="/admin" replace />
   if (role === 'ambassador') return <Navigate to="/ambassador" replace />
-  if (role === 'teacher') return <Navigate to="/teacher" replace />
+  // M1 R3.1-FE §H — founder is an elevated role (matches TeacherRoute above
+  // and the backend's ELEVATED_ROLES policy); /dashboard previously had no
+  // case for it and silently fell through to the student dashboard.
+  if (role === 'teacher' || role === 'founder') return <Navigate to="/teacher" replace />
   if (role === 'parent') return <Navigate to="/parent" replace />
   return <Navigate to="/student" replace />
 }

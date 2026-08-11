@@ -901,12 +901,15 @@ useEffect(() => {
         }
       }
     } catch (err) {
-      const _t = !!localStorage.getItem('som_token')
-      const _u = '/api/tami/chat'
-      const _s = err?.status || 'none'
-      const _m = err?.message || String(err)
-      console.error('[TAMi] chat error:', _m, 'status:', _s, 'token:', _t)
-      const errorMessage = { role: 'assistant', content: 'TAMi connection failed. token=' + _t + ' status=' + _s + ' url=' + _u + ' message=' + _m }
+      // M1 R3.1-FE §K — TAMi student-safe contract: never leak raw status
+      // codes/tokens/URLs into the conversational UI. 403 fails closed;
+      // 503/network/anything else is an honest "try again" — never called
+      // "not found".
+      console.error('[TAMi] chat error:', err?.message || String(err), 'status:', err?.status)
+      const safeContent = err?.status === 403
+        ? "I can't reach your info from here — try signing in again."
+        : "I'm having trouble connecting right now — try again in a moment."
+      const errorMessage = { role: 'assistant', content: safeContent }
       const finalMessages = [...baseMessages, errorMessage]
       const finalHistory  = [...baseHistory, errorMessage]
       setMessages(finalMessages)

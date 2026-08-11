@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import api from '../services/api.js'
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
@@ -40,12 +41,36 @@ const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
 const DEFAULT_SOM_LOGO = '/SOM_logo.png'
 
 export default function StudentDashboard() {
-  const { user } = useAuth()
+  const { user, learningIdentity } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('academic')
   const [activeItem, setActiveItem] = useState('Home')
   const [showTamiChat, setShowTamiChat] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+
+  // M1 R3.1-FE §G — DPM fetch lives here (not inside HomeDashboard) so both
+  // HomeDashboard and GameView can read the same status without a duplicate
+  // fetch and without a ReferenceError when the Game view renders alone.
+  const [dpmSafe, setDpmSafe] = useState(null)          // student-safe payload
+  const [dpmStatus, setDpmStatus] = useState('loading') // loading|ready|unavailable
+  const [dpmRetry, setDpmRetry] = useState(0)
+  useEffect(() => {
+    let cancelled = false
+    async function loadDpm() {
+      const rec = learningIdentity?.student_record_id
+      if (!rec) { setDpmStatus('ready'); setDpmSafe(null); return }
+      setDpmStatus('loading')
+      try {
+        const token = localStorage.getItem('som_token')
+        const res = await fetch(`${API_URL}/students/${encodeURIComponent(rec)}/dpm`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
+        if (cancelled) return
+        if (!res.ok) { setDpmStatus('unavailable'); setDpmSafe(null); return }
+        setDpmSafe(await res.json()); setDpmStatus('ready')
+      } catch { if (!cancelled) { setDpmStatus('unavailable'); setDpmSafe(null) } }
+    }
+    loadDpm()
+    return () => { cancelled = true }
+  }, [learningIdentity?.student_record_id, dpmRetry])
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'S'
@@ -249,9 +274,9 @@ export default function StudentDashboard() {
         {/* Dashboard Content */}
         <div style={{ padding: '20px 24px', maxWidth: 920, margin: '0 auto' }}>
           {mode === 'academic' ? (
-            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} />
+            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} dpmSafe={dpmSafe} dpmStatus={dpmStatus} onDpmRetry={() => setDpmRetry(t => t + 1)} />
           ) : (
-            <GameView navigate={navigate} motesartAvatar={motesartAvatar} />
+            <GameView navigate={navigate} motesartAvatar={motesartAvatar} dpmSafe={dpmSafe} dpmStatus={dpmStatus} />
           )}
         </div>
 
@@ -326,9 +351,38 @@ export default function StudentDashboard() {
 }
 
 /* ===== HOME DASHBOARD (Academic Mode) ===== */
-function HomeDashboard({ navigate, userName, motesartAvatar }) {
+function HomeDashboard({ navigate, userName, motesartAvatar, dpmSafe, dpmStatus, onDpmRetry }) {
   const [dpmVisible, setDpmVisible] = useState(false)
   const dpmRef = useRef(null)
+
+  // M1 R3.1-FE §F — "Today's Focus" and "Assignments Due" are canonical
+  // Homework data (api.getMyAssignments), never fabricated copy. No backend
+  // source exists for a level/streak/practice-minutes-today counter, so
+  // those render an honest "not yet available" state instead of invented
+  // numbers (Hard Rule 6 — no invented fields/routes).
+  const { learningIdentity } = useAuth()
+  const [assignments, setAssignments] = useState([])
+  const [assignmentsStatus, setAssignmentsStatus] = useState('loading') // loading|ready|unavailable
+  useEffect(() => {
+    let cancelled = false
+    async function loadAssignments() {
+      const si = learningIdentity?.student_instrument_id || learningIdentity?.selected_student_instrument_id
+      if (!si) { setAssignmentsStatus('ready'); setAssignments([]); return }
+      setAssignmentsStatus('loading')
+      try {
+        const data = await api.getMyAssignments(si)
+        if (cancelled) return
+        setAssignments(Array.isArray(data) ? data : (data?.assignments || []))
+        setAssignmentsStatus('ready')
+      } catch {
+        if (!cancelled) { setAssignmentsStatus('unavailable'); setAssignments([]) }
+      }
+    }
+    loadAssignments()
+    return () => { cancelled = true }
+  }, [learningIdentity?.student_instrument_id, learningIdentity?.selected_student_instrument_id])
+  const openAssignments = assignments.filter(a => String(a?.status || '').toLowerCase() !== 'completed')
+  const nextAssignment = openAssignments[0] || null
 
   const triggerDpm = useCallback(() => {
     setDpmVisible(false)
@@ -347,35 +401,8 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
   // M1 R3-FE §G/§N — NO hardcoded numeric DPM. The dashboard consumes the
   // backend's Article XIII student-safe DPM payload (qualitative status +
   // time facts). A 503 outage renders 'temporarily unavailable' with retry —
-  // never risk colors, never fabricated zeros.
-  const { learningIdentity } = useAuth()
-  const [dpmSafe, setDpmSafe] = useState(null)          // student-safe payload
-  const [dpmStatus, setDpmStatus] = useState('loading') // loading|ready|unavailable
-  const [dpmRetry, setDpmRetry] = useState(0)
-  useEffect(() => {
-    let cancelled = false
-    async function loadDpm() {
-      const rec = learningIdentity?.student_record_id
-      if (!rec) { setDpmStatus('ready'); setDpmSafe(null); return }
-      setDpmStatus('loading')
-      try {
-        const token = localStorage.getItem('som_token')
-        const res = await fetch(`${API_URL}/students/${encodeURIComponent(rec)}/dpm`, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
-        if (cancelled) return
-        if (!res.ok) { setDpmStatus('unavailable'); setDpmSafe(null); return }
-        setDpmSafe(await res.json()); setDpmStatus('ready')
-      } catch { if (!cancelled) { setDpmStatus('unavailable'); setDpmSafe(null) } }
-    }
-    loadDpm()
-    return () => { cancelled = true }
-  }, [learningIdentity?.student_record_id, dpmRetry])
-
-
-  // Sparkline - highlight today
-  const todayIndex = new Date().getDay()
-  const dayIndex = todayIndex === 0 ? 6 : todayIndex - 1 // Mon=0 ... Sun=6
-  const dayOpacity = [0.9, 0.72, 0.55, 0.38, 0, 0, 0]
-  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+  // never risk colors, never fabricated zeros. dpmSafe/dpmStatus are fetched
+  // once in the parent StudentDashboard and passed down (§G fix).
 
   return (
     <>
@@ -396,16 +423,28 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
         <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>You've been so consistent this week — keep that energy going!</span>
       </div>
 
-      {/* 2. Today's Focus */}
+      {/* 2. Today's Focus — canonical Homework data only, no fabricated copy */}
       <div style={{
         background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.2)',
         borderRadius: 14, padding: '18px 20px', marginBottom: 14,
       }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: '#5DCAA5', letterSpacing: 1, textTransform: 'uppercase' }}>Today's Focus</div>
-        <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 6 }}>
-          Complete Level 3 Scale Patterns — C Major & G Major
-        </div>
-        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>Assigned by Motesart · Due Friday</div>
+        {assignmentsStatus === 'unavailable' ? (
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', marginTop: 6 }}>Assignments are temporarily unavailable.</div>
+        ) : assignmentsStatus === 'loading' ? (
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>Loading…</div>
+        ) : nextAssignment ? (
+          <>
+            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 6 }}>
+              {nextAssignment.title || nextAssignment.name || 'Open assignment'}
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>
+              {nextAssignment.due_date ? `Due ${nextAssignment.due_date}` : nextAssignment.status || 'Assigned'}
+            </div>
+          </>
+        ) : (
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginTop: 6 }}>No assignments due right now.</div>
+        )}
         <button
           onClick={() => navigate('/practice-live')}
           style={{
@@ -417,22 +456,22 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
         >Start Practice</button>
       </div>
 
-      {/* 3. Three Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
-        {[
-          { label: 'Current Level', value: '3', sub: 'Piano' },
-          { label: 'Assignments Due', value: '1', sub: 'this week' },
-          { label: 'Day Streak', value: '5', sub: 'personal best: 12', color: '#14b8a6' },
-        ].map(stat => (
-          <div key={stat.label} style={{
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 12, padding: 14, textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 0.5 }}>{stat.label}</div>
-            <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 700, color: stat.color || '#fff', marginTop: 4 }}>{stat.value}</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{stat.sub}</div>
+      {/* 3. Stat Card — Assignments Due is canonical Homework data; there is
+          no backend source for a level/streak counter yet, so those tiles
+          are removed rather than showing invented numbers. */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12, marginBottom: 14 }}>
+        <div style={{
+          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 12, padding: 14, textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 0.5 }}>Assignments Due</div>
+          <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 700, color: '#fff', marginTop: 4 }}>
+            {assignmentsStatus === 'ready' ? openAssignments.length : '—'}
           </div>
-        ))}
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+            {assignmentsStatus === 'unavailable' ? 'unavailable' : 'open'}
+          </div>
+        </div>
       </div>
 
       {/* 4. My Coach Banner */}
@@ -480,35 +519,23 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       {/* 5. Two-Column: Practice Goal + DPM Score */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14, alignItems: 'stretch' }}>
 
-        {/* Left: Today's Practice Goal */}
+        {/* Left: This Week's Practice — real backend time-fact only (no
+            fabricated daily goal/sparkline; no per-day endpoint exists). */}
         <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Today's Practice Goal</span>
-            <span style={{ fontSize: 11, color: '#14b8a6', cursor: 'pointer', fontWeight: 500 }}>Edit</span>
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>This Week's Practice</span>
           </div>
           <div style={{ padding: 16, flex: 1 }}>
-            <div style={{ marginBottom: 12 }}>
-              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 700, color: '#fff' }}>12</span>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginLeft: 4 }}>of 30 min</span>
-            </div>
-            <div style={{ width: '100%', height: 10, background: 'rgba(255,255,255,0.12)', borderRadius: 6, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: '40%', background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 6 }} />
-            </div>
-            <div style={{ marginTop: 8, fontSize: 12, color: '#5DCAA5' }}>Just 18 more minutes!</div>
-
-            {/* Sparkline */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 16, height: 50 }}>
-              {dayLabels.map((d, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 }}>
-                  <div style={{
-                    width: 27, height: 27, borderRadius: 4,
-                    background: dayOpacity[i] > 0 ? '#14b8a6' : 'rgba(255,255,255,0.07)',
-                    opacity: dayOpacity[i] || (i >= dayIndex ? 1 : 0.3),
-                  }} />
-                  <span style={{ fontSize: 10, color: i === dayIndex ? '#14b8a6' : 'rgba(255,255,255,0.3)', fontWeight: i === dayIndex ? 600 : 400 }}>{d}</span>
-                </div>
-              ))}
-            </div>
+            {dpmStatus === 'unavailable' ? (
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Practice minutes are temporarily unavailable.</div>
+            ) : dpmSafe?.weekly_minutes != null ? (
+              <>
+                <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 700, color: '#fff' }}>{Math.round(dpmSafe.weekly_minutes)}</span>
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginLeft: 4 }}>min this week</span>
+              </>
+            ) : (
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>No practice minutes logged yet this week.</div>
+            )}
           </div>
         </div>
 
@@ -516,7 +543,6 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
         <div ref={dpmRef} onMouseEnter={triggerDpm} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>DPM Score</span>
-            <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 500 }}>Building</span>
           </div>
           <div style={{ padding: 16, flex: 1, display: 'flex', alignItems: 'center' }}>
             {/* M1 R3-FE §G/§N — Article XIII: the student surface renders the
@@ -527,7 +553,7 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
             {dpmStatus === 'unavailable' ? (
               <div data-testid="dpm-unavailable" style={{ display:'flex', flexDirection:'column', gap:8 }}>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)' }}>Your practice info is temporarily unavailable.</span>
-                <button onClick={() => setDpmRetry(t => t + 1)} style={{ alignSelf:'flex-start', padding:'6px 16px', borderRadius:8, border:'1px solid rgba(255,255,255,0.2)', background:'transparent', color:'rgba(255,255,255,0.7)', fontSize:12, fontWeight:600, cursor:'pointer' }}>Try again</button>
+                <button onClick={onDpmRetry} style={{ alignSelf:'flex-start', padding:'6px 16px', borderRadius:8, border:'1px solid rgba(255,255,255,0.2)', background:'transparent', color:'rgba(255,255,255,0.7)', fontSize:12, fontWeight:600, cursor:'pointer' }}>Try again</button>
               </div>
             ) : (
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
@@ -543,52 +569,15 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
         </div>
       </div>
 
-      {/* 6. Community Card */}
+      {/* 6. Community Card — M1 R3.1-FE §F: no community/social backend
+          exists yet, so this renders an honest empty state rather than
+          fabricated classmate names, shoutouts, or class-goal numbers. */}
       <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Community</span>
-          <span style={{ fontSize: 11, color: '#14b8a6', cursor: 'pointer', fontWeight: 500 }}>See All →</span>
         </div>
         <div style={{ padding: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {/* Left: Shoutout Feed */}
-            <div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(249,115,22,.3)' }}>
-                  <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
-                    if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
-                    e.currentTarget.src = DEFAULT_MOTESART_AVATAR
-                  }} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Great job on your scales this week!</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Motesart · 2h ago</div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(255,255,255,0.15)' }}>
-                  <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 13, color: '#fff' }}>A</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Who wants to practice duets this weekend?</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Aiden · 5h ago</div>
-                </div>
-              </div>
-            </div>
-            {/* Right: Class Goal */}
-            <div>
-              <div style={{ padding: 12, background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>🎉 Classmate Shoutout</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>Aiden hit a 10-day streak!</div>
-              </div>
-              <div style={{ marginTop: 14 }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Class Practice Goal — 620 / 1000 min</div>
-                <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: '62%', background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 4 }} />
-                </div>
-              </div>
-            </div>
-          </div>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, margin: 0 }}>No community activity yet.</p>
         </div>
       </div>
     </>
@@ -596,7 +585,7 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
 }
 
 /* ===== GAME VIEW ===== */
-function GameView({ navigate, motesartAvatar }) {
+function GameView({ navigate, motesartAvatar, dpmSafe, dpmStatus }) {
   return (
     <>
       {/* Games Dashboard Promo Card */}
@@ -665,17 +654,9 @@ function GameView({ navigate, motesartAvatar }) {
           <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12 }}>No game sessions yet. Hit Play to start!</p>
         </Card>
         <Card title="Game Leaderboard">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 8, background: 'linear-gradient(135deg,rgba(147,51,234,0.15),rgba(236,72,153,0.15))', border: '1px solid rgba(147,51,234,0.3)', borderRadius: 8 }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(168,85,247,0.4)' }}>
-              <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
-                if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
-                e.currentTarget.src = DEFAULT_MOTESART_AVATAR
-              }} />
-            </div>
-            <span style={{ flex: 1, fontSize: 12, color: '#a855f7', fontWeight: 700 }}>Motesart Mo (You)</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#22c55e' }}>0</span>
-          </div>
-          <button onClick={() => navigate('/leaderboard')} style={{ width: '100%', marginTop: 12, padding: 10, background: 'linear-gradient(135deg,rgba(147,51,234,0.2),rgba(236,72,153,0.2))', border: '1px solid rgba(147,51,234,0.3)', color: '#a855f7', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>View Full Leaderboard</button>
+          {/* M1 R3.1-FE §F — the leaderboard/session-log backend was removed
+              per M1_SPEC (see logSession() above); no fabricated rank row. */}
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 12, margin: 0 }}>Leaderboard not available yet.</p>
         </Card>
       </div>
     </>

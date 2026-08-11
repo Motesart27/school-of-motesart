@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import useIsMobile from '../hooks/useIsMobile.js'
 
 const css = `
@@ -38,63 +38,55 @@ const css = `
 @media(max-width:639px){.ss-stats{grid-template-columns:repeat(2,1fr)}}
 `
 
-const LEADERS = [
-  { rank:'👑', name:'Renee', letter:'R', pts:'12,840' },
-  { rank:'👑', name:'Alex', letter:'A', pts:'11,200', color:'#d1d5db' },
-  { rank:'👑', name:'Luke', letter:'L', pts:'9,750', color:'#b45309' },
-  { rank:'#4', name:'Motesart (You)', letter:'M', pts:'8,450', me:true },
-  { rank:'#5', name:'Sam', letter:'S', pts:'7,200' },
-]
+function fmtDuration(sec) {
+  if (sec == null) return '—'
+  const m = Math.floor(sec / 60), s = sec % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
 
+// M1 R3.1-FE §E/§F — SessionSummary previously rendered ENTIRELY hardcoded
+// data (fixed percentage rings, a fabricated leaderboard of other students,
+// fixed session stats) regardless of what actually happened. It now reads
+// the real session passed via navigate(..., { state }) (see GamePage.jsx's
+// Summary button) and renders an honest empty state when none is present
+// (e.g. direct navigation). No fabricated rank/leaders — no live
+// leaderboard backend exists (see GamePage.jsx's logSession comment).
 export default function SessionSummary() {
   const mob = useIsMobile()
   const navigate = useNavigate()
+  const location = useLocation()
+  const session = location.state || null
+
   return (
     <div className="ss-page"><style>{css}</style>
-      <div className="ss-header"><h1 style={{fontSize: mob ? 18 : 24,fontWeight:700}}>Session Complete!</h1><p style={{fontSize:13,color:'#9ca3af',marginTop:4}}>Game Mode • Find the Note</p></div>
+      <div className="ss-header"><h1 style={{fontSize: mob ? 18 : 24,fontWeight:700}}>Session Complete!</h1><p style={{fontSize:13,color:'#9ca3af',marginTop:4}}>{session?.concept ? `Game Mode · ${session.concept}` : 'Game Mode'}</p></div>
       <div className="ss-main">
-        <div className="ss-section"><div className="ss-perf">
-          <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#14b8a6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="62.8"/></svg><div className="ss-ring-val" style={{fontSize:15}}>Almost there</div><div className="ss-ring-label">Accuracy</div></div>
-          <div className="ss-ring"><svg width="96" height="96" style={{transform:'rotate(-90deg)'}}><circle cx="48" cy="48" r="40" fill="none" stroke="#374151" strokeWidth="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#8b5cf6" strokeWidth="8" strokeLinecap="round" strokeDasharray="251.3" strokeDashoffset="94.2"/></svg><div className="ss-ring-val" style={{fontSize:15}}>Growing</div><div className="ss-ring-label">Level Progress</div></div>
-        </div></div>
-        <div className="ss-section"><div className="ss-stats">
-          <div className="ss-stat purple"><div className="ss-sicon">🎯</div><div className="ss-sval">Lv.5</div><div className="ss-slbl">Level Reached</div></div>
-          <div className="ss-stat blue"><div className="ss-sicon">⏱️</div><div className="ss-sval">4:32</div><div className="ss-slbl">Time Practiced</div></div>
-          <div className="ss-stat orange"><div className="ss-sicon">🔥</div><div className="ss-sval">12</div><div className="ss-slbl">Best Streak</div></div>
-          <div className="ss-stat teal"><div className="ss-sicon">❤️</div><div className="ss-sval">2</div><div className="ss-slbl">Lives Left</div></div>
-        </div></div>
-        <div className="ss-section"><div className="ss-detail">
-          <div style={{fontWeight:600,marginBottom:12}}>Session Details</div>
-          {[['Correct Answers','18','#4ade80'],['Total Attempts','24','#fff'],['Stages Completed','4','#c084fc'],['Points Earned','+1,250','#facc15']].map(([l,v,c])=>(
-            <div key={l} className="ss-drow"><span style={{color:'#9ca3af',fontSize:14}}>{l}</span><span style={{fontWeight:700,fontSize:14,color:c}}>{v}</span></div>
-          ))}
-        </div></div>
-        <div className="ss-section"><div className="ss-dpm">
-          <div style={{fontSize:13,fontWeight:600,color:'#9ca3af',marginBottom:12}}>DPM Impact This Session</div>
-          <div className="ss-dpm-row">
-            {/* M1 R3-FE §G — qualitative effect words, no numeric DPM deltas */}
-            {[['Drive','Growing','#3b82f6'],['Passion','Growing','#f97316'],['Motivation','Steady','#22c55e']].map(([n,v,c])=>(
-              <div key={n} className="ss-dpm-item"><div style={{fontSize:14,fontWeight:700,color:'#4ade80'}}>{v}</div><div style={{fontSize:11,color:'#6b7280',marginTop:4}}>{n}</div><div style={{width:32,height:4,borderRadius:9999,background:c,margin:'8px auto 0'}}/></div>
-            ))}
-          </div>
-        </div></div>
-        <div className="ss-section"><div className="ss-lb-pos"><div style={{fontSize:13,color:'#c4b5fd'}}>Your Current Position</div><div style={{fontSize:40,fontWeight:700,marginTop:4}}>#4</div><div style={{fontSize:11,color:'#9ca3af',marginTop:4}}>on the Game Points board</div></div></div>
-        <div className="ss-section"><div className="ss-mini">
-          <div style={{display:'flex',alignItems:'center',gap:8,fontWeight:600,marginBottom:12}}>🏆 TAMi Leaders</div>
-          {LEADERS.map((l,i)=>(
-            <div key={i} className={`ss-mini-row ${l.me?'me':''}`}>
-              <div style={{width:24,textAlign:'center',fontSize:l.rank.startsWith('#')?11:16,fontWeight:700,color:l.rank.startsWith('#')?'#9ca3af':'inherit'}}>{l.rank.startsWith('#')?l.rank:<span style={{color:l.color||'inherit'}}>{l.rank}</span>}</div>
-              <div style={{width:28,height:28,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,flexShrink:0,background:l.me?'linear-gradient(135deg,#14b8a6,#06b6d4)':'linear-gradient(135deg,#a855f7,#ec4899)',color:'#fff'}}>{l.letter}</div>
-              <span style={{flex:1,fontSize:13,fontWeight:600,color:l.me?'#5eead4':'#fff'}}>{l.name}</span>
-              <span style={{fontSize:13,fontWeight:700,color:'#c084fc'}}>{l.pts}</span>
-            </div>
-          ))}
-        </div></div>
+        {!session ? (
+          <div className="ss-section"><div className="ss-detail" style={{textAlign:'center',color:'#9ca3af',fontSize:13}}>No session data available.</div></div>
+        ) : (
+          <>
+            <div className="ss-section"><div className="ss-stats">
+              <div className="ss-stat purple"><div className="ss-sicon">🎯</div><div className="ss-sval">Lv.{session.level ?? '—'}</div><div className="ss-slbl">Level Reached</div></div>
+              <div className="ss-stat blue"><div className="ss-sicon">⏱️</div><div className="ss-sval">{fmtDuration(session.durationSec)}</div><div className="ss-slbl">Time Practiced</div></div>
+              <div className="ss-stat orange"><div className="ss-sicon">🔥</div><div className="ss-sval">{session.bestStreak ?? 0}</div><div className="ss-slbl">Best Streak</div></div>
+              <div className="ss-stat teal"><div className="ss-sicon">❤️</div><div className="ss-sval">{session.livesLeft ?? '—'}</div><div className="ss-slbl">Lives Left</div></div>
+            </div></div>
+            <div className="ss-section"><div className="ss-detail">
+              <div style={{fontWeight:600,marginBottom:12}}>Session Details</div>
+              {[
+                ['Correct Answers', session.correct ?? 0, '#4ade80'],
+                ['Total Attempts', session.attempts ?? 0, '#fff'],
+                ['Points Earned', session.points != null ? `+${session.points}` : '—', '#facc15'],
+              ].map(([l,v,c])=>(
+                <div key={l} className="ss-drow"><span style={{color:'#9ca3af',fontSize:14}}>{l}</span><span style={{fontWeight:700,fontSize:14,color:c}}>{v}</span></div>
+              ))}
+            </div></div>
+          </>
+        )}
         <div className="ss-section"><div className="ss-actions">
           <button className="ss-abtn ss-ateal" onClick={()=>navigate('/game')}>🎮 Play Again</button>
           <button className="ss-abtn ss-apurple" onClick={()=>navigate('/')}>📊 Dashboard</button>
         </div></div>
-        <div className="ss-section" style={{display:'flex',justifyContent:'center'}}><button className="ss-outline" onClick={()=>navigate('/leaderboard')}>🏆 View Full Leaderboard</button></div>
       </div>
     </div>
   )

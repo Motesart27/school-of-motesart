@@ -78,50 +78,78 @@ const FEEL_TASKS = {
   }
 }
 
-// ─── MOCK STUDENT DATA ───
-const MOCK_STUDENT_STATES = {
-  T_FINGER_NUMBERING: { status: 'owned', confidence: 1.0, feelModes: { A: true, B: true, C: true } },
-  T_HAND_POSITION: { status: 'owned', confidence: 1.0, feelModes: { A: true, B: true, C: true } },
-  T_HALF_STEP: { status: 'accurate_with_support', confidence: 0.72, feelModes: { A: true, B: false, C: false } },
-  T_WHOLE_STEP: { status: 'practicing', confidence: 0.58, feelModes: { A: true, B: false, C: false } },
-  T_RHYTHM_BASIC: { status: 'introduced', confidence: 0.30, feelModes: { A: false, B: false, C: false } },
-  T_MAJOR_SCALE_PATTERN: { status: 'practicing', confidence: 0.45, feelModes: { A: false, B: false, C: false } },
-}
+// M1 R3.1-FE §D — the hardcoded MOCK_STUDENT_STATES fallback (fake owned/
+// confidence numbers standing in for a real student) was removed: local/
+// default state must never masquerade as live truth. See curriculumStatus
+// above — an outage now renders an honest empty state instead.
 
 export default function CurriculumPath() {
   const navigate = useNavigate()
-  const { user } = useAuth()
+  const { user, learningIdentity } = useAuth()
   const [selectedPhaseNum, setSelectedPhaseNum] = useState(2)
   const [selectedConceptId, setSelectedConceptId] = useState(null)
 
   // Live curriculum data (replaces mock on load)
   const [livePhases, setLivePhases] = useState(null)
   const [liveStates, setLiveStates] = useState(null)
+  // M1 R3.1-FE §D — Railway/SOM is the SOLE canonical learning-truth plane.
+  // 'loading' | 'ready' | 'unavailable'. The local concept_state_store cache
+  // is never read directly and rendered as if it were live — every concept
+  // id on the page is read THROUGH readThroughState(), which fetches the
+  // canonical server snapshot and only falls back to its own cache when the
+  // server is genuinely unreachable. If every fetch fails, the page shows a
+  // retryable outage state instead of trusting whatever happens to be cached.
+  const [curriculumStatus, setCurriculumStatus] = useState('loading')
+  const [retryTick, setRetryTick] = useState(0)
 
   useEffect(() => {
     let cancelled = false
     ;(async () => {
+      setCurriculumStatus('loading')
       try {
-            const { getStudentCurriculumView } = await import('../lesson_engine/curriculum_data_provider.js')
-            const { getAllStates } = await import('../lesson_engine/concept_state_store.js')
-            const liveStates = getAllStates()
-            const data = await getStudentCurriculumView(liveStates)
-            if (cancelled) return
+        const { getStudentCurriculumView } = await import('../lesson_engine/curriculum_data_provider.js')
+        const { readThroughState } = await import('../lesson_engine/concept_state_store.js')
+        const data = await getStudentCurriculumView({})
+        if (cancelled) return
+        const phases = data?.phases?.length ? data.phases : PHASES
         if (data?.phases?.length) setLivePhases(data.phases)
-        if (data?.conceptStates) setLiveStates(data.conceptStates)
+
+        const si = learningIdentity?.student_instrument_id || learningIdentity?.selected_student_instrument_id
+        if (!si) {
+          // No canonical identity yet — honest "not yet observed" empty
+          // state, never the demo/mock numbers standing in for a real student.
+          if (!cancelled) { setLiveStates({}); setCurriculumStatus('ready') }
+          return
+        }
+
+        const conceptIds = Array.from(new Set(phases.flatMap(p => p.concepts || [])))
+        const results = await Promise.all(conceptIds.map(id => readThroughState(id).catch(() => null)))
+        if (cancelled) return
+        const anyServerHit = results.some(r => r && r._source === 'server')
+        if (conceptIds.length > 0 && !anyServerHit) {
+          // Every canonical fetch failed — outage. Do NOT fall back to
+          // rendering whatever happens to be in the local cache as truth.
+          setLiveStates(null)
+          setCurriculumStatus('unavailable')
+          return
+        }
+        const statesMap = {}
+        conceptIds.forEach((id, i) => { if (results[i]) statesMap[id] = results[i] })
+        setLiveStates(statesMap)
+        setCurriculumStatus('ready')
       } catch (err) {
-        console.warn('[CurriculumPath] Live data load failed, using mock:', err)
+        console.warn('[CurriculumPath] Live data load failed:', err)
+        if (!cancelled) setCurriculumStatus('unavailable')
       }
     })()
     return () => { cancelled = true }
-  }, [])
+  }, [learningIdentity?.student_instrument_id, learningIdentity?.selected_student_instrument_id, retryTick])
 
-  // Use live data if available, fall back to mock
   const activePHASES = livePhases || PHASES
-  // M1 R3-FE §E — the mock fallback is DEMO ONLY and is labeled as such
-  // in the UI below whenever live canonical data is absent.
-  const usingMock = !liveStates
-  const activeSTATES = liveStates || MOCK_STUDENT_STATES
+  // §D — an outage renders an EMPTY state (never fabricated/default
+  // ownership); 'ready' renders exactly what the server returned, including
+  // a genuinely empty map when the server has observed nothing yet.
+  const activeSTATES = curriculumStatus === 'unavailable' ? {} : (liveStates || {})
 
   const currentPhase = activePHASES.find(p => p.num === selectedPhaseNum)
   const totalOwned = Object.values(activeSTATES).filter(s => s.status === 'owned').length
@@ -141,9 +169,10 @@ export default function CurriculumPath() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #111827, #1f2937)', color: '#fff', fontFamily: "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", overflowX: 'hidden' }}>
-      {usingMock && (
-        <div data-testid="demo-data-banner" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 8, padding: '10px 16px', margin: '12px 0', color: '#f59e0b', fontSize: 13, fontWeight: 600 }}>
-          Demo data — not canonical student state.
+      {curriculumStatus === 'unavailable' && (
+        <div data-testid="curriculum-unavailable" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: 8, padding: '10px 16px', margin: '12px 0', color: '#f59e0b', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span>Your progress info is temporarily unavailable.</span>
+          <button onClick={() => setRetryTick(t => t + 1)} style={{ padding: '4px 12px', borderRadius: 8, border: '1px solid rgba(245,158,11,0.45)', background: 'transparent', color: '#f59e0b', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Retry</button>
         </div>
       )}
       <style>{`

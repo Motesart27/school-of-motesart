@@ -19,6 +19,7 @@ import {
   readAssignmentIdFromUrl,
   submitPracticeLiveEvidence,
 } from '../services/practiceLiveEvidence.js'
+import { newClientEventId } from '../services/evidenceClient.js'
 import { useMotesartStudentState } from '../hooks/useMotesartStudentState.js'
 import { runMotesartThinkingEngine } from '../ai/motesart/motesartThinkingEngine.js'
 import { buildMotesartVoiceResponse } from '../ai/motesart/motesartVoicePersona.js'
@@ -1057,8 +1058,15 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
   // to the exact rec… shape, preserved for the WHOLE session, submitted
   // verbatim with canonical evidence. Never fabricated (free practice: null).
   const sessionAssignmentIdRef = React.useRef(readAssignmentIdFromUrl())
+  // M1 R3.1-FE §A — evidenceSubmittedRef becomes true ONLY on a CONFIRMED
+  // backend success (never optimistically before the request settles). The
+  // client_event_id is pinned once and reused on every retry (idempotency).
   const evidenceSubmittedRef = React.useRef(false)
+  const evidenceInFlightRef = React.useRef(false)
+  const evidenceClientEventIdRef = React.useRef(null)
   const attemptsRef = React.useRef(0)
+  // 'idle' | 'saving' | 'saved' | 'retry' | 'needs_selection' | 'fail_closed'
+  const [completionSaveState, setCompletionSaveState] = useState('idle')
 
   // Concept routing — read ?concept= from URL, stable for session lifetime.
   //
@@ -1235,17 +1243,34 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
 
   const advanceTeaching = React.useCallback(async (step) => {
     if (step >= THEORY_STEPS.length) {
-      setCoaching({ message: `Lesson complete! You learned ${currentConcept.concept}.`, speaking: false, tags: ['Complete'] })
-      if (currentConcept?.nextConcept) {
-        setTimeout(() => { window.location.href = '/practice-live?concept=' + currentConcept.nextConcept }, 2000)
+      // No canonical concept for this teaching flow (M1 R3-FE §J — e.g.
+      // find-home, skip-and-together): nothing to submit, complete normally.
+      if (!ACTIVE_CONCEPT_ID) {
+        setCoaching({ message: `Lesson complete! You learned ${currentConcept.concept}.`, speaking: false, tags: ['Complete'] })
+        setLessonComplete({ engagement: {} })
+        if (currentConcept?.nextConcept) {
+          setTimeout(() => { window.location.href = '/practice-live?concept=' + currentConcept.nextConcept }, 2000)
+        }
+        return
       }
-      setLessonComplete({ engagement: {} })
-      // M1 R3-FE §B — the session's ONE canonical evidence event: exact
-      // preserved launch assignment id (or none for free practice), exact
-      // canonical concept, canonical SI via the evidence client. Fire once.
-      if (!evidenceSubmittedRef.current && ACTIVE_CONCEPT_ID) {
-        evidenceSubmittedRef.current = true
-        submitPracticeLiveEvidence({
+
+      // M1 R3.1-FE §A — GOVERNING RULE: an assignment may not be presented as
+      // saved/completed until the canonical Practice_Event submission is
+      // CONFIRMED successful. Guard set + lessonComplete (which swaps to the
+      // "Session Complete" screen and starts the next-concept navigation)
+      // both happen ONLY after that confirmation — never optimistically, and
+      // never fire-and-forget.
+      if (evidenceSubmittedRef.current || evidenceInFlightRef.current) return
+      evidenceInFlightRef.current = true
+      setCompletionSaveState('saving')
+      setCoaching({ message: 'Saving your progress...', speaking: false, tags: ['Saving'] })
+      // Pin one client_event_id for this completion attempt — every retry
+      // (manual or queued) resubmits the SAME logical event (idempotency).
+      if (!evidenceClientEventIdRef.current) evidenceClientEventIdRef.current = newClientEventId()
+
+      let result
+      try {
+        result = await submitPracticeLiveEvidence({
           conceptId: ACTIVE_CONCEPT_ID,
           assignmentId: sessionAssignmentIdRef.current,
           trigger: 'complete',
@@ -1255,8 +1280,40 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
             attempts: attemptsRef.current,
             durationSec: timerRef.current || 0,
           },
-        }).catch(err => console.error('[PracticeLive] evidence failed:', String(err)))
+          clientEventId: evidenceClientEventIdRef.current,
+        })
+      } catch (err) {
+        console.error('[PracticeLive] evidence submission threw:', String(err))
+        result = { ok: false, queued: false, message: 'Could not save your progress — you can retry.' }
       }
+      evidenceInFlightRef.current = false
+
+      if (result?.ok) {
+        // Terminal guard set ONLY after confirmed backend success.
+        evidenceSubmittedRef.current = true
+        setCompletionSaveState('saved')
+        setCoaching({ message: `Lesson complete! You learned ${currentConcept.concept}.`, speaking: false, tags: ['Complete'] })
+        setLessonComplete({ engagement: {} })
+        if (currentConcept?.nextConcept) {
+          setTimeout(() => { window.location.href = '/practice-live?concept=' + currentConcept.nextConcept }, 2000)
+        }
+        return
+      }
+      if (result?.needsSelection) {
+        // Unresolved/selection-pending identity never burns the terminal guard.
+        setCompletionSaveState('needs_selection')
+        setCoaching({ message: result.message || 'Pick your instrument to save your progress.', speaking: false, tags: ['Action needed'] })
+        return
+      }
+      if (result?.failClosed) {
+        setCompletionSaveState('fail_closed')
+        setCoaching({ message: result.message || 'Not saved — this sign-in does not match this student’s records.', speaking: false, tags: ['Error'] })
+        return
+      }
+      // 503 / network / any other non-success — visible retry, never a
+      // success claim, and the guard stays unset so Retry can resubmit.
+      setCompletionSaveState('retry')
+      setCoaching({ message: result?.message || 'Could not save your progress yet — you can retry.', speaking: false, tags: ['Retry'] })
       return
     }
     teachingStepRef.current = step
@@ -1973,9 +2030,34 @@ export default function WYLPracticeLive({ lessonId = 'L01_c_major_scale', studen
     </>
   )
 
+  // M1 R3.1-FE §A — visible save/retry state for the canonical completion
+  // evidence. Never claims success; 'retry' resubmits with the SAME pinned
+  // client_event_id (idempotent), never a fresh one.
+  const completionSaveBanner = (completionSaveState === 'saving' || completionSaveState === 'retry' || completionSaveState === 'needs_selection' || completionSaveState === 'fail_closed') ? (
+    <div
+      data-testid={`practice-live-evidence-${completionSaveState}`}
+      style={{ position:'fixed', top:64, left:'50%', transform:'translateX(-50%)', zIndex:9997, display:'flex', alignItems:'center', gap:10, padding:'8px 14px', background: completionSaveState === 'fail_closed' ? 'rgba(239,68,68,0.12)' : 'rgba(245,158,11,0.12)', border: `1px solid ${completionSaveState === 'fail_closed' ? 'rgba(239,68,68,0.35)' : 'rgba(245,158,11,0.35)'}`, borderRadius:10, color: completionSaveState === 'fail_closed' ? '#fca5a5' : '#fbbf24', fontSize:12, fontWeight:600 }}
+    >
+      <span>
+        {completionSaveState === 'saving' ? 'Saving your progress...'
+          : completionSaveState === 'needs_selection' ? 'Pick your instrument to save your progress.'
+          : completionSaveState === 'fail_closed' ? 'Not saved — this sign-in does not match this student’s records.'
+          : 'Could not save your progress yet.'}
+      </span>
+      {(completionSaveState === 'retry' || completionSaveState === 'needs_selection') && (
+        <button
+          data-testid="practice-live-evidence-retry-btn"
+          onClick={() => advanceTeaching(THEORY_STEPS.length)}
+          style={{ padding:'4px 12px', borderRadius:8, border:'1px solid rgba(245,158,11,0.45)', background:'transparent', color:'#fbbf24', fontSize:12, fontWeight:700, cursor:'pointer' }}
+        >Retry</button>
+      )}
+    </div>
+  ) : null
+
   if (practiceView === 'concept') return (
     <>
       {conceptStateChip}
+      {completionSaveBanner}
       <PracticeConceptView
         conceptName={coaching.concept || currentConcept.concept}
         conceptDesc={currentConcept.description}
