@@ -65,6 +65,15 @@ class TAMiBridge {
     this.config = {
       apiUrl: config.apiUrl || '',
       lessonMomentEndpoint: config.lessonMomentEndpoint || '/tami/lesson-moment',
+      // M1 R3.2 (Codex HIGH-2): the frozen backend 382fab0 exposes NO
+      // /tami/lesson-moment operation. The escalation POST is DISABLED by
+      // default so the frontend fails closed (deterministic fallback) instead
+      // of posting to a nonexistent endpoint. Only set this true once a
+      // ratified backend contract exists AND getAuthToken is supplied.
+      lessonMomentEnabled: config.lessonMomentEnabled === true,
+      // Canonical auth: a function returning the current bearer JWT. Required
+      // for any authenticated TAMi call; never send display-name identity.
+      getAuthToken: typeof config.getAuthToken === 'function' ? config.getAuthToken : null,
       aiTimeoutMs: config.aiTimeoutMs || 8000,
       enableInactivityCheck: config.enableInactivityCheck !== false,
       inactivityCheckIntervalMs: config.inactivityCheckIntervalMs || 10000,
@@ -395,6 +404,16 @@ class TAMiBridge {
    * @returns {Object} Action to execute (AI or fallback)
    */
   async _callBackend(detection) {
+    // M1 R3.2 (Codex HIGH-2): fail closed when the lesson-moment escalation
+    // endpoint is not a ratified backend operation. No network call is made;
+    // the deterministic fallback is returned. This GUARANTEES zero POSTs to an
+    // unsupported /tami/lesson-moment operation.
+    if (!this.config.lessonMomentEnabled) {
+      this._log('lesson-moment escalation disabled (no ratified backend endpoint) — using deterministic fallback');
+      this.emit('bridge:ai_complete', { success: false, reason: 'endpoint_unsupported' });
+      return this.intelligence.getFallback(detection);
+    }
+
     // Record the call
     this.intelligence.recordAICall();
 
@@ -413,9 +432,16 @@ class TAMiBridge {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), this.config.aiTimeoutMs);
 
+      // Canonical auth: attach Authorization when a token provider is wired.
+      // Backend TAMi routes are authenticated (Depends(get_current_user)); role
+      // is derived from the verified JWT, never from the request body.
+      const _token = this.config.getAuthToken ? this.config.getAuthToken() : null;
       const response = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(_token ? { Authorization: `Bearer ${_token}` } : {}),
+        },
     body: JSON.stringify(body).replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, ''),
         signal: controller.signal,
       });

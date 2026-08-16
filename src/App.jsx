@@ -44,38 +44,57 @@ function ProtectedRoute({ children }) {
   return <ErrorBoundary>{children}<TamiGate /></ErrorBoundary>
 }
 
-function TeacherRoute({ children }) {
-  const { user } = useAuth()
+// M1 R3.2 (Codex MEDIUM-1): neutral, non-privileged placeholder shown while the
+// backend verifies the role. The privileged child is NEVER mounted until
+// verification resolves, so cached/forged localStorage role cannot briefly
+// render privileged UI.
+function AccessVerifying() {
+  return (
+    <div
+      data-testid="access-verifying"
+      style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#0a0e1a', color: '#9ca3af', fontFamily: "'Inter',-apple-system,sans-serif",
+        fontSize: 13,
+      }}
+    >
+      Verifying access…
+    </div>
+  )
+}
+
+// M1 R3.2 (Codex MEDIUM-1): single privileged guard. Order of checks:
+//   no user                     → redirect to login (unauthenticated)
+//   role not yet backend-verified → render placeholder, do NOT mount child
+//   backend-verified & allowed   → mount
+//   backend-verified & denied    → redirect (deny)
+// A 401/403/outage during verification triggers logout() in AuthContext, which
+// clears user → this guard then redirects to "/" (fail closed).
+function PrivilegedRoute({ allow, children }) {
+  const { user, roleVerified } = useAuth()
   if (!user) return <Navigate to="/" replace />
+  if (!roleVerified) return <AccessVerifying />
   const role = (user.role || '').toLowerCase()
-  // M1 R3-FE — founder is a legitimate elevated role (matches the backend's
-  // central ELEVATED_ROLES policy).
-  if (role !== 'teacher' && role !== 'admin' && role !== 'founder') return <Navigate to="/student" replace />
+  if (!allow.includes(role)) return <Navigate to="/student" replace />
   return <ErrorBoundary>{children}<TamiGate /></ErrorBoundary>
+}
+
+// M1 R3-FE — founder is a legitimate elevated role (matches the backend's
+// central ELEVATED_ROLES policy).
+function TeacherRoute({ children }) {
+  return <PrivilegedRoute allow={['teacher', 'admin', 'founder']}>{children}</PrivilegedRoute>
 }
 
 function AdminRoute({ children }) {
-  const { user } = useAuth()
-  if (!user) return <Navigate to="/" replace />
-  const role = (user.role || '').toLowerCase()
-  if (role !== 'admin') return <Navigate to="/student" replace />
-  return <ErrorBoundary>{children}<TamiGate /></ErrorBoundary>
+  return <PrivilegedRoute allow={['admin']}>{children}</PrivilegedRoute>
 }
 
 function AmbassadorRoute({ children }) {
-  const { user } = useAuth()
-  if (!user) return <Navigate to="/" replace />
-  const role = (user.role || '').toLowerCase()
-  if (role !== 'ambassador' && role !== 'admin') return <Navigate to="/student" replace />
-  return <ErrorBoundary>{children}<TamiGate /></ErrorBoundary>
+  return <PrivilegedRoute allow={['ambassador', 'admin']}>{children}</PrivilegedRoute>
 }
 
 function ParentRoute({ children }) {
-  const { user } = useAuth()
-  if (!user) return <Navigate to="/" replace />
-  const role = (user.role || '').toLowerCase()
-  if (role !== 'parent' && role !== 'admin') return <Navigate to="/student" replace />
-  return <ErrorBoundary>{children}<TamiGate /></ErrorBoundary>
+  return <PrivilegedRoute allow={['parent', 'admin']}>{children}</PrivilegedRoute>
 }
 
 function DashboardRedirect() {

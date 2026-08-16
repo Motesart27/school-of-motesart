@@ -102,6 +102,12 @@ export function AuthProvider({ children }) {
   })
 
   const [verifying, setVerifying] = useState(false)
+  // M1 R3.2 (Codex MEDIUM-1): privileged UI must NOT trust the cached
+  // localStorage role. roleVerified is false until GET /auth/verify confirms
+  // the role from the backend-verified JWT. Privileged route guards require
+  // roleVerified === true before mounting; any verification failure / outage
+  // leaves it false (fail closed).
+  const [roleVerified, setRoleVerified] = useState(false)
   const [identity, setIdentity] = useState(EMPTY_IDENTITY)
   const identityRef = useRef(identity)
   identityRef.current = identity
@@ -248,6 +254,7 @@ export function AuthProvider({ children }) {
     fetchSeqRef.current += 1 // invalidate any in-flight identity fetch
     if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
     setUser(null)
+    setRoleVerified(false)
     localStorage.removeItem('som_user')
     localStorage.removeItem('som_token')
     clearIdentitySnapshot()
@@ -285,7 +292,12 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('som:selection-required', handler)
   }, [clearInstrumentSelection, refreshLearningIdentity])
 
-  // ── Verify session on app boot, then resolve canonical identity ──
+  // ── Verify session with the backend, then resolve canonical identity ──
+  // M1 R3.2 (Codex MEDIUM-1): runs whenever a user identity becomes available
+  // (boot with a persisted session, or a fresh login). roleVerified only flips
+  // true after the backend confirms the role via GET /auth/verify. Until then,
+  // and on any failure/outage, roleVerified stays false so privileged UI does
+  // not mount from cached local state.
   useEffect(() => {
     if (!user || !user.email) return
 
@@ -298,16 +310,20 @@ export function AuthProvider({ children }) {
 
     let cancelled = false
     setVerifying(true)
+    setRoleVerified(false) // re-prove on every (re)verification; never trust cache
 
     api.verifySession()
       .then(data => {
         if (cancelled) return
         if (!data || !data.valid) {
           console.warn('[SOM Auth] Session invalid — forcing re-login')
+          setRoleVerified(false)
           logout()
         } else if (data.user) {
-          // Refresh role from Airtable (in case admin changed it)
+          // Role is taken ONLY from the backend-verified response, never the
+          // cached som_user. This is the authority for privileged routing.
           setUser(prev => prev ? { ...prev, role: data.user.role || 'student' } : null)
+          setRoleVerified(true)
           // M1 R1: (re)resolve canonical learning identity on verified boot —
           // any cached instrument selection re-validates in this refresh.
           refreshLearningIdentity()
@@ -316,13 +332,14 @@ export function AuthProvider({ children }) {
       .catch(() => {
         if (!cancelled) {
           console.warn('[SOM Auth] Backend unreachable — clearing session')
+          setRoleVerified(false)
           logout()
         }
       })
       .finally(() => { if (!cancelled) setVerifying(false) })
 
     return () => { cancelled = true }
-  }, []) // Only on mount
+  }, [user?.email]) // re-verify when the signed-in identity changes
 
   // ── Flush queued evidence on app start (evidenceClient re-checks identity) ──
   useEffect(() => {
@@ -352,7 +369,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{
-      user, login, logout, updateUser, verifying,
+      user, login, logout, updateUser, verifying, roleVerified,
       learningIdentity,
       evidenceStudentInstrumentId,
       evidenceReady,
