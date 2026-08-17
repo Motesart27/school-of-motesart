@@ -33,7 +33,7 @@ const SCREENS = resolve(OUT, 'm1r11-screens')
 mkdirSync(SCREENS, { recursive: true })
 
 const PORT = 4173
-const APP = `http://localhost:${PORT}`
+const APP = process.env.QA_BASE_URL || `http://localhost:${PORT}`
 const API = 'https://deployable-python-codebase-som-production.up.railway.app'
 // Converter hosts (never contacted by the homework surface — R1 governance).
 const CONVERTER_HOSTS = /(motesart-converter\.netlify\.app|school-of-motesart\.netlify\.app\/api\/)/
@@ -87,6 +87,7 @@ function check(name, ok, detail = '') {
 }
 
 async function ensurePreview() {
+  if (process.env.QA_BASE_URL) return null // bootstrap owns the shared preview lifecycle
   try {
     const res = await fetch(`${APP}/homework`)
     if (res.ok) return null // already serving (reuse)
@@ -101,8 +102,8 @@ async function ensurePreview() {
 }
 
 async function launch() {
-  try { return await chromium.launch() }
-  catch { return await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' }) }
+  const exe = process.env.QA_CHROMIUM
+  return exe ? await chromium.launch({ executablePath: exe }) : await chromium.launch()
 }
 
 async function makeContext(browser, opts) {

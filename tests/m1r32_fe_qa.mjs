@@ -101,7 +101,7 @@ function part1() {
 // PART 2 — browser/DOM/network
 // ═════════════════════════════════════════════════════════════════════════
 const PORT = 4188
-const APP = `http://localhost:${PORT}`
+const APP = process.env.QA_BASE_URL || `http://localhost:${PORT}`
 const API = 'https://deployable-python-codebase-som-production.up.railway.app'
 const SINGLE = 'recSI_ALICE'
 const IDENT = {
@@ -112,6 +112,7 @@ const IDENT = {
 }
 
 async function ensurePreview() {
+  if (process.env.QA_BASE_URL) return null // bootstrap owns the shared preview lifecycle
   try { const r = await fetch(`${APP}/`); if (r.ok) return null } catch { /* spawn */ }
   const child = spawn('npm', ['run', 'preview', '--', '--port', String(PORT), '--strictPort'],
     { cwd: ROOT, stdio: 'ignore', detached: true })
@@ -124,8 +125,8 @@ async function ensurePreview() {
 
 async function launchBrowser() {
   const args = ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream']
-  try { return await chromium.launch({ args }) }
-  catch { return await chromium.launch({ executablePath: process.env.QA_CHROMIUM || '/opt/pw-browsers/chromium', args }) }
+  const exe = process.env.QA_CHROMIUM
+  return exe ? await chromium.launch({ executablePath: exe, args }) : await chromium.launch({ args })
 }
 
 async function makeCtx(browser, opts = {}) {

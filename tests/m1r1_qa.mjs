@@ -34,7 +34,7 @@ mkdirSync(SCREENS, { recursive: true })
 const API = 'https://deployable-python-codebase-som-production.up.railway.app'
 const CONVERTER = 'motesart-converter.netlify.app'
 const PORT = 4173
-const BASE = `http://localhost:${PORT}`
+const BASE = process.env.QA_BASE_URL || `http://localhost:${PORT}`
 
 const results = []
 const capture = []       // every interesting request across all scenarios
@@ -200,15 +200,21 @@ async function noHorizontalOverflow(page) {
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────
-const preview = spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: ROOT, stdio: 'pipe' })
-await new Promise((res, rej) => {
-  const t = setTimeout(() => rej(new Error('preview server timeout')), 20000)
-  preview.stdout.on('data', (d) => { if (String(d).includes(String(PORT))) { clearTimeout(t); res() } })
-  preview.stderr.on('data', (d) => process.stderr.write(d))
-})
+// When the bootstrap owns the shared preview (QA_BASE_URL set) this suite does
+// NOT spawn or own a server — it uses the ready base URL directly.
+const preview = process.env.QA_BASE_URL
+  ? null
+  : spawn('npx', ['vite', 'preview', '--port', String(PORT), '--strictPort'], { cwd: ROOT, stdio: 'pipe' })
+if (preview) {
+  await new Promise((res, rej) => {
+    const t = setTimeout(() => rej(new Error('preview server timeout')), 20000)
+    preview.stdout.on('data', (d) => { if (String(d).includes(String(PORT))) { clearTimeout(t); res() } })
+    preview.stderr.on('data', (d) => process.stderr.write(d))
+  })
+}
 
 const browser = await chromium.launch({
-  executablePath: process.env.QA_CHROMIUM || '/opt/pw-browsers/chromium',
+  ...(process.env.QA_CHROMIUM ? { executablePath: process.env.QA_CHROMIUM } : {}),
   args: ['--autoplay-policy=no-user-gesture-required'],
 })
 
@@ -597,7 +603,7 @@ try {
   }
 } finally {
   await browser.close()
-  preview.kill('SIGTERM')
+  if (preview) preview.kill('SIGTERM')
 }
 
 const passCount = results.filter(r => r.pass).length

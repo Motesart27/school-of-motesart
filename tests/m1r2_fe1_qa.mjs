@@ -47,7 +47,7 @@ const SCREENS = resolve(OUT, 'm1r2-fe1-screens')
 mkdirSync(SCREENS, { recursive: true })
 
 const PORT = 4175
-const APP = `http://localhost:${PORT}`
+const APP = process.env.QA_BASE_URL || `http://localhost:${PORT}`
 const API = 'https://deployable-python-codebase-som-production.up.railway.app'
 const CONVERTER = 'https://motesart-converter.netlify.app'
 const BASELINE_THIRD_PARTY = new Set([
@@ -83,6 +83,7 @@ function check(name, ok, detail = '') {
 }
 
 async function ensurePreview() {
+  if (process.env.QA_BASE_URL) return null // bootstrap owns the shared preview lifecycle
   try { const r = await fetch(`${APP}/homework`); if (r.ok) return null } catch { /* spawn */ }
   const child = spawn('npm', ['run', 'preview', '--', '--port', String(PORT), '--strictPort'],
     { cwd: ROOT, stdio: 'ignore', detached: true })
@@ -96,8 +97,8 @@ async function ensurePreview() {
 async function launch() {
   const args = ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream',
     '--autoplay-policy=no-user-gesture-required']
-  try { return await chromium.launch({ args }) }
-  catch { return await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args }) }
+  const exe = process.env.QA_CHROMIUM
+  return exe ? await chromium.launch({ executablePath: exe, args }) : await chromium.launch({ args })
 }
 
 async function makeContext(browser, opts = {}) {

@@ -249,7 +249,7 @@ consistent with the existing suites' own precedent for this file).
 // ═════════════════════════════════════════════════════════════════════════
 
 const PORT = 4179
-const APP = `http://localhost:${PORT}`
+const APP = process.env.QA_BASE_URL || `http://localhost:${PORT}`
 const API = 'https://deployable-python-codebase-som-production.up.railway.app'
 const CONVERTER = 'https://motesart-converter.netlify.app'
 const SINGLE = 'recSI_ALICE'
@@ -262,6 +262,7 @@ const IDENT_RESOLVED = {
 }
 
 async function ensurePreview() {
+  if (process.env.QA_BASE_URL) return null // bootstrap owns the shared preview lifecycle
   try { const r = await fetch(`${APP}/homework`); if (r.ok) return null } catch { /* spawn */ }
   const child = spawn('npm', ['run', 'preview', '--', '--port', String(PORT), '--strictPort'],
     { cwd: ROOT, stdio: 'ignore', detached: true })
@@ -274,8 +275,8 @@ async function ensurePreview() {
 
 async function launchBrowser() {
   const args = ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream']
-  try { return await chromium.launch({ args }) }
-  catch { return await chromium.launch({ executablePath: process.env.QA_CHROMIUM || '/opt/pw-browsers/chromium', args }) }
+  const exe = process.env.QA_CHROMIUM
+  return exe ? await chromium.launch({ executablePath: exe, args }) : await chromium.launch({ args })
 }
 
 const governanceLog = []
