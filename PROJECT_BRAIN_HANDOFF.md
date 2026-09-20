@@ -106,3 +106,17 @@ Last Updated: May 23, 2026 | Bundle: index-DfXy9PFK.js
 4. Never claim a tool is unavailable without checking
 5. Visual approval before any code
 6. One feature per session
+
+## SESSION — September 20, 2026 — SOM-AUTONOMY-PILOT-01-CLAUDE (audit, docs only)
+
+**What:** Read-only autonomy audit of the Luke pilot cycle (lesson → evidence → concepts → homework → game → completion → evidence → teacher review → next lesson package) across school-of-motesart @ 9b5449f, Deployable-python-codebase-som @ ca36aeb, and Motesart-Number-System-Converter @ 6a4d009 (the host chapters and Rhythm Racer v2 write evidence to).
+
+**Result:** LUKE_FULL_CYCLE_CURRENTLY_POSSIBLE = NO. Three break points: (1) student_instrument_id never reaches the browser (Login.jsx drops the login `student` object; setStudentId has zero callers → every write is 'default_student' or a Users id; Practice Live log write 403s for students); (2) game evidence never lands where a teacher page reads (Find the Note posts to two nonexistent Railway routes; Rhythm Racer v2 + chapters post to the converter site under the wrong id and with `academic_complete`, which its recompute never counts; teacher pages read the teacher's own localStorage); (3) no assignment round-trip (HomeworkDashboard is placeholder data; teacher Create Assignment sends no student; completion is console.log; api.js has no PATCH).
+
+**G1:** MISSING (no concept-linked assign UI, no api method, no Concept_Assignments writer). **G5:** PARTIAL — levels 6–8 cannot be started, selected, completed, or unlock anything (clamp 1..5, playableLevels filter, Math.min(5) cap: rule preserved); the `?concept=` URL param is written verbatim (RhythmRacerV2.jsx:406) so a locked concept id can be credited under a playable level — one-line fix `concept_id: level.concept`. WYL R3-C1: not present in either repo.
+
+**Files:** docs/SOM_AUTONOMY_PILOT_01_GAP_MAP.md (new, full gap map with file:line evidence, A–I trace, 12 critical-path + 11 secondary broken links, readiness matrix, top-5 changes, doc-vs-code corrections, TO VERIFY list), PROJECT_BRAIN_HANDOFF.md (this entry). Zero code files changed. No deploy, no email, no billing, no new database, no new assessment.
+
+**Next steps (each its own session, visual approval first):** 1) Login.jsx/AuthContext store student id; 2) RhythmRacerV2 identity + `level.concept` + academic result; 3) HomeworkDashboard reads api.getHomework + TeacherDashboard sends student; 4) api.updateAssignment + completion PATCH from Rhythm Racer / Practice Live (+ slug/T_ fallback); 5) teacher read path (roster Role filter, getPracticeLogs repoint, ConceptHealth student selector, feedback write). Founder decisions needed: canonical Concept_State writer (converter vs Railway), inversion/chord-family concept id, concept column on Homework Assignments, GamePage (protected) edit for Find the Note evidence.
+
+**Doc corrections surfaced:** FIELDS.md:15 (homework.py IS mounted), FIELDS.md:53 (auth.py field names), PROJECT_BRAIN.md:661-664 / :876 / :474 / :745 contradicted by code, CLAUDE.md VITE_MOTESART_CLAUDE_KEY item is moot (never read), Cross-Brain Sync SHAs stale in both brains.
