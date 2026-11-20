@@ -94,7 +94,14 @@ export default function StudentDashboard() {
     return () => { cancelled = true }
   }, [user?.name, studentInstrumentId])
 
-  const pendingHomework = homework.filter(item => item.status === 'Assigned')
+  const currentCutoff = Date.now() - (30 * 86400000)
+  const pendingHomework = homework
+    .filter(item => {
+      if (item.status !== 'Assigned') return false
+      if (item.due_date) return new Date(item.due_date + 'T23:59:59').getTime() >= Date.now() - (14 * 86400000)
+      return item.created_at ? new Date(item.created_at).getTime() >= currentCutoff : false
+    })
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
   const pendingCount = pendingHomework.length
   const templateById = Object.fromEntries(homeworkLibrary.map(item => [item.id, item]))
   const focusAssignment = pendingHomework[0] || null
