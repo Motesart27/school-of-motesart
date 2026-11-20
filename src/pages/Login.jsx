@@ -49,7 +49,7 @@ export default function Login() {
         return
       }
       const userData = data?.user || data?.data?.user || extractUser(data) || { email: emailVal }
-      login(userData, token)
+      login(userData, token, data?.student || data?.data?.student || null)
       navigate('/dashboard', { replace: true })
     } catch (err) {
       setLoginError(err?.message || 'Login failed. Check your credentials and try again.')

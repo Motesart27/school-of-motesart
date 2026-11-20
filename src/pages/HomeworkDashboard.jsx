@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import api from '../services/api.js'
 
 /* ── Placeholder data — replaced by API when wired ── */
 const ASGN = [
@@ -11,22 +12,9 @@ const ASGN = [
   { id:'gate6_rhythm', title:'Gate 6 Rhythm — Quarter Notes', type:'Homework', concept:'R_PULSE_QUARTER', route:'/rhythm-racer?concept=R_PULSE_QUARTER&assignment_id=gate6_rhythm&level=3', status:'Pending', statusCls:'pn', countdown:'This week', cpCls:'cp-teal', progress:0, overdue:false,
     desc:'Open Rhythm Racer Level 3. Tap every beat in the measure and keep the pulse even from count-in through the final stage.' },
 ]
-const SHEETS = [
-  { name:'C Major Scale', meta:'Added Jan 10 \u00b7 Ms. Johnson' },
-  { name:'Hanon No. 1', meta:'Added Jan 8 \u00b7 Ms. Johnson' },
-  { name:'G Major Scale', meta:'Added Jan 5 \u00b7 Ms. Johnson' },
-  { name:'Twinkle Variation', meta:'Added Dec 20 \u00b7 Ms. Johnson' },
-]
-const ARCH = [
-  { name:'Interval Training', meta:'Homework \u00b7 5 attempts', score:100, color:'#22c55e', date:'Jan 18', bg:'rgba(34,197,94,0.1)' },
-  { name:'Note Reading Basics', meta:'Homework \u00b7 3 attempts', score:90, color:'#22c55e', date:'Jan 12', bg:'rgba(34,197,94,0.1)' },
-  { name:'Rhythm Exercise', meta:'Homework \u00b7 4 attempts', score:78, color:'#f59e0b', date:'Jan 6', bg:'rgba(245,158,11,0.1)' },
-  { name:'Sight Reading Test', meta:'Quiz \u00b7 2 attempts', score:62, color:'#f09595', date:'Dec 19', bg:'rgba(226,75,74,0.1)' },
-]
-const ANN = [
-  { initials:'MJ', name:'Ms. Johnson', time:'Today \u00b7 9:00 AM', pinned:true, title:'Recital coming up \u2014 Jan 30th!', body:'Our winter recital is January 30th at 5pm. Please have your piece memorized by next week\u2019s lesson. Parents are welcome to attend!' },
-  { initials:'MJ', name:'Ms. Johnson', time:'Yesterday \u00b7 3:15 PM', pinned:false, title:'New sheet music added', body:'I\u2019ve added Hanon No. 1 and the G Major scale to your sheet music library. Please review before Thursday\u2019s lesson.' },
-]
+const SHEETS = []
+const ARCH = []
+const ANN = []
 
 const css = `
 .hw-page{display:flex;flex-direction:column;height:100vh;overflow:hidden;background:#0d1117;font-family:'DM Sans',sans-serif;color:#fff}
@@ -164,7 +152,100 @@ export default function HomeworkDashboard() {
   const [selAsgn, setSelAsgn] = useState(null)
   const [helpActive, setHelpActive] = useState(false)
   const [guideShow, setGuideShow] = useState(false)
+  const [assignments, setAssignments] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const helpTimer = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadHomework() {
+      if (!user?.name) {
+        setAssignments([])
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      setLoadError('')
+      try {
+        const [rawAssignments, library] = await Promise.all([
+          api.getHomework(user.name),
+          api.getHomeworkLibrary(),
+        ])
+        if (cancelled) return
+        const templates = Object.fromEntries((library || []).map(item => [item.id, item]))
+        const mapped = (rawAssignments || []).map(a => {
+          const templateId = Array.isArray(a.homework_template) ? a.homework_template[0] : a.homework_template
+          const template = templateId ? templates[templateId] : null
+          const gameName = template?.['Game Name'] || ''
+          const normalizedGame = String(gameName).toLowerCase().replace(/\s/g, '')
+          let concept = null
+          let route = null
+          if (normalizedGame.includes('findthe')) {
+            concept = 'T_SCALE_DEGREES_MAJOR'
+            route = `/game?mode=academic&concept=${concept}&assignment_id=${a.id}&level=1`
+          } else if (normalizedGame.includes('rhythm') || normalizedGame.includes('rhythn')) {
+            concept = 'R_PULSE_QUARTER'
+            route = `/rhythm-racer?mode=academic&concept=${concept}&assignment_id=${a.id}&level=3`
+          } else {
+            route = `/practice-live?assignment_id=${a.id}`
+          }
+          const due = a.due_date ? new Date(a.due_date + 'T23:59:59') : null
+          const now = new Date()
+          const overdue = !!(due && due < now && a.status === 'Assigned')
+          const days = due ? Math.ceil((due - now) / 86400000) : null
+          const countdown = overdue
+            ? 'Overdue'
+            : days === null
+              ? 'Assigned'
+              : days <= 0 ? 'Due today' : days === 1 ? '1 day left' : `${days} days left`
+          const status = a.status || 'Assigned'
+          const statusCls = status === 'Completed' ? 'co' : status === 'Reviewed' ? 'ip' : overdue ? 'ov' : 'pn'
+          const created = a.created_at ? new Date(a.created_at) : null
+          const staleNoDue = !due && status === 'Assigned' && created && (now - created) > (30 * 86400000)
+          const stalePastDue = !!(due && due < now && status === 'Assigned' && (now - due) > (14 * 86400000))
+          return {
+            ...a,
+            template,
+            gameName,
+            concept,
+            route,
+            title: a.name || template?.Name || a.title || 'Homework',
+            desc: template?.Instructions || a.title || '',
+            type: a.type || (gameName ? 'Game' : 'Live Practice'),
+            status,
+            statusCls,
+            countdown,
+            cpCls: overdue ? 'cp-red' : status === 'Completed' ? 'cp-green' : 'cp-teal',
+            progress: status === 'Completed' ? 100 : 0,
+            overdue,
+            stale: staleNoDue || stalePastDue,
+          }
+        }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+        setAssignments(mapped)
+      } catch (err) {
+        if (!cancelled) {
+          setAssignments([])
+          setLoadError(err?.message || 'Homework could not be loaded')
+        }
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    loadHomework()
+    return () => { cancelled = true }
+  }, [user?.name])
+
+  const filteredAssignments = useMemo(() => {
+    const current = assignments.filter(a => !a.stale)
+    if (filter === 'All') return current
+    if (filter === 'Completed') return current.filter(a => a.status === 'Completed')
+    if (filter === 'Overdue') return current.filter(a => a.overdue)
+    if (filter === 'Due Soon') return current.filter(a => !a.overdue && a.status !== 'Completed')
+    return current
+  }, [assignments, filter])
+
+  const pendingCount = assignments.filter(a => a.status === 'Assigned' && !a.stale).length
 
   const openDet = (a) => { setSelAsgn(a); setDetOpen(true); resetHelp() }
   const closeDet = () => { setDetOpen(false); resetHelp() }
@@ -191,11 +272,11 @@ export default function HomeworkDashboard() {
       <div className="hw-topbar">
         <div>
           <div className="hw-title">Homework</div>
-          <div className="hw-sub">Music Theory 101</div>
+          <div className="hw-sub">{user?.name || 'Student'} · Academic Mode</div>
         </div>
         <div className="hw-bell">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <div className="hw-bell-dot" />
+          {pendingCount > 0 && <div className="hw-bell-dot" />}
         </div>
       </div>
 
@@ -203,7 +284,7 @@ export default function HomeworkDashboard() {
       <div className="hw-tabs">
         {TABS.map(t => (
           <button key={t.id} className={`hw-tab${tab===t.id?' active':''}`} onClick={() => switchTab(t.id)}>
-            {t.label}{t.badge ? <span className="hw-tab-badge">{t.badge}</span> : null}
+            {t.label}{t.id === 'asgn' && pendingCount > 0 ? <span className="hw-tab-badge">{pendingCount}</span> : null}
           </button>
         ))}
       </div>
@@ -218,7 +299,10 @@ export default function HomeworkDashboard() {
               <button key={f} className={`hw-fp${filter===f?' active':''}`} onClick={() => setFilter(f)}>{f}</button>
             ))}
           </div>
-          {ASGN.map(a => (
+          {loading && <div className="hw-desc">Loading your assigned homework…</div>}
+          {!loading && loadError && <div className="hw-desc" style={{color:'#f09595'}}>{loadError}</div>}
+          {!loading && !loadError && filteredAssignments.length === 0 && <div className="hw-desc">No homework is currently assigned.</div>}
+          {filteredAssignments.map(a => (
             <div key={a.id} className={`hw-acard${a.overdue?' overdue':''}`} onClick={() => openDet(a)}>
               <div className="hw-acard-left">
                 <div className="hw-acard-title">{a.title}</div>
@@ -241,6 +325,7 @@ export default function HomeworkDashboard() {
         {/* ── SHEET MUSIC TAB ── */}
         <div className={`hw-tc${tab==='sheet'?' active':''}`}>
           <div className="hw-sheet-grid">
+            {SHEETS.length === 0 && <div className="hw-desc">No sheet-music items are connected to this homework view yet.</div>}
             {SHEETS.map((s,i) => (
               <div key={i} className="hw-sheet-card">
                 <div className="hw-sheet-top">
@@ -261,6 +346,7 @@ export default function HomeworkDashboard() {
 
         {/* ── COMPLETED ARCHIVE TAB ── */}
         <div className={`hw-tc${tab==='arch'?' active':''}`} style={{gap:'8px'}}>
+          {ARCH.length === 0 && <div className="hw-desc">No completed homework is available in this archive yet.</div>}
           {ARCH.map((r,i) => (
             <div key={i} className="hw-arch-row">
               <div className="hw-arch-ico" style={{background:r.bg}}>{'\u2713'}</div>
@@ -278,6 +364,7 @@ export default function HomeworkDashboard() {
 
         {/* ── ANNOUNCEMENTS TAB ── */}
         <div className={`hw-tc${tab==='ann'?' active':''}`} style={{gap:'9px'}}>
+          {ANN.length === 0 && <div className="hw-desc">No School of Motesart announcements are posted here right now.</div>}
           {ANN.map((a,i) => (
             <div key={i} className="hw-ann-card">
               <div className="hw-ann-hd">
@@ -337,17 +424,17 @@ export default function HomeworkDashboard() {
             <div className="hw-dcard-hd">Feedback</div>
             <div className="hw-fb-teacher">
               <div className="hw-fb-hd">
-                <div className="hw-fb-av-init">MJ</div>
-                <div className="hw-fb-label">From Ms. Johnson {'\u00b7'} Jan 17</div>
+                <div className="hw-fb-av-init">M</div>
+                <div className="hw-fb-label">From Motesart</div>
               </div>
-              <div className="hw-fb-txt">Great progress! Your right hand is really strong now {'\u2014'} focus on bringing your left hand timing up to match. Slow it down to 60bpm hands together and build from there.</div>
+              <div className="hw-fb-txt">{selAsgn?.teacher_feedback || 'No teacher feedback has been added yet.'}</div>
             </div>
             <div className="hw-fb-motesart">
               <div className="hw-fb-hd">
-                <div className="hw-fb-av-img"><img src="/Motesart Avatar 1.PNG" alt="Motesart" onError={e => { e.target.style.display='none'; e.target.parentElement.textContent='M' }} /></div>
-                <div className="hw-fb-label">Motesart {'\u00b7'} Based on your last session</div>
+                <div className="hw-fb-av-img"><img src="/tami-avatar.png" alt="T.A.M.i" onError={e => { e.target.style.display='none'; e.target.parentElement.textContent='T' }} /></div>
+                <div className="hw-fb-label">T.A.M.i</div>
               </div>
-              <div className="hw-fb-txt">Your accuracy on the right hand hit 92% last session {'\u2014'} that{'\u2019'}s real ownership. Left hand is at 71%. Try the three-note grouping approach: play notes 1-2-3, pause, then 4-5-6. You{'\u2019'}ll feel the pattern lock in.</div>
+              <div className="hw-fb-txt">I can help explain this assignment. Saved practice evidence is used only after it is successfully recorded to your SOM profile.</div>
             </div>
           </div>
 
@@ -365,7 +452,7 @@ export default function HomeworkDashboard() {
               <div className="hw-vis">
                 <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#14b8a6'}} />Teacher sees submissions immediately</div>
                 <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#f59e0b'}} />Parent receives a weekly summary</div>
-                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#a78bfa'}} />T.A.M.i updates your DPM score</div>
+                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#a78bfa'}} />Saved practice evidence informs T.A.M.i</div>
               </div>
             </div>
           </div>

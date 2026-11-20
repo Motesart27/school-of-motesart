@@ -171,7 +171,7 @@ export default function RegistrationPage() {
       })
       const userData = user.user || user
       const token = user.token || userData?.token || null
-      login(userData, token)
+      login(userData, token, user.student || null)
       const userId = user.user?.id || user.id
       if (wyl && userId) api.updateWYL(userId, wyl).catch(() => {})
       navigate('/dashboard')

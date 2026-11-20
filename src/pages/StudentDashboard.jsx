@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import api from '../services/api.js'
 
 // Flat nav items with SVG icons
 const NAV_ITEMS = [
   { key: 'Home', icon: 'home' },
   { key: 'Practice Live', icon: 'practicelive' },
-  { key: 'Homework', icon: 'homework', badge: 3 },
+  { key: 'Homework', icon: 'homework' },
   { key: 'Games', icon: 'games' },
   { key: 'Practice Log', icon: 'practicelog' },
   { key: 'My Progress', icon: 'progress' },
   { key: 'My Music', icon: 'music' },
-  { key: 'Community', icon: 'community' },
-]
+ ]
 
 const NAV_ICONS = {
   home: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1',
@@ -38,12 +38,20 @@ const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
 const DEFAULT_SOM_LOGO = '/SOM_logo.png'
 
 export default function StudentDashboard() {
-  const { user } = useAuth()
+  const { user, student } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('academic')
   const [activeItem, setActiveItem] = useState('Home')
   const [showTamiChat, setShowTamiChat] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [homework, setHomework] = useState([])
+  const [homeworkLibrary, setHomeworkLibrary] = useState([])
+  const [practiceDashboard, setPracticeDashboard] = useState(null)
+
+  const studentInstrumentId =
+    student?.student_instrument_id ||
+    (Array.isArray(student?.instrument) ? student.instrument[0] : null) ||
+    null
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'S'
@@ -62,6 +70,50 @@ export default function StudentDashboard() {
       document.head.appendChild(link)
     }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function hydrateStudentHome() {
+      if (!user?.name) return
+      try {
+        const [assignments, library, practice] = await Promise.all([
+          api.getHomework(user.name),
+          api.getHomeworkLibrary(),
+          studentInstrumentId ? api.getPracticeDashboard(studentInstrumentId) : Promise.resolve(null),
+        ])
+        if (cancelled) return
+        setHomework(assignments || [])
+        setHomeworkLibrary(library || [])
+        setPracticeDashboard(practice || null)
+      } catch (err) {
+        if (!cancelled) console.warn('[SOM] Student dashboard hydration failed:', err)
+      }
+    }
+    hydrateStudentHome()
+    return () => { cancelled = true }
+  }, [user?.name, studentInstrumentId])
+
+  const currentCutoff = Date.now() - (30 * 86400000)
+  const pendingHomework = homework
+    .filter(item => {
+      if (item.status !== 'Assigned') return false
+      if (item.due_date) return new Date(item.due_date + 'T23:59:59').getTime() >= Date.now() - (14 * 86400000)
+      return item.created_at ? new Date(item.created_at).getTime() >= currentCutoff : false
+    })
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+  const pendingCount = pendingHomework.length
+  const templateById = Object.fromEntries(homeworkLibrary.map(item => [item.id, item]))
+  const focusAssignment = pendingHomework[0] || null
+  const focusTemplateId = Array.isArray(focusAssignment?.homework_template) ? focusAssignment.homework_template[0] : focusAssignment?.homework_template
+  const focusTemplate = focusTemplateId ? templateById[focusTemplateId] : null
+  const focusGame = String(focusTemplate?.['Game Name'] || '').toLowerCase().replace(/\s/g, '')
+  const focusRoute = focusGame.includes('findthe')
+    ? `/game?mode=academic&concept=T_SCALE_DEGREES_MAJOR&assignment_id=${focusAssignment?.id}&level=1`
+    : (focusGame.includes('rhythm') || focusGame.includes('rhythn'))
+      ? `/rhythm-racer?mode=academic&concept=R_PULSE_QUARTER&assignment_id=${focusAssignment?.id}&level=3`
+      : '/homework'
+  const focusTitle = focusAssignment?.name || focusTemplate?.Name || 'No homework assigned'
+  const focusDue = focusAssignment?.due_date ? `Due ${focusAssignment.due_date}` : 'Open Homework for details'
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
@@ -135,13 +187,13 @@ export default function StudentDashboard() {
                   <path d={NAV_ICONS[item.icon]} />
                 </svg>
                 <span style={{ flex: 1 }}>{item.key}</span>
-                {item.badge && (
+                {(item.key === 'Homework' ? pendingCount : item.badge) ? (
                   <span style={{
                     background: '#14b8a6', color: '#fff', fontSize: 10, fontWeight: 700,
                     borderRadius: '50%', width: 20, height: 20,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  }}>{item.badge}</span>
-                )}
+                  }}>{item.key === 'Homework' ? pendingCount : item.badge}</span>
+                ) : null}
               </button>
             ))}
           </nav>
@@ -153,7 +205,7 @@ export default function StudentDashboard() {
           <div style={{ padding: '8px 16px' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>QUICK LINKS</div>
             <button
-              onClick={() => navigate('/practice-live')}
+              onClick={() => navigate(focusRoute)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
                 background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.25)',
@@ -247,7 +299,17 @@ export default function StudentDashboard() {
         {/* Dashboard Content */}
         <div style={{ padding: '20px 24px', maxWidth: 920, margin: '0 auto' }}>
           {mode === 'academic' ? (
-            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} />
+            <HomeDashboard
+              navigate={navigate}
+              userName={userName}
+              motesartAvatar={motesartAvatar}
+              pendingCount={pendingCount}
+              focusTitle={focusTitle}
+              focusDue={focusDue}
+              focusRoute={focusRoute}
+              practiceDashboard={practiceDashboard}
+              student={student}
+            />
           ) : (
             <GameView navigate={navigate} motesartAvatar={motesartAvatar} />
           )}
@@ -324,7 +386,7 @@ export default function StudentDashboard() {
 }
 
 /* ===== HOME DASHBOARD (Academic Mode) ===== */
-function HomeDashboard({ navigate, userName, motesartAvatar }) {
+function HomeDashboard({ navigate, userName, motesartAvatar, pendingCount, focusTitle, focusDue, focusRoute, practiceDashboard, student }) {
   const [dpmVisible, setDpmVisible] = useState(false)
   const dpmRef = useRef(null)
 
@@ -340,11 +402,22 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
     obs.observe(node)
     return () => obs.disconnect()
   }, [triggerDpm])
-  // DPM donut calculations
+  // DPM and points are hydrated from saved SOM practice evidence.
   const C = 2 * Math.PI * 42
-  const drive = 1, passion = 27, motivation = 0, overall = 9
+  const dpm = practiceDashboard?.periods?.week?.dpm || {}
+  const drive = Number(dpm.drive || 0)
+  const passion = Number(dpm.passion || 0)
+  const motivation = Number(dpm.motivation || 0)
+  const overall = Math.round((drive + passion + motivation) / 3)
   const dA = (drive / 100) * C
   const pA = (passion / 100) * C
+  const totalPoints = practiceDashboard?.points?.total || 0
+  const week = practiceDashboard?.periods?.week || {}
+  const weeklyMinutes = Number(week.total_minutes || 0)
+  const consistencyDays = Number(week.consistency_days || 0)
+  const weeklyTarget = Number(practiceDashboard?.student?.weekly_target_minutes || 0)
+  const weeklyPct = weeklyTarget > 0 ? Math.min(100, Math.round((weeklyMinutes / weeklyTarget) * 100)) : 0
+  const currentLevel = practiceDashboard?.student?.level || student?.level || '—'
 
   // Sparkline - highlight today
   const todayIndex = new Date().getDay()
@@ -368,7 +441,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#e84b8a', flexShrink: 0 }} />
         <span style={{ fontSize: 11, fontWeight: 600, color: '#e84b8a', whiteSpace: 'nowrap' }}>T.A.M.i says:</span>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>You've been so consistent this week — keep that energy going!</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+          {pendingCount > 0 ? `You have ${pendingCount} homework assignment${pendingCount === 1 ? '' : 's'} ready.` : 'Your homework is clear right now.'}
+        </span>
       </div>
 
       {/* 2. Today's Focus */}
@@ -378,9 +453,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: '#5DCAA5', letterSpacing: 1, textTransform: 'uppercase' }}>Today's Focus</div>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 6 }}>
-          Complete Level 3 Scale Patterns — C Major & G Major
+          {focusTitle}
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>Assigned by Motesart · Due Friday</div>
+        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>Assigned by Motesart · {focusDue}</div>
         <button
           onClick={() => navigate('/practice-live')}
           style={{
@@ -395,9 +470,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       {/* 3. Three Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
         {[
-          { label: 'Current Level', value: '3', sub: 'Piano' },
-          { label: 'Assignments Due', value: '1', sub: 'this week' },
-          { label: 'Day Streak', value: '5', sub: 'personal best: 12', color: '#14b8a6' },
+          { label: 'Current Level', value: currentLevel, sub: 'Piano' },
+          { label: 'Assignments Due', value: String(pendingCount || 0), sub: 'this week' },
+          { label: 'SOM Points', value: String(totalPoints), sub: `${consistencyDays} practice day${consistencyDays === 1 ? '' : 's'} this week`, color: '#14b8a6' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -452,137 +527,54 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
         </div>
       </div>
 
-      {/* 5. Two-Column: Practice Goal + DPM Score */}
+      {/* 5. Saved practice + internal learning signals */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14, alignItems: 'stretch' }}>
-
-        {/* Left: Today's Practice Goal */}
         <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Today's Practice Goal</span>
-            <span style={{ fontSize: 11, color: '#14b8a6', cursor: 'pointer', fontWeight: 500 }}>Edit</span>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>This Week's Practice</span>
           </div>
           <div style={{ padding: 16, flex: 1 }}>
             <div style={{ marginBottom: 12 }}>
-              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 700, color: '#fff' }}>12</span>
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginLeft: 4 }}>of 30 min</span>
+              <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 32, fontWeight: 700, color: '#fff' }}>{weeklyMinutes}</span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', marginLeft: 4 }}>
+                {weeklyTarget > 0 ? `of ${weeklyTarget} min` : 'saved minutes'}
+              </span>
             </div>
             <div style={{ width: '100%', height: 10, background: 'rgba(255,255,255,0.12)', borderRadius: 6, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: '40%', background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 6 }} />
+              <div style={{ height: '100%', width: `${weeklyPct}%`, background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 6 }} />
             </div>
-            <div style={{ marginTop: 8, fontSize: 12, color: '#5DCAA5' }}>Just 18 more minutes!</div>
+            <div style={{ marginTop: 8, fontSize: 12, color: '#5DCAA5' }}>
+              {consistencyDays} saved practice day{consistencyDays === 1 ? '' : 's'} this week
+            </div>
+          </div>
+        </div>
 
-            {/* Sparkline */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 16, height: 50 }}>
-              {dayLabels.map((d, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 }}>
-                  <div style={{
-                    width: 27, height: 27, borderRadius: 4,
-                    background: dayOpacity[i] > 0 ? '#14b8a6' : 'rgba(255,255,255,0.07)',
-                    opacity: dayOpacity[i] || (i >= dayIndex ? 1 : 0.3),
-                  }} />
-                  <span style={{ fontSize: 10, color: i === dayIndex ? '#14b8a6' : 'rgba(255,255,255,0.3)', fontWeight: i === dayIndex ? 600 : 400 }}>{d}</span>
-                </div>
+        <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Learning Signals</span>
+          </div>
+          <div style={{ padding: 16, flex: 1 }}>
+            <div style={{ color: 'rgba(255,255,255,0.62)', fontSize: 12, lineHeight: 1.6 }}>
+              T.A.M.i uses your saved practice, homework, and game evidence to help Motesart prepare better instruction.
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+              {[
+                ['Practice', drive > 0],
+                ['Games', passion > 0],
+                ['Homework', motivation > 0],
+              ].map(([label, active]) => (
+                <span key={label} style={{
+                  padding: '5px 9px', borderRadius: 20, fontSize: 10, fontWeight: 600,
+                  background: active ? 'rgba(20,184,166,.12)' : 'rgba(255,255,255,.05)',
+                  color: active ? '#5DCAA5' : 'rgba(255,255,255,.35)',
+                  border: active ? '1px solid rgba(20,184,166,.25)' : '1px solid rgba(255,255,255,.08)',
+                }}>{label}: {active ? 'Evidence saved' : 'Waiting for saved evidence'}</span>
               ))}
             </div>
           </div>
         </div>
-
-        {/* Right: DPM Score */}
-        <div ref={dpmRef} onMouseEnter={triggerDpm} style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>DPM Score</span>
-            <span style={{ fontSize: 11, color: '#f59e0b', fontWeight: 500 }}>Building</span>
-          </div>
-          <div style={{ padding: 16, flex: 1, display: 'flex', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              {/* SVG Donut */}
-              <div style={{ position: 'relative' }}>
-                <svg width="100" height="100" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="8" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#378ADD" strokeWidth="8"
-                    strokeDasharray={dpmVisible ? `${dA} ${C - dA}` : `0 ${C}`} transform="rotate(-90 50 50)" strokeLinecap="round" style={{ transition: 'stroke-dasharray 1.2s ease-out' }} />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#f59e0b" strokeWidth="8"
-                    strokeDasharray={dpmVisible ? `${pA} ${C - pA}` : `0 ${C}`} strokeDashoffset={`${-(dA + 4)}`} style={{ transition: 'stroke-dasharray 1.2s ease-out 0.25s' }}
-                    transform="rotate(-90 50 50)" strokeLinecap="round" />
-                  {motivation > 0 && (
-                    <circle cx="50" cy="50" r="42" fill="none" stroke="#22c55e" strokeWidth="8"
-                      strokeDasharray={dpmVisible ? `${(motivation / 100) * C} ${C - (motivation / 100) * C}` : `0 ${C}`}
-                      strokeDashoffset={`${-(dA + pA + 8)}`}
-                      transform="rotate(-90 50 50)" strokeLinecap="round"  style={{ transition: 'stroke-dasharray 1.2s ease-out 0.5s' }} />
-                  )}
-                </svg>
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', textAlign: 'center' }}>
-                  <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 22, fontWeight: 800 }}>{overall}%</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>DPM</div>
-                </div>
-              </div>
-              {/* Legend */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {[
-                  { color: '#378ADD', label: 'Drive', value: `${drive}%` },
-                  { color: '#f59e0b', label: 'Passion', value: `${passion}%` },
-                  { color: '#22c55e', label: 'Motivation', value: `${motivation}%` },
-                ].map(d => (
-                  <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0 }} />
-                    <span style={{ color: 'rgba(255,255,255,0.45)' }}>{d.label}</span>
-                    <span style={{ color: '#fff', fontWeight: 700 }}>{d.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* 6. Community Card */}
-      <div style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600 }}>Community</span>
-          <span style={{ fontSize: 11, color: '#14b8a6', cursor: 'pointer', fontWeight: 500 }}>See All →</span>
-        </div>
-        <div style={{ padding: 16 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {/* Left: Shoutout Feed */}
-            <div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(249,115,22,.3)' }}>
-                  <img src={motesartAvatar} alt="Motesart" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => {
-                    if (e.currentTarget.src.endsWith(DEFAULT_MOTESART_AVATAR)) return
-                    e.currentTarget.src = DEFAULT_MOTESART_AVATAR
-                  }} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Great job on your scales this week!</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Motesart · 2h ago</div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1.5px solid rgba(255,255,255,0.15)' }}>
-                  <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 13, color: '#fff' }}>A</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>Who wants to practice duets this weekend?</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Aiden · 5h ago</div>
-                </div>
-              </div>
-            </div>
-            {/* Right: Class Goal */}
-            <div>
-              <div style={{ padding: 12, background: 'rgba(255,255,255,0.04)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)' }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>🎉 Classmate Shoutout</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>Aiden hit a 10-day streak!</div>
-              </div>
-              <div style={{ marginTop: 14 }}>
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginBottom: 6 }}>Class Practice Goal — 620 / 1000 min</div>
-                <div style={{ width: '100%', height: 8, background: 'rgba(255,255,255,0.12)', borderRadius: 4, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: '62%', background: 'linear-gradient(90deg,#14b8a6,#06b6d4)', borderRadius: 4 }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </>
   )
 }
@@ -615,10 +607,10 @@ function GameView({ navigate, motesartAvatar }) {
             <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: 17, fontWeight: 900, color: '#fff', letterSpacing: '-.3px' }}>Games Dashboard</span>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px rgba(34,197,94,.5)', display: 'inline-block' }} />
           </div>
-          <p style={{ color: '#a5b4fc', fontSize: 12, margin: 0, lineHeight: 1.4, fontWeight: 500 }}>Level up your skills with fun music games. Train your ear, test your speed, and climb the leaderboard!</p>
+          <p style={{ color: '#a5b4fc', fontSize: 12, margin: 0, lineHeight: 1.4, fontWeight: 500 }}>Train your ear and timing in Find the Note and Rhythm Racer. Academic assignments and Game Mode contribute to your saved SOM practice history.</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
             <div style={{ flex: 1, display: 'flex', gap: 14 }}>
-              {[{ v: '5+', l: 'Games' }, { v: 'Live', l: 'Scores' }, { v: 'Global', l: 'Ranks' }].map(s => (
+              {[{ v: '2', l: 'Live Games' }, { v: '2', l: 'Modes' }, { v: 'Saved', l: 'Points' }].map(s => (
                 <div key={s.l} style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#eab308' }}>{s.v}</div>
                   <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>{s.l}</div>
