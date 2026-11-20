@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import api from '../services/api.js'
 import levels from '../data/rhythm_racer_levels.json'
 
 const API_BASE = 'https://motesart-converter.netlify.app'
@@ -197,7 +197,12 @@ function DrumPad({ side, label, active, onHit }) {
 export default function RhythmRacerV2() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { user } = useAuth()
+  const { user, student } = useAuth()
+  const storedStudent = student || JSON.parse(localStorage.getItem('som_student') || '{}')
+  const studentInstrumentId =
+    storedStudent?.student_instrument_id ||
+    (Array.isArray(storedStudent?.instrument) ? storedStudent.instrument[0] : null) ||
+    null
 
   const requestedMode = searchParams.get('mode') || 'game'
   const isAcademic = requestedMode === 'academic'
@@ -211,6 +216,7 @@ export default function RhythmRacerV2() {
   const [phase, setPhase] = useState('ready')
   const [displayMode, setDisplayMode] = useState('trad')
   const [points, setPoints] = useState(0)
+  const pointsRef = useRef(0)
   const [lives, setLives] = useState(MAX_LIVES)
   const [correctStages, setCorrectStages] = useState(0)
   const [failedStages, setFailedStages] = useState(0)
@@ -302,7 +308,11 @@ export default function RhythmRacerV2() {
     setNoteFeedback(prev => ({ ...prev, [pending.note.patternIndex]: result }))
     setStageResults(prev => [...prev, item])
     setSessionResults(prev => [...prev, item])
-    setPoints(prev => prev + noteScore(result, onFire))
+    setPoints(prev => {
+      const next = prev + noteScore(result, onFire)
+      pointsRef.current = next
+      return next
+    })
     setFeedback({ result, title: RESULT_TEXT[result][0], text: RESULT_TEXT[result][1] })
   }, [flashPad, onFire, phase, summary])
 
@@ -402,7 +412,7 @@ export default function RhythmRacerV2() {
 
     const payload = {
       client_event_id: makeEventId(),
-      student_instrument_id: user?.id || getStudentId(),
+      student_instrument_id: studentInstrumentId,
       concept_id: conceptId || level.concept,
       chapter: 'rhythm_racer',
       result: nextSummary.result,
@@ -427,6 +437,13 @@ export default function RhythmRacerV2() {
       avatar_summary: nextSummary.avatar,
     }
 
+    if (!studentInstrumentId) {
+      console.warn('[RhythmRacerV2] Not saved: student instrument identity unavailable')
+      setLogState('failed')
+      loggedRef.current = false
+      return
+    }
+
     try {
       console.log('[RhythmRacerV2] Event payload:', payload)
       const res = await fetch(API_BASE + '/api/practice-events', {
@@ -434,9 +451,10 @@ export default function RhythmRacerV2() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
+      if (!res.ok) throw new Error(`practice event HTTP ${res.status}`)
       const data = await res.json()
       console.log('[RhythmRacerV2] API event response:', data)
-      await fetch(API_BASE + '/api/concept-state/recompute', {
+      const recompute = await fetch(API_BASE + '/api/concept-state/recompute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -444,10 +462,32 @@ export default function RhythmRacerV2() {
           concept_id: payload.concept_id,
         }),
       })
+      if (!recompute.ok) throw new Error(`concept state HTTP ${recompute.status}`)
+
+      await api.logPracticeSession({
+        student_id: studentInstrumentId,
+        duration_min: Math.max(1, Math.ceil(nextSummary.durationSeconds / 60)),
+        activity_type: isAcademic ? 'homework' : 'games',
+        piece_name: `Rhythm Racer — ${level.name}`,
+        accuracy_pct: nextSummary.accuracy,
+        source: 'school',
+        game_name: 'Rhythm Racer',
+        points_earned: pointsRef.current,
+        level_reached: level.level,
+        notes: isAcademic && assignmentId
+          ? `Academic assignment ${assignmentId}`
+          : 'Game mode',
+      })
+
+      if (isAcademic && assignmentId) {
+        await api.updateAssignment(assignmentId, { status: 'Completed' })
+      }
+
       setLogState('posted')
     } catch (err) {
       console.warn('[RhythmRacerV2] API write failed:', err)
       setLogState('failed')
+      loggedRef.current = false
     }
   }
 
