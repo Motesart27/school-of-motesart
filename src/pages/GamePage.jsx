@@ -1176,9 +1176,10 @@ export default function GamePage() {
  <div style={{fontSize:26,fontWeight:900}}>{isHomeworkSession ? 'Assignment Complete!' : 'Game Over!'}</div>
  <div style={{fontSize:13,color:'#9ca3af',marginBottom:16}}>{isHomeworkSession ? `You trained your ear on ${conceptDisplayName}` : `Level ${level} · Session Complete`}</div>
  <div className="gp-go-stats">
- {[[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],
- [accuracy+'%','Accuracy','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']
- ].map(([v,l,c])=>(
+ {(isHomeworkSession
+   ? [[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],[s.bestStreak,'Best Streak','#22d3ee']]
+   : [[s.correct,'Correct','#4ade80'],[s.attempts,'Attempts','#c084fc'],[accuracy+'%','Accuracy','#fb923c'],[s.bestStreak,'Best Streak','#22d3ee']]
+ ).map(([v,l,c])=>(
  <div key={l} className="gp-go-stat">
  <div style={{fontSize:20,fontWeight:700,color:c}}>{v}</div>
  <div style={{fontSize:11,color:'#6b7280',marginTop:2}}>{l}</div>
@@ -1191,8 +1192,8 @@ export default function GamePage() {
  <div style={{fontSize:11,color:'#92400e'}}>Saved to your SOM points history</div>
  </div>
  )}
- {/* Ear Training Meter */}
- <div className="gp-ear-meter">
+ {/* Ear Training Meter — game mode only; academic homework keeps scores teacher-side */}
+ {!isHomeworkSession && <div className="gp-ear-meter">
  <div style={{fontSize:14,fontWeight:700,color:'#0ea5e9',marginBottom:12}}> Ear Training Meter</div>
  {[
  ['Pitch Accuracy', Math.min(accuracy+7,100), 'linear-gradient(90deg,#22c55e,#4ade80)', '#4ade80'],
@@ -1207,7 +1208,7 @@ export default function GamePage() {
  <div className="gp-ear-score" style={{color:col}}>{val}%</div>
  </div>
  ))}
- </div>
+ </div>}
  {/* TAMi */}
  <div className="gp-tami-card">
  <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
