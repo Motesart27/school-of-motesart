@@ -11,6 +11,13 @@ export function AuthProvider({ children }) {
     } catch { return null }
   })
 
+  const [student, setStudent] = useState(() => {
+    try {
+      const saved = localStorage.getItem('som_student')
+      return saved ? JSON.parse(saved) : null
+    } catch { return null }
+  })
+
   const [verifying, setVerifying] = useState(false)
 
   // ── Persist to localStorage (but NEVER trust it as source of truth) ──
@@ -19,12 +26,18 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem('som_user')
   }, [user])
 
-  // ── Login: set user from backend response only ──
-  const login = (userData, token) => {
+  useEffect(() => {
+    if (student) localStorage.setItem('som_student', JSON.stringify(student))
+    else localStorage.removeItem('som_student')
+  }, [student])
+
+  // ── Login: set user/student from backend response only ──
+  const login = (userData, token, studentData = null) => {
     // SECURITY: Role comes from backend (Airtable) only.
     // Default to "student" if backend somehow omits role.
     const u = { ...userData, role: userData.role || 'student' }
     setUser(u)
+    setStudent(studentData || null)
     // Store JWT token
     if (token) localStorage.setItem('som_token', token)
   }
@@ -32,7 +45,9 @@ export function AuthProvider({ children }) {
   // ── Logout: clear everything ──
   const logout = useCallback(() => {
     setUser(null)
+    setStudent(null)
     localStorage.removeItem('som_user')
+    localStorage.removeItem('som_student')
     localStorage.removeItem('som_token')
   }, [])
 
@@ -77,8 +92,9 @@ export function AuthProvider({ children }) {
           console.warn('[SOM Auth] Session invalid — forcing re-login')
           logout()
         } else if (data.user) {
-          // Refresh role from Airtable (in case admin changed it)
-          setUser(prev => prev ? { ...prev, role: data.user.role || 'student' } : null)
+          // Refresh canonical identity from the backend.
+          setUser(prev => prev ? { ...prev, ...data.user, role: data.user.role || 'student' } : null)
+          setStudent(data.student || null)
         }
       })
       .catch(() => {
@@ -94,7 +110,7 @@ export function AuthProvider({ children }) {
   }, []) // Only on mount
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, verifying }}>
+    <AuthContext.Provider value={{ user, student, login, logout, updateUser, verifying }}>
       {children}
     </AuthContext.Provider>
   )
