@@ -12,22 +12,9 @@ const ASGN = [
   { id:'gate6_rhythm', title:'Gate 6 Rhythm — Quarter Notes', type:'Homework', concept:'R_PULSE_QUARTER', route:'/rhythm-racer?concept=R_PULSE_QUARTER&assignment_id=gate6_rhythm&level=3', status:'Pending', statusCls:'pn', countdown:'This week', cpCls:'cp-teal', progress:0, overdue:false,
     desc:'Open Rhythm Racer Level 3. Tap every beat in the measure and keep the pulse even from count-in through the final stage.' },
 ]
-const SHEETS = [
-  { name:'C Major Scale', meta:'Added Jan 10 \u00b7 Ms. Johnson' },
-  { name:'Hanon No. 1', meta:'Added Jan 8 \u00b7 Ms. Johnson' },
-  { name:'G Major Scale', meta:'Added Jan 5 \u00b7 Ms. Johnson' },
-  { name:'Twinkle Variation', meta:'Added Dec 20 \u00b7 Ms. Johnson' },
-]
-const ARCH = [
-  { name:'Interval Training', meta:'Homework \u00b7 5 attempts', score:100, color:'#22c55e', date:'Jan 18', bg:'rgba(34,197,94,0.1)' },
-  { name:'Note Reading Basics', meta:'Homework \u00b7 3 attempts', score:90, color:'#22c55e', date:'Jan 12', bg:'rgba(34,197,94,0.1)' },
-  { name:'Rhythm Exercise', meta:'Homework \u00b7 4 attempts', score:78, color:'#f59e0b', date:'Jan 6', bg:'rgba(245,158,11,0.1)' },
-  { name:'Sight Reading Test', meta:'Quiz \u00b7 2 attempts', score:62, color:'#f09595', date:'Dec 19', bg:'rgba(226,75,74,0.1)' },
-]
-const ANN = [
-  { initials:'MJ', name:'Ms. Johnson', time:'Today \u00b7 9:00 AM', pinned:true, title:'Recital coming up \u2014 Jan 30th!', body:'Our winter recital is January 30th at 5pm. Please have your piece memorized by next week\u2019s lesson. Parents are welcome to attend!' },
-  { initials:'MJ', name:'Ms. Johnson', time:'Yesterday \u00b7 3:15 PM', pinned:false, title:'New sheet music added', body:'I\u2019ve added Hanon No. 1 and the G Major scale to your sheet music library. Please review before Thursday\u2019s lesson.' },
-]
+const SHEETS = []
+const ARCH = []
+const ANN = []
 
 const css = `
 .hw-page{display:flex;flex-direction:column;height:100vh;overflow:hidden;background:#0d1117;font-family:'DM Sans',sans-serif;color:#fff}
@@ -338,6 +325,7 @@ export default function HomeworkDashboard() {
         {/* ── SHEET MUSIC TAB ── */}
         <div className={`hw-tc${tab==='sheet'?' active':''}`}>
           <div className="hw-sheet-grid">
+            {SHEETS.length === 0 && <div className="hw-desc">No sheet-music items are connected to this homework view yet.</div>}
             {SHEETS.map((s,i) => (
               <div key={i} className="hw-sheet-card">
                 <div className="hw-sheet-top">
@@ -358,6 +346,7 @@ export default function HomeworkDashboard() {
 
         {/* ── COMPLETED ARCHIVE TAB ── */}
         <div className={`hw-tc${tab==='arch'?' active':''}`} style={{gap:'8px'}}>
+          {ARCH.length === 0 && <div className="hw-desc">No completed homework is available in this archive yet.</div>}
           {ARCH.map((r,i) => (
             <div key={i} className="hw-arch-row">
               <div className="hw-arch-ico" style={{background:r.bg}}>{'\u2713'}</div>
@@ -375,6 +364,7 @@ export default function HomeworkDashboard() {
 
         {/* ── ANNOUNCEMENTS TAB ── */}
         <div className={`hw-tc${tab==='ann'?' active':''}`} style={{gap:'9px'}}>
+          {ANN.length === 0 && <div className="hw-desc">No School of Motesart announcements are posted here right now.</div>}
           {ANN.map((a,i) => (
             <div key={i} className="hw-ann-card">
               <div className="hw-ann-hd">
