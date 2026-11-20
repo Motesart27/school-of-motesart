@@ -199,7 +199,7 @@ export default function StudentDashboard() {
           <div style={{ padding: '8px 16px' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>QUICK LINKS</div>
             <button
-              onClick={() => navigate('/practice-live')}
+              onClick={() => navigate(focusRoute)}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
                 background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.25)',
@@ -293,7 +293,17 @@ export default function StudentDashboard() {
         {/* Dashboard Content */}
         <div style={{ padding: '20px 24px', maxWidth: 920, margin: '0 auto' }}>
           {mode === 'academic' ? (
-            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} />
+            <HomeDashboard
+              navigate={navigate}
+              userName={userName}
+              motesartAvatar={motesartAvatar}
+              pendingCount={pendingCount}
+              focusTitle={focusTitle}
+              focusDue={focusDue}
+              focusRoute={focusRoute}
+              practiceDashboard={practiceDashboard}
+              student={student}
+            />
           ) : (
             <GameView navigate={navigate} motesartAvatar={motesartAvatar} />
           )}
@@ -370,7 +380,7 @@ export default function StudentDashboard() {
 }
 
 /* ===== HOME DASHBOARD (Academic Mode) ===== */
-function HomeDashboard({ navigate, userName, motesartAvatar }) {
+function HomeDashboard({ navigate, userName, motesartAvatar, pendingCount, focusTitle, focusDue, focusRoute, practiceDashboard, student }) {
   const [dpmVisible, setDpmVisible] = useState(false)
   const dpmRef = useRef(null)
 
@@ -386,11 +396,18 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
     obs.observe(node)
     return () => obs.disconnect()
   }, [triggerDpm])
-  // DPM donut calculations
+  // DPM and points are hydrated from saved SOM practice evidence.
   const C = 2 * Math.PI * 42
-  const drive = 1, passion = 27, motivation = 0, overall = 9
+  const dpm = practiceDashboard?.periods?.week?.dpm || {}
+  const drive = Number(dpm.drive || 0)
+  const passion = Number(dpm.passion || 0)
+  const motivation = Number(dpm.motivation || 0)
+  const overall = Math.round((drive + passion + motivation) / 3)
   const dA = (drive / 100) * C
   const pA = (passion / 100) * C
+  const totalPoints = practiceDashboard?.points?.total || 0
+  const consistencyDays = practiceDashboard?.periods?.week?.consistency_days || 0
+  const currentLevel = practiceDashboard?.student?.level || student?.level || '—'
 
   // Sparkline - highlight today
   const todayIndex = new Date().getDay()
@@ -414,7 +431,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#e84b8a', flexShrink: 0 }} />
         <span style={{ fontSize: 11, fontWeight: 600, color: '#e84b8a', whiteSpace: 'nowrap' }}>T.A.M.i says:</span>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>You've been so consistent this week — keep that energy going!</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+          {pendingCount > 0 ? `You have ${pendingCount} homework assignment${pendingCount === 1 ? '' : 's'} ready.` : 'Your homework is clear right now.'}
+        </span>
       </div>
 
       {/* 2. Today's Focus */}
@@ -424,9 +443,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: '#5DCAA5', letterSpacing: 1, textTransform: 'uppercase' }}>Today's Focus</div>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 6 }}>
-          Complete Level 3 Scale Patterns — C Major & G Major
+          {focusTitle}
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>Assigned by Motesart · Due Friday</div>
+        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>Assigned by Motesart · {focusDue}</div>
         <button
           onClick={() => navigate('/practice-live')}
           style={{
@@ -441,9 +460,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       {/* 3. Three Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
         {[
-          { label: 'Current Level', value: '3', sub: 'Piano' },
-          { label: 'Assignments Due', value: '1', sub: 'this week' },
-          { label: 'Day Streak', value: '5', sub: 'personal best: 12', color: '#14b8a6' },
+          { label: 'Current Level', value: currentLevel, sub: 'Piano' },
+          { label: 'Assignments Due', value: String(pendingCount || 0), sub: 'this week' },
+          { label: 'SOM Points', value: String(totalPoints), sub: `${consistencyDays} practice day${consistencyDays === 1 ? '' : 's'} this week`, color: '#14b8a6' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
