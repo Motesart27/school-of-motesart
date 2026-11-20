@@ -4,6 +4,8 @@ import useIsMobile from '../hooks/useIsMobile.js'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { updateWYLFromBehavior } from "../services/wylEvolution.js"
 import { getState, setState } from '../lesson_engine/concept_state_store.js'
+import { useAuth } from '../context/AuthContext.jsx'
+import api from '../services/api.js'
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 
@@ -340,6 +342,7 @@ function Confetti() {
 export default function GamePage() {
  const mob = useIsMobile()
  const navigate = useNavigate()
+ const { user, student } = useAuth()
  const [searchParams] = useSearchParams()
  const urlMode = searchParams.get('mode')
  const urlConcept = searchParams.get('concept')
@@ -348,8 +351,16 @@ export default function GamePage() {
  const conceptDisplayName = urlConcept === 'T_HALF_STEP' ? 'The Half Step'
    : urlConcept ? urlConcept.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
    : 'This Concept'
- const completeAssignment = (id) => { console.log('[SOM] Assignment complete:', id) }
- const storedUser = JSON.parse(localStorage.getItem('som_user') || '{}')
+ const completeAssignment = async (id) => {
+   if (!id) return
+   await api.updateAssignment(id, { status: 'Completed' })
+ }
+ const storedUser = user || JSON.parse(localStorage.getItem('som_user') || '{}')
+ const storedStudent = student || JSON.parse(localStorage.getItem('som_student') || '{}')
+ const studentInstrumentId =
+   storedStudent?.student_instrument_id ||
+   (Array.isArray(storedStudent?.instrument) ? storedStudent.instrument[0] : null) ||
+   null
 
  // Level lives in state so UI updates when it changes
  const [level, setLevel] = useState(1)
@@ -410,51 +421,57 @@ export default function GamePage() {
  startTime: Date.now(), bestStreak: 0, currentStreak: 0,
  })
 
- // Log session + leaderboard
+ // Log durable practice evidence. Academic and Game points use the same
+ // session score, but are stored in separate practice categories and both
+ // contribute to the student's all-time points total.
  const logSession = useCallback(async () => {
  if (sessionLogged) return
  const s = sessionRef.current
- const user = JSON.parse(localStorage.getItem('som_user') || '{}')
  const durationSeconds = Math.round((Date.now() - s.startTime) / 1000)
  const accuracy = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0
  const points = (s.correct * 100) + (s.bestStreak * 50)
  setSessionPoints(points)
 
- try {
- await fetch(`${BACKEND_URL}/session/log`, {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- user_id: user.id || user.name || 'anonymous',
- user_name: user.name || 'Player',
- level, mode,
- correct: s.correct, attempts: s.attempts, accuracy,
- best_streak: s.bestStreak, replays_used: s.replaysUsed,
- duration_seconds: durationSeconds,
- note_errors: s.noteErrors,
- points,
- game_name: 'Find the Note',
- })
- })
- if (!isHomeworkSession) {
- await fetch(`${BACKEND_URL}/leaderboard/submit`, {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- user_id: user.id || user.name || 'anonymous',
- user_name: user.name || 'Player',
- game: 'Find the Note',
- level,
- points,
- accuracy,
- best_streak: s.bestStreak,
- })
- })
+ if (!studentInstrumentId) {
+   console.warn('[SOM] Find the Note not saved: student instrument identity unavailable')
+   return
  }
- setSessionLogged(true)
+
+ try {
+ const durationMin = Math.max(1, Math.ceil(durationSeconds / 60))
+ await api.logPracticeSession({
+   student_id: studentInstrumentId,
+   duration_min: durationMin,
+   activity_type: isHomeworkSession ? 'homework' : 'games',
+   piece_name: `Find the Note — ${conceptDisplayName}`,
+   accuracy_pct: accuracy,
+   source: 'school',
+   game_name: 'Find The Note',
+   points_earned: points,
+   streak_best: s.bestStreak,
+   level_reached: level,
+   notes: isHomeworkSession
+     ? `Academic assignment ${urlAssignmentId || ''}`.trim()
+     : 'Game mode',
+ })
+
+ if (urlConcept) {
+   await api.logConceptPracticeEvent(studentInstrumentId, {
+     client_event_id: crypto.randomUUID ? crypto.randomUUID() : `ftn_${Date.now()}`,
+     concept_id: urlConcept,
+     duration_min: durationSeconds / 60,
+     notes_attempted: s.attempts,
+     notes_correct: s.correct,
+     mistake_tags: Object.keys(s.noteErrors || {}),
+     result: accuracy >= 85 ? 'great' : accuracy >= 60 ? 'ok' : 'hard',
+     chapter: 'find_it',
+     hint_used: s.replaysUsed > 0,
+   })
+ }
+
  updateWYLFromBehavior("ear_training_session", { accuracy, level })
  if (isHomeworkSession && urlAssignmentId) {
- completeAssignment(urlAssignmentId)
+ await completeAssignment(urlAssignmentId)
  const sessionAccuracy = s.attempts > 0 ? s.correct / s.attempts : 0
  const prev = getState(urlConcept) || {}
  setState(urlConcept, {
@@ -465,10 +482,11 @@ export default function GamePage() {
  ownership_state: prev.ownership_state || 'practicing'
  })
  }
+ setSessionLogged(true)
  } catch (e) {
- console.warn('Session/leaderboard log failed:', e)
+ console.warn('Find the Note save failed:', e)
  }
- }, [sessionLogged, mode, level])
+ }, [sessionLogged, mode, level, studentInstrumentId, isHomeworkSession, urlAssignmentId, urlConcept, conceptDisplayName])
 
  // Generate mystery sequence whenever level or noteCount changes
  useEffect(() => {
@@ -1170,7 +1188,7 @@ export default function GamePage() {
  {!isHomeworkSession && (
  <div style={{padding:12,borderRadius:10,background:'rgba(234,179,8,.1)',border:'1px solid rgba(234,179,8,.3)',marginBottom:16}}>
  <div style={{fontSize:22,fontWeight:900,color:'#fbbf24'}}> {s.correct * 100 + s.bestStreak * 50} pts</div>
- <div style={{fontSize:11,color:'#92400e'}}>Logged to leaderboard</div>
+ <div style={{fontSize:11,color:'#92400e'}}>Saved to your SOM points history</div>
  </div>
  )}
  {/* Ear Training Meter */}
