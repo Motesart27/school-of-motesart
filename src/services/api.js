@@ -97,11 +97,28 @@ export const api = {
   getHomework: (studentName) =>
     request(`/assignments/student/${encodeURIComponent(studentName)}`),
 
+  getHomeworkLibrary: () => request('/library'),
+
   createAssignment: (data) =>
     request('/assignments', { method: 'POST', body: JSON.stringify(data) }),
 
+  updateAssignment: (assignmentId, data) =>
+    request(`/assignments/${encodeURIComponent(assignmentId)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
   logPracticeSession: (data) =>
     request('/practice-log/sessions', { method: 'POST', body: JSON.stringify(data) }),
+
+  getPracticeDashboard: (studentInstrumentId) =>
+    request(`/practice-log/dashboard/${encodeURIComponent(studentInstrumentId)}`),
+
+  logConceptPracticeEvent: (studentInstrumentId, data) =>
+    request(`/concept-state/${encodeURIComponent(studentInstrumentId)}/practice-event`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 
   // ─── Sessions ───────────────────────────────────────────────
   getSessions: (studentId) =>
