@@ -214,6 +214,9 @@ export default function HomeworkDashboard() {
               : days <= 0 ? 'Due today' : days === 1 ? '1 day left' : `${days} days left`
           const status = a.status || 'Assigned'
           const statusCls = status === 'Completed' ? 'co' : status === 'Reviewed' ? 'ip' : overdue ? 'ov' : 'pn'
+          const created = a.created_at ? new Date(a.created_at) : null
+          const staleNoDue = !due && status === 'Assigned' && created && (now - created) > (30 * 86400000)
+          const stalePastDue = !!(due && due < now && status === 'Assigned' && (now - due) > (14 * 86400000))
           return {
             ...a,
             template,
@@ -229,8 +232,9 @@ export default function HomeworkDashboard() {
             cpCls: overdue ? 'cp-red' : status === 'Completed' ? 'cp-green' : 'cp-teal',
             progress: status === 'Completed' ? 100 : 0,
             overdue,
+            stale: staleNoDue || stalePastDue,
           }
-        })
+        }).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
         setAssignments(mapped)
       } catch (err) {
         if (!cancelled) {
@@ -246,14 +250,15 @@ export default function HomeworkDashboard() {
   }, [user?.name])
 
   const filteredAssignments = useMemo(() => {
-    if (filter === 'All') return assignments
-    if (filter === 'Completed') return assignments.filter(a => a.status === 'Completed')
-    if (filter === 'Overdue') return assignments.filter(a => a.overdue)
-    if (filter === 'Due Soon') return assignments.filter(a => !a.overdue && a.status !== 'Completed')
-    return assignments
+    const current = assignments.filter(a => !a.stale)
+    if (filter === 'All') return current
+    if (filter === 'Completed') return current.filter(a => a.status === 'Completed')
+    if (filter === 'Overdue') return current.filter(a => a.overdue)
+    if (filter === 'Due Soon') return current.filter(a => !a.overdue && a.status !== 'Completed')
+    return current
   }, [assignments, filter])
 
-  const pendingCount = assignments.filter(a => a.status === 'Assigned').length
+  const pendingCount = assignments.filter(a => a.status === 'Assigned' && !a.stale).length
 
   const openDet = (a) => { setSelAsgn(a); setDetOpen(true); resetHelp() }
   const closeDet = () => { setDetOpen(false); resetHelp() }
