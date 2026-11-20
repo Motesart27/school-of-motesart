@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import api from '../services/api.js'
 
 // Flat nav items with SVG icons
 const NAV_ITEMS = [
   { key: 'Home', icon: 'home' },
   { key: 'Practice Live', icon: 'practicelive' },
-  { key: 'Homework', icon: 'homework', badge: 3 },
+  { key: 'Homework', icon: 'homework' },
   { key: 'Games', icon: 'games' },
   { key: 'Practice Log', icon: 'practicelog' },
   { key: 'My Progress', icon: 'progress' },
@@ -38,12 +39,20 @@ const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
 const DEFAULT_SOM_LOGO = '/SOM_logo.png'
 
 export default function StudentDashboard() {
-  const { user } = useAuth()
+  const { user, student } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('academic')
   const [activeItem, setActiveItem] = useState('Home')
   const [showTamiChat, setShowTamiChat] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [homework, setHomework] = useState([])
+  const [homeworkLibrary, setHomeworkLibrary] = useState([])
+  const [practiceDashboard, setPracticeDashboard] = useState(null)
+
+  const studentInstrumentId =
+    student?.student_instrument_id ||
+    (Array.isArray(student?.instrument) ? student.instrument[0] : null) ||
+    null
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'S'
@@ -62,6 +71,43 @@ export default function StudentDashboard() {
       document.head.appendChild(link)
     }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    async function hydrateStudentHome() {
+      if (!user?.name) return
+      try {
+        const [assignments, library, practice] = await Promise.all([
+          api.getHomework(user.name),
+          api.getHomeworkLibrary(),
+          studentInstrumentId ? api.getPracticeDashboard(studentInstrumentId) : Promise.resolve(null),
+        ])
+        if (cancelled) return
+        setHomework(assignments || [])
+        setHomeworkLibrary(library || [])
+        setPracticeDashboard(practice || null)
+      } catch (err) {
+        if (!cancelled) console.warn('[SOM] Student dashboard hydration failed:', err)
+      }
+    }
+    hydrateStudentHome()
+    return () => { cancelled = true }
+  }, [user?.name, studentInstrumentId])
+
+  const pendingHomework = homework.filter(item => item.status === 'Assigned')
+  const pendingCount = pendingHomework.length
+  const templateById = Object.fromEntries(homeworkLibrary.map(item => [item.id, item]))
+  const focusAssignment = pendingHomework[0] || null
+  const focusTemplateId = Array.isArray(focusAssignment?.homework_template) ? focusAssignment.homework_template[0] : focusAssignment?.homework_template
+  const focusTemplate = focusTemplateId ? templateById[focusTemplateId] : null
+  const focusGame = String(focusTemplate?.['Game Name'] || '').toLowerCase().replace(/\s/g, '')
+  const focusRoute = focusGame.includes('findthe')
+    ? `/game?mode=academic&concept=T_SCALE_DEGREES_MAJOR&assignment_id=${focusAssignment?.id}&level=1`
+    : (focusGame.includes('rhythm') || focusGame.includes('rhythn'))
+      ? `/rhythm-racer?mode=academic&concept=R_PULSE_QUARTER&assignment_id=${focusAssignment?.id}&level=3`
+      : '/homework'
+  const focusTitle = focusAssignment?.name || focusTemplate?.Name || 'No homework assigned'
+  const focusDue = focusAssignment?.due_date ? `Due ${focusAssignment.due_date}` : 'Open Homework for details'
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
@@ -135,13 +181,13 @@ export default function StudentDashboard() {
                   <path d={NAV_ICONS[item.icon]} />
                 </svg>
                 <span style={{ flex: 1 }}>{item.key}</span>
-                {item.badge && (
+                {(item.key === 'Homework' ? pendingCount : item.badge) ? (
                   <span style={{
                     background: '#14b8a6', color: '#fff', fontSize: 10, fontWeight: 700,
                     borderRadius: '50%', width: 20, height: 20,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  }}>{item.badge}</span>
-                )}
+                  }}>{item.key === 'Homework' ? pendingCount : item.badge}</span>
+                ) : null}
               </button>
             ))}
           </nav>
