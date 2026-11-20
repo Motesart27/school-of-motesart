@@ -621,9 +621,14 @@ export default function RhythmRacerV2() {
 
         {summary && (
           <section className="rr2-summary">
-            <h2>Session Summary</h2>
-            <p>{summary.accuracy}% accuracy - {summary.mastery.replace(/_/g, ' ')}</p>
-            <p>{summary.teacher}</p>
+            <h2>{isAcademic ? 'Homework Complete' : 'Session Summary'}</h2>
+            {isAcademic
+              ? <p>{summary.avatar}</p>
+              : <>
+                  <p>{summary.accuracy}% accuracy - {summary.mastery.replace(/_/g, ' ')}</p>
+                  <p>{summary.teacher}</p>
+                </>
+            }
             <div className="rr2-summary-actions">
               {isAcademic && <button type="button" onClick={() => navigate('/homework')}>Back to Homework</button>}
               {!isAcademic && <button type="button" onClick={() => { setSummary(null); setLives(MAX_LIVES); setPhase('ready'); loggedRef.current = false; sessionStartRef.current = Date.now() }}>Play Again</button>}
