@@ -181,7 +181,7 @@ export default function HomeworkDashboard() {
         if (cancelled) return
         const byId = new Map((library || []).map(item => [item.id, item]))
         const mapped = (rows || [])
-          .filter(a => String(a.status || '').toLowerCase() !== 'completed')
+          .filter(a => ['assigned', 'in progress'].includes(String(a.status || '').toLowerCase()))
           .map(a => {
             const templateId = Array.isArray(a.homework_template) ? a.homework_template[0] : a.homework_template
             const template = byId.get(templateId) || {}
