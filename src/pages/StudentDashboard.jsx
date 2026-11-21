@@ -266,7 +266,7 @@ export default function StudentDashboard() {
         {/* Dashboard Content */}
         <div style={{ padding: '20px 24px', maxWidth: 920, margin: '0 auto' }}>
           {mode === 'academic' ? (
-            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} />
+            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} homeworkAssignments={homeworkAssignments} student={student} />
           ) : (
             <GameView navigate={navigate} motesartAvatar={motesartAvatar} />
           )}
@@ -343,7 +343,7 @@ export default function StudentDashboard() {
 }
 
 /* ===== HOME DASHBOARD (Academic Mode) ===== */
-function HomeDashboard({ navigate, userName, motesartAvatar }) {
+function HomeDashboard({ navigate, userName, motesartAvatar, homeworkAssignments, student }) {
   const [dpmVisible, setDpmVisible] = useState(false)
   const dpmRef = useRef(null)
 
