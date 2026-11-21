@@ -234,7 +234,7 @@ export default function HomeworkDashboard() {
       navigate(a.route)
       return
     }
-    navigate(a.type === 'Quiz' ? `/game?mode=academic&concept=${a.concept||'T_HALF_STEP'}&assignment_id=${a.id}` : `/practice-live?concept=${a.concept||'T_HALF_STEP'}&assignment_id=${a.id}`)
+    openDet(a)
   }
   const toggleHelp = () => {
     if (helpActive) { resetHelp(); return }
