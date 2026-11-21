@@ -149,10 +149,7 @@ const css = `
 `
 
 const TABS = [
-  { id:'asgn', label:'Assignments', badge:3 },
-  { id:'sheet', label:'Sheet Music' },
-  { id:'arch', label:'Completed Archive' },
-  { id:'ann', label:'Announcements' },
+  { id:'asgn', label:'Assignments' },
 ]
 const FILTERS = ['All','Due Soon','Overdue','Completed']
 
@@ -211,6 +208,7 @@ export default function HomeworkDashboard() {
               progress: 0,
               overdue: false,
               desc: template.Instructions || a.title || '',
+              teacherFeedback: a.teacher_feedback || '',
             }
           })
         setAssignments(mapped)
@@ -397,20 +395,17 @@ export default function HomeworkDashboard() {
           {/* Feedback */}
           <div className="hw-dcard">
             <div className="hw-dcard-hd">Feedback</div>
-            <div className="hw-fb-teacher">
-              <div className="hw-fb-hd">
-                <div className="hw-fb-av-init">MJ</div>
-                <div className="hw-fb-label">From Ms. Johnson {'\u00b7'} Jan 17</div>
+            {selAsgn?.teacherFeedback ? (
+              <div className="hw-fb-teacher">
+                <div className="hw-fb-hd">
+                  <div className="hw-fb-av-init">M</div>
+                  <div className="hw-fb-label">From Motesart</div>
+                </div>
+                <div className="hw-fb-txt">{selAsgn.teacherFeedback}</div>
               </div>
-              <div className="hw-fb-txt">Great progress! Your right hand is really strong now {'\u2014'} focus on bringing your left hand timing up to match. Slow it down to 60bpm hands together and build from there.</div>
-            </div>
-            <div className="hw-fb-motesart">
-              <div className="hw-fb-hd">
-                <div className="hw-fb-av-img"><img src="/Motesart Avatar 1.PNG" alt="Motesart" onError={e => { e.target.style.display='none'; e.target.parentElement.textContent='M' }} /></div>
-                <div className="hw-fb-label">Motesart {'\u00b7'} Based on your last session</div>
-              </div>
-              <div className="hw-fb-txt">Your accuracy on the right hand hit 92% last session {'\u2014'} that{'\u2019'}s real ownership. Left hand is at 71%. Try the three-note grouping approach: play notes 1-2-3, pause, then 4-5-6. You{'\u2019'}ll feel the pattern lock in.</div>
-            </div>
+            ) : (
+              <div className="hw-fb-txt">No teacher feedback has been posted for this assignment yet.</div>
+            )}
           </div>
 
           {/* Submit */}
@@ -425,9 +420,9 @@ export default function HomeworkDashboard() {
               <button className="hw-submit">Submit Assignment</button>
               <div className="hw-tami-btn">Ask T.A.M.i for Help</div>
               <div className="hw-vis">
-                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#14b8a6'}} />Teacher sees submissions immediately</div>
-                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#f59e0b'}} />Parent receives a weekly summary</div>
-                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#a78bfa'}} />T.A.M.i updates your DPM score</div>
+                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#14b8a6'}} />Saved academic attempts become practice evidence</div>
+                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#f59e0b'}} />A failed save is not treated as completed work</div>
+                <div className="hw-vis-row"><div className="hw-vis-dot" style={{background:'#a78bfa'}} />T.A.M.i can use saved evidence for future coaching context</div>
               </div>
             </div>
           </div>
