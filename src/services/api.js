@@ -102,6 +102,9 @@ export const api = {
   createAssignment: (data) =>
     request('/assignments', { method: 'POST', body: JSON.stringify(data) }),
 
+  updateAssignment: (recordId, data) =>
+    request(`/assignments/${encodeURIComponent(recordId)}`, { method: 'PATCH', body: JSON.stringify(data) }),
+
   logPracticeSession: (data) =>
     request('/practice-log/sessions', { method: 'POST', body: JSON.stringify(data) }),
 
