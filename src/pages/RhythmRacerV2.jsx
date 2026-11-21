@@ -199,7 +199,7 @@ export default function RhythmRacerV2() {
   const [searchParams] = useSearchParams()
   const { user, student } = useAuth()
   const storedStudent = student || JSON.parse(localStorage.getItem('som_student') || 'null')
-  const studentInstrumentId = storedStudent?.student_instruments?.[0] || null
+  const studentInstrumentId = storedStudent?.student_instruments?.[0] || (storedStudent?.instrument ? storedStudent?.id : null) || null
 
   const requestedMode = searchParams.get('mode') || 'game'
   const isAcademic = requestedMode === 'academic'
