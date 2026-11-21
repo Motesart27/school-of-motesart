@@ -39,7 +39,7 @@ const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
 const DEFAULT_SOM_LOGO = '/SOM_logo.png'
 
 export default function StudentDashboard() {
-  const { user } = useAuth()
+  const { user, student } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('academic')
   const [activeItem, setActiveItem] = useState('Home')
@@ -387,7 +387,11 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#e84b8a', flexShrink: 0 }} />
         <span style={{ fontSize: 11, fontWeight: 600, color: '#e84b8a', whiteSpace: 'nowrap' }}>T.A.M.i says:</span>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>You've been so consistent this week — keep that energy going!</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+          {homeworkAssignments.length > 0
+            ? `You have ${homeworkAssignments.length} current assignment${homeworkAssignments.length === 1 ? '' : 's'}. Start with the one due soonest.`
+            : 'No current homework is showing right now.'}
+        </span>
       </div>
 
       {/* 2. Today's Focus */}
@@ -416,9 +420,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       {/* 3. Three Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
         {[
-          { label: 'Current Level', value: '3', sub: 'Piano' },
+          { label: 'Current Level', value: student?.level || '—', sub: 'Piano' },
           { label: 'Assignments Due', value: String(homeworkAssignments.length), sub: 'current' },
-          { label: 'Day Streak', value: '5', sub: 'personal best: 12', color: '#14b8a6' },
+          { label: 'Day Streak', value: '—', sub: 'from saved practice', color: '#14b8a6' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
