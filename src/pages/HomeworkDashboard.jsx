@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import api from '../services/api.js'
 
 /* ── Placeholder data — replaced by API when wired ── */
 const ASGN = [
@@ -158,6 +159,8 @@ const FILTERS = ['All','Due Soon','Overdue','Completed']
 export default function HomeworkDashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [assignments, setAssignments] = useState([])
+  const [loadError, setLoadError] = useState('')
   const [tab, setTab] = useState('asgn')
   const [filter, setFilter] = useState('All')
   const [detOpen, setDetOpen] = useState(false)
@@ -165,6 +168,63 @@ export default function HomeworkDashboard() {
   const [helpActive, setHelpActive] = useState(false)
   const [guideShow, setGuideShow] = useState(false)
   const helpTimer = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadAssignments() {
+      if (!user?.name && !user?.email) return
+      try {
+        const [rows, library] = await Promise.all([
+          api.getHomework(user.name || user.email),
+          api.getHomeworkLibrary(),
+        ])
+        if (cancelled) return
+        const byId = new Map((library || []).map(item => [item.id, item]))
+        const mapped = (rows || [])
+          .filter(a => String(a.status || '').toLowerCase() !== 'completed')
+          .map(a => {
+            const templateId = Array.isArray(a.homework_template) ? a.homework_template[0] : a.homework_template
+            const template = byId.get(templateId) || {}
+            const gameName = String(template['Game Name'] || '')
+            const name = a.name || a.title || 'Homework'
+            const isFind = /find.*note/i.test(gameName + ' ' + name)
+            const isRhythm = /rhyth/i.test(gameName + ' ' + name)
+            let route = null
+            let concept = null
+            if (isFind) {
+              concept = 'T_SCALE_DEGREES_MAJOR'
+              route = `/game?mode=academic&concept=${concept}&assignment_id=${a.id}&level=1`
+            } else if (isRhythm) {
+              concept = 'R_PULSE_QUARTER'
+              route = `/rhythm-racer?mode=academic&concept=${concept}&assignment_id=${a.id}&level=3`
+            }
+            return {
+              id: a.id,
+              title: name,
+              type: a.type || (isFind || isRhythm ? 'Game' : 'Homework'),
+              concept,
+              route,
+              status: a.status || 'Assigned',
+              statusCls: String(a.status || '').toLowerCase() === 'in progress' ? 'ip' : 'pn',
+              countdown: a.due_date ? `Due ${a.due_date}` : 'Assigned',
+              cpCls: 'cp-teal',
+              progress: 0,
+              overdue: false,
+              desc: template.Instructions || a.title || '',
+            }
+          })
+        setAssignments(mapped)
+        setLoadError('')
+      } catch (err) {
+        if (!cancelled) {
+          setAssignments([])
+          setLoadError(err?.message || 'Homework could not be loaded')
+        }
+      }
+    }
+    loadAssignments()
+    return () => { cancelled = true }
+  }, [user?.name, user?.email])
 
   const openDet = (a) => { setSelAsgn(a); setDetOpen(true); resetHelp() }
   const closeDet = () => { setDetOpen(false); resetHelp() }
@@ -203,7 +263,7 @@ export default function HomeworkDashboard() {
       <div className="hw-tabs">
         {TABS.map(t => (
           <button key={t.id} className={`hw-tab${tab===t.id?' active':''}`} onClick={() => switchTab(t.id)}>
-            {t.label}{t.badge ? <span className="hw-tab-badge">{t.badge}</span> : null}
+            {t.label}{t.id==='asgn' && assignments.length ? <span className="hw-tab-badge">{assignments.length}</span> : null}
           </button>
         ))}
       </div>
@@ -218,7 +278,9 @@ export default function HomeworkDashboard() {
               <button key={f} className={`hw-fp${filter===f?' active':''}`} onClick={() => setFilter(f)}>{f}</button>
             ))}
           </div>
-          {ASGN.map(a => (
+          {loadError && <div className="hw-desc">{loadError}</div>}
+          {!loadError && assignments.length === 0 && <div className="hw-desc">No current homework assignments.</div>}
+          {assignments.map(a => (
             <div key={a.id} className={`hw-acard${a.overdue?' overdue':''}`} onClick={() => openDet(a)}>
               <div className="hw-acard-left">
                 <div className="hw-acard-title">{a.title}</div>
