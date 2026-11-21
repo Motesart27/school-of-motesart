@@ -438,12 +438,13 @@ export default function GamePage() {
      notes: JSON.stringify({
        mode,
        assignment_id: urlAssignmentId,
-       level,
-       points,
-       best_streak: s.bestStreak,
        replays_used: s.replaysUsed,
        note_errors: s.noteErrors,
      }),
+     game_name: 'Find the Note',
+     points_earned: points,
+     streak_best: s.bestStreak,
+     level_reached: level,
      source: 'school',
    })
 
