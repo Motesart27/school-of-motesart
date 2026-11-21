@@ -407,7 +407,7 @@ function HomeDashboard({ navigate, userName, motesartAvatar, homeworkAssignments
           {homeworkAssignments[0]?.due_date ? `Assigned by Motesart · Due ${homeworkAssignments[0].due_date}` : 'Check Homework for current assignments'}
         </div>
         <button
-          onClick={() => navigate('/practice-live')}
+          onClick={() => navigate('/homework')}
           style={{
             display: 'inline-block', marginTop: 12, padding: '8px 20px',
             background: 'linear-gradient(135deg,#d946ef,#a855f7)', color: '#fff', border: 'none',
