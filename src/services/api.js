@@ -85,7 +85,7 @@ export const api = {
 
   // ─── Students ───────────────────────────────────────────────
   getStudents: () => request('/students'),
-  getStudentByEmail: (email) => request(`/student?email=${encodeURIComponent(email)}`),
+  getStudent: (recordId) => request(`/students/${encodeURIComponent(recordId)}`),
 
   // ─── Practice ───────────────────────────────────────────────
   getPracticeLogs: (studentId) =>
@@ -96,6 +96,8 @@ export const api = {
   // ─── Homework ───────────────────────────────────────────────
   getHomework: (studentName) =>
     request(`/assignments/student/${encodeURIComponent(studentName)}`),
+
+  getHomeworkLibrary: () => request('/library'),
 
   createAssignment: (data) =>
     request('/assignments', { method: 'POST', body: JSON.stringify(data) }),
