@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { getStudentId } from '../lesson_engine/concept_state_store.js'
+import api from '../services/api.js'
 import levels from '../data/rhythm_racer_levels.json'
 
-const API_BASE = 'https://motesart-converter.netlify.app'
+const API_BASE = import.meta.env.VITE_API_URL || 'https://deployable-python-codebase-som-production.up.railway.app'
 const PERFECT_MS = 50
 const GOOD_MS = 100
 const EDGE_MS = 180
@@ -197,7 +197,9 @@ function DrumPad({ side, label, active, onHit }) {
 export default function RhythmRacerV2() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { user } = useAuth()
+  const { user, student } = useAuth()
+  const storedStudent = student || JSON.parse(localStorage.getItem('som_student') || 'null')
+  const studentInstrumentId = storedStudent?.student_instruments?.[0] || null
 
   const requestedMode = searchParams.get('mode') || 'game'
   const isAcademic = requestedMode === 'academic'
@@ -400,54 +402,73 @@ export default function RhythmRacerV2() {
       .filter(item => ['early', 'late', 'miss', 'extra'].includes(item.result))
       .map(item => item.count || item.result)
 
-    const payload = {
-      client_event_id: makeEventId(),
-      student_instrument_id: user?.id || getStudentId(),
-      concept_id: conceptId || level.concept,
-      chapter: 'rhythm_racer',
-      result: nextSummary.result,
-      success_summary: `Rhythm Racer ${level.name}: ${nextSummary.accuracy}% accuracy`,
-      found_pairs: [],
-      wrong_taps: wrongTaps,
-      attempt_count: nextSummary.attempts,
-      hint_used: false,
-      tempo_factor: level.bpm / 70,
-      timestamp: new Date().toISOString(),
-      assignment_id: assignmentId,
-      activity_type: 'rhythm_racer',
-      started_at: new Date(sessionStartRef.current).toISOString(),
-      ended_at: new Date().toISOString(),
-      duration_seconds: nextSummary.durationSeconds,
-      accuracy: nextSummary.accuracy,
-      attempts: nextSummary.attempts,
-      hints_used: 0,
-      mistake_pattern: nextSummary.mistake,
-      mastery_status: nextSummary.mastery,
-      teacher_summary: nextSummary.teacher,
-      avatar_summary: nextSummary.avatar,
+    if (!studentInstrumentId) {
+      console.warn('[RhythmRacerV2] No student instrument identity — session remains unsaved')
+      setLogState('failed')
+      loggedRef.current = false
+      return
     }
 
+    const resultBand = nextSummary.accuracy >= 80 ? 'great' : nextSummary.accuracy >= 60 ? 'ok' : 'hard'
+    const correctNotes = results.filter(item => ['perfect', 'good'].includes(item.result)).length
+    const token = localStorage.getItem('som_token')
+
     try {
-      console.log('[RhythmRacerV2] Event payload:', payload)
-      const res = await fetch(API_BASE + '/api/practice-events', {
+      await api.logPracticeSession({
+        student_id: studentInstrumentId,
+        duration_min: Math.max(1, Math.ceil(nextSummary.durationSeconds / 60)),
+        activity_type: 'games',
+        piece_name: 'Rhythm Racer',
+        accuracy_pct: nextSummary.accuracy,
+        self_rating: resultBand,
+        notes: JSON.stringify({
+          mode: requestedMode,
+          assignment_id: assignmentId,
+          concept_id: conceptId || level.concept,
+          mistake_pattern: nextSummary.mistake,
+        }),
+        game_name: 'Rhythm Racer',
+        points_earned: points,
+        streak_best: perfectStageStreak,
+        level_reached: level.level,
+        source: 'school',
+      })
+
+      const payload = {
+        client_event_id: makeEventId(),
+        concept_id: conceptId || level.concept,
+        duration_min: Math.max(0.1, nextSummary.durationSeconds / 60),
+        tempo_factor: level.bpm / 70,
+        notes_attempted: nextSummary.attempts,
+        notes_correct: correctNotes,
+        mistake_tags: nextSummary.mistake && nextSummary.mistake !== 'steady_pulse' ? [nextSummary.mistake] : [],
+        result: resultBand,
+        chapter: 'rhythm_racer',
+        grade_band: 'adult',
+        wrong_taps: wrongTaps,
+        attempt_count: nextSummary.attempts,
+        hint_used: false,
+      }
+
+      const res = await fetch(`${API_BASE}/concept-state/${encodeURIComponent(studentInstrumentId)}/practice-event`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       })
-      const data = await res.json()
-      console.log('[RhythmRacerV2] API event response:', data)
-      await fetch(API_BASE + '/api/concept-state/recompute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          student_instrument_id: payload.student_instrument_id,
-          concept_id: payload.concept_id,
-        }),
-      })
+      if (!res.ok) throw new Error(`Practice event save failed: ${res.status}`)
+
+      if (isAcademic && assignmentId) {
+        await api.updateAssignment(assignmentId, { status: 'Completed' })
+      }
+
       setLogState('posted')
     } catch (err) {
-      console.warn('[RhythmRacerV2] API write failed:', err)
+      console.warn('[RhythmRacerV2] durable save failed:', err)
       setLogState('failed')
+      loggedRef.current = false
     }
   }
 
