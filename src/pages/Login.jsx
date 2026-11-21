@@ -49,7 +49,15 @@ export default function Login() {
         return
       }
       const userData = data?.user || data?.data?.user || extractUser(data) || { email: emailVal }
-      login(userData, token)
+      let studentData = data?.student || data?.data?.student || null
+      if (studentData?.id) {
+        try {
+          studentData = await api.getStudent(studentData.id)
+        } catch {
+          // Keep the authenticated student payload if profile hydration is unavailable.
+        }
+      }
+      login(userData, token, studentData)
       navigate('/dashboard', { replace: true })
     } catch (err) {
       setLoginError(err?.message || 'Login failed. Check your credentials and try again.')

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
+import api from '../services/api.js'
 
 // Flat nav items with SVG icons
 const NAV_ITEMS = [
@@ -38,12 +39,13 @@ const DEFAULT_MOTESART_AVATAR = '/Motesart%20Avatar%201.PNG'
 const DEFAULT_SOM_LOGO = '/SOM_logo.png'
 
 export default function StudentDashboard() {
-  const { user } = useAuth()
+  const { user, student } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState('academic')
   const [activeItem, setActiveItem] = useState('Home')
   const [showTamiChat, setShowTamiChat] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [homeworkAssignments, setHomeworkAssignments] = useState([])
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Student'
   const initials = userName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'S'
@@ -52,6 +54,23 @@ export default function StudentDashboard() {
     user?.avatar ||
     user?.avatarUrl ||
     DEFAULT_MOTESART_AVATAR
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadHomework() {
+      if (!user?.name && !user?.email) return
+      try {
+        const rows = await api.getHomework(user.name || user.email)
+        if (!cancelled) {
+          setHomeworkAssignments((rows || []).filter(a => ['assigned', 'in progress'].includes(String(a.status || '').toLowerCase())))
+        }
+      } catch {
+        if (!cancelled) setHomeworkAssignments([])
+      }
+    }
+    loadHomework()
+    return () => { cancelled = true }
+  }, [user?.name, user?.email])
 
   // Inject Google Fonts
   useEffect(() => {
@@ -135,12 +154,12 @@ export default function StudentDashboard() {
                   <path d={NAV_ICONS[item.icon]} />
                 </svg>
                 <span style={{ flex: 1 }}>{item.key}</span>
-                {item.badge && (
+                {item.key === 'Homework' && homeworkAssignments.length > 0 && (
                   <span style={{
                     background: '#14b8a6', color: '#fff', fontSize: 10, fontWeight: 700,
-                    borderRadius: '50%', width: 20, height: 20,
+                    borderRadius: '50%', minWidth: 20, height: 20, padding: '0 5px',
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                  }}>{item.badge}</span>
+                  }}>{homeworkAssignments.length}</span>
                 )}
               </button>
             ))}
@@ -153,7 +172,7 @@ export default function StudentDashboard() {
           <div style={{ padding: '8px 16px' }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.35)', letterSpacing: 1.5, marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>QUICK LINKS</div>
             <button
-              onClick={() => navigate('/practice-live')}
+              onClick={() => navigate('/homework')}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
                 background: 'rgba(20,184,166,0.08)', border: '1px solid rgba(20,184,166,0.25)',
@@ -247,7 +266,7 @@ export default function StudentDashboard() {
         {/* Dashboard Content */}
         <div style={{ padding: '20px 24px', maxWidth: 920, margin: '0 auto' }}>
           {mode === 'academic' ? (
-            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} />
+            <HomeDashboard navigate={navigate} userName={userName} motesartAvatar={motesartAvatar} homeworkAssignments={homeworkAssignments} student={student} />
           ) : (
             <GameView navigate={navigate} motesartAvatar={motesartAvatar} />
           )}
@@ -324,7 +343,7 @@ export default function StudentDashboard() {
 }
 
 /* ===== HOME DASHBOARD (Academic Mode) ===== */
-function HomeDashboard({ navigate, userName, motesartAvatar }) {
+function HomeDashboard({ navigate, userName, motesartAvatar, homeworkAssignments, student }) {
   const [dpmVisible, setDpmVisible] = useState(false)
   const dpmRef = useRef(null)
 
@@ -368,7 +387,11 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#e84b8a', flexShrink: 0 }} />
         <span style={{ fontSize: 11, fontWeight: 600, color: '#e84b8a', whiteSpace: 'nowrap' }}>T.A.M.i says:</span>
-        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>You've been so consistent this week — keep that energy going!</span>
+        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)' }}>
+          {homeworkAssignments.length > 0
+            ? `You have ${homeworkAssignments.length} current assignment${homeworkAssignments.length === 1 ? '' : 's'}. Start with the one due soonest.`
+            : 'No current homework is showing right now.'}
+        </span>
       </div>
 
       {/* 2. Today's Focus */}
@@ -378,11 +401,13 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: '#5DCAA5', letterSpacing: 1, textTransform: 'uppercase' }}>Today's Focus</div>
         <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 6 }}>
-          Complete Level 3 Scale Patterns — C Major & G Major
+          {homeworkAssignments[0]?.name || homeworkAssignments[0]?.title || 'No current homework assigned'}
         </div>
-        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>Assigned by Motesart · Due Friday</div>
+        <div style={{ fontSize: 12, color: 'rgba(20,184,166,0.6)', marginTop: 4 }}>
+          {homeworkAssignments[0]?.due_date ? `Assigned by Motesart · Due ${homeworkAssignments[0].due_date}` : 'Check Homework for current assignments'}
+        </div>
         <button
-          onClick={() => navigate('/practice-live')}
+          onClick={() => navigate('/homework')}
           style={{
             display: 'inline-block', marginTop: 12, padding: '8px 20px',
             background: 'linear-gradient(135deg,#d946ef,#a855f7)', color: '#fff', border: 'none',
@@ -395,9 +420,9 @@ function HomeDashboard({ navigate, userName, motesartAvatar }) {
       {/* 3. Three Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
         {[
-          { label: 'Current Level', value: '3', sub: 'Piano' },
-          { label: 'Assignments Due', value: '1', sub: 'this week' },
-          { label: 'Day Streak', value: '5', sub: 'personal best: 12', color: '#14b8a6' },
+          { label: 'Current Level', value: student?.level || '—', sub: 'Piano' },
+          { label: 'Assignments Due', value: String(homeworkAssignments.length), sub: 'current' },
+          { label: 'Day Streak', value: '—', sub: 'from saved practice', color: '#14b8a6' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
