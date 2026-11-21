@@ -62,7 +62,7 @@ export default function StudentDashboard() {
       try {
         const rows = await api.getHomework(user.name || user.email)
         if (!cancelled) {
-          setHomeworkAssignments((rows || []).filter(a => String(a.status || '').toLowerCase() !== 'completed'))
+          setHomeworkAssignments((rows || []).filter(a => ['assigned', 'in progress'].includes(String(a.status || '').toLowerCase())))
         }
       } catch {
         if (!cancelled) setHomeworkAssignments([])
