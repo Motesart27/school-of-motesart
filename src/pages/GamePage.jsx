@@ -352,7 +352,7 @@ export default function GamePage() {
    : urlConcept ? urlConcept.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
    : 'This Concept'
  const storedStudent = student || JSON.parse(localStorage.getItem('som_student') || 'null')
- const studentInstrumentId = storedStudent?.student_instruments?.[0] || null
+ const studentInstrumentId = storedStudent?.student_instruments?.[0] || (storedStudent?.instrument ? storedStudent?.id : null) || null
 
  // Level lives in state so UI updates when it changes
  const [level, setLevel] = useState(1)
